@@ -50,7 +50,7 @@ namespace TaymadeEntities.Models
 
         #endregion Public Properties
 
-        internal void Update()
+        public void Update()
         {
             try
             {
@@ -297,7 +297,7 @@ namespace TaymadeEntities.Models
         public int? CurrentSection { get; set; }
 
         [JsonProperty]
-        public int? Paragraphs { get; internal set; }
+        public int? Paragraphs { get;  set; }
 
         [JsonIgnore]
         public Story Parent { get; set; }
@@ -308,7 +308,7 @@ namespace TaymadeEntities.Models
         [JsonProperty]
         public int? TotalSections { get; set; }
         [JsonProperty]
-        public int? WordCount { get; internal set; }
+        public int? WordCount { get;  set; }
         #endregion Public Properties
 
         #region Public Methods
@@ -332,7 +332,7 @@ namespace TaymadeEntities.Models
             return JsonConvert.SerializeObject(this);
         }
 
-        internal string ToInfo()
+        public string ToInfo()
         {
             string info = $"Chapter: {CurrentChapter}/{TotalChapters}, Page: {CurrentPage}/{TotalPages}, Section: {CurrentSection}/{TotalSections}";
             return info;

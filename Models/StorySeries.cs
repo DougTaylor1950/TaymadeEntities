@@ -38,6 +38,11 @@ namespace TaymadeEntities.Models
 
         #region Methods
 
+        public void Save()
+        {
+
+        }
+
         /// <summary>
         /// The ToString.
         /// </summary>

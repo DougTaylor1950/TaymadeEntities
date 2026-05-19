@@ -810,7 +810,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         public bool? PathWrong { get => pathWrong; set => this.RaiseAndSetIfChanged(ref pathWrong, value); }
 
-        public string? Percent { get => percent; internal set => this.RaiseAndSetIfChanged(ref percent, value); }
+        public string? Percent { get => percent;  set => this.RaiseAndSetIfChanged(ref percent, value); }
 
         /// <summary>
         /// Gets or sets the Published.
@@ -1576,7 +1576,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Delete.
         /// </summary>
-        internal void Delete()
+        public void Delete()
         {
             var local = DataController.SandboxEntities.Set<Story>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
@@ -1601,7 +1601,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Insert.
         /// </summary>
-        internal void Insert()
+        public void Insert()
         {
             DataController.SandboxEntities.Story.Add(this);
             int rowschanged = DataController.SandboxEntities.SaveChanges();
@@ -1610,7 +1610,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Save.
         /// </summary>
-        internal void Save()
+        public void Save()
         {
             if (Added == null)
             {
@@ -1671,7 +1671,7 @@ namespace TaymadeEntities.Models
             Dirty = false;
         }
 
-        internal async Task<bool> SaveAsync()
+        public async Task<bool> SaveAsync()
         {
             bool success = false;
             if (Added == null)
@@ -2026,7 +2026,7 @@ namespace TaymadeEntities.Models
         /// <remarks>
         ///   <created> 18/01/2026 18/01/2026 </created>
         /// </remarks>
-        internal void BuildCodesFromCast()
+        public void BuildCodesFromCast()
         {
             if (cast != null && cast.Count > 0)
             {
@@ -2051,7 +2051,7 @@ namespace TaymadeEntities.Models
 
         }
 
-        internal void UpdateCastMember(StoryCast currentCastMember)
+        public void UpdateCastMember(StoryCast currentCastMember)
         {
             if (currentCastMember != null)
             {
@@ -2106,7 +2106,7 @@ namespace TaymadeEntities.Models
         //    }
         //}
 
-        internal void DeleteCastMember(StoryCast currentCastMember)
+        public void DeleteCastMember(StoryCast currentCastMember)
         {
             //throw new NotImplementedException();
             if (currentCastMember != null)
@@ -2127,7 +2127,7 @@ namespace TaymadeEntities.Models
         /// <remarks>
         ///   <created> 18/01/2026 18/01/2026 </created>
         /// </remarks>
-        internal void AddCastMember(StoryCast currentCastMember)
+        public void AddCastMember(StoryCast currentCastMember)
         {
             // create new cast member
             if (currentCastMember != null)

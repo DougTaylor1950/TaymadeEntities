@@ -13,6 +13,7 @@ namespace TaymadeEntities.Models
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
+    using TaymadeEntities.DBContext;
 
     /// <summary>
     /// Defines the <see cref="DataController" />.
@@ -29,7 +30,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the SandboxEntities.
         /// </summary>
-        private static Models.sandboxEntities sandboxEntities = new sandboxEntities();
+        private static DBContext.SandboxEntities sandboxEntities = new SandboxEntities();
 
         /// <summary>
         /// Defines the autoCompleteList.
@@ -428,7 +429,7 @@ namespace TaymadeEntities.Models
             set => movieImageEntity = value;
         }
 
-        public static sandboxEntities SandboxEntities
+        public static DBContext.SandboxEntities SandboxEntities
         {
             get
             {

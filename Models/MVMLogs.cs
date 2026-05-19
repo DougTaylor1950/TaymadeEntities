@@ -49,13 +49,13 @@ namespace TaymadeEntities.Models
 
         #region Internal Methods
 
-        internal void Delete()
+        public void Delete()
         {
             DataController.SandboxEntities.MVMLogs.Remove(this);
             int rowschanged = DataController.SandboxEntities.SaveChanges();
         }
 
-        internal void Insert()
+        public void Insert()
         {
             DataController.SandboxEntities.MVMLogs.Add(this);
             int rowschanged = DataController.SandboxEntities.SaveChanges();

@@ -112,7 +112,7 @@ namespace TaymadeEntities.Support
 
         #region Private Properties
 
-        private Models.sandboxEntities _SandboxEntities { get; set; } = new Models.sandboxEntities();
+        private DBContext.SandboxEntities _SandboxEntities { get; set; } = new DBContext.SandboxEntities();
         public bool AllowReload { get;  set; }
 
         #endregion Private Properties

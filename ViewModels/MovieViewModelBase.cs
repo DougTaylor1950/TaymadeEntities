@@ -51,7 +51,7 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Defines the MovieContext.
         /// </summary>
-        public Models.sandboxEntities MovieContext = new Models.sandboxEntities();
+        public DBContext.SandboxEntities MovieContext = new DBContext.SandboxEntities();
 
         #endregion Public Fields
 

@@ -64,7 +64,7 @@ namespace TaymadeEntities.Models
 
         public DateTime? LastScan { get; set; }
 
-        internal void Save()
+        public void Save()
         {
             try
             {

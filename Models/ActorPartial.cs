@@ -206,6 +206,8 @@ namespace TaymadeEntities.Models
         /// </summary>
         [NotMapped]
         public string? TmpRole { get; internal set; }
+
+        [NotMapped]
         public Cast? Parent { get; internal set; }
 
         #endregion

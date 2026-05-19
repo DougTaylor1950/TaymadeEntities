@@ -15,7 +15,10 @@ namespace TaymadeEntities.Models
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using ReactiveUI;
-   //using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using TaymadeEntities.DBContext;
+
+#nullable enable
+    //using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     /// <summary>
     /// Defines the <see cref="PhraseEntry" />.
@@ -27,13 +30,14 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the link.
         /// </summary>
-        private string link;
+        private string? link;
 
         /// <summary>
         /// Defines the phraseInfo.
         /// </summary>
         private PhraseInfo? phraseInfo;
-        private string description;
+        private string? description;
+        private PhraseHeader? phraseHeader;
 
         #endregion
 
@@ -43,7 +47,7 @@ namespace TaymadeEntities.Models
         /// Gets or sets the COMPKEY.
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public string COMPKEY { get; set; }
+        public string? COMPKEY { get; set; }
 
         /// <summary>
         /// Gets or sets the DataType.
@@ -68,7 +72,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the Order.
         /// </summary>
-        public Nullable<int> Order { get; set; }
+        public int? Order { get; set; }
 
         /// <summary>
         /// Gets or sets the PhraseID.
@@ -76,13 +80,13 @@ namespace TaymadeEntities.Models
         public int PhraseID { get; set; }
 
         [NotMapped]
-        public virtual PhraseHeader? PhraseHeader { get; set; }
+        public virtual PhraseHeader? PhraseHeader { get => phraseHeader; set => phraseHeader = value; }
 
         /// <summary>
         /// Gets or sets the PhraseInfo.
         /// </summary>
         [NotMapped]
-        public PhraseInfo PhraseInfo
+        public PhraseInfo? PhraseInfo
         {
             get
             {
@@ -177,7 +181,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Save.
         /// </summary>
-        internal void Save()
+        public void Save()
         {
             if (PhraseInfo != null)
             {

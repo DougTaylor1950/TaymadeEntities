@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TaymadeEntities.DBContext;
 using DbContext = Microsoft.EntityFrameworkCore.DbContext;
 
 namespace TaymadeEntities.Models
@@ -16,9 +17,9 @@ namespace TaymadeEntities.Models
 
     public class SandboxDBContextFactory 
     {
-        public sandboxEntities Create()
+        public SandboxEntities Create()
         {
-            return new sandboxEntities();
+            return new SandboxEntities();
         }
     }
 }

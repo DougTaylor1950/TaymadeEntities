@@ -7,9 +7,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace TaymadeEntities.Models
+namespace TaymadeEntities.DBContext
 {
     using TaymadeEntities.Support;
+    using TaymadeEntities.Models;
    // using CSharpFunctionalExtensions;
     using DocumentFormat.OpenXml.Office2010.Excel;
     using Microsoft.Data.SqlClient;
@@ -62,14 +63,14 @@ namespace TaymadeEntities.Models
     /// <summary>
     /// Defines the <see cref="sandboxEntities" />.
     /// </summary>
-    public partial class sandboxEntities : DbContext
+    public partial class SandboxEntities : DbContext
     {
         #region Constructors
 
         /// <summary>
         /// Initializes a new instance of the <see cref="sandboxEntities"/> class.
         /// </summary>
-        public sandboxEntities()
+        public SandboxEntities()
         {
 
             Database.SetCommandTimeout((int)TimeSpan.FromMinutes(5).TotalSeconds);
@@ -79,7 +80,7 @@ namespace TaymadeEntities.Models
         /// Initializes a new instance of the <see cref="sandboxEntities"/> class.
         /// </summary>
         /// <param name="options">The options<see cref="DbContextOptions"/>.</param>
-        public sandboxEntities(DbContextOptions options) : base(options)
+        public SandboxEntities(DbContextOptions options) : base(options)
         {
         }
 
@@ -118,7 +119,7 @@ namespace TaymadeEntities.Models
 
         /// <summary>Gets or sets the filter.</summary>
         /// <value>The filter.</value>
-        public virtual DbSet<Filter> Filter { get; set; }
+        public virtual DbSet<Models.Filter> Filter { get; set; }
 
         /// <summary>
         /// Gets or sets the MapDrive.
@@ -161,12 +162,12 @@ namespace TaymadeEntities.Models
 
         public DbSet<PhraseHeader> PhraseHeader { get; set; }
 
-        public virtual DbSet<ProductionCompany> ProductionCompany { get; set; }
+        public virtual DbSet<Models.ProductionCompany> ProductionCompany { get; set; }
         public DbSet<ProductionCompanyMovie> ProductionCompanyMovie { get; set; }
         /// <summary>
         /// Gets or sets the Seasons.
         /// </summary>
-        public virtual DbSet<Season> Seasons { get; set; }
+        public virtual DbSet<Models.Season> Seasons { get; set; }
 
         /// <summary>
         /// Gets or sets the Series.
@@ -470,7 +471,7 @@ namespace TaymadeEntities.Models
             return result;
         }
 
-        public List<ProductionCompany> GetMovieProductionCompanies(int movieId)
+        public List<Models.ProductionCompany> GetMovieProductionCompanies(int movieId)
         {
             //var id = new SqlParameter("MovieId", movieId);
 
@@ -705,7 +706,7 @@ namespace TaymadeEntities.Models
 
             modelBuilder.Entity<StoryDictionary>().HasKey(sd => sd.Id);
 
-            modelBuilder.Entity<Filter>().HasKey(f => f.Id);
+            modelBuilder.Entity<Models.Filter>().HasKey(f => f.Id);
             //modelBuilder.Entity<MovieImage>().HasKey(mf => mf.Id);
 
             modelBuilder.Entity<Bookmark>().HasKey(b => b.Id);
@@ -747,9 +748,9 @@ namespace TaymadeEntities.Models
             modelBuilder.Entity<Series>().HasKey(s => s.Id);
             modelBuilder.Entity<Series>().HasMany(se => se.Seasons).WithOne(se => se.Series1);
 
-            modelBuilder.Entity<Season>().HasKey(s => s.Id);
-            modelBuilder.Entity<Season>().HasOne(s => s.Series1).WithMany(s => s.Seasons).HasForeignKey(se => se.Series);
-            modelBuilder.Entity<Season>().HasMany(t => t.TVEpisodes).WithOne(s => s.Season).HasForeignKey(ts => ts.SeasonID);
+            modelBuilder.Entity<Models.Season>().HasKey(s => s.Id);
+            modelBuilder.Entity<Models.Season>().HasOne(s => s.Series1).WithMany(s => s.Seasons).HasForeignKey(se => se.Series);
+            modelBuilder.Entity<Models.Season>().HasMany(t => t.TVEpisodes).WithOne(s => s.Season).HasForeignKey(ts => ts.SeasonID);
 
             modelBuilder.Entity<TVEpisode>().HasKey(t => t.Id);
 
@@ -775,7 +776,7 @@ namespace TaymadeEntities.Models
             modelBuilder.Entity<StoryHeadings>()
         .ToView("StoryHeadings")
         .HasNoKey();
-            modelBuilder.Entity<ProductionCompany>().HasKey(p => p.Id);
+            modelBuilder.Entity<Models.ProductionCompany>().HasKey(p => p.Id);
             //modelBuilder.Entity<ProductionCompany>().HasMany(m => m.MovieList);
 
             //modelBuilder.Entity<ProductionCompanyMovie>().HasKey(p => p.Id);
