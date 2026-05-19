@@ -6,9 +6,9 @@
 // <author>Doug Taylor</author>
 //-----------------------------------------------------------------------
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
-    // using AvalonMVVM.Support;
+    // using TaymadeEntities.Support;
     using SupportCore;
     using SupportCore.Word;
     using DocumentFormat.OpenXml;
@@ -28,7 +28,7 @@ namespace AvalonMVVM.Models
     using System.IO;
     using System.Linq;
     using System.Xml.Linq;
-    using AvalonMVVM.ViewModels;
+    using TaymadeEntities.ViewModels;
 
     // using global::Support.Core.Word;
 

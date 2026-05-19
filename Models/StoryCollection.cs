@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     public class StoryCollection : List<Story>
     {

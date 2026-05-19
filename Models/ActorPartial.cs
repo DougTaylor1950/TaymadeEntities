@@ -6,9 +6,9 @@
 // <author>Doug Taylor</author>
 //-----------------------------------------------------------------------
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
-    using AvalonMVVM.Support;
+    using TaymadeEntities.Support;
     using Microsoft.EntityFrameworkCore;
     using ReactiveUI;
     using System;

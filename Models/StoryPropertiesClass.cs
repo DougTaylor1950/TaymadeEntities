@@ -6,7 +6,7 @@
 // <author>Doug Taylor</author>
 //-----------------------------------------------------------------------
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     using Newtonsoft.Json;
     //using Newtonsoft.Json;

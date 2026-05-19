@@ -6,7 +6,7 @@
 // <author>Doug Taylor</author>
 //-----------------------------------------------------------------------
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     /// <summary>
     /// Defines the <see cref="MappedDrives" />.

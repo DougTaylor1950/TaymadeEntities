@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     public class MusicEntitiesContext : DbContext
     {

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     public class MovieContext : DbContext
     {

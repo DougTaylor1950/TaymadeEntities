@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     public class MVMLogs
     {

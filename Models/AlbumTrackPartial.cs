@@ -12,7 +12,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     /// <summary>
     /// Defines the <see cref="AlbumTrack" />.

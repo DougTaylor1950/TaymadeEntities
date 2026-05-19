@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     /// <summary>
     /// </summary>
-    /// <seealso cref="AvalonMVVM.Models.ModelBase" />
+    /// <seealso cref="TaymadeEntities.Models.ModelBase" />
     /// <author>
     /// Doug Taylor - Taymade Software Services
     /// </author>

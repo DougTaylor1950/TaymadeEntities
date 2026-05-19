@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     public partial class MovieImageEntity : DbContext
     {

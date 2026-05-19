@@ -6,7 +6,7 @@
 // <author>Doug Taylor</author>
 //-----------------------------------------------------------------------
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;

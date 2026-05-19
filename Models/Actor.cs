@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     using DocumentFormat.OpenXml.Wordprocessing;
     using Microsoft.EntityFrameworkCore;

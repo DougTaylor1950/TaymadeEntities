@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     /// <summary>
     /// Holds Dictionary items for the Story

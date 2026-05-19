@@ -6,7 +6,7 @@
 // <author>Doug Taylor</author>
 //-----------------------------------------------------------------------
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     using Microsoft.EntityFrameworkCore;
     // using MusicBrainzSupport;
@@ -17,7 +17,7 @@ namespace AvalonMVVM.Models
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using MusicBrainzSupport;
-    using AvalonMVVM.Support;
+    using TaymadeEntities.Support;
 
 
     /// <summary>

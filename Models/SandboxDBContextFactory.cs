@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DbContext = Microsoft.EntityFrameworkCore.DbContext;
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     public interface IDbContextFactory<TContext> where TContext : DbContext
     {

@@ -1,4 +1,4 @@
-﻿namespace AvalonMVVM.Models
+﻿namespace TaymadeEntities.Models
 {
     using Microsoft.EntityFrameworkCore;
     using Newtonsoft.Json;

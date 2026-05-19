@@ -1,4 +1,4 @@
-﻿using AvalonMVVM.Support;
+﻿using TaymadeEntities.Support;
 using DocumentFormat.OpenXml.Presentation;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 using ReactiveUI;
 using System.Runtime.Serialization;
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     /// <summary>
     /// A class that gives adaptable extensions to a Movie Object

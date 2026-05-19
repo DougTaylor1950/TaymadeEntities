@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     public class ActorList : List<Actor>
     {

@@ -1,4 +1,4 @@
-﻿using AvalonMVVM.Support;
+﻿using TaymadeEntities.Support;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     public class DownloadProperties
     {

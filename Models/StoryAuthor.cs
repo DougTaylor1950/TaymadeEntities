@@ -12,7 +12,7 @@ using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     public class StoryAuthor
     {

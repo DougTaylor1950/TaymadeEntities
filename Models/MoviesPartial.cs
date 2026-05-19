@@ -6,11 +6,11 @@
 // <author>Doug Taylor</author>
 //-----------------------------------------------------------------------
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     using Avalonia.Media;
-    using AvalonMVVM.Support;
-    using AvalonMVVM.ViewModels;
+    using TaymadeEntities.Support;
+    using TaymadeEntities.ViewModels;
     using DocumentFormat.OpenXml.Office2010.Excel;
     using DocumentFormat.OpenXml.Office2010.ExcelAc;
     using DynamicData.Binding;

@@ -1,4 +1,4 @@
-﻿using AvalonMVVM.Support;
+﻿using TaymadeEntities.Support;
 using Microsoft.EntityFrameworkCore;
 using ReactiveUI;
 using System;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
     public class MovieGenre : ModelBase
     {

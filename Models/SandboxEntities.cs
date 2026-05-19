@@ -7,9 +7,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AvalonMVVM.Models
+namespace TaymadeEntities.Models
 {
-    using AvalonMVVM.Support;
+    using TaymadeEntities.Support;
     using CSharpFunctionalExtensions;
     using DocumentFormat.OpenXml.Office2010.Excel;
     using Microsoft.Data.SqlClient;
