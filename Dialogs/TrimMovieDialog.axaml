@@ -1,0 +1,246 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="800"
+		xmlns:vm="using:TaymadeEntities.ViewModels"
+		xmlns:uc="using:TaymadeEntities.Controls"
+		xmlns:tcb="using:TaymadeControls.Buttons"
+		x:DataType="vm:MovieConversionViewModel"
+		x:Class="TaymadeEntities.Dialogs.TrimMovieDialog"
+		Title="TrimMovieDialog">
+
+	<Design.DataContext>
+		<vm:MovieConversionViewModel/>
+	</Design.DataContext>
+
+	<StackPanel Orientation="Vertical">
+		<TabControl >
+			<TabItem Header="Trim" Name="movieList" >
+				<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
+					<DockPanel	LastChildFill="True" >
+						<StackPanel Orientation="Vertical" DockPanel.Dock="Top" Height="400">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="100"/>
+									<ColumnDefinition Width="200"/>
+									<ColumnDefinition Width="10"/>
+
+									<ColumnDefinition Width="100"/>
+									<ColumnDefinition Width="100"/>
+									<ColumnDefinition Width="10"/>
+									<ColumnDefinition Width="100"/>
+
+								</Grid.ColumnDefinitions>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="60"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="30"></RowDefinition>
+									<RowDefinition Height="30"></RowDefinition>
+
+								</Grid.RowDefinitions>
+								<TextBlock Classes="h2" Text="Movie Name"  Grid.Column="0" Grid.Row="0"/>
+								<TextBox Classes="c1" Text="{Binding CurrentMovie.MovieName, Mode=TwoWay }"   Grid.Column="1" />
+
+								<TextBlock Classes="h2" Text="StartTime"  Grid.Column="0" Grid.Row="1"/>
+								<ComboBox  Grid.Column="1" Grid.Row="1" ItemsSource="{Binding CurrentMovie.Bookmarks}"  SelectedItem="{Binding CurrentMovie.StartBookmark}"/>
+								<TextBlock Classes="h2" Text="First"  Grid.Column="3" Grid.Row="1"/>
+								<TextBlock Classes="c1" Text="{Binding CurrentMovie.StartBookmark }"  Grid.Row="1" Grid.Column="4" />
+								<TextBox Classes="c1" Text="{Binding CurrentMovie.StartBookmark.FormattedTime }"  Grid.Row="1" Grid.Column="6" />
+
+								<TextBlock Classes="h2" Text="End Time"  Grid.Column="0" Grid.Row="2"/>
+								<ComboBox  Grid.Column="1" Grid.Row="2" ItemsSource="{Binding CurrentMovie.Bookmarks}"  SelectedItem="{Binding CurrentMovie.EndBookmark}"/>
+								<TextBlock Classes="h2" Text="Last"  Grid.Column="3" Grid.Row="2"/>
+								<TextBlock Classes="c1" Text="{Binding CurrentMovie.EndBookmark }"  Grid.Row="2" Grid.Column="4" />
+								<TextBox Classes="c1" Text="{Binding CurrentMovie.EndBookmark.FormattedTime }"  Grid.Row="2" Grid.Column="6" />
+
+								<CheckBox Grid.Row="3" Content="Clip" IsChecked="{Binding GammaCorrections.Clip}" />
+
+							</Grid>
+
+						</StackPanel>
+
+					</DockPanel>
+				</Border>
+			</TabItem>
+
+			<TabItem Header="Correct" Name="gammaCorrect" >
+				<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
+					<DockPanel	LastChildFill="True" >
+						<StackPanel Orientation="Vertical" DockPanel.Dock="Top" Height="400">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="100"/>
+									<ColumnDefinition Width="200"/>
+									<ColumnDefinition Width="10"/>
+
+									<ColumnDefinition Width="100"/>
+									<ColumnDefinition Width="200"/>
+
+								</Grid.ColumnDefinitions>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="30"></RowDefinition>
+									<RowDefinition Height="30"></RowDefinition>
+								</Grid.RowDefinitions>
+
+								<TextBlock Classes="h2" Text="Gamma"  Grid.Column="0" Grid.Row="0"/>
+								<TextBox Classes="c1" Text="{Binding GammaCorrections.Gamma }"   Grid.Column="1" />
+								<CheckBox Grid.Row="0" Grid.Column="3" Content="Correct" IsChecked="{Binding GammaCorrections.Correct}"/>
+								<Slider Minimum="0.1" Maximum="10.0" Value="{Binding GammaCorrections.Gamma}" TickFrequency="0.05" IsSnapToTickEnabled="True" Grid.Row="1" Grid.Column="1"/>
+
+								<TextBlock Classes="h2" Text="Saturation"  Grid.Column="0" Grid.Row="2"/>
+								<TextBox Classes="c1" Text="{Binding GammaCorrections.Saturation }"   Grid.Column="1" Grid.Row="2" />
+								<Slider Minimum="-3.0" Maximum="3.0" Value="{Binding GammaCorrections.Saturation}" TickFrequency="0.01" IsSnapToTickEnabled="True" Grid.Row="3" Grid.Column="1"/>
+								<TextBlock Classes="h2" Text="Brightness"  Grid.Column="3" Grid.Row="2"/>
+								<TextBox Classes="c1" Text="{Binding GammaCorrections.Brightness }"   Grid.Column="4" Grid.Row="2" />
+								<Slider Minimum="-1.0" Maximum="1.0" Value="{Binding GammaCorrections.Brightness}" TickFrequency="0.01" IsSnapToTickEnabled="True" Grid.Row="3" Grid.Column="4"/>
+
+								<TextBlock Classes="h2" Text="Sharpness"  Grid.Column="0" Grid.Row="4"/>
+								<TextBox Classes="c1" Text="{Binding GammaCorrections.Sharpness }"   Grid.Column="1" Grid.Row="4" />
+								<Slider Minimum="-1.5" Maximum="1.5" Value="{Binding GammaCorrections.Sharpness}" TickFrequency="0.01" IsSnapToTickEnabled="True" Grid.Row="5" Grid.Column="1"/>
+								<TextBlock Classes="h2" Text="Contrast"  Grid.Column="3" Grid.Row="4"/>
+								<TextBox Classes="c1" Text="{Binding GammaCorrections.Contrast }"   Grid.Column="4" Grid.Row="4" />
+								<Slider Minimum="-1.0" Maximum="10.0" Value="{Binding GammaCorrections.Contrast}" TickFrequency="0.01" IsSnapToTickEnabled="True" Grid.Row="5" Grid.Column="4"/>
+
+
+							</Grid>
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="80"/>
+
+								</Grid.ColumnDefinitions>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+								</Grid.RowDefinitions>
+								<TextBlock Classes="h2" Text="Red"  Grid.Column="0" Grid.Row="0"/>
+								<TextBox Classes="h2" Text="{Binding GammaCorrections.Red}"  Grid.Column="1" Grid.Row="0"/>
+								<Slider Minimum="0.1" Maximum="10.0" Value="{Binding GammaCorrections.Red}" TickFrequency="0.05" IsSnapToTickEnabled="True" Grid.Row="1" Grid.Column="1"/>
+
+								<TextBlock Classes="h2" Text="Blue"  Grid.Column="2" Grid.Row="0"/>
+								<TextBox Classes="h2" Text="{Binding GammaCorrections.Blue}"  Grid.Column="3" Grid.Row="0"/>
+								<Slider Minimum="0.1" Maximum="10.0" Value="{Binding GammaCorrections.Blue}" TickFrequency="0.05" IsSnapToTickEnabled="True" Grid.Row="1" Grid.Column="3"/>
+
+								<TextBlock Classes="h2" Text="Green"  Grid.Column="4" Grid.Row="0"/>
+								<TextBox Classes="h2" Text="{Binding GammaCorrections.Green}"  Grid.Column="5" Grid.Row="0"/>
+								<Slider Minimum="0.1" Maximum="10.0" Value="{Binding GammaCorrections.Green}" TickFrequency="0.05" IsSnapToTickEnabled="True" Grid.Row="1" Grid.Column="5"/>
+
+								<TextBlock Classes="h2" Text="Weight"  Grid.Column="6" Grid.Row="0"/>
+								<TextBox Classes="h2" Text="{Binding GammaCorrections.Weight}"  Grid.Column="7" Grid.Row="0"/>
+								<Slider Minimum="0.1" Maximum="10.0" Value="{Binding GammaCorrections.Weight}" TickFrequency="0.05" IsSnapToTickEnabled="True" Grid.Row="1" Grid.Column="7"/>
+
+								<Button Content="Save" Margin="5"  Name="SaveConfig" Command="{Binding SaveGamma}" Grid.Column="8">
+								</Button>
+
+							</Grid>
+						</StackPanel>
+
+					</DockPanel>
+				</Border>
+
+
+
+
+			</TabItem>
+
+			<TabItem Header="Crop" >
+				<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
+					<StackPanel Orientation="Horizontal" Height="800">
+						<StackPanel Orientation="Vertical">
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="100"/>
+									<ColumnDefinition Width="150"/>
+
+									<ColumnDefinition Width="100"/>
+									<ColumnDefinition Width="150"/>
+
+
+								</Grid.ColumnDefinitions>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+								</Grid.RowDefinitions>
+
+								<TextBlock Classes="h2" Text="Left"  Grid.Column="0" Grid.Row="0" />
+								<NumericUpDown Name="udLeft" Value="{Binding GammaCorrections.Left}"  Grid.Row="0" Grid.Column="1"/>
+								<TextBlock Classes="h2" Text="Top"  Grid.Column="2" Grid.Row="0" />
+								<NumericUpDown Name="udTop" Value="{Binding GammaCorrections.Top}" Grid.Row="0" Grid.Column="3" />
+
+								<TextBlock Classes="h2" Text="Width"  Grid.Column="0" Grid.Row="1"/>
+								<NumericUpDown  Name="udWidth" Value="{Binding GammaCorrections.Width}" Grid.Row="1" Grid.Column="1"/>
+								<TextBlock Classes="h2" Text="Height"  Grid.Column="2" Grid.Row="1"/>
+								<NumericUpDown  Name="udHeight" Value="{Binding GammaCorrections.Height}" Grid.Row="1" Grid.Column="3"/>
+
+								<CheckBox Grid.Row="2" Content="Crop" IsChecked="{Binding GammaCorrections.Crop}" />
+								<CheckBox Grid.Row="3" Content="Scale" IsChecked="{Binding GammaCorrections.Scale}" />
+								<TextBlock Classes="h2" Text="Scale Height"  Grid.Column="1" Grid.Row="4"/>
+								<TextBox Grid.Row="4" Grid.Column="2"  Text="{Binding GammaCorrections.ScaleHeight}"/>
+								<TextBlock Classes="h2" Text="Scale Width"  Grid.Column="1" Grid.Row="3"/>
+								<TextBox Grid.Row="3" Grid.Column="2"  Text="{Binding GammaCorrections.ScaleWidth}"/>
+								<NumericUpDown Name="udScale" Increment="0.1"
+											   FormatString="{}{0:#,0.0}" Value="{Binding GammaCorrections.ScaleFactor}"
+											   Grid.Row="5" Grid.Column="3"/>
+							</Grid>
+						</StackPanel>
+						<StackPanel>
+							<Border CornerRadius="6" BorderBrush="Gray" Background="WhiteSmoke" BorderThickness="2" DockPanel.Dock="Top" >
+								<ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+									<StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center" Height="500" >
+										<Image Source="{Binding Bookmark.ImageBMP}" Name="Poster" DockPanel.Dock="Top" IsVisible="{Binding Bookmark.BMPVisible}" />
+									</StackPanel>
+								</ScrollViewer>
+
+							</Border>
+							<Button Content="Redraw" Margin="5"  Name="Redraw" Command="{Binding Redraw}">
+							</Button>
+						</StackPanel>
+					</StackPanel>
+				</Border>
+
+			</TabItem>
+		</TabControl>
+		<StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center" Height="50">
+			<tcb:OkButton Margin="5" Width="100" Click="Accept_Click" Name="Accept" />
+			<tcb:CancelButton Margin="5" Width="100" Click="Cancel_Click" Name="Cancel" />
+			<Button  Margin="5"  Name="Play" Command="{Binding Play}" Width="120">
+				<StackPanel Orientation="Horizontal">
+					<Image Source="avares://TaymadeControls/Assets/MovieReel.jpg"
+						   Stretch="Fill"
+						   Width="40"
+						   HorizontalAlignment="Left" />
+					<TextBlock Text="Play" HorizontalAlignment="Right"
+				Width="40"
+				VerticalAlignment="Center"/>
+				</StackPanel>
+			</Button>
+			<Button  Margin="5"  Name="Corection" Command="{Binding Correction}">
+				<StackPanel Orientation="Horizontal">
+					<Image Source="avares://TaymadeControls/Assets/book_PNG2121.png" Stretch="None" Width="20" HorizontalAlignment="Left" />
+					<TextBlock Text="Correction" HorizontalAlignment="Right" Width="60" VerticalAlignment="Center"/>
+				</StackPanel>
+			</Button>
+
+		</StackPanel>
+	</StackPanel>
+</Window>

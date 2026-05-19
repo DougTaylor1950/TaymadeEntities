@@ -8,7 +8,7 @@
 
 namespace TaymadeEntities.Models
 {
-    using Microsoft.AspNetCore.Builder;
+    
     using Microsoft.EntityFrameworkCore;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;

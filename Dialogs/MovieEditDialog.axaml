@@ -1,0 +1,498 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:vm="using:TaymadeEntities.ViewModels"
+		xmlns:views="using:TaymadeEntities.Views"
+
+		xmlns:tc="using:TaymadeControls"
+		xmlns:tcb="using:TaymadeControls.Buttons"
+		xmlns:auc="using:TaymadeEntities.Controls"
+
+		mc:Ignorable="d" d:DesignWidth="1800" d:DesignHeight="900"
+		x:Class="TaymadeEntities.Dialogs.MovieEditDialog"
+		x:DataType="vm:MovieEditViewModel"
+		Icon="avares://TaymadeControls/Assets/Icons/MovieReel.ico"
+		Title="Edit Movie">
+
+
+	<Design.DataContext>
+		<vm:MovieEditViewModel/>
+	</Design.DataContext>
+
+	<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
+		<StackPanel Orientation="Vertical">
+			<TabControl>
+				<TabItem Header="Edit">
+					<DockPanel	LastChildFill="True" >
+						<StackPanel Orientation="Vertical" DockPanel.Dock="Top">
+							<tc:HeaderControl2
+							Height="50"
+							Title="Movie Edit"
+							/>
+
+							<Grid ShowGridLines="False">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="100"/>
+									<ColumnDefinition Width="140"/>
+									<ColumnDefinition Width="140"/>
+									<ColumnDefinition Width="220"/>
+									<ColumnDefinition Width="10"/>
+
+									<ColumnDefinition Width="100"/>
+									<ColumnDefinition Width="100"/>
+									<ColumnDefinition Width="100"/>
+									<ColumnDefinition Width="100"/>
+									<ColumnDefinition Width="100"/>
+									<ColumnDefinition Width="200"/>
+									<ColumnDefinition Width="200"/>
+									<ColumnDefinition Width="200"/>
+
+								</Grid.ColumnDefinitions>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="50"></RowDefinition>
+									<RowDefinition Height="60"></RowDefinition>
+									<RowDefinition Height="60"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+
+								</Grid.RowDefinitions>
+								<TextBlock Classes="h2"  Text="Name"  Grid.Column="0" Grid.Row="0"/>
+								<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.MovieName, Mode=TwoWay }" IsReadOnly="False"  Grid.Column="1" Grid.ColumnSpan="3"/>
+								<TextBlock  Classes="h2" Text="Year"  Grid.Column="5" Grid.Row="0" />
+								<TextBox Height="30"  Classes="c1" Text="{Binding CurrentMovie.Year, Mode=TwoWay}" Grid.ColumnSpan="2" Grid.Column="6" Grid.Row="0" />
+								<TextBlock  Classes="h2" Text="Rating"  Grid.Column="8" Grid.Row="0" />
+								<TextBox Height="30"  Classes="c1" Text="{Binding CurrentMovie.MovieExtension.Rating, Mode=TwoWay}"  Grid.Column="9" Grid.Row="0" />
+
+								<TextBlock Text="Information" Classes="h2" Grid.Column="0"  Grid.Row="1" TextWrapping="Wrap" Height="60" />
+								<TextBox Height="60" Classes="c1" Text="{Binding CurrentMovie.Info, Mode=TwoWay}"   Grid.Row="1" Grid.Column="1"  Grid.ColumnSpan="3" TextWrapping="Wrap"  />
+								<TextBlock  Classes="h2" Text="Added"  Grid.Column="5" Grid.Row="1"   />
+								<TextBox Height="30" Classes="c1"  Text="{Binding CurrentMovie.AddedOn, Mode=TwoWay}" Grid.ColumnSpan="2" Grid.Column="6" Grid.Row="1" />
+
+								<TextBlock Text="Path" Classes="h2" Grid.Column="0" Grid.Row="2" />
+								<TextBox Height="60" Classes="c1" Text="{Binding CurrentMovie.MoviePath, Mode=TwoWay}"  Grid.Column="1"  Grid.ColumnSpan="3" Grid.Row="2" />
+								<TextBlock  Classes="h2" Text="Modified"  Grid.Column="5" Grid.Row="2" />
+								<TextBox Height="30" Classes="c1"  Text="{Binding CurrentMovie.ModifiedOn, Mode=TwoWay}" Grid.Column="6"  Grid.ColumnSpan="2" Grid.Row="2" />
+
+								<TextBlock Text="XSPF Path" Classes="h2" Grid.Column="0"  Grid.ColumnSpan="3" Grid.Row="3" />
+								<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.Path, Mode=TwoWay}"  Grid.Column="1"  Grid.ColumnSpan="3"  Grid.Row="3" />
+								<TextBlock  Classes="h2" Text="TMDBID"  Grid.Column="5" Grid.Row="3" />
+								<TextBox Height="30" Classes="c1"  Text="{Binding CurrentMovie.TMDBID, Mode=TwoWay}" Grid.Column="6"  Grid.ColumnSpan="2" Grid.Row="3" />
+								<tcb:ImagedButton  Grid.Column="8"
+												   Grid.Row="3"
+												   Command="{Binding GetTMDBDetails}"
+												   ToolTip.Tip="Get details from TMDB"
+												   ImageSource="avares://TaymadeControls/Assets/get.png"
+												   LabelText="TMDB"
+												   />
+
+
+								<TextBlock Text="Image Path" Classes="h2" Grid.Column="0" Grid.Row="4" />
+								<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.ImagePath, Mode=TwoWay}"  Grid.Column="1" Grid.Row="4"  Grid.ColumnSpan="3" />
+								<TextBlock  Classes="h2" Text="IMDBID"  Grid.Column="5" Grid.Row="4" />
+								<TextBox Height="30" Classes="c1"  Text="{Binding CurrentMovie.IMDBID, Mode=TwoWay}"  Grid.ColumnSpan="2" Grid.Column="6" Grid.Row="4" />
+								<tcb:ImagedButton Grid.Column="8"
+												  Grid.Row="4"
+												  Click="GetGroup"
+												  ImageSource="avares://TaymadeControls/Assets/get.png"
+												  LabelText="Group"
+												  />
+
+
+								<TextBlock Text="Genre" Classes="h2" Grid.Column="0" Grid.Row="5" />
+								<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.FilmGroup, Mode=TwoWay}"   Grid.Column="1"  Grid.ColumnSpan="3" Grid.Row="5" />
+								<TextBlock Text="Duration" Classes="h2" Grid.Column="5" Grid.Row="5" />
+								<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.MovieDuration}"   Grid.Column="6" Grid.Row="5" />
+								<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.DurationSeconds}"  Grid.Column="7" Grid.Row="5" />
+								<tcb:ImagedButton  Grid.Column="8"
+												   Grid.Row="5"
+												   Click="GetDuration"
+												   ImageSource="avares://TaymadeControls/Assets/clock.png"
+												   LabelText="Duration"
+												   HotKeyText=""
+												   />
+
+								<tcb:ImagedButton Grid.Column="9"
+												  Grid.Row="5"
+												  Click="MoveFolder"
+												  ToolTip.Tip="Move Folder"
+												  ImageSource="avares://TaymadeControls/Assets/move.png"
+												  LabelText="Move Folder"
+												  />
+
+								<tcb:ImagedButton  Grid.Column="9"
+												   Grid.Row="6"
+												   Click="RenameFile"
+												   LabelText="Rename File"
+												   />
+
+								<tcb:ImagedButton Grid.Column="9"
+												  Grid.Row="7"
+												  Click="RenameFolder"
+												  ToolTip.Tip="Rename Folder"
+												  LabelText="Rename Folder"
+												  HotKeyText=""
+												  ImageHeight="1"
+												  ImageWidth="1"
+												  />
+
+
+								<TextBlock Text="Primary" Classes="h2" Grid.Column="0" Grid.Row="6" />
+								<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.PrimaryFilmGroup, Mode=TwoWay}"  Grid.Column="1" Grid.Row="6" />
+								<TextBlock Text="Director" Grid.Column="5" Grid.Row="6" Classes="h2" />
+								<ComboBox  Classes="c1" ItemsSource="{Binding DirectorList}" Grid.Column="6" Grid.Row="6" SelectedItem="{Binding CurrentMovie.Director}" />
+								<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.DirectorsName}"  Grid.Column="7" Grid.Row="6" />
+								<tcb:ImagedButton  Grid.Column="8"
+												   Grid.Row="6"
+												   Click="GetDirector"
+												   ToolTip.Tip="Add Director"
+												   ImageSource="avares://TaymadeControls/Assets/add_icon.png"
+												   LabelText="Director"
+												   />
+
+								<tcb:ImagedButton  Grid.Column="10"
+												   Grid.Row="6"
+												   Command="{Binding GetSearchDirector}"
+												   ToolTip.Tip="Get Director"
+												   ImageSource="avares://TaymadeControls/Assets/get.png"
+												   LabelText="Director"
+												   />
+
+
+								<TextBlock Text="Has Chapters" Classes="h2" Grid.Column="0" Grid.Row="7" />
+								<CheckBox Height="30" Classes="c1" IsChecked="{Binding CurrentMovie.HasChapters, Mode=TwoWay}"  Grid.Column="1" Grid.Row="7" />
+								<TextBlock Text="Series" Classes="h2" Grid.Column="0" Grid.Row="9" />
+								<ComboBox  Classes="c1" ItemsSource="{Binding SeriesList}" Grid.Column="1" Grid.Row="9" />
+								<tcb:ImagedButton Grid.Column="8"
+												  Grid.Row="7"
+												  Click="GetBookmarks"
+												  ToolTip.Tip="Get Bookmarks"
+												  ImageSource="avares://TaymadeControls/Assets/bookmark.png"
+												  LabelText="Get"
+												  HotKeyText=""
+												  />
+
+
+								<TextBlock  Text="{Binding CurrentMovie.ErrorText}" IsVisible="{Binding CurrentMovie.HasErrors}"  Classes="e2" Grid.Column="0" Grid.ColumnSpan="7" Grid.Row="9" />
+								<TextBlock  Text="{Binding Progress}"   Classes="c1" Grid.Column="0" Grid.ColumnSpan="7" Grid.Row="10" />
+								<TextBlock Text="#Bookmarks" Classes="h2" Grid.Column="5" Grid.Row="7" />
+								<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.ImagesCount, Mode=TwoWay}"  Grid.Column="6" Grid.Row="7" />
+								<TextBox Height="30" Text="{Binding CurrentMovie.Series, Mode=TwoWay}"  Grid.Column="1" Grid.Row="6" />
+								<TextBox Height="30" Text="{Binding CurrentMovie.DirectorID}"  Grid.Column="4" Grid.Row="6" />
+								<ComboBox Grid.Row="8" Grid.Column="1"   ItemsSource="{Binding Phrases}" SelectedItem="{Binding NewPhrase}"/>
+								<ComboBox Grid.Row="8" Grid.Column="2" Grid.ColumnSpan="3"   ItemsSource="{Binding SubPhrases}" SelectedItem="{Binding NewSubPhrase}"/>
+
+								<tcb:ImagedButton  Click="AddPhrase"
+												   Grid.Row="8"
+												   Grid.Column="3"
+												   ToolTip.Tip="Add Phrase"
+												   ImageSource="avares://TaymadeControls/Assets/add_icon.png"
+												   LabelText="Add Phrase"
+												   />
+
+								<ProgressBar Value="{Binding ProgressPercent}" ShowProgressText="True" Grid.Row="11" Grid.Column="1"  Minimum="0" Maximum="100" />
+								<DataGrid
+								ItemsSource="{Binding CurrentMovie.MovieGenres}"
+								SelectedItem="{Binding CurrentGenre}"
+								AutoGenerateColumns="False"
+								VerticalScrollBarVisibility="Visible"
+								HorizontalScrollBarVisibility="Visible"
+								Margin="10,90,10,10"
+								Grid.Column="10" Grid.Row="0" Grid.RowSpan="4"
+								>
+									<DataGrid.Columns>
+										<DataGridTextColumn Header="Genres" Binding="{Binding Description}" />
+									</DataGrid.Columns>
+									<DataGrid.ContextMenu>
+										<ContextMenu>
+											<MenuItem Header="Remove Genre" Command="{Binding RemoveGenre}" />
+										</ContextMenu>
+									</DataGrid.ContextMenu>
+								</DataGrid>
+
+
+
+								<!--				<DataGrid
+								ItemsSource="{Binding CurrentMovie.ProductionCompanies}"
+								AutoGenerateColumns="False"
+								VerticalScrollBarVisibility="Visible"
+								HorizontalScrollBarVisibility="Visible"
+								Margin="10,90,10,10"
+								Grid.Column="11" Grid.Row="0" Grid.RowSpan="9"
+								>
+								<DataGrid.Columns>
+								<DataGridTextColumn Header="Companies" Binding="{Binding CompanyName}" />
+								</DataGrid.Columns>
+								</DataGrid> -->
+
+								<!-- <DataGrid
+								ItemsSource="{Binding CurrentMovie.MovieLanguages}"
+								AutoGenerateColumns="False"
+								VerticalScrollBarVisibility="Visible"
+								HorizontalScrollBarVisibility="Visible"
+								Margin="10,90,10,10"
+								Grid.Column="12" Grid.Row="0" Grid.RowSpan="4"
+								>
+								<DataGrid.Columns>
+								<DataGridTextColumn Header="Language" Binding="{Binding LanguageName}" />
+								</DataGrid.Columns>
+								</DataGrid>
+
+								-->
+							</Grid>
+						</StackPanel>
+
+						<Image Source="{Binding CurrentMovie.ImageBMP}" Height="200" Width="300"  DockPanel.Dock="Bottom"> </Image>
+
+					</DockPanel >
+				</TabItem>
+				<!--
+				<TabItem Header="Series">
+				<auc:SeriesUserControl  DockPanel.Dock="Top"/>
+				</TabItem>
+				-->
+				<!--
+				<TabItem Header="Cast">
+				<StackPanel>
+				<tc:HeaderControl2 Title="Movie Cast"
+				TitleForeground="Black"
+				TitleBackground="LightGray"
+				Background="{Binding $self.CastTileBrush}"
+				Height="75"
+				/>
+
+
+
+				<auc:MovieCastControl Name="MovieCast"/>
+				<auc:ActorEditControl Name="ActorDetail"
+				IsVisible="True"/>
+
+				</StackPanel>
+				</TabItem>
+				-->
+
+				<TabItem Header="Bookmarks" >
+					<StackPanel Orientation="Horizontal" >
+						<StackPanel Orientation="Vertical" Background="Transparent" Name="BookmarksTab">
+							<tc:HeaderControl2 Title="Movie Bookmarks"
+											   Background="{Binding $self.SpectrumBrush}"
+
+											   Height="75"
+											   />
+							<StackPanel Orientation="Horizontal">
+								<Border BorderThickness="2"
+										BorderBrush="Black"
+										CornerRadius="5"
+
+										>
+									<StackPanel>
+										<tcb:ToolbarPanel Name="ToolbarBookmarks" Height="50" />
+
+										<StackPanel Height="800">
+											<StackPanel Orientation="Horizontal">
+												<!--
+
+												-->
+
+												<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
+
+													<ScrollViewer HorizontalScrollBarVisibility="Visible"
+																  VerticalScrollBarVisibility="Visible"
+																  Background="Transparent"
+																  >
+														<DataGrid
+														Background="Transparent"
+														RowBackground="Bisque"
+														VerticalScrollBarVisibility="Visible"
+														HorizontalScrollBarVisibility="Auto"
+														ItemsSource="{Binding CurrentMovie.Bookmarks}"
+														SelectedItem="{Binding CurrentBookmark}"
+														>
+															<DataGrid.Columns>
+																<DataGridTextColumn Header="Time" Binding="{Binding FormattedTime}" />
+																<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+																<DataGridTextColumn Header="ImagePath" Width="300" Binding="{Binding ImagePath}" />
+																<DataGridTextColumn Header="Type"  Width="100" Binding="{Binding Type}" />
+															</DataGrid.Columns>
+														</DataGrid>
+													</ScrollViewer>
+												</Border>
+											</StackPanel>
+										</StackPanel>
+									</StackPanel>
+								</Border>
+
+
+
+								<StackPanel  Background="Gray" Width="10" />
+								<!--	<auc:BookmarkUserControl Name="BookmarkDetails" Height="800" />	-->
+								<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
+									<StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+										<!--
+										<Grid>
+										<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="150" />
+										<ColumnDefinition Width="10"/>
+										<ColumnDefinition Width="200"/>
+										<ColumnDefinition Width="200"/>
+
+
+
+										</Grid.ColumnDefinitions>
+										<Grid.RowDefinitions>
+										<RowDefinition Height="30"></RowDefinition>
+										<RowDefinition Height="30"></RowDefinition>
+										<RowDefinition Height="30"></RowDefinition>
+										<RowDefinition Height="30"></RowDefinition>
+										<RowDefinition Height="30"></RowDefinition>
+										<RowDefinition Height="100"></RowDefinition>
+										</Grid.RowDefinitions>
+										<tcb:ImagedButton  Grid.Row="5"
+										Grid.Column="2"
+
+										Command="{Binding DelBookmark}"
+										LabelText="Del Bookmark"
+										ImageSource="avares://TaymadeControls/Assets/Cross2.png"
+										/>
+
+
+										<tcb:ImagedButton  Grid.Row="5"
+										Grid.Column="3"
+
+										Command="{Binding PlayBookmark}"
+										LabelText="Play From"
+										ImageSource="avares://TaymadeControls/Assets/playLast.png"
+										HotKeyText=""
+										/>
+										</Grid> -->
+										<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
+											<StackPanel Orientation="Vertical" >
+												<Grid ShowGridLines="False">
+													<Grid.ColumnDefinitions>
+														<ColumnDefinition Width="120"/>
+														<ColumnDefinition Width="100"/>
+														<ColumnDefinition Width="100"/>
+														<ColumnDefinition Width="100"/>
+														<ColumnDefinition Width="10"/>
+
+														<ColumnDefinition Width="100"/>
+														<ColumnDefinition Width="100"/>
+
+													</Grid.ColumnDefinitions>
+													<Grid.RowDefinitions>
+														<RowDefinition Height="40"></RowDefinition>
+														<RowDefinition Height="40"></RowDefinition>
+														<RowDefinition Height="40"></RowDefinition>
+														<RowDefinition Height="40"></RowDefinition>
+														<RowDefinition Height="40"></RowDefinition>
+														<RowDefinition Height="40"></RowDefinition>
+														<RowDefinition Height="40"></RowDefinition>
+													</Grid.RowDefinitions>
+													<TextBlock Classes="h1" Text="Name" TextAlignment="Left" Grid.Column="0" Grid.Row="0"/>
+													<TextBox Classes="c14" Text="{Binding CurrentBookmark.Name}" Grid.Row="0" IsReadOnly="False"  Grid.Column="1" Grid.ColumnSpan="3"/>
+													<!--<AutoCompleteBox Classes="c14" ItemsSource="{Binding AutoCompleteList}"
+																	 Grid.Column="5"  /> -->
+													<TextBlock Classes="h1" Text="Image Path" TextAlignment="Left" Grid.Column="0" Grid.Row="1"/>
+													<TextBox Classes="c14" Text="{Binding CurrentBookmark.ImagePath, Mode=TwoWay }" Grid.Row="1" IsReadOnly="False"  Grid.Column="1"  Grid.ColumnSpan="3"/>
+													<TextBox Classes="c14"
+
+															 Grid.Row="0"
+															 IsReadOnly="False"
+															 Grid.Column="6"/>
+													
+													<tcb:ImagedButton Grid.Row="1"
+													Grid.Column="5"
+													Click="GrabImage_Click"
+													ImageSource="avares://TaymadeControls/Assets/MovieReel.jpg"
+													LabelText="Grab Image"
+													/>
+													<!--
+													<tcb:ImagedButton Grid.Row="2"
+													Grid.Column="6"
+													Command="{Binding AddText}"
+													ImageSource="avares://TaymadeControls/Assets/add_icon.png"
+													LabelText="Add Text" />
+													-->
+													<tcb:ImagedButton Grid.Row="1"
+																	  Grid.Column="6"
+																	  Command="{Binding DelImage}"
+																	  ImageSource="avares://TaymadeControls/Assets/Cross2.png"
+																	  LabelText="Del Image"
+																	  HotKeyText=""/> 
+																	  
+													<TextBlock Classes="h1" Text="Comment" TextAlignment="Left" Grid.Column="0" Grid.Row="2"/>
+													<TextBox Classes="c14" Text="{Binding CurrentBookmark.Comment, Mode=TwoWay }" Grid.Row="2" IsReadOnly="False"  Grid.Column="1"  Grid.ColumnSpan="3"/>
+
+													<TextBlock Classes="h1" Text="Type" TextAlignment="Left" Grid.Column="0" Grid.Row="3"/>
+													<TextBox Classes="c14" FontSize="14" Text="{Binding CurrentBookmark.Type, Mode=TwoWay }" Grid.Row="3" IsReadOnly="False"  Grid.Column="1"  Grid.ColumnSpan="3"/>
+
+													<TextBlock Classes="h1" Text="Time" TextAlignment="Left" Grid.Column="0" Grid.Row="4"/>
+													<TextBox Classes="c14" FontSize="14" Text="{Binding CurrentBookmark.FormattedTime, Mode=TwoWay }" Grid.Row="4" IsReadOnly="False"  Grid.Column="1" />
+													<TextBox Classes="c14" FontSize="14" Text="{Binding CurrentBookmark.Time, Mode=TwoWay }" Grid.Row="4" IsReadOnly="False"  Grid.Column="5"/>
+													<NumericUpDown Value="{Binding CurrentBookmark.Hours}" Increment="1" Minimum="0" Maximum="5" Grid.Row="5" Grid.Column="1" AllowSpin="True" ShowButtonSpinner="True" ButtonSpinnerLocation="Right"/>
+													<NumericUpDown Value="{Binding CurrentBookmark.Minutes}" Increment="1" Minimum="0" Maximum="60" Grid.Row="5" Grid.Column="2"/>
+													<NumericUpDown Value="{Binding CurrentBookmark.Seconds}" Increment="1" Minimum="0" Maximum="60" Grid.Row="5" Grid.Column="3"/>
+													<NumericUpDown Value="{Binding CurrentBookmark.Milli}" Increment="10" Minimum="0" Maximum="999" Grid.Row="5" Grid.Column="5"/>
+													<tcb:ImagedButton  Grid.Row="6"
+																	   Grid.Column="2"
+																	   Command="{Binding DelBookmark}"
+																	   LabelText="Del Bookmark"
+																	   ImageSource="avares://TaymadeControls/Assets/Cross2.png"
+																	   />
+
+
+													<tcb:ImagedButton  Grid.Row="6"
+																	   Grid.Column="3"
+
+																	   Command="{Binding PlayBookmark}"
+																	   LabelText="Play From"
+																	   ImageSource="avares://TaymadeControls/Assets/playLast.png"
+																	   HotKeyText=""
+																	   />
+
+												</Grid>
+											</StackPanel>
+										</Border>
+										<ScrollViewer HorizontalScrollBarVisibility="Auto"
+													  VerticalScrollBarVisibility="Auto"
+													  Margin="10"
+													  Height="800"
+													  VerticalAlignment="Top"
+													  VerticalContentAlignment="Top"
+													  >
+
+
+											<Image   Source="{Binding CurrentBookmark.ImageBMP}"
+													 Width="700"
+													 Height="400"
+													 Stretch="UniformToFill"
+
+													 VerticalAlignment="Top"/>
+
+										</ScrollViewer>
+									</StackPanel>
+								</Border>
+							</StackPanel>
+						</StackPanel>
+
+					</StackPanel>
+				</TabItem>
+
+			</TabControl>
+			<StackPanel Name="OkButtonPanelEditMovie"
+						Orientation="Horizontal"
+						HorizontalAlignment="Center" Height="80">
+				<tcb:OkButton Click="OkButton_Click"	Margin="5"  HotKey="Enter"/>
+				<tcb:CancelButton Click="CancelButton_Click" Margin="5,5,5,5" HotKey="Escape"/>
+
+			</StackPanel>
+		</StackPanel>
+	</Border>
+</Window>

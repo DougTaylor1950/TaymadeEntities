@@ -10,7 +10,7 @@
 namespace TaymadeEntities.Models
 {
     using TaymadeEntities.Support;
-    using CSharpFunctionalExtensions;
+   // using CSharpFunctionalExtensions;
     using DocumentFormat.OpenXml.Office2010.Excel;
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
@@ -158,6 +158,8 @@ namespace TaymadeEntities.Models
         /// Gets or sets the PhraseEntry.
         /// </summary>
         public DbSet<PhraseEntry> PhraseEntry { get; set; }
+
+        public DbSet<PhraseHeader> PhraseHeader { get; set; }
 
         public virtual DbSet<ProductionCompany> ProductionCompany { get; set; }
         public DbSet<ProductionCompanyMovie> ProductionCompanyMovie { get; set; }
@@ -737,6 +739,8 @@ namespace TaymadeEntities.Models
             modelBuilder.Entity<MovieLanguage>().HasKey(s => s.Id);
             modelBuilder.Entity<MovieLanguage>().HasOne(m => m.Movie).WithMany(l => l.MovieLanguages).HasForeignKey(g => g.MovieId);
 
+            modelBuilder.Entity<PhraseHeader>().HasKey(s => s.Id);
+            modelBuilder.Entity<PhraseHeader>().HasMany(s => s.PhraseEntries).WithOne(p => p.PhraseHeader).HasForeignKey(p => p.PhraseID); modelBuilder.Entity<UnboundGridData>().HasKey(u => u.Id);
             // modelBuilder.Entity<MovieGenre>().HasOne(m => m.MainGenreEntity).f
             //modelBuilder.Entity<MovieGenre>().HasOne(m => m.Movies).WithMany(ms => ms.MovieGenres).HasForeignKey(c => c.Genre) ;
 

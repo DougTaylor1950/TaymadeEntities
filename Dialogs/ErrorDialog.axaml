@@ -1,0 +1,43 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:vm="using:TaymadeEntities.ViewModels"
+		xmlns:avc="using:TaymadeEntities.Controls"
+		xmlns:tc="using:TaymadeControls"
+		xmlns:bt="using:TaymadeControls.Buttons"
+		mc:Ignorable="d"
+		d:DesignWidth="1800"
+		d:DesignHeight="1250"
+		x:DataType="vm:ErrorViewModel"
+		x:Class="TaymadeEntities.Dialogs.ErrorDialog"
+		Title="ErrorDialog">
+
+
+	<Design.DataContext>
+		<vm:ErrorViewModel/>
+	</Design.DataContext>
+
+	<Border BorderBrush="DarkGray"
+			BorderThickness="2"
+			CornerRadius="10">
+		<StackPanel Orientation="Vertical" Height="900">
+			<tc:HeaderControl2 Height="100"
+
+			Title="Errors"
+			SubtitleA="{Binding ErrorCount}"
+			/>
+			<avc:ErrorLogsControl Name="ErrorLogsControl"
+
+			Height="800">
+
+			</avc:ErrorLogsControl>
+			<bt:OKCancelPanel HorizontalAlignment="Center"
+					Name="OkCancel" >
+				
+			</bt:OKCancelPanel>
+
+		</StackPanel>
+
+	</Border>
+</Window>

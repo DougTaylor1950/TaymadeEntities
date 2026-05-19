@@ -15,7 +15,7 @@ namespace TaymadeEntities.Models
     using DocumentFormat.OpenXml.Packaging;
     using DocumentFormat.OpenXml.Wordprocessing;
     using IronPdf;
-    using Microsoft.AspNetCore.Http.HttpResults;
+    
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
     using OpenXmlPowerTools;
@@ -1671,6 +1671,71 @@ namespace TaymadeEntities.Models
             Dirty = false;
         }
 
+        internal async Task<bool> SaveAsync()
+        {
+            bool success = false;
+            if (Added == null)
+            {
+                Added = DateTime.Today;
+            }
+
+            if (this.Id < 1) this.Insert();
+
+            Json = StoryInfo?.ToJSON();
+
+            if (Score == null) Score = 1;
+
+            // find file creation time from directory
+            if (Creation == null && Path != null)
+            {
+                System.IO.FileInfo info = new System.IO.FileInfo(this.Path);
+
+                Creation = info.CreationTime;
+            }
+
+            //if (DataController.SandboxEntities.Entry(this).State == EntityState.Unchanged)
+            //{
+            LastModified = DateTime.Now;
+
+            var local = DataController.SandboxEntities.Set<Story>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+
+            // check if local is not null
+            if (local != null)
+            {
+                // detach
+                DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
+            }
+            // set Modified flag in your entry
+            try
+            {
+                 DataController.SandboxEntities.Entry(this).State = EntityState.Modified;
+                int rowschanged = await DataController.SandboxEntities.SaveChangesAsync();
+                if (rowschanged >= 1)
+                {
+                    success = true;
+                    Debug.WriteLine("saved ok : " + Id.ToString() + " rows changed " + rowschanged.ToString());
+                }
+
+                else if (rowschanged == 0)
+                {
+                    Debug.WriteLine("saved failed : " + Id.ToString());
+                }
+                else
+                {
+                    Debug.WriteLine("saved ok : " + Id.ToString());
+                }
+            }
+            catch (Exception e)
+            {
+
+                string error = e.ToString();
+            }
+            //}
+            Dirty = false;
+
+            return success;
+        }
+
         /// <summary>
         /// The ParagraphText.
         /// </summary>
@@ -2009,37 +2074,37 @@ namespace TaymadeEntities.Models
             }
         }
 
-        internal async void EditCastMember(StoryCast currentCastMember, StoryViewModel viewModel)
-        {
-            Dialogs.EditCastMemberDialog? EditCastMemberDialog = new();
+        //internal async void EditCastMember(StoryCast currentCastMember, StoryViewModel viewModel)
+        //{
+        //    Dialogs.EditCastMemberDialog? EditCastMemberDialog = new();
 
-            if (EditCastMemberDialog != null)
-            {
-                StoryCast oldCastMember = viewModel.CurrentCastMember;
-                // give dialog access to StoryViewModel
-                EditCastMemberDialog.DataContext = viewModel;
+        //    if (EditCastMemberDialog != null)
+        //    {
+        //        StoryCast oldCastMember = viewModel.CurrentCastMember;
+        //        // give dialog access to StoryViewModel
+        //        EditCastMemberDialog.DataContext = viewModel;
 
-                // Set the Accept and Cancel buttons to the ViewModel (actually DialogModelBase)
-                EditCastMemberDialog.OkButtonPanelEditMovie.OkButton.Command = viewModel.Accept;
-                EditCastMemberDialog.OkButtonPanelEditMovie.CancelButton.Command = viewModel.Cancel;
+        //        // Set the Accept and Cancel buttons to the ViewModel (actually DialogModelBase)
+        //        EditCastMemberDialog.OkButtonPanelEditMovie.OkButton.Command = viewModel.Accept;
+        //        EditCastMemberDialog.OkButtonPanelEditMovie.CancelButton.Command = viewModel.Cancel;
 
-                // find the Mian Window and use that to host the dialogue
-                Views.MainWindow? mainWindow = Support.Support.GetMainWindow();
-                if (mainWindow != null)
-                {
-                    viewModel.Caller = EditCastMemberDialog;
-                    await EditCastMemberDialog.ShowDialog(mainWindow);
+        //        // find the Mian Window and use that to host the dialogue
+        //        Views.MainWindow? mainWindow = Support.Support.GetMainWindow();
+        //        if (mainWindow != null)
+        //        {
+        //            viewModel.Caller = EditCastMemberDialog;
+        //            await EditCastMemberDialog.ShowDialog(mainWindow);
 
-                    // The view Model will contain the result button, if ok save the changes
-                    if (viewModel.resultButton != null && viewModel.resultButton.Result == Dialogs.DialogResultButton.ResultType.Ok)
-                    {
-                        viewModel.CurrentCastMember.Update();
-                    }
-                    else
-                        viewModel.CurrentCastMember = oldCastMember;
-                }
-            }
-        }
+        //            // The view Model will contain the result button, if ok save the changes
+        //            if (viewModel.resultButton != null && viewModel.resultButton.Result == Models.DialogResultButton.ResultType.Ok)
+        //            {
+        //                viewModel.CurrentCastMember.Update();
+        //            }
+        //            else
+        //                viewModel.CurrentCastMember = oldCastMember;
+        //        }
+        //    }
+        //}
 
         internal void DeleteCastMember(StoryCast currentCastMember)
         {

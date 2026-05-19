@@ -16,6 +16,7 @@ namespace TaymadeEntities.Models
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Globalization;
     using System.Linq;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Defines the <see cref="Bookmark" />.
@@ -271,6 +272,23 @@ namespace TaymadeEntities.Models
             }
             DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
             DataController.SandboxEntities.SaveChanges();
+        }
+
+        internal async Task<bool> SaveAsync()
+        {
+            bool success = false;
+            var local = DataController.SandboxEntities.Set<Bookmark>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+
+            // check if local is not null
+            if (local != null)
+            {
+                // detach
+                // DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
+            }
+            DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+           int count = await DataController.SandboxEntities.SaveChangesAsync();
+            success = (count == 1);
+            return success;
         }
 
         /// <summary>

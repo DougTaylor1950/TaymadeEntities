@@ -1,0 +1,85 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="850"
+		xmlns:vm="using:TaymadeEntities.ViewModels"
+		xmlns:sp="using:TaymadeEntities.Support"
+		xmlns:tcb="using:TaymadeControls.Buttons"
+		xmlns:tc="using:TaymadeControls"
+		xmlns:uc="using:TaymadeEntities.Controls"
+		Width="1200"
+		x:DataType="vm:MovieViewModelBase"
+		x:Class="TaymadeEntities.Dialogs.TMDBSearchDialog"
+		Title="Search Dialog">
+
+	<Design.DataContext>
+		<vm:MovieViewModelBase/>
+	</Design.DataContext>
+
+	<Window.Styles>
+		<StyleInclude Source="/Styles/TaymadeEntitiesStyles.axaml"/>
+	</Window.Styles>
+
+	<DockPanel>
+		<StackPanel Orientation="Vertical" DockPanel.Dock="Top">
+			<tc:HeaderControl2
+			Height="75"
+			Title="TMDB Movie Search"
+			>
+			</tc:HeaderControl2>
+
+			<Grid DockPanel.Dock="Top">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="100"/>
+					<ColumnDefinition Width="500"/>
+					<ColumnDefinition Width="100"/>
+					<ColumnDefinition Width="150"/>
+					<ColumnDefinition Width="100"/>
+					<ColumnDefinition Width="100"/>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="50"></RowDefinition>
+				</Grid.RowDefinitions>
+
+				<TextBox Classes="h1" FontSize="20" Text="Name" TextAlignment="Left" Grid.Column="0" Grid.Row="0"/>
+				<TextBox Classes="c1" FontSize="20" Name="SearchFor" Text="{Binding MovieTitle}" IsReadOnly="False"  Grid.Column="1" />
+				<tcb:ImagedButton  Grid.Row="0"
+								   Grid.Column="3"
+								   Name="TMDBSearch"
+								   HotKey="Alt+S"
+								   ImageSource="avares://TaymadeControls/Assets/search_icon.png"
+								   LabelText="Search"
+								   />
+
+				<TextBlock Classes="h1" FontSize="20" Text="Year" TextAlignment="Left" Grid.Column="4" Grid.Row="0"/>
+				<TextBox Classes="c1" FontSize="20" Name="SearchYear" Text="{Binding Year}" IsReadOnly="False"  Grid.Column="5" />
+			</Grid>
+			<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
+
+				<StackPanel DockPanel.Dock="Top">
+					<DataGrid Name="dgFoundMovies" 
+			   AutoGenerateColumns="False"
+			   VerticalScrollBarVisibility="Visible" 
+			   x:DataType="sp:MovieBase"
+			   Height="400">
+						<DataGrid.Columns>
+							<DataGridTextColumn Header="Name" Binding="{Binding Adult}" />
+							<DataGridTextColumn Header="Id" Binding="{Binding ID}" />
+							<DataGridTextColumn Header="Title" Binding="{Binding Title}" />
+							<DataGridTextColumn Header="Year" Binding="{Binding Year}" />
+						</DataGrid.Columns>
+						<DataGrid.RowDetailsTemplate>
+							<DataTemplate>
+								<TextBlock Classes="c1" Height="30" Text="{Binding Overview}" />
+							</DataTemplate>
+						</DataGrid.RowDetailsTemplate>
+					</DataGrid>
+				</StackPanel>
+			</Border>
+			<StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center" Height="50">
+				<tcb:OKCancelPanel Name="TMDBSearchOKPanel" />
+			</StackPanel>
+		</StackPanel>
+	</DockPanel>
+</Window>

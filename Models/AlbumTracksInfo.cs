@@ -1,4 +1,4 @@
-﻿using MusicBrainzSupport;
+﻿//using MusicBrainzSupport;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ namespace TaymadeEntities.Models
     {
         public Album? Album { get; set; }
 
-        public MBMedia? Media { get; set; }
+        //public MBMedia? Media { get; set; }
 
        // public DCAlbumDetails DCAlbumDetails { get; set; }
 
@@ -20,7 +20,7 @@ namespace TaymadeEntities.Models
     {
         public Artist? Artist { get; set; }
 
-        public List<MBArtistRelationship>? BandMembers { get; set; }
+       // public List<MBArtistRelationship>? BandMembers { get; set; }
 
     }
 }

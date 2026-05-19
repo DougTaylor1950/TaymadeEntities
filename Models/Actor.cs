@@ -9,7 +9,7 @@
 
 namespace TaymadeEntities.Models
 {
-    using DocumentFormat.OpenXml.Wordprocessing;
+    //using DocumentFormat.OpenXml.Wordprocessing;
     using Microsoft.EntityFrameworkCore;
     using ReactiveUI;
     using System;
@@ -19,6 +19,7 @@ namespace TaymadeEntities.Models
     using System.Linq;
     using System.Xml.Linq;
 
+#nullable enable
     /// <summary>
     /// Defines the <see cref="Actor" />.
     /// </summary>
@@ -45,31 +46,31 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the info.
         /// </summary>
-        private string info;
+        private string? info;
 
         /// <summary>
         /// Defines the name.
         /// </summary>
-        private string name = "";
+        private string? name = "";
 
         /// <summary>
         /// Defines the placeOfBirth.
         /// </summary>
-        private string placeOfBirth;
+        private string? placeOfBirth;
 
         /// <summary>
         /// Defines the tMDBID.
         /// </summary>
         private int? tMDBID;
-        private string aliases;
-        private ICollection<Cast> casts;
+        private string? aliases;
+        private ICollection<Cast>? casts;
         private DateTime? deathDay;
-        private string filmGroup;
-        private string imagePath;
-        private string iMDB;
-        private string sortName;
-        private string wIKIPageID;
-        private string thumb;
+        private string? filmGroup;
+        private string? imagePath;
+        private string? iMDB;
+        private string? sortName;
+        private string? wIKIPageID;
+        private string? thumb;
         private bool? mergeItem = false;
         private bool? mergeSource = false;
         private bool dirty;
@@ -168,17 +169,17 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the Adult.
         /// </summary>
-        public Nullable<bool> Adult { get => adult; set => this.RaiseAndSetIfChanged(ref adult, value); }
+        public bool? Adult { get => adult; set => this.RaiseAndSetIfChanged(ref adult, value); }
 
         /// <summary>
         /// Gets or sets the Aliases.
         /// </summary>
-        public string Aliases { get => aliases; set => this.RaiseAndSetIfChanged(ref aliases, value); }
+        public string? Aliases { get => aliases; set => this.RaiseAndSetIfChanged(ref aliases, value); }
 
         /// <summary>
         /// Gets or sets the Casts.
         /// </summary>
-        public virtual ICollection<Cast> Casts
+        public virtual ICollection<Cast>? Casts
         {
             get
             {
@@ -194,17 +195,17 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the DeathDay.
         /// </summary>
-        public Nullable<System.DateTime> DeathDay { get => deathDay; set => this.RaiseAndSetIfChanged(ref deathDay, value); }
+        public DateTime? DeathDay { get => deathDay; set => this.RaiseAndSetIfChanged(ref deathDay, value); }
 
         /// <summary>
         /// Gets or sets the dob.
         /// </summary>
-        public Nullable<System.DateTime> DOB { get => dob1; set => this.RaiseAndSetIfChanged(ref dob1, value); }
+        public DateTime? DOB { get => dob1; set => this.RaiseAndSetIfChanged(ref dob1, value); }
 
         /// <summary>
         /// Gets or sets the FilmGroup.
         /// </summary>
-        public string FilmGroup { get => filmGroup; set => this.RaiseAndSetIfChanged(ref filmGroup, value); }
+        public string? FilmGroup { get => filmGroup; set => this.RaiseAndSetIfChanged(ref filmGroup, value); }
 
         [NotMapped]
         internal bool Dirty { get => dirty; set => dirty = value; }
@@ -215,7 +216,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the Gender.
         /// </summary>
-        public Nullable<int> Gender
+        public int? Gender
         {
             get
             {
@@ -242,7 +243,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the ImagePath.
         /// </summary>
-        public string ImagePath
+        public string? ImagePath
         {
             get
             {
@@ -267,12 +268,12 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the IMDB.
         /// </summary>
-        public string IMDB { get => iMDB; set => this.RaiseAndSetIfChanged(ref iMDB, value); }
+        public string? IMDB { get => iMDB; set => this.RaiseAndSetIfChanged(ref iMDB, value); }
 
         /// <summary>
         /// Gets or sets the Info.
         /// </summary>
-        public string Info
+        public string? Info
         {
             get => info; 
             set
@@ -285,7 +286,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the Name.
         /// </summary>
-        public string Name
+        public string? Name
         {
             get
             {
@@ -298,25 +299,25 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the PlaceOfBirth.
         /// </summary>
-        public string PlaceOfBirth { get => placeOfBirth; set => this.RaiseAndSetIfChanged(ref placeOfBirth, value); }
+        public string? PlaceOfBirth { get => placeOfBirth; set => this.RaiseAndSetIfChanged(ref placeOfBirth, value); }
 
         /// <summary>
         /// Gets or sets the SortName.
         /// </summary>
-        public string SortName { get => sortName; set => this.RaiseAndSetIfChanged(ref sortName, value); }
+        public string? SortName { get => sortName; set => this.RaiseAndSetIfChanged(ref sortName, value); }
 
 
-        public string Thumb { get => thumb; set => this.RaiseAndSetIfChanged(ref thumb, value); }
+        public string? Thumb { get => thumb; set => this.RaiseAndSetIfChanged(ref thumb, value); }
 
         /// <summary>
         /// Gets or sets the TMDBID.
         /// </summary>
-        public Nullable<int> TMDBID { get => tMDBID; set => this.RaiseAndSetIfChanged(ref tMDBID, value); }
+        public int? TMDBID { get => tMDBID; set => this.RaiseAndSetIfChanged(ref tMDBID, value); }
 
         /// <summary>
         /// Gets or sets the WIKIPageID.
         /// </summary>
-        public string WIKIPageID { get => wIKIPageID; set => this.RaiseAndSetIfChanged(ref wIKIPageID, value); }
+        public string? WIKIPageID { get => wIKIPageID; set => this.RaiseAndSetIfChanged(ref wIKIPageID, value); }
 
         #endregion
 

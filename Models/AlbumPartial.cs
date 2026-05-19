@@ -16,7 +16,7 @@ namespace TaymadeEntities.Models
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
-    using MusicBrainzSupport;
+   // using MusicBrainzSupport;
     using TaymadeEntities.Support;
 
 
@@ -112,11 +112,11 @@ namespace TaymadeEntities.Models
         [NotMapped]
         public string ReturnUrl { get; set; }
 
-        [NotMapped]
-        public MBAlbum MBAlbum { get;  set; }
+        //[NotMapped]
+        //public MBAlbum MBAlbum { get;  set; }
 
-        [NotMapped]
-        public DCAlbumDetails DCAlbum { get; private set; }
+        //[NotMapped]
+      //  public DCAlbumDetails DCAlbum { get; private set; }
 
         #endregion
 
@@ -128,39 +128,39 @@ namespace TaymadeEntities.Models
         public async void GetDatabaseAlbums()
         {
             // get MusicBrianz info
-            if (!string.IsNullOrEmpty(MusicBrainzID) && MBAlbum == null)
-            {
-                    MBAlbum = await MusicBrainzSupport.MusicBrainz.GetAlbumAsync(MusicBrainzID);
-            }
+            //if (!string.IsNullOrEmpty(MusicBrainzID) && MBAlbum == null)
+            //{
+            //        MBAlbum = await MusicBrainzSupport.MusicBrainz.GetAlbumAsync(MusicBrainzID);
+            //}
 
-            if (!string.IsNullOrEmpty(DiscogsID) && DCAlbum == null)
-            {
-                //string url = "https://api.discogs.com/masters/" + this.DiscogsID;
+            //if (!string.IsNullOrEmpty(DiscogsID) && DCAlbum == null)
+            //{
+            //    //string url = "https://api.discogs.com/masters/" + this.DiscogsID;
 
-                // we can have two forms of ID url or simple ID
-                if (DiscogsID.Length < 15)
-                {
-                    DCAlbum = MusicBrainzSupport.Discogs.GetAlbumDetailsFromId(DiscogsID);
-                }
-                else
-                {
-                    DCAlbum = MusicBrainzSupport.Discogs.GetAlbumDetailsFromUrl(DiscogsID);
+            //    // we can have two forms of ID url or simple ID
+            //    if (DiscogsID.Length < 15)
+            //    {
+            //        DCAlbum = MusicBrainzSupport.Discogs.GetAlbumDetailsFromId(DiscogsID);
+            //    }
+            //    else
+            //    {
+            //        DCAlbum = MusicBrainzSupport.Discogs.GetAlbumDetailsFromUrl(DiscogsID);
 
-                    if (!string.IsNullOrEmpty(DiscogsReleaseID) && DiscogsReleaseID != DiscogsID)
-                    {
-                        DCAlbumDetails releaseAlbum = MusicBrainzSupport.Discogs.GetAlbumDetailsFromUrl(DiscogsReleaseID);
-                        if (releaseAlbum != null)
-                        {
-                            DCAlbum.Tracks = releaseAlbum.Tracks;
-                        }
-                    }
-                }
+            //        if (!string.IsNullOrEmpty(DiscogsReleaseID) && DiscogsReleaseID != DiscogsID)
+            //        {
+            //            DCAlbumDetails releaseAlbum = MusicBrainzSupport.Discogs.GetAlbumDetailsFromUrl(DiscogsReleaseID);
+            //            if (releaseAlbum != null)
+            //            {
+            //                DCAlbum.Tracks = releaseAlbum.Tracks;
+            //            }
+            //        }
+            //    }
 
-                if (IncludeHTML && DCAlbum != null && !string.IsNullOrEmpty(DCAlbum.Uri))
-                {
-                    DCHTML = Discogs.GetUrl(DCAlbum.Uri);
-                }
-            }
+            //    if (IncludeHTML && DCAlbum != null && !string.IsNullOrEmpty(DCAlbum.Uri))
+            //    {
+            //        DCHTML = Discogs.GetUrl(DCAlbum.Uri);
+            //    }
+            //}
         }
 
         /// <summary>

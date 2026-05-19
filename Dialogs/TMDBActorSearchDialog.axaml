@@ -1,0 +1,92 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+		xmlns:vm="using:TaymadeEntities.ViewModels"
+		xmlns:tc="using:TaymadeControls"
+		xmlns:tcb="using:TaymadeControls.Buttons"
+		x:DataType="vm:ActorSearchModel"
+		x:Class="TaymadeEntities.Dialogs.TMDBActorSearchDialog"
+		
+		Title="Actor Search Dialog">
+
+	<Design.DataContext>
+		<vm:ActorSearchModel/>
+	</Design.DataContext>
+
+	
+
+	<DockPanel>
+		<Grid DockPanel.Dock="Top">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="100"/>
+
+				<ColumnDefinition Width="400"/>
+				<ColumnDefinition Width="100"/>
+				<ColumnDefinition Width="100"/>
+				<ColumnDefinition Width="100"/>
+
+
+			</Grid.ColumnDefinitions>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="50"></RowDefinition>
+			</Grid.RowDefinitions>
+			<TextBlock Classes="h1" FontSize="20" Text="Name" TextAlignment="Left" Grid.Column="0" Grid.Row="0"/>
+			<TextBox Classes="c1" FontSize="20" Name="SearchFor" Text="" IsReadOnly="False"  Grid.Column="1" />
+			<Button Content="Search" Grid.Row="0" Grid.Column="2" Name="TMDBSearch" />
+			<Button Content="Search only" Grid.Row="0" Grid.Column="3" Name="TMDBSearchOnly" />
+
+		</Grid>
+		<Border  CornerRadius="6" 
+		   BorderBrush="Gray" 
+		   Background="LightGray"
+		   BorderThickness="2" 
+		   DockPanel.Dock="Top">
+
+			<StackPanel DockPanel.Dock="Top">
+				<DataGrid Name="dgFoundMovies" 
+			  AutoGenerateColumns="False" 
+			  VerticalScrollBarVisibility="Visible" 
+			  ItemsSource="{Binding	FoundPeople}"
+			  SelectedItem="{Binding FoundPerson}"
+			  Height="300">
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+						<DataGridTextColumn Header="Id" Binding="{Binding PersonId}" />
+						<DataGridTextColumn Header="Adult" Binding="{Binding Adult}" />
+						<DataGridTextColumn Header="Gender" Binding="{Binding GenderValue}" />
+						<DataGridTextColumn Header="Profile" Binding="{Binding ProfilePath}" />
+					</DataGrid.Columns>
+					<DataGrid.RowDetailsTemplate>
+						<DataTemplate x:DataType="vm:ActorSearchModel">
+							<StackPanel Orientation="Vertical">
+								<TextBlock Classes="c1" Text="{Binding FoundPerson.KnownForDescription}" />
+								<!--<TextBlock Classes="c1" Text="{Binding FoundPerson.Aliases}}" />-->
+								<TextBlock Classes="c1" Text="{Binding FoundPerson.DateOfBirth}" />
+							</StackPanel>
+						</DataTemplate>
+					</DataGrid.RowDetailsTemplate>
+				</DataGrid>
+
+				<DataGrid Name="dgFoundActors" 
+			  ItemsSource="{Binding ActorList}"
+			  AutoGenerateColumns="False" 
+			  VerticalScrollBarVisibility="Visible" Height="200">
+					<DataGrid.Columns>
+						<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+						<DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+						<DataGridTextColumn Header="Adult" Binding="{Binding Adult}" />
+						<DataGridTextColumn Header="Gender" Binding="{Binding GenderDisplay}" />
+						<DataGridTextColumn Header="Image" Binding="{Binding ImagePath}" />
+					</DataGrid.Columns>
+				</DataGrid>
+			
+			</StackPanel>
+		</Border>
+		<StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center" Height="50">
+			<tcb:OkButton Click="OkButton_Click" />
+			<tcb:CancelButton Click="CancelButton_Click" />
+		</StackPanel>
+	</DockPanel>
+</Window>

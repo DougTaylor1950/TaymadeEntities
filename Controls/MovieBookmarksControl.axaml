@@ -1,0 +1,63 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 d:DesignHeight="700"
+			 xmlns:vm="using:TaymadeEntities.ViewModels"
+			 xmlns:ac="using:Avalonia.Controls"
+			 xmlns:c="using:TaymadeEntities.Controls"
+			 xmlns:tc="using:TaymadeControls"
+			 xmlns:tcb="using:TaymadeControls.Buttons"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
+			 x:Class="TaymadeEntities.Controls.MovieBookmarksControl"
+			 Height="700"
+			 Width="900"
+			 x:DataType="vm:MovieEditViewModel"
+			 >
+
+	<Design.DataContext>
+		<vm:MovieEditViewModel/>
+	</Design.DataContext>
+
+	<StackPanel Orientation="Vertical" Background="Transparent">
+		<StackPanel Orientation="Horizontal">
+			<Border BorderThickness="2"
+					BorderBrush="Black"
+					CornerRadius="5"
+					>
+				<tcb:ToolbarPanel Name="ToolbarBookmarks" Height="50" />
+			</Border>	</StackPanel>
+		<StackPanel Height="800">
+			<StackPanel Orientation="Horizontal">
+				<!--	
+
+				-->
+			</StackPanel>
+			<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
+
+				<ScrollViewer HorizontalScrollBarVisibility="Visible" 
+				  VerticalScrollBarVisibility="Visible"
+				  Background="Transparent"
+				  >
+					<DataGrid Name="dgBooks"
+						 Background="Transparent"
+						 RowBackground="Bisque"
+							  Height="800"
+							  Width="700"
+							  VerticalScrollBarVisibility="Visible"
+							  HorizontalScrollBarVisibility="Auto"
+							  ItemsSource="{Binding CurrentMovie.Bookmarks}"
+							  SelectedItem="{Binding CurrentBookmark}"
+							  SelectionChanged="dgBooks_SelectionChanged"
+							  >
+						<DataGrid.Columns>
+							<DataGridTextColumn Header="Time" Binding="{Binding FormattedTime}" />
+							<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+							<DataGridTextColumn Header="ImagePath" Width="300" Binding="{Binding ImagePath}" />
+							<DataGridTextColumn Header="Type"  Width="100" Binding="{Binding Type}" />
+						</DataGrid.Columns>
+					</DataGrid>
+				</ScrollViewer>
+			</Border>
+		</StackPanel>
+	</StackPanel>
+</UserControl>

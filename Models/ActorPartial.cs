@@ -205,7 +205,8 @@ namespace TaymadeEntities.Models
         /// Gets or sets the TmpRole.
         /// </summary>
         [NotMapped]
-        public string TmpRole { get; internal set; }
+        public string? TmpRole { get; internal set; }
+        public Cast? Parent { get; internal set; }
 
         #endregion
 
@@ -274,7 +275,7 @@ namespace TaymadeEntities.Models
                 // Id may not be known at this stage.
                 if (Id > 0 && !string.IsNullOrEmpty(person.Profile_path) && (string.IsNullOrEmpty(imagePath) || !System.IO.File.Exists(ImagePath) || imagePath.Contains(defaultimage)))
                 {
-                    Bitmap temp = TmdbSupport.GetImageFromProfile(person.Profile_path);
+                    Avalonia.Media.Imaging.Bitmap temp = TmdbSupport.GetImageFromProfile(person.Profile_path);
 
                     if (temp != null)
                     {
@@ -322,7 +323,7 @@ namespace TaymadeEntities.Models
 
                 if (!string.IsNullOrEmpty(person.ProfilePath) && (string.IsNullOrEmpty(imagePath) || !System.IO.File.Exists(ImagePath)) && Id > 0)
                 {
-                    Bitmap temp = TmdbSupport.GetImageFromProfile(person.ProfilePath);
+                    Avalonia.Media.Imaging.Bitmap temp = TmdbSupport.GetImageFromProfile(person.ProfilePath);
 
 
                     if (temp != null && Id > 0)
@@ -370,7 +371,7 @@ namespace TaymadeEntities.Models
             {
                 Casts ??= [.. DataController.SandboxEntities.Casts.AsNoTracking().Where(x => x.ActorId == Id)];
 
-                List<int> movieIds = [.. Casts.Select(x => x.MovieID)];
+                List<int?> movieIds = [.. Casts.Select(x => x.MovieID)];
                 Movies = [.. (from movies in DataController.SandboxEntities.Movies where movieIds.Contains(movies.Id) select movies)];
             }
         }
@@ -380,7 +381,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         internal void GetCasts()
         {
-            if (Casts.Count == 0)
+            if (Casts?.Count == 0)
             {
                 Casts = [.. DataController.SandboxEntities.Casts.AsNoTracking().Where(a => a.ActorId == Id)];
             }

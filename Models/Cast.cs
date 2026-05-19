@@ -16,6 +16,8 @@ namespace TaymadeEntities.Models
     using System.Linq;
     using ReactiveUI;
 
+#nullable enable
+
     /// <summary>
     /// Defines the <see cref="Cast" />.
     /// </summary>
@@ -27,14 +29,14 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the actor.
         /// </summary>
-        private Actor actor;
-        private int actorId;
+        private Actor? actor;
+        private int? actorId;
         private int? castId;
-        private string credit_id1;
+        private string? credit_id1;
         private int id;
-        private int movieID;
-        private Movies movies;
-        private string role;
+        private int? movieID;
+        private Movies? movies;
+        private string? role;
         private bool actorChanged;
 
         #endregion
@@ -51,7 +53,7 @@ namespace TaymadeEntities.Models
                 this.RaiseAndSetIfChanged(ref actorChanged, value);
                 if (value)
                 {
-                    Actor.SetGenderDisplay();
+                    Actor?.SetGenderDisplay();
                 }
             }
         }
@@ -60,7 +62,7 @@ namespace TaymadeEntities.Models
         /// Gets or sets the Actor.
         /// </summary>
         [NotMapped]
-        public virtual Actor Actor
+        public virtual Actor? Actor
         {
             get
             {
@@ -81,12 +83,12 @@ namespace TaymadeEntities.Models
         /// Gets or sets the ActorId.
         /// </summary>
         [ForeignKey("Actor")]
-        public int ActorId { get => actorId; set => this.RaiseAndSetIfChanged(ref actorId, value); }
+        public int? ActorId { get => actorId; set => this.RaiseAndSetIfChanged(ref actorId, value); }
 
         /// <summary>
         /// Gets or sets the CastId.
         /// </summary>
-        public Nullable<int> CastId { get => castId; set => this.RaiseAndSetIfChanged(ref castId, value); }
+        public int? CastId { get => castId; set => this.RaiseAndSetIfChanged(ref castId, value); }
 
         /// <summary>
         /// Gets or sets the credit_id.
@@ -103,18 +105,18 @@ namespace TaymadeEntities.Models
         /// Gets or sets the MovieID.
         /// </summary>
         [ForeignKey("Movies")]
-        public int MovieID { get => movieID; set => this.RaiseAndSetIfChanged(ref movieID, value); }
+        public int? MovieID { get => movieID; set => this.RaiseAndSetIfChanged(ref movieID, value); }
 
         /// <summary>
         /// Gets or sets the Movies.
         /// </summary>
         [NotMapped]
-        public Movies Movies { get => movies; set => this.RaiseAndSetIfChanged(ref movies, value); }
+        public Movies? Movies { get => movies; set => this.RaiseAndSetIfChanged(ref movies, value); }
 
         /// <summary>
         /// Gets or sets the Role.
         /// </summary>
-        public string Role { get => role; set => this.RaiseAndSetIfChanged(ref role, value); }
+        public string? Role { get => role; set => this.RaiseAndSetIfChanged(ref role, value); }
 
         #endregion
 

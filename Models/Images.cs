@@ -13,13 +13,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using Newtonsoft;
-using static TaymadeEntities.Support.MissingFileFinder;
+//using static TaymadeEntities.Support.MissingFileFinder;
 using Newtonsoft.Json;
 using System.Web;
 using Microsoft.EntityFrameworkCore;
 using DynamicData;
 using DocumentFormat.OpenXml.Presentation;
 using Avalonia.Controls;
+using TaymadeEntities.Models;
+
 
 namespace TaymadeEntities.Models
 {
@@ -418,7 +420,7 @@ namespace TaymadeEntities.Models
                             if (images != null && images.ImageItems.Count > 0 && !string.IsNullOrEmpty(images.LastImageName))
                             {
                                 CurrentImageItem = images.ImageItems.Where(it => it.ImageName == images.LastImageName).FirstOrDefault();
-                                MainSupport.ScrollItemImagesIntoView(CurrentImageItem);
+                            //    MainSupport.ScrollItemImagesIntoView(CurrentImageItem);
                             }
                         }
                     }
@@ -542,7 +544,7 @@ namespace TaymadeEntities.Models
             set => this.RaiseAndSetIfChanged(ref currentMovie, value);
         }
 
-        public MainWindowViewModel MVVM { get; set; }
+        public MovieViewModelBase MVVM { get; set; }
 
         #endregion
 
@@ -676,7 +678,7 @@ namespace TaymadeEntities.Models
                 CurrentSubFolder = null;
         }
 
-        public void SubSelectionChanged(MainWindowViewModel? mvvm, object? e)
+        public void SubSelectionChanged(MovieViewModelBase? mvvm, object? e)
         {
             if (mvvm != null && e != null)
             {
@@ -750,7 +752,7 @@ namespace TaymadeEntities.Models
                 if (imageItem != null)
                 {
                     CurrentImageItem = imageItem;
-                    MainSupport.ScrollItemImagesIntoView(imageItem);
+                 //   MainSupport.ScrollItemImagesIntoView(imageItem);
                 }
             }
         }

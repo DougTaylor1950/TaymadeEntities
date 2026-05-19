@@ -1,0 +1,137 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+
+			 xmlns:vm="using:TaymadeEntities.ViewModels"
+			 xmlns:c="using:TaymadeEntities.Controls"
+			 xmlns:tc="using:TaymadeControls"
+			 xmlns:tcb="using:TaymadeControls.Buttons"
+			 mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="450"
+			 x:DataType="vm:MovieEditViewModel"
+			 x:Class="TaymadeEntities.Controls.SeriesUserControl">
+
+	
+
+	<Design.DataContext>
+		<vm:MovieEditViewModel/>
+	</Design.DataContext>
+
+	<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
+		<DockPanel	LastChildFill="True" >
+			<tc:HeaderControl2 Name="SeriesHeaderPanel" DockPanel.Dock="Top" />
+			<Grid ShowGridLines="False">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="100"/>
+					<ColumnDefinition Width="70"/>
+					<ColumnDefinition Width="1"/>
+					<ColumnDefinition Width="100"/>
+					<ColumnDefinition Width="20"/>
+					<ColumnDefinition Width="100"/>
+
+					<ColumnDefinition Width="100"/>
+					<ColumnDefinition Width="300"/>
+					<ColumnDefinition Width="150"/>
+					<ColumnDefinition Width="150"/>
+
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="50"></RowDefinition>
+					<RowDefinition Height="40"></RowDefinition>
+					<RowDefinition Height="40"></RowDefinition>
+					<RowDefinition Height="40"></RowDefinition>
+					<RowDefinition Height="40"></RowDefinition>
+					<RowDefinition Height="60"></RowDefinition>
+
+				</Grid.RowDefinitions>
+				<TextBlock Classes="h2"  
+			   Text="Series ID"  
+			   VerticalAlignment="Center"
+			   Grid.Column="0" 
+			   Grid.Row="0"/>
+				<!--
+				<TextBlock Height="30"  Text="{Binding Movie.Series}" Grid.Column="1" />
+				-->
+				<ComboBox Classes="c1" 
+			  Name ="SeriesList"  
+			  Grid.Column="1" 
+			  Grid.Row="0" 
+			  VerticalAlignment="Center"
+			  ItemsSource="{Binding SeriesList}" 
+			  SelectedItem="{Binding CurrentMovie.SeriesEntity}"
+			  />
+				<TextBlock  Classes="h2"  Text="Series Name"  Grid.Column="4" Grid.Row="0"/>
+				<TextBox  Classes="c1" Height="30"  Text="{Binding CurrentMovie.SeriesEntity.Name}" Grid.Column="4" />
+
+				<TextBlock  Classes="h2"  Text="Series Overview"  Grid.Column="0" Grid.Row="1"/>
+				<TextBox  Classes="c1" Height="30"  Text="{Binding CurrentMovie.SeriesEntity.Overview, Mode=TwoWay}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="6" TextWrapping="Wrap" />
+
+				<TextBlock  Classes="h2"  Text="Season No"  Grid.Column="0" Grid.Row="2"/>
+				<!--
+				<TextBox Height="30"  Text="{Binding SeasonEntity.SeasonNo}" Grid.Column="1" Grid.Row="2" />-->
+
+				<ComboBox Classes="c1" Name="SeasonList"  ItemsSource="{Binding CurrentMovie.SeriesEntity.Seasons}" SelectedItem="{Binding CurrentMovie.SeasonEntity}" Grid.Column="1" Grid.Row="2" />
+				<TextBlock  Classes="h2"  Text="Name"  Grid.Column="3" Grid.Row="2"/>
+				<TextBox   Classes="c1" Height="30"   Text="{Binding CurrentMovie.SeasonEntity.Name}" Grid.Column="5" Grid.Row="2"  Width="100" />
+				<TextBlock  Classes="h2"  Text="Year"  Grid.Column="6" Grid.Row="2"/>
+				<tcb:ImagedButton Grid.Row="2" Grid.Column="8"
+								  Command="{Binding	AddSeasonCommand}"
+								  ImageSource="avares://TaymadeControls/Assets/add_icon.png"
+								  LabelText="Add Season"
+								  HotKeyText=""
+								  TextFontSize="12"
+								  HotKeyFontSize="9"
+								  />
+
+				<tcb:ImagedButton Grid.Row="2"
+								  Grid.Column="9"
+								  Command="{Binding EditSeasonCommand}"
+								  ToolTip.Tip="Edit the Season's details"
+								  ImageSource="avares://TaymadeControls/Assets/edit_icon.png"
+								  LabelText="Edit Season"
+								  />
+
+				<TextBox   Classes="c1" Height="30"   Text="{Binding CurrentMovie.SeasonEntity.Year}" Grid.Column="7" Grid.Row="2"  Width="200" />
+
+				<TextBlock  Classes="h2"  Text="Episode No"  Grid.Column="0" Grid.Row="3"/>
+				<TextBlock  Classes="h2"  Text="No"  Grid.Column="3" Grid.Row="3"/>
+				<TextBox   Classes="c1" Height="30"   Text="{Binding CurrentMovie.EpisodeEntity.EpisodeNumber}" Grid.Column="5" Grid.Row="3"  Width="100" />
+				<tcb:ImagedButton Grid.Row="3"
+								  Grid.Column="8"
+								  Command="{Binding AddTVEpisodeCommand}"
+								  ToolTip.Tip="Add a new Episode"
+								  ImageSource="avares://TaymadeControls/Assets/add_icon.png"
+								  LabelText="Add Episode"
+								  />
+
+				<tcb:ImagedButton Grid.Row="3" Grid.Column="9"
+								  Command="{Binding EditEpisodeCommand}"
+								  ToolTip.Tip="Edit the Episode"
+								  ImageSource="avares://TaymadeControls/Assets/edit_icon.png"
+								  LabelText="Edit Episode"
+								  />
+
+
+				<!--
+				<TextBox Height="30"  Text="{Binding Episode.EpisodeNumber}"  Grid.Column="1" Grid.Row="3" />
+				-->
+				<ComboBox Classes="c1" Name="EpisodeList"  ItemsSource="{Binding CurrentMovie.SeasonEntity.TVEpisodes}" SelectedItem="{Binding CurrentMovie.EpisodeEntity }" Grid.Column="1" Grid.Row="3" />
+
+				<TextBlock  Classes="h2"  Text="Name" Grid.Column="6" Grid.Row="3"/>
+				<TextBox Classes="c1" Height="30"  Text="{Binding CurrentMovie.EpisodeEntity.Name}" Grid.Column="7" Grid.Row="3" Width="200" />
+
+				<TextBlock  Classes="h2"  Text="Overview"  Grid.Column="0" Grid.Row="4"/>
+				<TextBox  Classes="c1" Height="30"  Text="{Binding CurrentMovie.EpisodeEntity.Overview}" Grid.Column="1" Grid.Row="4" Grid.ColumnSpan="4" TextWrapping="Wrap" />
+
+				<TextBlock  Classes="h2"  Text="DB ID"  Grid.Column="0" Grid.Row="5"/>
+				<TextBox  Classes="c1" Height="30"  Text="{Binding CurrentMovie.EpisodeEntity.TMID}" Grid.Column="1" Grid.Row="5"  TextWrapping="Wrap" />
+				<TextBlock  Classes="h2"  Text="Air Date"  Grid.Column="6" Grid.Row="5"/>
+				<TextBox  Classes="c1" Height="30"  Text="{Binding CurrentMovie.EpisodeEntity.AirDateString, Mode=TwoWay}" Grid.Column="7" Grid.Row="5"  />
+
+
+			</Grid>
+		</DockPanel>
+	</Border>
+
+
+</UserControl>

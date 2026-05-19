@@ -11,8 +11,8 @@ namespace TaymadeEntities.Models
     using Avalonia.Media;
     using TaymadeEntities.Support;
     using TaymadeEntities.ViewModels;
-    using DocumentFormat.OpenXml.Office2010.Excel;
-    using DocumentFormat.OpenXml.Office2010.ExcelAc;
+    //using DocumentFormat.OpenXml.Office2010.Excel;
+   // using DocumentFormat.OpenXml.Office2010.ExcelAc;
     using DynamicData.Binding;
     using Microsoft.EntityFrameworkCore;
     using ReactiveUI;
@@ -486,15 +486,15 @@ namespace TaymadeEntities.Models
                 bookmark.Type = "BOOKMARK";
                 bookmark.MovieID = Id;
                 //VideoSupport videoSupport = new VideoSupport();
-                VideoSupport.GrabBookmarkImage(this, bookmark);
+                //VideoSupport.GrabBookmarkImage(this, bookmark);
 
-                bookmark.ImagePath = VideoSupport.thumbnailPath;
-                if (Id > 0)
-                {
-                    DataController.SandboxEntities.Bookmarks.Add(bookmark);
-                    DataController.SandboxEntities.SaveChanges();
-                    SetPercentUnmarked();
-                }
+                //bookmark.ImagePath = VideoSupport.thumbnailPath;
+                //if (Id > 0)
+                //{
+                //    DataController.SandboxEntities.Bookmarks.Add(bookmark);
+                //    DataController.SandboxEntities.SaveChanges();
+                //    SetPercentUnmarked();
+                //}
 
                 ImagePath = bookmark.ImagePath;
                 Save();
@@ -507,12 +507,12 @@ namespace TaymadeEntities.Models
             }
         }
 
-        public string CreateXSPFDirectory(PhraseViewModel viewModel, string filmName)
+        public string CreateXSPFDirectory(PhraseEntry phrase, string filmName)
         {
             string XSPFilenameDir;
-            if (viewModel.CurrentPhrase != null)
+            if (phrase != null)
             {
-                XSPFilenameDir = @"k:\td1\xspf\" + viewModel.CurrentPhrase.Id;
+                XSPFilenameDir = @"k:\td1\xspf\" + phrase.Id;
             }
             else
                 XSPFilenameDir = @"k:\td1\xspf\missing\";
@@ -558,7 +558,7 @@ namespace TaymadeEntities.Models
         /// <returns>The <see cref="Task"/>.</returns>
         public async Task EditMovie(Views.MainWindow main)
         {
-            ViewModels.MovieViewModel? mvm = new ViewModels.MovieViewModel(this);
+            ViewModels.MovieEditViewModel? mvm = new ViewModels.MovieEditViewModel(this);
 
             Dialogs.MovieEditDialog editor = new Dialogs.MovieEditDialog(mvm);
             editor.DataContext = mvm;
@@ -566,9 +566,9 @@ namespace TaymadeEntities.Models
             mvm.Caller = editor;
             //Dialogs.DialogResultButton result;
 
-            await editor.ShowDialog(main);
+            bool result = await editor.ShowDialog<bool>(main);
 
-            if (mvm != null && mvm.resultButton != null && mvm.resultButton.Result == Dialogs.DialogResultButton.ResultType.Ok)
+            if (result)
             {
                 // save movie
 
@@ -674,9 +674,16 @@ namespace TaymadeEntities.Models
         public async Task GetDuration(string tempMoviePath = "")
         {
             if (string.IsNullOrEmpty(tempMoviePath)) tempMoviePath = MoviePath;
-            int time = await VideoSupport.GetDurationSeconds(tempMoviePath, this);
-
-            DurationSeconds = time;
+            TaymadeEntities.Support.FFProbeInfo? info = await FFMpegSupport.GetFFProbeInfo(tempMoviePath);
+            //int time = await VideoSupport.GetDurationSeconds(tempMoviePath, this);
+            if (info != null && info.Duration != null)
+            {
+                {
+                    TimeSpan duration = TimeSpan.Parse(info.Duration);
+                    int time = (int)duration.TotalSeconds;
+                    DurationSeconds = time;
+                }
+            }
         }
 
         public string? GetTempFileName()
@@ -873,7 +880,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Save.
         /// </summary>
-        internal bool Save()
+        internal async Task< bool> SaveAsync()
         {
             bool success = true;
             if (HasChapters == null) HasChapters = false;
@@ -921,12 +928,12 @@ namespace TaymadeEntities.Models
                     // set Modified flag in your entry
                     ModifiedOn = DateTime.Now;
                     DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                    int saved = DataController.SandboxEntities.SaveChanges();
+                    int saved =  await DataController.SandboxEntities.SaveChangesAsync();
                     ClearErrors();
                     LogMessage("Saved " + ChangedFields);
                     ChangedFields = string.Empty;
                     Dirty = false;                  // clear modified flag;
-                    //success = (saved == 1  );
+                    success = (saved == 1  );
                 }
                 catch (Exception ex)
                 {
@@ -945,6 +952,82 @@ namespace TaymadeEntities.Models
                     Errors.Add(error);
                     success = false;
                 }
+            //}
+            return success;
+        }
+
+        internal bool Save()
+        {
+            bool success = true;
+            if (HasChapters == null) HasChapters = false;
+            if (HasEpisodes == null) HasEpisodes = false;
+            if (Series == null) Series = 2;
+
+            //if (dirty)
+            //{
+            if (MovieExtension == null)
+            {
+                MovieExtension = new MovieExtn();
+                MovieExtension.Rating = 0;
+                Json = MovieExtension.Serialise();
+            }
+            else Json = MovieExtension.Serialise();
+            try
+            {
+                this.ErrorText = "";
+
+                if (Id == 0)
+                {
+                    success = Insert();
+                }
+
+                if (SeriesEntity != null && (Series == null || Series != SeriesEntity.Id))
+                {
+                    Series = SeriesEntity.Id;
+                }
+
+                if (Director != null)
+                {
+                    Director.Save();
+                }
+
+                EntityState state = DataController.SandboxEntities.Entry(this).State;
+
+                var local = DataController.SandboxEntities.Set<Movies>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+
+                // check if local is not null
+                if (local != null)
+                {
+                    // detach
+                    //DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
+                }
+                // set Modified flag in your entry
+                ModifiedOn = DateTime.Now;
+                DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                int saved = DataController.SandboxEntities.SaveChanges();
+                ClearErrors();
+                LogMessage("Saved " + ChangedFields);
+                ChangedFields = string.Empty;
+                Dirty = false;                  // clear modified flag;
+                                                //success = (saved == 1  );
+            }
+            catch (Exception ex)
+            {
+                string msg = "error Saving movie : " + Id.ToString() + " : " + MovieName;
+                Support.Logger.Error(ex, msg);
+
+                MVMLogs logs = new MVMLogs(ex, "database", "Error");
+
+                if (Errors == null) Errors = new System.Collections.Generic.List<ModelError>();
+
+                ModelError error = new ModelError()
+                {
+                    Error = ex.Message,
+                    Property = "save"
+                };
+                Errors.Add(error);
+                success = false;
+            }
             //}
             return success;
         }

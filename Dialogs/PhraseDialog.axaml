@@ -1,0 +1,194 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:vm="using:TaymadeEntities.ViewModels"
+		xmlns:tcb="using:TaymadeControls.Buttons"
+		x:DataType="vm:PhraseViewModel"
+		mc:Ignorable="d" d:DesignWidth="1800" d:DesignHeight="1250"
+		x:Class="TaymadeEntities.Dialogs.PhraseDialog"
+		Title="PhraseDialog">
+
+	<StackPanel>
+		<ComboBox	ItemsSource="{Binding PhraseHeaderList}"
+				  Name="ComboPhraseHeader"
+				  SelectedItem="{Binding SelectedPhraseHeader}"
+				  SelectionChanged="PhraseHeader_SelectionChanged"
+				  Margin="10"/>
+		<Border BorderBrush="Black"
+				BorderThickness="2"
+				CornerRadius="5"
+				>
+			<StackPanel Orientation="Horizontal">
+				<StackPanel	Orientation="Vertical" Margin="10">
+
+					<ListBox ItemsSource="{Binding PhraseEntries}"
+							 Width="300"
+							 Height="600"
+							 Name="ListPhrases"
+							 SelectedItem="{Binding SelectedPhrase}"
+							 HorizontalAlignment="Left"
+							 Margin="10,10,10,10"/>
+					<tcb:ImagedButton LabelText="Add Phrase"
+									  ImageSource="avares://TaymadeControls/Assets/add_icon.png"
+									  Command="{Binding AddPhraseCommand}"
+									  Margin="10,10,10,10"/>
+				</StackPanel>
+				<StackPanel Width="20" Background="LightGray"/>
+				<!-- This is just a spacer to add some separation between the list of phrases and the details of the selected phrase -->
+				<StackPanel Orientation="Vertical" Margin="10">
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="100"/>
+							<ColumnDefinition Width="200"/>
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+
+						</Grid.RowDefinitions>
+						<TextBlock Text="Id"
+								   Grid.Row="0"
+								   Grid.Column="0"
+								   Margin="10"/>
+						<TextBox Text="{Binding SelectedPhrase.Id}"
+								 FontSize="14"
+								 FontWeight="Bold"
+								 Grid.Column="1"
+								 Margin="10" Grid.Row="0"/>
+						<TextBlock Text="Description"
+								   Grid.Row="1"
+								   Grid.Column="0"
+								   Margin="10"/>
+						<TextBox Text="{Binding SelectedPhrase.Description}"
+								 FontSize="14"
+								 Margin="10"
+								 Grid.Column="1"
+								 Grid.Row="1"
+								 />
+						<TextBlock Text="Order"
+								   Grid.Row="2"
+								   Grid.Column="0"
+								   Margin="10"/>
+						<TextBox Text="{Binding SelectedPhrase.Order}"
+								 FontSize="14"
+								 Margin="10"
+								 Grid.Column="1"
+								 Grid.Row="2"
+								 />
+
+						<CheckBox IsChecked="{Binding SelectedPhrase.Sortable}"
+								  Grid.Column="1"
+								  Margin="10"
+								  Grid.Row="3"
+								  Content="Sortable"
+								  />
+						<CheckBox IsChecked="{Binding SelectedPhrase.Searchable}"
+								  Grid.Column="1"
+								  Margin="10"
+								  Grid.Row="4"
+								  Content="Searchable"
+								  />
+						<tcb:ImagedButton LabelText="Save Changes"
+										  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+										  Margin="10,10,10,10"
+										  Grid.Row="5"
+										  Grid.Column="1"
+										  Command="{Binding SavePhraseChangesCommand}"
+										  />
+					</Grid>
+				</StackPanel>
+				<StackPanel Width="20" Background="LightGray"/>
+				<StackPanel	Orientation="Vertical" Margin="10">
+
+					<ListBox ItemsSource="{Binding SubPhraseEntries}"
+							 Width="300"
+							 Height="600"
+							 Name="ListSubPhrases"
+							 IsVisible="{Binding HasSubPhrases}"
+							 SelectedItem="{Binding SelectedSubPhrase}"
+							 HorizontalAlignment="Left"
+							 Margin="10,10,10,10"/>
+					<tcb:ImagedButton LabelText="Add SubPhrase"
+									  IsVisible="{Binding HasSubPhrases}"
+									  ImageSource="avares://TaymadeControls/Assets/add_icon.png"
+									  Command="{Binding AddSubPhraseCommand}"
+									  Margin="10,10,10,10"/>
+				</StackPanel>
+					<StackPanel Orientation="Vertical" 
+				 IsVisible="{Binding HasSubPhrases}"
+				 Margin="10">
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="100"/>
+							<ColumnDefinition Width="200"/>
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="Auto"/>
+
+						</Grid.RowDefinitions>
+						<TextBlock Text="Id"
+								   Grid.Row="0"
+								   Grid.Column="0"
+								   Margin="10"/>
+						<TextBox Text="{Binding SelectedSubPhrase.Id}"
+								 FontSize="14"
+								 FontWeight="Bold"
+								 Grid.Column="1"
+								 Margin="10" Grid.Row="0"/>
+						<TextBlock Text="Description"
+								   Grid.Row="1"
+								   Grid.Column="0"
+								   Margin="10"/>
+						<TextBox Text="{Binding SelectedSubPhrase.Description}"
+								 FontSize="14"
+								 Margin="10"
+								 Grid.Column="1"
+								 Grid.Row="1"
+								 />
+						<TextBlock Text="Order"
+								   Grid.Row="2"
+								   Grid.Column="0"
+								   Margin="10"/>
+						<TextBox Text="{Binding SelectedSubPhrase.Order}"
+								 FontSize="14"
+								 Margin="10"
+								 Grid.Column="1"
+								 Grid.Row="2"
+								 />
+
+						<CheckBox IsChecked="{Binding SelectedSubPhrase.Sortable}"
+								  Grid.Column="1"
+								  Margin="10"
+								  Grid.Row="3"
+								  Content="Sortable"
+								  />
+						<CheckBox IsChecked="{Binding SelectedSubPhrase.Searchable}"
+								  Grid.Column="1"
+								  Margin="10"
+								  Grid.Row="4"
+								  Content="Searchable"
+								  />
+						<tcb:ImagedButton LabelText="Save Changes"
+										  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+										  Margin="10,10,10,10"
+										  Grid.Row="5"
+										  Grid.Column="1"
+										  Command="{Binding SaveSubPhraseChangesCommand}"
+										  />
+					</Grid>
+				</StackPanel>
+			</StackPanel>
+		</Border>
+	</StackPanel>
+
+</Window>

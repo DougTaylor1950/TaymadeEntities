@@ -1,0 +1,105 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 mc:Ignorable="d"
+			 d:DesignWidth="600"
+			 d:DesignHeight="800"
+			 xmlns:vm="using:TaymadeEntities.ViewModels"
+			 xmlns:c="using:TaymadeEntities.Controls"
+			 xmlns:tc="using:TaymadeControls"
+			 xmlns:tcb="using:TaymadeControls.Buttons"
+			 Width="800"
+			 x:DataType="vm:MovieEditViewModel"
+			 x:Class="TaymadeEntities.Controls.BookmarkUserControl"
+			 >
+	<Design.DataContext>
+		<vm:MovieEditViewModel/>
+	</Design.DataContext>
+
+	<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
+		<StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+
+			<Grid   >
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="150" />
+					<ColumnDefinition Width="10"/>
+					<ColumnDefinition Width="200"/>
+					<ColumnDefinition Width="200"/>
+
+
+
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="30"></RowDefinition>
+					<RowDefinition Height="30"></RowDefinition>
+					<RowDefinition Height="30"></RowDefinition>
+					<RowDefinition Height="30"></RowDefinition>
+					<RowDefinition Height="30"></RowDefinition>
+					<RowDefinition Height="100"></RowDefinition>
+
+				</Grid.RowDefinitions>
+				<TextBlock Classes="h2" Grid.Row="0" Grid.Column="0" Text="Image Path"/>
+				<TextBox Classes="c1" Grid.Row="0" Grid.Column="2" Text="{Binding CurrentBookmark.ImagePath, Mode=TwoWay}" />
+
+
+				<TextBlock Classes="h2" Grid.Row="1" Grid.Column="0" Text="Name"/>
+				<TextBox Classes="c1" Grid.Row="1" Grid.Column="2" Text="{Binding CurrentBookmark.Name, Mode=TwoWay}" Background ="AntiqueWhite"/>
+
+				<TextBlock Classes="h2" Grid.Row="2" Grid.Column="0" Text="Time"/>
+
+				<TextBlock Classes="c2" Grid.Row="2" Grid.Column="2" Text="{Binding CurrentBookmark.FormattedTime, Mode=TwoWay}" Background ="AntiqueWhite"/>
+
+				<TextBlock Classes="h2" Grid.Row="3" Grid.Column="0" Text="Comment"/>
+
+				<TextBox Classes="c1" Grid.Row="3" Grid.Column="2" Text="{Binding CurrentBookmark.Comment, Mode=TwoWay}" Background ="AntiqueWhite"/>
+
+				<tcb:ImagedButton  Grid.Row="5"
+								   Name="EditBookmark"
+								   Command="{Binding EditBookmark}"
+								   LabelText="Edit Bookmark"
+								   ImageSource="avares://TaymadeControls/Assets/edit_icon.png"
+								   />
+
+
+
+				<tcb:ImagedButton  Grid.Row="5"
+								   Grid.Column="2"
+								   Name="DelBookmark"
+								   Command="{Binding DelBookmark}"
+								   LabelText="Del Bookmark"
+								   ImageSource="avares://TaymadeControls/Assets/Cross2.png"
+								   />
+
+
+				<tcb:ImagedButton  Grid.Row="5"
+								   Grid.Column="3"
+								   Name="PlayBookmark"
+								   Command="{Binding PlayBookmark}"
+								   LabelText="Play From"
+								   ImageSource="avares://TaymadeControls/Assets/playLast.png"
+								   HotKeyText=""
+								   />
+
+			</Grid>
+			<ScrollViewer HorizontalScrollBarVisibility="Auto" 
+				 VerticalScrollBarVisibility="Auto"
+				 Margin="10"
+				 Height="800"
+				 VerticalAlignment="Top"
+				 VerticalContentAlignment="Top"
+				 >
+
+
+				<Image   Source="{Binding CurrentBookmark.ImageBMP}" 
+						 Width="700"
+						 Height="400"
+						 Stretch="UniformToFill"
+						 Name="Poster"
+						 VerticalAlignment="Top"/>
+
+			</ScrollViewer>
+		</StackPanel>
+
+	</Border>
+</UserControl>

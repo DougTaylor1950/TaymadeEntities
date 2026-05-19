@@ -1,0 +1,53 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+	    xmlns:vm="using:TaymadeEntities.ViewModels"
+		xmlns:uc="using:TaymadeEntities.Controls"
+		x:DataType="vm:EntryDialogModel"
+
+		x:Class="TaymadeEntities.Dialogs.EntryDialog"
+		Title="Cast Editor">
+
+	<Window.Styles>
+		<StyleInclude Source="avares://TaymadeControls/Styles/TaymadeStyles.axaml"/>
+	</Window.Styles>
+
+	<Design.DataContext>
+		<vm:EntryDialogModel/>
+	</Design.DataContext>
+
+	<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
+
+		<DockPanel	LastChildFill="True" >
+			<StackPanel Orientation="Vertical" DockPanel.Dock="Top">
+				<TextBox Classes="c1" Text="{Binding EntryText}" Name="entryText" >
+					<TextBox.ContextMenu>
+						<ContextMenu  Name="EntryTextMenu">
+							<MenuItem Header="Hyphenate Spaces" Command="{Binding Hyphenate}" />
+							<MenuItem Header="Underscore Spaces" Command="{Binding Underscore}" />
+							<MenuItem Header="Shorten" Command="{Binding Shorten}" />
+						</ContextMenu>
+					</TextBox.ContextMenu>
+				</TextBox>
+				<TextBox Classes="c1" Text="{Binding EntryTime}" Name="entryTime" />
+				<DatePicker Name="entryDate" DayVisible="True" MonthVisible="True"
+							YearFormat="yyyy" YearVisible="True" SelectedDate="{Binding EntryDate}" >
+
+				</DatePicker>
+			</StackPanel>
+			<StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center" Height="50">
+				<Button Content="OK" Margin="5" Click="Accept_Click" Name="Accept" >
+					
+				</Button>
+				<Button Content="Cancel" Margin="5" Click="Cancel_Click" Name="Cancel" >
+				</Button>
+				<!--
+				<Button Content="Search" Margin="5" Command="{Binding Search}" Name="Search" />
+			-->
+			</StackPanel>
+		</DockPanel>
+	</Border>
+
+</Window>

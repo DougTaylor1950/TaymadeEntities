@@ -14,7 +14,7 @@ namespace TaymadeEntities.Models
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
-    using MusicBrainzSupport;
+   // using MusicBrainzSupport;
     using Microsoft.EntityFrameworkCore;
 
     /// <summary>
@@ -28,14 +28,14 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the DCArtist.
         /// </summary>
-        [NotMapped]
-        public DCArtist? DCArtist { get; set; }
+        //[NotMapped]
+        //public DCArtist? DCArtist { get; set; }
 
         /// <summary>
         /// Gets or sets the MBArtist.
         /// </summary>
-        [NotMapped]
-        public MBArtist? MBArtist { get; set; }
+        //[NotMapped]
+        //public MBArtist? MBArtist { get; set; }
 
         [NotMapped]
         public string? DCHtml { get; set; }
@@ -49,20 +49,20 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void GetArtistInfo()
         {
-            if (MBArtist == null && !string.IsNullOrEmpty(MusicBrainzID))
-            {
-                MBArtist = MusicBrainzSupport.MusicBrainz.GetArtist(MusicBrainzID);
-            }
+            //if (MBArtist == null && !string.IsNullOrEmpty(MusicBrainzID))
+            //{
+            //    MBArtist = MusicBrainzSupport.MusicBrainz.GetArtist(MusicBrainzID);
+            //}
 
-            if (DCArtist == null && !string.IsNullOrEmpty(DiscogsID))
-            {
-                DCArtist = Discogs.GetArtistDetailsFromId(DiscogsID);
+            //if (DCArtist == null && !string.IsNullOrEmpty(DiscogsID))
+            //{
+            //    DCArtist = Discogs.GetArtistDetailsFromId(DiscogsID);
 
-                if (DCArtist != null && !string.IsNullOrEmpty(DCArtist.Uri))
-                {
-                    DCHtml = Discogs.GetUrl(DCArtist.Uri);
-                }
-            }
+            //    if (DCArtist != null && !string.IsNullOrEmpty(DCArtist.Uri))
+            //    {
+            //        DCHtml = Discogs.GetUrl(DCArtist.Uri);
+            //    }
+            //}
         }
 
         internal void Save()

@@ -1,0 +1,38 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="600" Height="600" Width="400"
+		xmlns:vm="using:TaymadeEntities.ViewModels"
+		xmlns:uc="using:TaymadeEntities.Controls"
+		xmlns:tcb="using:TaymadeControls.Buttons"
+		x:DataType="vm:PhraseViewModel"
+		x:Class="TaymadeEntities.Dialogs.PhraseSelectDialog"
+		Title="Phrase Selector">
+
+
+
+	<Design.DataContext>
+		<vm:PhraseViewModel/>
+	</Design.DataContext>
+
+	<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
+
+		<DockPanel	LastChildFill="True" >
+			<StackPanel Orientation="Vertical" DockPanel.Dock="Top" Height="500">
+				<StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+					<ComboBox  Name="Phrases" ItemsSource="{Binding PhraseEntries}" SelectedItem="{Binding CurrentPhrase}" />
+					<ComboBox  Name="SubPhrases" ItemsSource="{Binding SubPhraseEntries}" SelectedItem="{Binding CurrentSubPhrase}" />
+				</StackPanel>
+			</StackPanel>
+			<StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center" Height="50">
+				<tcb:OkButton Margin="5" Click="Accept_Click" Name="Accept" />
+				<tcb:CancelButton Margin="5" Click="Cancel_Click" Name="Cancel" />
+				<!--
+				<Button Content="Search" Margin="5" Command="{Binding Search}" Name="Search" />
+				-->
+			</StackPanel>
+		</DockPanel>
+	</Border>
+
+</Window>

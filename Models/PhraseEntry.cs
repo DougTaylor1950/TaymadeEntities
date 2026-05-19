@@ -75,6 +75,9 @@ namespace TaymadeEntities.Models
         /// </summary>
         public int PhraseID { get; set; }
 
+        [NotMapped]
+        public virtual PhraseHeader? PhraseHeader { get; set; }
+
         /// <summary>
         /// Gets or sets the PhraseInfo.
         /// </summary>
