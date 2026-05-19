@@ -161,6 +161,10 @@ namespace TaymadeEntities.Models
         #region Properties
 
         [NotMapped]
+
+        public string? DeathDayString { get; set; }
+
+        [NotMapped]
         public bool? MergeItem { get => mergeItem; set => this.RaiseAndSetIfChanged(ref mergeItem, value); }
 
         [NotMapped]

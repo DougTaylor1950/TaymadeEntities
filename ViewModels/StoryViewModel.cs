@@ -1964,34 +1964,34 @@ namespace TaymadeEntities.ViewModels
 
         internal async void EditCastMember(TaymadeEntities.Models.StoryCast currentCastMember, StoryViewModel viewModel)
         {
-            Dialogs.EditCastMemberDialog? EditCastMemberDialog = new();
+            //Dialogs.EditCastMemberDialog? EditCastMemberDialog = new();
 
-            if (EditCastMemberDialog != null)
-            {
-                TaymadeEntities.Models.StoryCast oldCastMember = viewModel.CurrentCastMember;
-                // give dialog access to StoryViewModel
-                EditCastMemberDialog.DataContext = viewModel;
+            //if (EditCastMemberDialog != null)
+            //{
+            //    TaymadeEntities.Models.StoryCast oldCastMember = viewModel.CurrentCastMember;
+            //    // give dialog access to StoryViewModel
+            //    EditCastMemberDialog.DataContext = viewModel;
 
-                // Set the Accept and Cancel buttons to the ViewModel (actually DialogModelBase)
-                EditCastMemberDialog.OkButtonPanelEditMovie.OkButton.Command = viewModel.Accept;
-                EditCastMemberDialog.OkButtonPanelEditMovie.CancelButton.Command = viewModel.Cancel;
+            //    // Set the Accept and Cancel buttons to the ViewModel (actually DialogModelBase)
+            //    EditCastMemberDialog.OkButtonPanelEditMovie.OkButton.Command = viewModel.Accept;
+            //    EditCastMemberDialog.OkButtonPanelEditMovie.CancelButton.Command = viewModel.Cancel;
 
-                // find the Mian Window and use that to host the dialogue
-                Views.MainWindow? mainWindow = Support.GetMainWindow();
-                if (mainWindow != null)
-                {
-                    viewModel.Caller = EditCastMemberDialog;
-                    await EditCastMemberDialog.ShowDialog(mainWindow);
+            //    // find the Mian Window and use that to host the dialogue
+            //    Views.MainWindow? mainWindow = Support.GetMainWindow();
+            //    if (mainWindow != null)
+            //    {
+            //        viewModel.Caller = EditCastMemberDialog;
+            //        await EditCastMemberDialog.ShowDialog(mainWindow);
 
-                    // The view Model will contain the result button, if ok save the changes
-                    if (viewModel.resultButton != null && viewModel.resultButton.Result == Models.DialogResultButton.ResultType.Ok)
-                    {
-                        viewModel.CurrentCastMember.Update();
-                    }
-                    else
-                        viewModel.CurrentCastMember = oldCastMember;
-                }
-            }
+            //        // The view Model will contain the result button, if ok save the changes
+            //        if (viewModel.resultButton != null && viewModel.resultButton.Result == Models.DialogResultButton.ResultType.Ok)
+            //        {
+            //            viewModel.CurrentCastMember.Update();
+            //        }
+            //        else
+            //            viewModel.CurrentCastMember = oldCastMember;
+            //    }
+            //}
         }
 
         public void EditStoryLocal()

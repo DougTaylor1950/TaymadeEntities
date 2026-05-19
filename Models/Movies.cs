@@ -17,6 +17,7 @@ namespace TaymadeEntities.Models
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
+    using Avalonia.Metadata;
 
 
     /// <summary>
@@ -183,6 +184,8 @@ namespace TaymadeEntities.Models
         private Director director;
         private int? directorID;
         private string json;
+        private bool? hasSeries;
+        private bool? hasSeason;
 
         #endregion
 
@@ -266,6 +269,19 @@ namespace TaymadeEntities.Models
                     Added = dt;
                 }
             }
+        }
+
+        [NotMapped]
+        public bool? HasSeries
+        {
+            get => hasSeries;
+            set => this.RaiseAndSetIfChanged(ref hasSeries, value);
+        }
+
+        public bool? HasSeason
+        {
+            get => hasSeason;
+            set => this.RaiseAndSetIfChanged(ref hasSeason, value);
         }
 
         // add a ToString override to return the MovieName and Year
@@ -646,7 +662,8 @@ namespace TaymadeEntities.Models
         public Nullable<int> Season
         {
             get
-            { if (season == null) return 0;
+            {
+                if (season == null) return 0;
                 else return season;
             }
 
@@ -667,7 +684,7 @@ namespace TaymadeEntities.Models
 
                     if (seasonEntity != null && (seasonEntity.TVEpisodes == null || seasonEntity.TVEpisodes.Count == 0))
                     {
-                        seasonEntity.TVEpisodes = new ObservableCollection<TVEpisode>( DataController.SandboxEntities.TVEpisodes.Where(t=> t.SeasonID == seasonEntity.Id).ToList());
+                        seasonEntity.TVEpisodes = new ObservableCollection<TVEpisode>(DataController.SandboxEntities.TVEpisodes.Where(t => t.SeasonID == seasonEntity.Id).ToList());
                     }
                 }
                 return seasonEntity;
