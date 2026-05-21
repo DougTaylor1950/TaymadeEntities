@@ -8,7 +8,19 @@ using System.Runtime.InteropServices;
 
 namespace FileSupport
 {
-
+    public class FileSupport
+    {
+        public static async Task CopyFileAsync(string sourcePath, string destinationPath)
+        {
+            using (Stream source = File.OpenRead(sourcePath))
+            {
+                using (Stream destination = File.Create(destinationPath))
+                {
+                    await source.CopyToAsync(destination);
+                }
+            }
+        }
+    }
     public class FileOperationAPIWrapper
     {
         /// <summary>

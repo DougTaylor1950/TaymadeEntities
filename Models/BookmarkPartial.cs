@@ -232,7 +232,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Delete.
         /// </summary>
-        internal void Delete()
+        public void Delete()
         {
             Movies = null;
             var local = DataController.SandboxEntities.Set<Bookmark>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
@@ -251,7 +251,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Insert.
         /// </summary>
-        internal void Insert()
+        public void Insert()
         {
             DataController.SandboxEntities.Bookmarks.Add(this);
             DataController.SandboxEntities.SaveChanges();
@@ -260,7 +260,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Save.
         /// </summary>
-        internal void Save()
+        public void Save()
         {
             var local = DataController.SandboxEntities.Set<Bookmark>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
@@ -274,7 +274,7 @@ namespace TaymadeEntities.Models
             DataController.SandboxEntities.SaveChanges();
         }
 
-        internal async Task<bool> SaveAsync()
+        public async Task<bool> SaveAsync()
         {
             bool success = false;
             var local = DataController.SandboxEntities.Set<Bookmark>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
@@ -294,7 +294,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The SetImageBMP.
         /// </summary>
-        internal void SetImageBMP()
+        public void SetImageBMP()
         {
             if (!string.IsNullOrEmpty(Support.FixImagePath(ImagePath)))
             {

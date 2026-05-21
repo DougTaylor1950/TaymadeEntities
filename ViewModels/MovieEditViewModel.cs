@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace TaymadeEntities.ViewModels
 {
-    public class MovieEditViewModel : MovieViewModel, IDisposable
+    public class MovieEditViewModel : MovieViewModelBase, IDisposable
     {
 
         #region Private Fields
@@ -261,7 +261,11 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets or sets the Progress.
         /// </summary>
-        public string? Progress { get => this.progress; set => this.RaiseAndSetIfChanged(ref this.progress, value); }
+        public string? Progress
+        {
+            get => this.progress;
+            set => this.RaiseAndSetIfChanged(ref this.progress, value);
+        }
 
         /// <summary>
         /// Gets the ProgressPercent.
@@ -432,7 +436,7 @@ namespace TaymadeEntities.ViewModels
                         {
                             // get the image using the bookmark time
                             // if the image does not exist, then grab image
-                           // await Support.VideoSupport.GrabBookmarkImage(CurrentMovie, bookmark, 0);
+                            //await Support.VideoSupport.GrabBookmarkImage(CurrentMovie, bookmark, 0);
 
                             CurrentBookmark = bookmark;
                             //bookmark.ImagePath = string.Empty;

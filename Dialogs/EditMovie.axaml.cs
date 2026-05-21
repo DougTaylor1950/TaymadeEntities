@@ -17,6 +17,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TaymadeControls;
 using TaymadeControls.Buttons;
+using static TaymadeEntities.Support.FFMpegSupport;
 using Colors = Avalonia.Media.Colors;
 
 namespace TaymadeEntities.Dialogs;
@@ -47,13 +48,44 @@ public partial class EditMovie : Window
 
         SetupToolbar();
 
+        this.CliWrapProgress += EditMovie_CliWrapProgress;
+
         Closed += (_, _) =>
         {
             (DataContext as IDisposable)?.Dispose();
         };
     }
 
+    private void EditMovie_CliWrapProgress(object sender, CliWrapProgressEventArgs e)
+    {
+        if (this.DataContext != null && this.DataContext is MovieEditViewModel)
+        {
+            MovieEditViewModel? viewModel = this.DataContext as MovieEditViewModel;
+            if (viewModel != null)
+            {
+                viewModel.Progress = e.Progress;
+            }
+
+        }
+
+    }
+
     #endregion Public Constructors
+
+    /// <summary>
+    /// Defines the CliWrapProgress.
+    /// </summary>
+    public event CliWrapProgressEventHandler CliWrapProgress;
+
+    /// <summary>
+    /// The OnCliWrapProgress.
+    /// </summary>
+    /// <param name="e">The e<see cref="CliWrapProgressEventArgs"/>.</param>
+    protected virtual void OnCliWrapProgress(CliWrapProgressEventArgs e)
+    {
+        CliWrapProgressEventHandler handler = CliWrapProgress;
+        handler?.Invoke(this, e);
+    }
 
     #region Private Properties
 
@@ -291,7 +323,7 @@ public partial class EditMovie : Window
                 //CurrentMovie = temp;
                 //CurrentMovie.Save();
 
-                //TaymadeEntities.Support.Support.PlayMovie(Support.FixImagePath(CurrentMoviePath), null);
+                //AvalonMVVM.Support.Support.PlayMovie(Support.FixImagePath(CurrentMoviePath), null);
             }
         }
     }
@@ -454,12 +486,19 @@ public partial class EditMovie : Window
     /// <param name="newFilename">The newFilename<see cref="string"/>.</param>
     /// <param name="existingPath">The existingPath<see cref="string"/>.</param>
     /// <returns>The <see cref="bool"/>.</returns>
-    private bool MoveFile(string newFilename, string existingPath)
+    private async Task<bool> MoveFile(string newFilename, string existingPath)
     {
         if (!File.Exists(newFilename) && File.Exists(existingPath) && newFilename != existingPath)
         {
-            File.Move(existingPath, newFilename);
-
+            await FileSupport.FileSupport.CopyFileAsync(existingPath, newFilename);
+            // delete existing path because this is a move
+            File.Delete(existingPath);
+            CliWrapProgressEventArgs newargs = new CliWrapProgressEventArgs(0, null)
+            {
+                Progress = newFilename + " moved",
+                TaskName = "File moving"
+            };
+            OnCliWrapProgress(newargs);
             return true;
         }
         else return false;
@@ -488,26 +527,59 @@ public partial class EditMovie : Window
                         string? directory = Path.GetDirectoryName(existingPath);
                         var topLevel = TopLevel.GetTopLevel(this);
 
+                        IStorageFolder? startLoc = await StorageProvider.TryGetFolderFromPathAsync(directory);
+
+
                         // Start async operation to open the dialog.
                         var files = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
                         {
-                            Title = "Open File",
+                            Title = "Open Folder to Move to",
+                            SuggestedStartLocation = startLoc,
                             AllowMultiple = false
                         });
-                        //OpenFolderDialog? dialog = new();
-                        //dialog.Directory = directory;
+
                         //// see which folder to open from
-                        //var result = await dialog.ShowAsync(window);
                         if (files != null && files.Count > 0)
                         {
+
                             string result = files[0].Path.LocalPath;
+
+                            char newDrive = result[0];
+                            char oldDrive = existingPath[0];
+
+                            string newDirectory = files[0].Path.LocalPath;
+                            if (newDrive != oldDrive)
+                            {
+                                // need to find the current directory in the
+                                // existing directory Path and create a directory in the new folder
+
+                                string[] folders = directory.Split('\\');
+                                int noOfFolders = folders.Length;
+                                // the folder we want should be in the last folder
+                                string newFolder = folders[noOfFolders - 1];
+
+                                // create the new directory
+                                newDirectory = result + newFolder;
+                                if (!Directory.Exists(newDirectory))
+                                {
+                                    Directory.CreateDirectory(newDirectory);
+                                }
+                            }
+
+                            CliWrapProgressEventArgs cliArgs = new CliWrapProgressEventArgs(0, null)
+                            {
+                                Progress = "About to move files please be patient"
+                            };
+
+                            OnCliWrapProgress(cliArgs);
+
                             // this will be the new folder.
-                            string newFilename = files[0].Path.LocalPath + @"\" + Path.GetFileName(existingPath);
-                            MoveOrRenameMovie(ViewModel.CurrentMovie, existingPath, newFilename);
+                            string newFilename = newDirectory + @"\" + Path.GetFileName(existingPath);
+                            bool success = await MoveOrRenameMovie(ViewModel.CurrentMovie, existingPath, newFilename);
 
-                            newFilename = MoveOrRenameNfoFiles(directory, result, newFilename);
+                            newFilename = await MoveOrRenameNfoFiles(newDirectory, result, newFilename);
 
-                            newFilename = MoveOrRenameBookmarkFolder(result, newFilename);
+                            newFilename = await MoveOrRenameBookmarkFolder(newDirectory, newFilename);
                         }
                     }
                     //else
@@ -565,7 +637,7 @@ public partial class EditMovie : Window
     /// <param name="newFilename">The new filename.</param>
     /// <returns></returns>
     /// <autogeneratedoc />
-    private string MoveOrRenameBookmarkFolder(string? result, string newFilename)
+    private async Task<string> MoveOrRenameBookmarkFolder(string? result, string newFilename)
     {
         if (ViewModel != null && ViewModel.CurrentMovie != null && ViewModel.CurrentMovie.Bookmarks != null)
         {
@@ -574,7 +646,7 @@ public partial class EditMovie : Window
                 if (!string.IsNullOrEmpty(bkm.ImagePath))
                 {
                     newFilename = result + @"\" + Path.GetFileName(bkm.ImagePath);
-                    MoveFile(newFilename, bkm.ImagePath);
+                    await MoveFile(newFilename, bkm.ImagePath);
                     bkm.ImagePath = newFilename;
                     bkm.Save();
                 }
@@ -599,14 +671,16 @@ public partial class EditMovie : Window
     /// <param name="existingPath">The existing path.</param>
     /// <param name="newFilename">The new filename.</param>
     /// <autogeneratedoc />
-    private void MoveOrRenameMovie(Movies? currentMovie, string existingPath, string newFilename)
+    private async Task<bool> MoveOrRenameMovie(Movies? currentMovie, string existingPath, string newFilename)
     {
-        if (MoveFile(newFilename, existingPath))
+        bool result = await MoveFile(newFilename, existingPath);
+        if (result)
         {
             currentMovie.MoviePath = TaymadeEntities.Support.Support.FixPathBack(newFilename);
             //CurrentMovie.PathWrong = false;
             currentMovie.Save();
         }
+        return result;
     }
 
     /// <summary>
@@ -617,14 +691,14 @@ public partial class EditMovie : Window
     /// <param name="newFilename">The new filename.</param>
     /// <returns></returns>
     /// <autogeneratedoc />
-    private string MoveOrRenameNfoFiles(string? directory, string? result, string newFilename)
+    private async Task<string> MoveOrRenameNfoFiles(string? directory, string? result, string newFilename)
     {
         IEnumerable<string> matchingFiles = Directory.EnumerateFiles(directory, "*.NFO", SearchOption.TopDirectoryOnly);
 
         foreach (string item in matchingFiles)
         {
             newFilename = directory + @"\" + Path.GetFileName(item);
-            MoveFile(newFilename, item);
+            await MoveFile(newFilename, item);
         }
 
         return newFilename;
@@ -1009,6 +1083,23 @@ public partial class EditMovie : Window
 
     private void Button_Click(object? sender, RoutedEventArgs e)
     {
+    }
+
+    private async void SaveMovie_Click(object? sender, RoutedEventArgs e)
+    {
+        if (sender != null && sender is Button)
+        {
+            Button? button = sender as Button;
+
+            if (button.DataContext is MovieEditViewModel)
+            {
+                MovieEditViewModel viewModel = button.DataContext as MovieEditViewModel;
+                if (viewModel.CurrentMovie != null)
+                {
+                    await viewModel.CurrentMovie.SaveAsync();
+                }
+            }
+        }
     }
 
 

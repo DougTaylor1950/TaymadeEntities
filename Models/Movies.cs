@@ -231,7 +231,7 @@ namespace TaymadeEntities.Models
 
         [NotMapped]
 
-        internal bool Dirty { get => dirty; set => dirty = value; }
+        public bool Dirty { get => dirty; set => dirty = value; }
 
 
 

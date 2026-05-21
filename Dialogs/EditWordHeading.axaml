@@ -1,0 +1,58 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+		x:Class="TaymadeEntities.Dialogs.EditWordHeading"
+		xmlns:vm="using:TaymadeEntities.ViewModels"
+		xmlns:uc="using:TaymadeEntities.Controls"
+		xmlns:tcb="using:TaymadeControls.Buttons"
+		x:DataType="vm:StoryViewModel"
+
+		Title="EditWordHeading">
+	<Window.Styles>
+		<StyleInclude Source="avares://TaymadeControls/Styles/TaymadeStyles.axaml"/>
+	</Window.Styles>
+
+	<Design.DataContext>
+		<vm:StoryViewModel/>
+	</Design.DataContext>
+	<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
+		<DockPanel	LastChildFill="True" >
+			<StackPanel Orientation="Vertical" DockPanel.Dock="Top">
+				<Grid ShowGridLines="False">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="100"/>
+						<ColumnDefinition Width="500"/>
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto"/>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="*"/>
+						<RowDefinition Height="*"/>
+
+					</Grid.RowDefinitions>
+					<TextBlock Grid.Column="0" Grid.Row="0" Text="Heading Text:" Margin="5"/>
+					<TextBox Grid.Column="1" Grid.Row="0" Text="{Binding CurrentHeading.HeadingText}" Margin="5" Width="400"/>
+					<TextBlock Grid.Column="0" Grid.Row="1" Text="Heading Level:" Margin="5"/>
+					<TextBox Grid.Column="1" Grid.Row="1" Text="{Binding CurrentHeading.HeadingLevel}" Margin="5" Width="400"/>
+					<TextBlock Grid.Column="0" Grid.Row="2" Text="String Id:" Margin="5"/>
+					<TextBox Grid.Column="1" Grid.Row="2" Text="{Binding CurrentHeading.StringId}" Margin="5" Width="400"/>
+					<TextBlock Grid.Column="0" Grid.Row="3" Text="Paragraph:" Margin="5"/>
+					<TextBox Grid.Column="1" Grid.Row="3" Text="{Binding CurrentHeading.PageNumber}" Margin="5" Width="400"/>
+					<TextBlock Grid.Column="0" Grid.Row="4" Text="ID:" Margin="5"/>
+					<TextBlock Grid.Column="1" Grid.Row="4" Classes="c2" Text="{Binding CurrentHeading.Id}" Margin="5" Width="400"/>
+					<TextBlock Grid.Column="0" Grid.Row="5" Text="Parent Id:" Margin="5"/>
+					<TextBox Grid.Column="1" Grid.Row="5" Text="{Binding CurrentHeading.ParentId}" Margin="5" Width="400"/>
+				</Grid>
+			</StackPanel>
+			<StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" Margin="5" HorizontalAlignment="Center" Height="40">
+				<tcb:OkButton Click="OkButton_Click" />
+				<tcb:CancelButton Click="CancelButton_Click" />
+			</StackPanel>
+		</DockPanel>
+	</Border>
+</Window>

@@ -2,17 +2,16 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using TaymadeEntities.Models;
-using TaymadeEntities.ViewModels;
+using Avalonia.VisualTree;
 using DocumentFormat.OpenXml.Vml;
 using Microsoft.IdentityModel.Tokens;
+using TaymadeEntities.Models;
+using TaymadeEntities.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-
 //using System.Windows.Forms;
 using Button = Avalonia.Controls.Button;
-using Avalonia.Platform;
 
 namespace TaymadeEntities.Dialogs;
 
@@ -24,6 +23,9 @@ public partial class EditCastMemberDialog : Window
     {
         InitializeComponent();
         DataContextChanged += this.EditCastMemberDialog_DataContextChanged;
+
+        this.OkButtonPanelEditMovie.OkButton.Click += OkButton_Click;
+        this.OkButtonPanelEditMovie.CancelButton.Click += CancelButton_Click;
 
         //if (this.ButtonPanelMale != null)
         //{
@@ -40,6 +42,16 @@ public partial class EditCastMemberDialog : Window
         //    this.ButtonPanelFemale.SmallPlusButtonClick(AddFemales);
         //    this.ButtonPanelFemale.SmallMinusButtonClick(RemoveFemales);
         //}
+    }
+
+    private void CancelButton_Click(object? sender, RoutedEventArgs e)
+    {
+        this.Close(true);
+    }
+
+    private void OkButton_Click(object? sender, RoutedEventArgs e)
+    {
+        this.Close(false);
     }
 
     private void RemoveFemales(object? sender, RoutedEventArgs e)
@@ -153,7 +165,7 @@ public partial class EditCastMemberDialog : Window
         this.cbText.Text = newText;
     }
 
-    //public StoryViewModel? StoryViewModel { get; private set; }
+    public StoryViewModel? StoryViewModel { get; private set; }
     public DateTime LastClick { get; private set; }
 
     private void EditCastMemberDialog_DataContextChanged(object? sender, System.EventArgs e)
@@ -291,9 +303,10 @@ public partial class EditCastMemberDialog : Window
             
             TimeSpan ts = DateTime.Now - LastClick;
             //Debug.WriteLine(ts.TotalMilliseconds);
-            //TimeSpan dtTime = IPlatformSettings.GetDoubleTapTime(Avalonia.Input.PointerType.Mouse);
-            //Debug.WriteLine(dtTime.TotalMilliseconds);
-            if (1000 * 3 > ts.TotalMilliseconds)
+
+            var platformSettings = this.GetPlatformSettings();
+            TimeSpan dtTime = platformSettings?.GetDoubleTapTime(Avalonia.Input.PointerType.Mouse) ?? TimeSpan.Zero;            //Debug.WriteLine(dtTime.TotalMilliseconds);
+            if (dtTime * 3 > ts)
             {
                 // Code to handle double click goes here
                 if (sender is Avalonia.Controls.ComboBox)

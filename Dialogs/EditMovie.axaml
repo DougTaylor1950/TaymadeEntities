@@ -65,7 +65,7 @@
 									   Grid.Row="0"/>
 							<TextBox Height="30"
 									 Classes="c1"
-									 Text="{Binding CurrentMovie.MovieName, Mode=OneWay }"
+									 Text="{Binding CurrentMovie.MovieName, Mode=TwoWay }"
 									 IsReadOnly="False"
 									 Grid.Column="1"
 									 Grid.ColumnSpan="3"/>
@@ -75,7 +75,7 @@
 										Grid.Row="0" />
 							<TextBox Height="30"
 									 Classes="c1"
-									 Text="{Binding CurrentMovie.Year, Mode=OneWay}"
+									 Text="{Binding CurrentMovie.Year, Mode=TwoWay}"
 									 Grid.ColumnSpan="2"
 									 Grid.Column="6"
 									 Grid.Row="0" />
@@ -85,7 +85,7 @@
 										Grid.Row="0" />
 							<TextBox Height="30"
 									 Classes="c1"
-									 Text="{Binding CurrentMovie.MovieExtension.Rating, Mode=OneWay}"
+									 Text="{Binding CurrentMovie.MovieExtension.Rating, Mode=TwoWay}"
 									 Grid.Column="9"
 									 Grid.Row="0" />
 
@@ -97,7 +97,7 @@
 									   Height="60" />
 							<TextBox Height="60"
 									 Classes="c1"
-									 Text="{Binding CurrentMovie.Info, Mode=OneWay}"
+									 Text="{Binding CurrentMovie.Info, Mode=TwoWay}"
 									 Grid.Row="1" Grid.Column="1"
 									 Grid.ColumnSpan="3"
 									 TextWrapping="Wrap"  />
@@ -107,7 +107,7 @@
 										Grid.Row="1"   />
 							<TextBox Height="30"
 									 Classes="c1"
-									 Text="{Binding CurrentMovie.AddedOn, Mode=OneWay}"
+									 Text="{Binding CurrentMovie.AddedOn, Mode=TwoWay}"
 									 Grid.ColumnSpan="2"
 									 Grid.Column="6"
 									 Grid.Row="1" />
@@ -118,7 +118,7 @@
 									   Grid.Row="2" />
 							<TextBox Height="60"
 									 Classes="c1"
-									 Text="{Binding CurrentMovie.MoviePath, Mode=OneWay}"
+									 Text="{Binding CurrentMovie.MoviePath, Mode=TwoWay}"
 									 Grid.Column="1"
 									 Grid.ColumnSpan="3"
 									 Grid.Row="2" />
@@ -128,7 +128,7 @@
 										Grid.Row="2" />
 							<TextBox Height="30"
 									 Classes="c1"
-									 Text="{Binding CurrentMovie.ModifiedOn, Mode=OneWay}"
+									 Text="{Binding CurrentMovie.ModifiedOn, Mode=TwoWay}"
 									 Grid.Column="6"
 									 Grid.ColumnSpan="2"
 									 Grid.Row="2" />
@@ -139,7 +139,7 @@
 									   Grid.ColumnSpan="3"
 									   Grid.Row="3" />
 							<TextBox Height="30"
-									 Classes="c1" Text="{Binding CurrentMovie.Path, Mode=OneWay}"
+									 Classes="c1" Text="{Binding CurrentMovie.Path, Mode=TwoWay}"
 									 Grid.Column="1"
 									 Grid.ColumnSpan="3"
 									 Grid.Row="3" />
@@ -149,7 +149,7 @@
 										Grid.Row="3" />
 							<TextBox Height="30"
 									 Classes="c1"
-									 Text="{Binding CurrentMovie.TMDBID, Mode=OneWay}"
+									 Text="{Binding CurrentMovie.TMDBID, Mode=TwoWay}"
 									 Grid.Column="6"
 									 Grid.ColumnSpan="2"
 									 Grid.Row="3" />
@@ -162,9 +162,9 @@
 											   LabelText="TMDB"
 											   />
 							<TextBlock Text="Image Path" Classes="h2" Grid.Column="0" Grid.Row="4" />
-							<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.ImagePath, Mode=OneWay}"  Grid.Column="1" Grid.Row="4"  Grid.ColumnSpan="3" />
+							<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.ImagePath, Mode=TwoWay}"  Grid.Column="1" Grid.Row="4"  Grid.ColumnSpan="3" />
 							<TextBlock  Classes="h2" Text="IMDBID"  Grid.Column="5" Grid.Row="4" />
-							<TextBox Height="30" Classes="c1"  Text="{Binding CurrentMovie.IMDBID, Mode=OneWay}"  Grid.ColumnSpan="2" Grid.Column="6" Grid.Row="4" />
+							<TextBox Height="30" Classes="c1"  Text="{Binding CurrentMovie.IMDBID, Mode=TwoWay}"  Grid.ColumnSpan="2" Grid.Column="6" Grid.Row="4" />
 							<tcb:ImagedButton Grid.Column="8"
 											  Grid.Row="4"
 											  Click="GetGroup"
@@ -173,7 +173,7 @@
 											  />
 
 							<TextBlock Text="Genre" Classes="h2" Grid.Column="0" Grid.Row="5" />
-							<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.FilmGroup, Mode=OneWay}"   Grid.Column="1"  Grid.ColumnSpan="3" Grid.Row="5" />
+							<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.FilmGroup, Mode=TwoWay}"   Grid.Column="1"  Grid.ColumnSpan="3" Grid.Row="5" />
 							<TextBlock Text="Duration" Classes="h2" Grid.Column="5" Grid.Row="5" />
 							<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.MovieDuration}"   Grid.Column="6" Grid.Row="5" />
 							<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.DurationSeconds}"  Grid.Column="7" Grid.Row="5" />
@@ -207,10 +207,17 @@
 											  ImageHeight="1"
 											  ImageWidth="1"
 											  />
+							<tcb:ImagedButton Grid.Column="10"
+											  Grid.Row="7"
+											  Click="SaveMovie_Click"
+											  ToolTip.Tip="Save Movie"
+											  LabelText="Save Movie"
+											  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
 
+											  />
 
 							<TextBlock Text="Primary" Classes="h2" Grid.Column="0" Grid.Row="6" />
-							<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.PrimaryFilmGroup, Mode=OneWay}"  Grid.Column="1" Grid.Row="6" />
+							<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.PrimaryFilmGroup, Mode=TwoWay}"  Grid.Column="1" Grid.Row="6" />
 							<TextBlock Text="Director" Grid.Column="5" Grid.Row="6" Classes="h2" />
 							<ComboBox  Classes="c1" ItemsSource="{Binding DirectorList}" Grid.Column="6" Grid.Row="6" SelectedItem="{Binding CurrentMovie.Director}" />
 							<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.DirectorsName}"  Grid.Column="7" Grid.Row="6" />
@@ -231,7 +238,7 @@
 											   />
 
 							<TextBlock Text="Has Chapters" Classes="h2" Grid.Column="0" Grid.Row="7" />
-							<CheckBox Height="30" Classes="c1" IsChecked="{Binding CurrentMovie.HasChapters, Mode=OneWay}"  Grid.Column="1" Grid.Row="7" />
+							<CheckBox Height="30" Classes="c1" IsChecked="{Binding CurrentMovie.HasChapters, Mode=TwoWay}"  Grid.Column="1" Grid.Row="7" />
 							<TextBlock Text="Series" Classes="h2" Grid.Column="0" Grid.Row="9" />
 							<ComboBox  Classes="c1"
 									   ItemsSource="{Binding SeriesList}"
@@ -251,8 +258,8 @@
 							<TextBlock  Text="{Binding CurrentMovie.ErrorText}" IsVisible="{Binding CurrentMovie.HasErrors}"  Classes="e2" Grid.Column="0" Grid.ColumnSpan="7" Grid.Row="9" />
 							<TextBlock  Text="{Binding Progress}"   Classes="c1" Grid.Column="0" Grid.ColumnSpan="7" Grid.Row="10" />
 							<TextBlock Text="#Bookmarks" Classes="h2" Grid.Column="5" Grid.Row="7" />
-							<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.ImagesCount, Mode=OneWay}"  Grid.Column="6" Grid.Row="7" />
-							<TextBox Height="30" Text="{Binding CurrentMovie.Series, Mode=OneWay}"  Grid.Column="1" Grid.Row="6" />
+							<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.ImagesCount, Mode=TwoWay}"  Grid.Column="6" Grid.Row="7" />
+							<TextBox Height="30" Text="{Binding CurrentMovie.Series, Mode=TwoWay}"  Grid.Column="1" Grid.Row="6" />
 							<TextBox Height="30" Text="{Binding CurrentMovie.DirectorID}"
 									 Grid.Column="3"
 									 Grid.Row="6" />
@@ -392,7 +399,7 @@
 															 Grid.ColumnSpan="3"/>
 
 													<TextBlock Classes="h1" Text="Image Path" TextAlignment="Left" Grid.Column="0" Grid.Row="1"/>
-													<TextBox Classes="c14" Text="{Binding CurrentBookmark.ImagePath, Mode=OneWay }" Grid.Row="1" IsReadOnly="False"  Grid.Column="1"  Grid.ColumnSpan="3"/>
+													<TextBox Classes="c14" Text="{Binding CurrentBookmark.ImagePath, Mode=TwoWay }" Grid.Row="1" IsReadOnly="False"  Grid.Column="1"  Grid.ColumnSpan="3"/>
 													<TextBox Classes="c14"
 
 															 Grid.Row="0"
@@ -414,14 +421,14 @@
 																	  />
 
 													<TextBlock Classes="h1" Text="Comment" TextAlignment="Left" Grid.Column="0" Grid.Row="2"/>
-													<TextBox Classes="c14" Text="{Binding CurrentBookmark.Comment, Mode=OneWay }" Grid.Row="2" IsReadOnly="False"  Grid.Column="1"  Grid.ColumnSpan="3"/>
+													<TextBox Classes="c14" Text="{Binding CurrentBookmark.Comment, Mode=TwoWay }" Grid.Row="2" IsReadOnly="False"  Grid.Column="1"  Grid.ColumnSpan="3"/>
 
 													<TextBlock Classes="h1" Text="Type" TextAlignment="Left" Grid.Column="0" Grid.Row="3"/>
-													<TextBox Classes="c14" FontSize="14" Text="{Binding CurrentBookmark.Type, Mode=OneWay }" Grid.Row="3" IsReadOnly="False"  Grid.Column="1"  Grid.ColumnSpan="3"/>
+													<TextBox Classes="c14" FontSize="14" Text="{Binding CurrentBookmark.Type, Mode=TwoWay }" Grid.Row="3" IsReadOnly="False"  Grid.Column="1"  Grid.ColumnSpan="3"/>
 
 													<TextBlock Classes="h1" Text="Time" TextAlignment="Left" Grid.Column="0" Grid.Row="4"/>
-													<TextBox Classes="c14" FontSize="14" Text="{Binding CurrentBookmark.FormattedTime, Mode=OneWay }" Grid.Row="4" IsReadOnly="False"  Grid.Column="1" />
-													<TextBox Classes="c14" FontSize="14" Text="{Binding CurrentBookmark.Time, Mode=OneWay }" Grid.Row="4" IsReadOnly="False"  Grid.Column="5"/>
+													<TextBox Classes="c14" FontSize="14" Text="{Binding CurrentBookmark.FormattedTime, Mode=TwoWay }" Grid.Row="4" IsReadOnly="False"  Grid.Column="1" />
+													<TextBox Classes="c14" FontSize="14" Text="{Binding CurrentBookmark.Time, Mode=TwoWay }" Grid.Row="4" IsReadOnly="False"  Grid.Column="5"/>
 													<NumericUpDown Value="{Binding CurrentBookmark.Hours}" Increment="1" Minimum="0" Maximum="5" Grid.Row="5" Grid.Column="1" AllowSpin="True" ShowButtonSpinner="True" ButtonSpinnerLocation="Right"/>
 													<NumericUpDown Value="{Binding CurrentBookmark.Minutes}" Increment="1" Minimum="0" Maximum="60" Grid.Row="5" Grid.Column="2"/>
 													<NumericUpDown Value="{Binding CurrentBookmark.Seconds}" Increment="1" Minimum="0" Maximum="60" Grid.Row="5" Grid.Column="3"/>
@@ -536,7 +543,7 @@
 											Grid.Column="0"
 											Grid.Row="1"/>
 								<TextBox  Classes="c1"
-										  Height="30"  Text="{Binding CurrentMovie.SeriesEntity.Overview, Mode=OneWay}" Grid.Column="1"
+										  Height="30"  Text="{Binding CurrentMovie.SeriesEntity.Overview, Mode=TwoWay}" Grid.Column="1"
 										  Grid.Row="1"
 										  Grid.ColumnSpan="6"
 										  TextWrapping="Wrap" />
@@ -624,7 +631,7 @@
 								<TextBlock  Classes="h2"  Text="DB ID"  Grid.Column="0" Grid.Row="5"/>
 								<TextBox  Classes="c1" Height="30"  Text="{Binding CurrentMovie.EpisodeEntity.TMID}" Grid.Column="1" Grid.Row="5"  TextWrapping="Wrap" />
 								<TextBlock  Classes="h2"  Text="Air Date"  Grid.Column="6" Grid.Row="5"/>
-								<TextBox  Classes="c1" Height="30"  Text="{Binding CurrentMovie.EpisodeEntity.AirDateString, Mode=OneWay}" Grid.Column="7" Grid.Row="5"  />
+								<TextBox  Classes="c1" Height="30"  Text="{Binding CurrentMovie.EpisodeEntity.AirDateString, Mode=TwoWay}" Grid.Column="7" Grid.Row="5"  />
 							</Grid>
 							<!-- New Season details -->
 							<Border BorderBrush="Black"
@@ -778,14 +785,14 @@
 												  >
 
 											<DataGrid.Columns>
-												<DataGridTextColumn Header="Id" Binding="{Binding Id,Mode=OneWay}" />
-												<DataGridTextColumn Header="ActorId" Binding="{Binding ActorId,Mode=OneWay}" />
-												<DataGridTextColumn Header="Role" Binding="{Binding Role,Mode=OneWay}" />
-												<DataGridTextColumn Header="Name" Binding="{Binding Actor.Name,Mode=OneWay}" />
-												<DataGridTextColumn Header="Gender" Binding="{Binding Actor.GenderDisplay,Mode=OneWay}" />
-												<DataGridTextColumn Header="Aliases" Binding="{Binding Actor.Aliases,Mode=OneWay}" Width="200" />
-												<DataGridCheckBoxColumn Header="Adult" Binding="{Binding Actor.Adult,Mode=OneWay}" />
-												<DataGridTextColumn Header="Date of Birth" Binding="{Binding Actor.DOB,Mode=OneWay}" />
+												<DataGridTextColumn Header="Id" Binding="{Binding Id,Mode=TwoWay}" />
+												<DataGridTextColumn Header="ActorId" Binding="{Binding ActorId,Mode=TwoWay}" />
+												<DataGridTextColumn Header="Role" Binding="{Binding Role,Mode=TwoWay}" />
+												<DataGridTextColumn Header="Name" Binding="{Binding Actor.Name,Mode=TwoWay}" />
+												<DataGridTextColumn Header="Gender" Binding="{Binding Actor.GenderDisplay,Mode=TwoWay}" />
+												<DataGridTextColumn Header="Aliases" Binding="{Binding Actor.Aliases,Mode=TwoWay}" Width="200" />
+												<DataGridCheckBoxColumn Header="Adult" Binding="{Binding Actor.Adult,Mode=TwoWay}" />
+												<DataGridTextColumn Header="Date of Birth" Binding="{Binding Actor.DOB,Mode=TwoWay}" />
 											</DataGrid.Columns>
 
 
@@ -841,7 +848,7 @@
 
 											</Grid.RowDefinitions>
 											<TextBlock Classes="h2" Text="Actor Name"  Grid.Column="0" Grid.Row="0"/>
-											<TextBox Classes="c1" Text="{Binding CurrentActor.Name, Mode=OneWay }"   Grid.Column="1" />
+											<TextBox Classes="c1" Text="{Binding CurrentActor.Name, Mode=TwoWay }"   Grid.Column="1" />
 											<TextBlock Classes="h2" Text="Adult"  Grid.Column="3" Grid.Row="0"/>
 											<CheckBox IsChecked="{Binding	CurrentActor.Adult}" Grid.Column="4" Grid.Row="0" />
 											<TextBlock Classes="h2" Text="Aliases"  Grid.Column="0" Grid.Row="1"/>
@@ -874,7 +881,7 @@
 															  />
 
 											<TextBlock Classes="h2" Text="Birth Place"  Grid.Column="0" Grid.Row="4"/>
-											<TextBox Classes="c1" Text="{Binding CurrentActor.PlaceOfBirth, Mode=OneWay }"  Grid.Row="4" Grid.Column="1" />
+											<TextBox Classes="c1" Text="{Binding CurrentActor.PlaceOfBirth, Mode=TwoWay }"  Grid.Row="4" Grid.Column="1" />
 											<TextBlock Classes="h2" Text="TMDBID"  Grid.Column="3" Grid.Row="4"/>
 											<TextBox Classes="c1" Text="{Binding CurrentActor.TMDBID}" Grid.Column="4" Grid.Row="4" />
 											<TextBlock Classes="h2" Text="IMDB"  Grid.Column="3" Grid.Row="5"/>

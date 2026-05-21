@@ -162,7 +162,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Save.
         /// </summary>
-        internal void Save()
+        public void Save()
         {
             try
             {

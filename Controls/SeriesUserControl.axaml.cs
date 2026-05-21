@@ -12,7 +12,7 @@ namespace TaymadeEntities.Controls
     using Avalonia.Data;
     using Avalonia.Markup.Xaml;
     using TaymadeEntities.ViewModels;
-    using TaymadeControls;
+    //using TaymadeControls;
 
     /// <summary>
     /// Defines the <see cref="SeriesUserControl" />.

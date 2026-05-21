@@ -168,7 +168,7 @@ namespace TaymadeEntities.Models
             }
         }
 
-        internal void Delete()
+        public void Delete()
         {
             //DataController.SandboxEntities.PhraseEntry.Remove(this);
             //DataController.SandboxEntities.SaveChanges();

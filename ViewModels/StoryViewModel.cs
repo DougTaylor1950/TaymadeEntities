@@ -61,7 +61,7 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Defines the DefaultStoryDirectory.
         /// </summary>
-        internal const string DefaultStoryDirectory = @"K:\Drive_I\Stories";
+        public const string DefaultStoryDirectory = @"K:\Drive_I\Stories";
 
         /// <summary>
         /// Defines the savePath.
@@ -413,8 +413,11 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         public ObservableCollection<Story>? StoryList { get => storyList; set => this.RaiseAndSetIfChanged(ref storyList, value); }
 
-        public ObservableCollection<Story> SelectedStoryList { get => selectedStoryList; 
-            set => this.RaiseAndSetIfChanged(ref selectedStoryList, value); }
+        public ObservableCollection<Story> SelectedStoryList
+        {
+            get => selectedStoryList;
+            set => this.RaiseAndSetIfChanged(ref selectedStoryList, value);
+        }
 
         /// <summary>
         /// Gets or sets the tags.
@@ -1823,18 +1826,17 @@ namespace TaymadeEntities.ViewModels
                 {
                     CurrentHeading = CurrentHeading1;
 
-                    //EditWordHeading editHeading = new(this);
-                    //editHeading.DataContext = this;
+                    EditWordHeading editHeading = new(this);
+                    editHeading.DataContext = this;
 
-                    //Caller = editHeading;
+                    Caller = editHeading;
 
-                    //await editHeading.ShowDialog(MainWindow.Instance);
-                    //if (resultButton != null && resultButton.Result == Dialogs.DialogResultButton.ResultType.Ok
-                    //   )
-                    //{
-                    //    CurrentHeading.Update();
-                    //    CurrentHeading1 = (WordHeadings)CurrentHeading;
-                    //}
+                    bool result = await editHeading.ShowDialog<bool>(Support.GetMainWindow());
+                    if (result)
+                    {
+                        CurrentHeading.Update();
+                        CurrentHeading1 = (WordHeadings)CurrentHeading;
+                    }
                 }
             }
         }
@@ -1847,18 +1849,16 @@ namespace TaymadeEntities.ViewModels
                 {
                     CurrentHeading = CurrentHeading2;
 
-                    //EditWordHeading editHeading = new(this);
-                    //editHeading.DataContext = this;
+                    EditWordHeading editHeading = new(this);
+                    editHeading.DataContext = this;
 
-                    //Caller = editHeading;
-
-                    //await editHeading.ShowDialog(MainWindow.Instance);
-                    //if (resultButton != null && resultButton.Result == Dialogs.DialogResultButton.ResultType.Ok
-                    //   )
-                    //{
-                    //    CurrentHeading.Update();
-                    //    CurrentHeading2 = (WordHeadings)CurrentHeading;
-                    //}
+                    bool result = await editHeading.ShowDialog<bool>(Support.GetMainWindow());
+                    if (result)
+                    {
+                        CurrentHeading.Update();
+                        CurrentHeading2 = (WordHeadings)CurrentHeading;
+                        //}
+                    }
                 }
             }
         }
@@ -1869,20 +1869,18 @@ namespace TaymadeEntities.ViewModels
             {
                 if (CurrentHeading3 != null)
                 {
-                    CurrentHeading = CurrentHeading2;
+                    CurrentHeading = CurrentHeading3;
 
-                    //EditWordHeading editHeading = new(this);
-                    //editHeading.DataContext = this;
+                    EditWordHeading editHeading = new(this);
+                    editHeading.DataContext = this;
 
-                    //Caller = editHeading;
-
-                    //await editHeading.ShowDialog(MainWindow.Instance);
-                    //if (resultButton != null && resultButton.Result == Dialogs.DialogResultButton.ResultType.Ok
-                    //   )
-                    //{
-                    //    CurrentHeading.Update();
-                    //    CurrentHeading3 = (WordHeadings)CurrentHeading;
-                    //}
+                    bool result = await editHeading.ShowDialog<bool>(Support.GetMainWindow());
+                    if (result)
+                    {
+                        CurrentHeading?.Update();
+                        CurrentHeading3 = (WordHeadings)CurrentHeading;
+                        //}
+                    }
                 }
             }
         }
@@ -1893,19 +1891,17 @@ namespace TaymadeEntities.ViewModels
             {
                 if (CurrentSection != null)
                 {
+                    CurrentHeading = CurrentSection;
+                    EditWordHeading editHeading = new(this);
+                    editHeading.DataContext = this;
 
-                   // EditWordHeading editHeading = new(this);
-                    //editHeading.DataContext = this;
 
-                    //Caller = editHeading;
-
-                    //await editHeading.ShowDialog(MainWindow.Instance);
-                    //if (resultButton != null && resultButton.Result == Dialogs.DialogResultButton.ResultType.Ok
-                    //   )
-                    //{
-                    //    CurrentHeading.Update();
-                    //    CurrentHeading2 = (WordHeadings)CurrentHeading;
-                    //}
+                    bool result = await editHeading.ShowDialog<bool>(Support.GetMainWindow());
+                    if (result)
+                    {
+                        CurrentHeading.Update();
+                        CurrentSection = (WordHeadings)CurrentHeading;
+                    }
                 }
             }
         }
@@ -2307,7 +2303,7 @@ namespace TaymadeEntities.ViewModels
                                             CurrentStory.IDAuthor = authorObj.Id;
                                             CurrentStory.AuthorItem = authorObj;
                                             // save story
-                                           success = await CurrentStory.SaveAsync();
+                                            success = await CurrentStory.SaveAsync();
                                         }
 
                                     }
@@ -2496,7 +2492,7 @@ namespace TaymadeEntities.ViewModels
                                         }
                                         GetHeadings2();
                                     }
-                                   success = await CurrentStory.SaveAsync();
+                                    success = await CurrentStory.SaveAsync();
                                     //viewModel.CreateNewHierachy(CurrentStory);
                                     CurrentStory.Info = CurrentStory.StoryInfo.ToInfo();
                                     break;

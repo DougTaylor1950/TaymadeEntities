@@ -17,6 +17,12 @@ public partial class ErrorDialog : Window
         AddButtons();
 
         this.Initialized += this.ErrorDialog_Initialized;
+        this.DataContextChanged += ErrorDialog_DataContextChanged;
+    }
+
+    private void ErrorDialog_DataContextChanged(object? sender, EventArgs e)
+    {
+        
     }
 
     private void ErrorDialog_Initialized(object? sender, System.EventArgs e)
@@ -65,7 +71,7 @@ public partial class ErrorDialog : Window
 
     private void CloseThis(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        this.Close();
+        this.Close(true);
     }
 
     private void ClearAll_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

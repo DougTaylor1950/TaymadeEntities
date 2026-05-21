@@ -20,6 +20,7 @@ namespace TaymadeEntities.ViewModels
     using System.Linq;
     using System.Reactive;
     using System.Windows.Input;
+    using Avalonia.Controls;
 
     //using TaymadeEntities.Views;
 
@@ -294,7 +295,7 @@ namespace TaymadeEntities.ViewModels
             DataController.SandboxEntities.Movies.Add(this.CurrentMovie);
             DataController.SandboxEntities.SaveChanges();
 
-            Views.MainWindow? main = Support.GetMainWindow();
+            Window? main = Support.GetMainWindow();
             if (main != null)
                 await this.CurrentMovie.EditMovie(main);
         }

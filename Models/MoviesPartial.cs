@@ -25,6 +25,7 @@ namespace TaymadeEntities.Models
     using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
+    using Avalonia.Controls;
 
     /// <summary>
     /// Defines the <see cref="MovieMetaData" />.
@@ -556,7 +557,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         /// <param name="main">The main<see cref="Views.MainWindow"/>.</param>
         /// <returns>The <see cref="Task"/>.</returns>
-        public async Task EditMovie(Views.MainWindow main)
+        public async Task EditMovie(Window main)
         {
             ViewModels.MovieEditViewModel? mvm = new ViewModels.MovieEditViewModel(this);
 
@@ -810,18 +811,18 @@ namespace TaymadeEntities.Models
                 return filmDuration;
         }
 
-        internal void Delete()
+        public void Delete()
         {
             DataController.SandboxEntities.DeleteMovie(Id);
 
             //DataController.SandboxEntities.Movies.Remove(this);
             //DataController.SandboxEntities.SaveChanges();
         }
-        internal Bookmark GetLastBookmark()
+        public Bookmark GetLastBookmark()
         {
             return Bookmarks.LastOrDefault();
         }
-        internal bool Insert()
+        public bool Insert()
         {
             bool success = true;
             try
@@ -872,7 +873,7 @@ namespace TaymadeEntities.Models
 
         /// <summary>Logs the message.</summary>
         /// <param name="action">The action.</param>
-        internal void LogMessage(string action)
+        public void LogMessage(string action)
         {
             Support.GenerateInfoAndLogMessage(action, "Movie", Id, MovieName);
         }
@@ -880,7 +881,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Save.
         /// </summary>
-        internal async Task< bool> SaveAsync()
+        public async Task< bool> SaveAsync()
         {
             bool success = true;
             if (HasChapters == null) HasChapters = false;
@@ -956,7 +957,7 @@ namespace TaymadeEntities.Models
             return success;
         }
 
-        internal bool Save()
+        public bool Save()
         {
             bool success = true;
             if (HasChapters == null) HasChapters = false;
@@ -1031,6 +1032,8 @@ namespace TaymadeEntities.Models
             //}
             return success;
         }
+
+       
         #endregion Methods
     }
 }

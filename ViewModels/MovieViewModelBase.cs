@@ -458,7 +458,7 @@ namespace TaymadeEntities.ViewModels
 
         #region Public Properties
 
-        public MainWindow? mainWindow { get; set; }
+        public Window? mainWindow { get; set; }
 
         public bool MainWindowInitialised { get; set; } = false;
         public static SvgImage SpectrumImage
@@ -902,13 +902,13 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         public bool HasTemp { get => hasTemp; set => this.RaiseAndSetIfChanged(ref hasTemp, value); }
 
-        public TabItemHeader ImageSetsHeader
-        {
-            get
-            {
-                return TaymadeControls.Builders.TabHeaders.imageSetsHeader;
-            }
-        }
+        //public TabItemHeader ImageSetsHeader
+        //{
+        //    get
+        //    {
+        //        return TaymadeControls.Builders.TabHeaders.imageSetsHeader;
+        //    }
+        //}
 
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="MovieViewModelBase"/> is initialise.
@@ -4516,7 +4516,7 @@ namespace TaymadeEntities.ViewModels
 
         private async Task<string?> DoGetClipboardTextAsync()
         {
-            MainWindow? main = Support.Support.GetMainWindow();
+            Window? main = Support.Support.GetMainWindow();
 
             string? returnString = string.Empty;
 
@@ -4619,7 +4619,7 @@ namespace TaymadeEntities.ViewModels
             //    desktop.MainWindow?.Clipboard is not { } provider)
             //    throw new NullReferenceException("Missing Clipboard instance.");
 
-            MainWindow? main = Support.Support.GetMainWindow();
+            Window? main = Support.Support.GetMainWindow();
 
             if (main != null)
             {

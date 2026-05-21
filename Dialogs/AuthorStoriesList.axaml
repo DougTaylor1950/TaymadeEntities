@@ -1,0 +1,198 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:vm="using:TaymadeEntities.ViewModels"
+		xmlns:mo="using:TaymadeEntities.Models"
+		xmlns:tcb="using:TaymadeControls.Buttons"
+		mc:Ignorable="d" d:DesignWidth="1800" d:DesignHeight="850"
+		x:Class="TaymadeEntities.Dialogs.AuthorStoriesList"
+		x:DataType="vm:StoryViewModel"
+		Title="AuthorStoriesList"
+		Height="850"
+		Width="1800"
+		>
+
+	<Window.Styles>
+		<StyleInclude Source="avares://TaymadeControls/Styles/TaymadeStyles.axaml"/>
+	</Window.Styles>
+
+	<Design.DataContext>
+		<vm:StoryViewModel/>
+	</Design.DataContext>
+
+	<StackPanel >
+		<DataGrid
+		Name="dgAuthorStories"
+		Height="400"
+		HorizontalScrollBarVisibility="Visible"
+		VerticalScrollBarVisibility="Visible"
+		ItemsSource="{Binding AuthorStoriesList}"
+		SelectedItem="{Binding CurrentStory}"
+		>
+			<DataGrid.Columns>
+				<DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+				<DataGridTextColumn Header="Author" Binding="{Binding Author}" />
+				<DataGridTextColumn Header="Age" Binding="{Binding Age}" />
+				<DataGridTextColumn Header="Lowest Age" Binding="{Binding LowestAgeInt}" />
+				<DataGridTemplateColumn Header="Codes" Width="250" CanUserSort="true" SortMemberPath="Codes">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding Codes}" TextWrapping="Wrap" />
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTemplateColumn Header="Title" Width="200" CanUserSort="true" SortMemberPath="Title">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding Title}" TextWrapping="Wrap" />
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+				<DataGridTextColumn Header="Added" Binding="{Binding AddedString}" />
+				<DataGridTextColumn Header="Created" Binding="{Binding CreatedString}" />
+				<DataGridTextColumn Header="Modified" Binding="{Binding ModifiedString}" />
+				<DataGridTextColumn Header="Path Error" Binding="{Binding PathWrong}" />
+				<DataGridTemplateColumn Header="Edit">
+					<DataGridTemplateColumn.CellTemplate>
+						<DataTemplate>
+							<Button  Content="Edit" Click="Button_Click"/>
+						</DataTemplate>
+					</DataGridTemplateColumn.CellTemplate>
+				</DataGridTemplateColumn>
+
+
+			</DataGrid.Columns>
+
+		</DataGrid>
+		<StackPanel Orientation="Vertical" Width="1800" HorizontalAlignment="Left" >
+			<TabControl Width="1900" HorizontalAlignment="Left">
+				<TabItem Header="Details">
+					<ScrollViewer VerticalScrollBarVisibility="Visible">
+						<Grid >
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="100"/>
+								<ColumnDefinition Width="200"/>
+								<ColumnDefinition Width="100"/>
+								<ColumnDefinition Width="200"/>
+								<ColumnDefinition Width="10"/>
+
+								<ColumnDefinition Width="100"/>
+								<ColumnDefinition Width="100"/>
+								<ColumnDefinition Width="100"/>
+								<ColumnDefinition Width="100"/>
+								<ColumnDefinition Width="100"/>
+								<ColumnDefinition Width="100"/>
+								<ColumnDefinition Width="100"/>
+								<ColumnDefinition Width="300"/>
+
+							</Grid.ColumnDefinitions>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="40"></RowDefinition>
+								<RowDefinition Height="40"></RowDefinition>
+								<RowDefinition Height="40"></RowDefinition>
+								<RowDefinition Height="40"></RowDefinition>
+								<RowDefinition Height="40"></RowDefinition>
+								<RowDefinition Height="40"></RowDefinition>
+								<RowDefinition Height="40"></RowDefinition>
+								<RowDefinition Height="40"></RowDefinition>
+
+							</Grid.RowDefinitions>
+							<TextBlock Classes="h2" Text="Story Title"  Grid.Column="0" Grid.Row="0"/>
+							<TextBox Classes="c1" Text="{Binding CurrentStory.Title }"   Grid.Column="1" Grid.ColumnSpan="3"  />
+							<TextBlock Classes="h2" Text="Path Error"  Grid.Column="5" Grid.Row="0"/>
+							<CheckBox IsChecked="{Binding CurrentStory.PathWrong}" Grid.Column="6" Grid.Row="0" />
+							<TextBlock Classes="h2" Text="Characters"  Grid.Column="9" Grid.Row="0"/>
+							<TextBox Classes="c1" Text="{Binding CurrentStory.Characters }"  Grid.Row="0"  Grid.Column="10" />
+							<TextBlock Classes="h2" Text="Percent"  Grid.Column="11" Grid.Row="0"/>
+							<TextBox Classes="c1" Text="{Binding CurrentStory.Percent }"  Grid.Row="0"  Grid.Column="12" />
+
+							<TextBlock Classes="h2" Text="Id"  Grid.Column="7" Grid.Row="0"/>
+							<TextBlock Classes="h2" Text="{Binding CurrentStory.Id }"  Grid.Row="0"  Grid.Column="8" />
+
+							<TextBlock Classes="h2" Text="Codes"  Grid.Column="0" Grid.Row="1"/>
+							<TextBox Classes="c1" Text="{Binding CurrentStory.Codes }"   Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3"  />
+							<TextBlock Classes="h2" Text="Age"  Grid.Column="5" Grid.Row="1"/>
+							<TextBox Classes="c1" Text="{Binding CurrentStory.Age}" Grid.Column="6" Grid.Row="1" />
+							<TextBlock Classes="h2" Text="Headings"  Grid.Column="7" Grid.Row="1"/>
+							<TextBox Classes="c1" Text="{Binding CurrentStory.HeadingCount}" Grid.Column="8" Grid.Row="1" />
+							<TextBlock Classes="h2" Text="Lines"  Grid.Column="9" Grid.Row="1"/>
+							<TextBox Classes="c1" Text="{Binding CurrentStory.Lines }"  Grid.Row="1"  Grid.Column="10" />
+							<TextBlock Classes="h2" Text="Info"  Grid.Column="11" Grid.Row="1"/>
+							<TextBox Classes="c1" Text="{Binding CurrentStory.Info }"  Grid.Row="1"  Grid.Column="12" />
+
+							<TextBlock Classes="h2" Text="Author"  Grid.Column="0" Grid.Row="2"/>
+							<TextBox Classes="c1" Text="{Binding CurrentStory.Author }"   Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="3"  />
+							<TextBlock Classes="h2" Text="Lowest Age"  Grid.Column="5" Grid.Row="2"/>
+							<TextBox Classes="c1" Text="{Binding CurrentStory.LowestAge}" Grid.Column="6" Grid.Row="2" />
+							<!--	<TextBox Classes="c1" Text="{Binding CurrentStory.LowestAgeInt}" Grid.Column="7" Grid.Row="2" />
+							-->
+							<TextBlock Classes="h2" Text="Pages"  Grid.Column="9" Grid.Row="2"/>
+							<TextBox Classes="c1" Text="{Binding CurrentStory.Pages }"  Grid.Row="2"  Grid.Column="10" />
+
+							<TextBlock Classes="h2" Text="Path"  Grid.Column="0" Grid.Row="3"/>
+							<TextBox Classes="c1" Text="{Binding CurrentStory.Path }"   Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="3" />
+							<Button Grid.Row="3" Grid.Column="5" Content="Save" Name="Save" Command="{Binding SaveStory}" />
+							<Button Grid.Row="3" Grid.Column="6" Content="Props" Name="Props" Command="{Binding GetProps}" />
+							<Button Grid.Row="3" Grid.Column="7"  Name="MoveStory" Content="MoveStory" Width="100" Command="{Binding DoMoveStory}">
+
+							</Button>
+							<TextBlock Classes="h2" Text="Published"  Grid.Column="9" Grid.Row="3"/>
+							<TextBox Classes="c1" Text="{Binding CurrentStory.Published }"  Grid.Row="3"  Grid.Column="10" />
+							<Button Grid.Row="3" Grid.Column="8" Content="Edit" Name="LEditStory" Width="100" Height="40" HorizontalContentAlignment="Center"
+									Command="{Binding EditStory}"/>
+
+							<TextBlock Classes="h2" Text="Score"  Grid.Column="9" Grid.Row="4"/>
+							<TextBox Classes="c1" Text="{Binding CurrentStory.Score }"  Grid.Row="4"  Grid.Column="10" />
+
+							<TextBlock Classes="h2" Text="Translated"  Grid.Column="0" Grid.Row="4"/>
+							<CheckBox Classes="c1"  IsChecked="{Binding CurrentStory.Translation}"  Grid.Column="1" Grid.Row="4"  />
+							<TextBlock Classes="h2" Text="Language"  Grid.Column="2" Grid.Row="4"/>
+							<TextBox Classes="c1" Text="{Binding CurrentStory.OriginalLanguage }"   Grid.Column="3" Grid.Row="4"  />
+							<ComboBox Name="cbLanguage"
+									  Grid.Row="4" Grid.Column="5"
+									  SelectedItem="{Binding CurrentStory.Language}"
+									  ItemsSource="{Binding LanguageList}"/>
+							<Button Grid.Row="4" Grid.Column="6" Content="Get Word Props" Name="GetWProps" Command="{Binding GetWordProps}"/>
+							<Button Grid.Row="4" Grid.Column="7" Content="Set Word Props" Name="SetWProps" Command="{Binding SetWordProps}" />
+							<Button Grid.Row="5" Grid.Column="5" Content="Delete" Name="Delete" Command="{Binding DeleteStoryEntity}" />
+							<Button Grid.Row="5" Grid.Column="6" Content="Del Doc" Name="DelDoc" Command="{Binding DelDocStory}" />
+							<TextBlock Classes="h2" Text="Series"  Grid.Column="7" Grid.Row="5"/>
+							<ComboBox Name="cbSeries" Grid.Row="5" Grid.Column="8" ItemsSource="{Binding SeriesList}" SelectedItem="{Binding CurrentStory.StorySeries}"/>
+							<TextBlock Classes="h2" Text="Authors"  Grid.Column="9" Grid.Row="5"/>
+							<ComboBox Name="cbAuthors" Grid.Row="5" Grid.Column="10" ItemsSource="{Binding Authors}" SelectedItem="{Binding CurrentStory.AuthorItem}"/>
+
+							<TextBlock Classes="h2" Text="Added"  Grid.Column="0" Grid.Row="5"/>
+							<TextBox Classes="c1"  Grid.Column="1" Grid.Row="5" Text="{Binding CurrentStory.AddedString}"/>
+							<TextBlock Classes="h2" Text="Created"  Grid.Column="2" Grid.Row="5"/>
+							<TextBox Classes="c1"  Grid.Column="3" Grid.Row="5" Text="{Binding CurrentStory.CreatedString}"/>
+							<DataGrid Name="dgAuthors" Grid.Column="11" GridLinesVisibility="Horizontal"  Grid.ColumnSpan="2" Grid.Row="2" Grid.RowSpan="3" ItemsSource="{Binding CurrentStory.Authors}">
+								<DataGrid.Columns>
+									<DataGridTextColumn Header="Id" Binding="{Binding AuthorId}" />
+									<DataGridTextColumn Header="Author" Binding="{Binding Author.Name}" />
+								</DataGrid.Columns>
+
+							</DataGrid>
+							<Button Grid.Row="5" Grid.Column="11" Content="Add Author" Name="AddAuthor" Command="{Binding AddAuthor}" />
+							<ComboBox Name="cbSeries1" Grid.Row="5" Grid.Column="12" ItemsSource="{Binding Authors}" SelectedItem="{Binding SelectedAuthor}"/>
+
+						</Grid>
+
+					</ScrollViewer>
+				</TabItem>
+
+			</TabControl>
+
+		</StackPanel>
+		<StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center" Height="50">
+
+			<tcb:OKCancelPanel HorizontalAlignment="Center"
+							   Name="OKCancelPanel"
+							   Margin="5" Height="40" />
+		</StackPanel>
+
+
+	</StackPanel>
+
+
+</Window>

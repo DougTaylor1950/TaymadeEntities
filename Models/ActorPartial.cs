@@ -392,7 +392,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Insert.
         /// </summary>
-        internal void Insert()
+        public void Insert()
         {
             //string temp = SortName;
             DataController.SandboxEntities.Add(this);

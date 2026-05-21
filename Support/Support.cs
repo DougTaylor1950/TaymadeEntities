@@ -1447,11 +1447,11 @@ namespace TaymadeEntities.Support
         /// The GetMainWindow.
         /// </summary>
         /// <returns>The <see cref="Views.MainWindow"/>.</returns>
-        public static Views.MainWindow? GetMainWindow()
+        public static Window? GetMainWindow()
         {
             if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopLifetime)
             {
-                return desktopLifetime.MainWindow as Views.MainWindow;
+                return desktopLifetime.MainWindow as Window ;
             }
             return null;
         }

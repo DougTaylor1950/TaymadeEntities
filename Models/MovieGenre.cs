@@ -142,7 +142,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         ///  Delete Entity from database
         /// </summary>
-        internal void Delete()
+        public void Delete()
         {
             this.Movies = null;
             var local = DataController.SandboxEntities.Set<MovieGenre>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
@@ -156,7 +156,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Add a new Cast entity into database 
         /// </summary>
-        internal void Insert()
+        public void Insert()
         {
 
             try
@@ -167,7 +167,7 @@ namespace TaymadeEntities.Models
                     //EntityState state = DataController.SandboxEntities.Entry(this).State;
 
                     //DataController.SandboxEntities.SaveChanges();
-                    MovieGenre temp = DataController.SandboxEntities.CreateMovieGenre(this.MovieId,this.Genre, this.SubGenre);
+                    MovieGenre temp = DataController.SandboxEntities.CreateMovieGenre(this.MovieId, this.Genre, this.SubGenre);
                     this.Id = temp.Id;
                 }
             }
@@ -181,7 +181,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Save.
         /// </summary>
-        internal void Save()
+        public void Save()
         {
             try
             {
@@ -204,6 +204,35 @@ namespace TaymadeEntities.Models
             {
                 // throw;
             }
+
+        }
+
+        public async Task<bool> SaveAsync()
+        {
+            bool success = false;
+            try
+            {
+
+                var local = DataController.SandboxEntities.Set<MovieGenre>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+
+                // check if local is not null 
+                if (local != null)
+                {
+                    // detach
+                    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
+                }
+                // set Modified flag in your entry
+                DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                int result = await DataController.SandboxEntities.SaveChangesAsync();
+                success = (result == 1);
+
+            }
+            catch (Exception)
+            {
+                // throw;
+            }
+
+            return success;
 
         }
 

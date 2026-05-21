@@ -162,7 +162,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Add a new Cast entity into database 
         /// </summary>
-        internal void Insert()
+        public void Insert()
         {
 
             if (this.Id < 10)
@@ -176,7 +176,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         ///  Delete Entity from database
         /// </summary>
-        internal void Delete()
+        public void Delete()
         {
             this.Movies = null;
             var local = DataController.SandboxEntities.Set<Cast>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));

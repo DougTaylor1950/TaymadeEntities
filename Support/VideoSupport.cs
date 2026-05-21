@@ -296,53 +296,53 @@ namespace TaymadeEntities.Support
         /// </summary>
         /// <param name="moviePath">The moviePath<see cref="string"/>.</param>
         /// <returns>The <see cref="Task{MediaToolkit.Standard.Models.FfProbeOutput}"/>.</returns>
-        public static async Task<MediaToolkit.Standard.Models.FfProbeOutput> GetMetadataAsync(string moviePath)
-        {
-            string ffmpegFilePath = @"C:\Program Files\FFMpeg\bin\ffmpeg.exe";
-            string? ffprobeFilePath = null;
+        //public static async Task<MediaToolkit.Standard.Models.FfProbeOutput> GetMetadataAsync(string moviePath)
+        //{
+        //    string ffmpegFilePath = @"C:\Program Files\FFMpeg\bin\ffmpeg.exe";
+        //    string? ffprobeFilePath = null;
 
-            string videoPath = Support.FixImagePath(moviePath);
+        //    string videoPath = Support.FixImagePath(moviePath);
 
-            //string dirSep = @"\";
+        //    //string dirSep = @"\";
 
-            string duration = string.Empty;
+        //    string duration = string.Empty;
 
-            MediaToolkit.Standard.Tasks.Results.GetMetadataResult? metadataResult = null;
-            MediaToolkit.Standard.Models.FfProbeOutput? output = null;
+        //    MediaToolkit.Standard.Tasks.Results.GetMetadataResult? metadataResult = null;
+        //    MediaToolkit.Standard.Models.FfProbeOutput? output = null;
 
-            if (!Support.IsWindows())
-            {
-                ffmpegFilePath = @"/usr/bin/ffmpeg";
-                ffprobeFilePath = @"/usr/bin/ffprobe";
-                //dirSep = "/";
-            }
+        //    if (!Support.IsWindows())
+        //    {
+        //        ffmpegFilePath = @"/usr/bin/ffmpeg";
+        //        ffprobeFilePath = @"/usr/bin/ffprobe";
+        //        //dirSep = "/";
+        //    }
 
-            try
-            {
-                var serviceProvider = new ServiceCollection().AddMediaToolkit(ffmpegFilePath, ffprobeFilePath).BuildServiceProvider();
-                // Get metadata
-                var service = serviceProvider.GetService<IMediaToolkitService>();
-                var metadataTask = new FfTaskGetMetadata(videoPath);
+        //    try
+        //    {
+        //        var serviceProvider = new ServiceCollection().AddMediaToolkit(ffmpegFilePath, ffprobeFilePath).BuildServiceProvider();
+        //        // Get metadata
+        //        var service = serviceProvider.GetService<IMediaToolkitService>();
+        //        var metadataTask = new FfTaskGetMetadata(videoPath);
 
 
-                if (service != null)
-                {
-                    metadataResult = await service.ExecuteAsync(metadataTask);
-                    // var saveThumbnailTask = new FfTaskSaveThumbnail(videoPath, "", TimeSpan.FromSeconds(0));
+        //        if (service != null)
+        //        {
+        //            metadataResult = await service.ExecuteAsync(metadataTask);
+        //            // var saveThumbnailTask = new FfTaskSaveThumbnail(videoPath, "", TimeSpan.FromSeconds(0));
 
-                    if (metadataResult != null)
-                    {
-                        output = metadataResult.Metadata;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
+        //            if (metadataResult != null)
+        //            {
+        //                output = metadataResult.Metadata;
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.ToString());
+        //    }
 
-            return output;
-        }
+        //    return output;
+        //}
 
         /// <summary>
         /// The GrabBookmarkImage.

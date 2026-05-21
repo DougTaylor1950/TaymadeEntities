@@ -1408,7 +1408,7 @@ namespace TaymadeEntities.ViewModels
 
                     //   dialogModel.Caller = entryDialog;
 
-                    MainWindow main = Support.GetMainWindow();
+                    Window main = Support.GetMainWindow();
                     DialogResultButton result = await entryDialog.ShowDialog<DialogResultButton>(main);
                     if (result != null && result.Result == DialogResultButton.ResultType.Ok)
                     {
@@ -1976,7 +1976,7 @@ namespace TaymadeEntities.ViewModels
 
         public void UpdateMainWindow(UnboundGridData unboundItem, string additional = "")
         {
-            MainWindow? mainWindow = Support.GetMainWindow();
+            Window? mainWindow = Support.GetMainWindow();
             if (mainWindow != null)
             {
                 // see if mainwindow has a as a control DownloadsHeaderControl

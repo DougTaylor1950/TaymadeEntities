@@ -13,7 +13,7 @@
 		x:Class="TaymadeEntities.Dialogs.EditCastMemberDialog"
 		Title="EditCastMemberDialog">
 	<Window.Styles>
-		<StyleInclude Source="/Styles/TaymadeEntitiesStyles.axaml"/>
+		<StyleInclude Source="avares://TaymadeControls/Styles/TaymadeStyles.axaml"/>
 
 	</Window.Styles>
 
