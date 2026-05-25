@@ -37,7 +37,9 @@
 	  <AvaloniaXaml Remove="ButtonWithText.axaml" />
 	  <AvaloniaXaml Remove="Controls\MovieBookmarksControl.axaml" />
 	  <AvaloniaXaml Remove="Dialogs\EditMovie.axaml" />
+	  <AvaloniaXaml Remove="Dialogs\MovieFilterDialog.axaml" />
 	  <AvaloniaXaml Remove="Dialogs\MovieListDialog.axaml" />
+	  <AvaloniaXaml Remove="Dialogs\SearchMoviesDialog.axaml" />
 	  <AvaloniaXaml Remove="Dialogs\TMDBSearchDialog.axaml" />
 	  <AvaloniaXaml Remove="HeaderControl.axaml" />
 	  <AvaloniaXaml Remove="UserControl1.axaml" />
@@ -53,13 +55,19 @@
 	  <Compile Remove="ButtonWithText.axaml.cs" />
 	  <Compile Remove="Controls\MovieBookmarksControl.axaml.cs" />
 	  <Compile Remove="Dialogs\EditMovie.axaml.cs" />
+	  <Compile Remove="Dialogs\MovieFilterDialog.axaml.cs" />
 	  <Compile Remove="Dialogs\MovieListDialog.axaml.cs" />
+	  <Compile Remove="Dialogs\SearchMoviesDialog.axaml.cs" />
 	  <Compile Remove="Dialogs\TMDBSearchDialog.axaml.cs" />
 	  <Compile Remove="HeaderControl.axaml.cs" />
 	  <Compile Remove="Support\VideoSupport.cs" />
 
 	  <Compile Remove="UserControl1.axaml.cs" />
 	  
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\TaymadeControlsV12\TaymadeControls.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

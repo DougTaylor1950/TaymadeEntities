@@ -1,0 +1,144 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		mc:Ignorable="d" 
+		d:DesignWidth="800" 
+		d:DesignHeight="550"
+		x:Class="TaymadeEntities.SearchMoviesDialog"
+		Title="Search Movies"
+		xmlns:vm="using:MovieDBViewer.ViewModels"
+		xmlns:uc="using:TaymadeEntities.Controls"
+		xmlns:tc="using:TaymadeControls"
+		xmlns:tcb="using:TaymadeControls.Buttons"
+		x:DataType="vm:SearchViewModel"
+		>
+
+	
+
+	<Design.DataContext>
+		<vm:SearchViewModel/>
+	</Design.DataContext>
+
+	<Border BorderThickness="1"
+			CornerRadius="10"
+			BorderBrush="Gray"
+
+			>
+		<StackPanel >
+			<tc:HeaderControl2
+			Title="Movie Search"
+			TitleForeground="Black"
+			/>
+			<Grid  ShowGridLines="False">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="100" />
+					<RowDefinition Height="40" />
+					<RowDefinition Height="40" />
+					<RowDefinition Height="40" />
+					<RowDefinition Height="40" />
+					<RowDefinition Height="40" />
+					<RowDefinition Height="40" />
+					<RowDefinition Height="40" />
+				</Grid.RowDefinitions>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="150"/>
+					<ColumnDefinition Width="220"/>
+					<ColumnDefinition Width="*"/>
+				</Grid.ColumnDefinitions>
+
+				<TextBlock Text="Title"
+						   ToolTip.Tip="SQL wildcards % _ can be used, if none are added, % will bracket text"
+						   Grid.Column="0"
+						   Grid.Row="0"
+						   Classes="h1"
+						   VerticalAlignment="Bottom"
+						   />
+				<TextBox Text="{Binding MovieTitle}"
+						 Classes="c1"
+						 Grid.Column="1"
+						 Grid.Row="0"
+						 VerticalAlignment="Bottom"
+						 />
+
+				<TextBlock Text="Actor"
+						   Grid.Column="0"
+						   Grid.Row="1"
+						   Classes="h1"
+						   VerticalAlignment="Center"
+						   />
+				<TextBox Text="{Binding ActorName}"
+						 Classes="c1"
+						 Grid.Column="1"
+						 Grid.Row="1"
+						 />
+
+				<Label Grid.Row="1"
+		   Grid.Column="2"
+		   Content="   &lt;-- Can be cumulative with Movie Title "
+		   />
+
+				<TextBlock Text="Bookmark Text"
+						   Grid.Column="0"
+						   Grid.Row="2"
+						   Classes="h1"
+						   VerticalAlignment="Center"
+						   />
+				<TextBox Text="{Binding BookmarkText}"
+						 Classes="c1"
+						 Grid.Column="1"
+						 Grid.Row="2"
+						 />
+
+				<TextBlock Text="Info Text"
+						   Grid.Column="0"
+						   Grid.Row="3"
+						   Classes="h1"
+						   VerticalAlignment="Center"
+						   />
+				<TextBox Text="{Binding InfoText}"
+						 Classes="c1"
+						 Grid.Column="1"
+						 Grid.Row="3"
+						 />
+
+				<TextBlock Text="Movie Id"
+						   Grid.Column="0"
+						   Grid.Row="4"
+						   Classes="h1"
+						   VerticalAlignment="Center"
+						   />
+				<TextBox Text="{Binding MovieId}"
+						 Classes="c1"
+						 Grid.Column="1"
+						 Grid.Row="4"
+						 />
+
+				<TextBlock Text="Series"
+						   Grid.Column="0"
+						   Grid.Row="5"
+						   Classes="h1"
+						   VerticalAlignment="Center"
+						   />
+				<ComboBox ItemsSource="{Binding SeriesList}"
+				SelectedItem="{Binding CurrentSeries}"
+				Grid.Row="5"
+				Grid.Column="1"
+				Width="210"
+				AutoScrollToSelectedItem="True"
+				/>
+			</Grid>
+			<!--<tcb:OKCancelPanel
+			VerticalAlignment="Bottom"
+			HorizontalAlignment="Center"
+			Name="OkPanel"/> -->
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+				<tcb:OkButton Click="OkButton_Click" />
+				<tcb:CancelButton Click="CancelButton_Click" />
+			</StackPanel>
+
+		</StackPanel>
+	</Border>
+
+</Window>
+

@@ -278,6 +278,7 @@ namespace TaymadeEntities.Models
             set => this.RaiseAndSetIfChanged(ref hasSeries, value);
         }
 
+        [NotMapped]
         public bool? HasSeason
         {
             get => hasSeason;

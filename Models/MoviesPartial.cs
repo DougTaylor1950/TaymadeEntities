@@ -852,7 +852,7 @@ namespace TaymadeEntities.Models
         /// <remarks>
         ///   <created> 31/01/2026 31/01/2026 </created>
         /// </remarks>
-        internal void LoadChildren()
+        public void LoadChildren()
         {
             try
             {

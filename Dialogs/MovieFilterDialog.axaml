@@ -1,0 +1,111 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:views="using:TaymadeEntities.Views"
+		xmlns:vm="using:TaymadeEntities.ViewModels"
+		x:DataType="vm:MovieViewModelBase"
+		mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+		x:Class="TaymadeEntities.Dialogs.MovieFilterDialog"
+		Title="MovieFilterDialog">
+
+	<Design.DataContext>
+		<vm:MovieViewModelBase/>
+	</Design.DataContext>
+
+	
+
+	<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
+		<DockPanel>
+
+			<StackPanel Orientation="Horizontal" DockPanel.Dock="Top" >
+				<Grid>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="40"></RowDefinition>
+						<RowDefinition Height="40"></RowDefinition>
+						<RowDefinition Height="40"></RowDefinition>
+						<RowDefinition Height="40"></RowDefinition>
+						<RowDefinition Height="40"></RowDefinition>
+						<RowDefinition Height="40"></RowDefinition>
+						<RowDefinition Height="40"></RowDefinition>
+						<RowDefinition Height="40"></RowDefinition>
+					</Grid.RowDefinitions>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition  Width="50"/>
+						<ColumnDefinition  Width="150"/>
+						<ColumnDefinition  Width="50"/>
+						<ColumnDefinition  Width="150"/>
+						<ColumnDefinition  Width="100"/>
+						<ColumnDefinition  Width="150"/>
+						<ColumnDefinition  Width="100"/>
+						<ColumnDefinition  Width="150"/>
+
+
+
+					</Grid.ColumnDefinitions>
+					<TextBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding CurrentFilter.FilterName}"/>
+
+					<CheckBox Name="NegAddChapter" Content="!"  Width="40" Grid.Row="1" Grid.Column="0" IsChecked="{Binding CurrentFilter.NotHasChapter}"/>
+					<CheckBox Name="AddChapter" Content="Has Chapter" Width="150" Grid.Row="1" Grid.Column="1" IsChecked="{Binding CurrentFilter.HasChapter}" />
+					<CheckBox Content="!"  Width="40" Grid.Row="1" Grid.Column="2" IsChecked="{Binding CurrentFilter.NotHasEpisode}"/>
+					<CheckBox Content="Has Episode"  Width="150" Grid.Row="1" Grid.Column="3" IsChecked="{Binding CurrentFilter.HasEpisode}" />
+					<CheckBox Content="Name" Grid.Row="1" Grid.Column="4"  IsChecked="{Binding CurrentFilter.FilterByName}"/>
+					<TextBox Grid.Row="1" Grid.Column="5" Name="FilterMovieName"/>
+
+					<CheckBox  Content="+" Width="40" Grid.Row="2" Grid.Column="0" IsChecked="{Binding CurrentFilter.UseCurrentPhrase}"/>
+					<ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding Phrases}" SelectedItem="{Binding TempPhrase}"/>
+
+					<CheckBox  Content="Duration"   Grid.Row="2" Grid.Column="3" IsChecked="{Binding CurrentFilter.UseDuration}" Grid.ColumnSpan="2"/>
+					<TextBox Grid.Row="2" Grid.Column="4" Text="{Binding CurrentFilter.DurationFilter}" Grid.ColumnSpan="2"/>
+
+					<CheckBox  Content="Modified On"   Grid.Row="3" Grid.Column="0" IsChecked="{Binding CurrentFilter.UseModified}" Grid.ColumnSpan="2"/>
+					<TextBox Grid.Row="3" Grid.Column="2" Text="{Binding CurrentFilter.ModifiedFilter}" Grid.ColumnSpan="2" Width="150"/>
+
+					<CheckBox  Content="Added On"   Grid.Row="3" Grid.Column="4" IsChecked="{Binding CurrentFilter.UseAdded}" Grid.ColumnSpan="2"/>
+					<TextBox Grid.Row="3" Grid.Column="5" Text="{Binding CurrentFilter.AddedFilter}" Grid.ColumnSpan="2"/>
+
+					<CheckBox  Content="Series"   Grid.Row="4" Grid.Column="0" IsChecked="{Binding CurrentFilter.UseSeries}" Grid.ColumnSpan="2"/>
+					<ComboBox Grid.Row="4" Grid.Column="3" ItemsSource="{Binding SeriesList}" SelectedItem="{Binding SeriesEntity}" Width="150" Grid.ColumnSpan="3"/>
+
+					<TextBlock Grid.Row="5" Grid.Column="0" Text="Secondary Filter" Grid.ColumnSpan="2" />
+					<TextBlock Grid.Row="5" Grid.Column="2" Text="Tertiary Filter" Grid.ColumnSpan="2" />
+					<TextBlock Grid.Row="5" Grid.Column="4" Text="Director" Grid.ColumnSpan="2" />
+					<TextBlock Grid.Row="5" Grid.Column="6" Text="Bookmark" Grid.ColumnSpan="2" />
+
+					<CheckBox  Content="+" Width="40" Grid.Row="6" Grid.Column="0" IsChecked="{Binding CurrentFilter.UseSecondaryFilter}"/>
+					<ComboBox Grid.Row="6" Grid.Column="1" ItemsSource="{Binding Phrases}" SelectedItem="{Binding CurrentFilter.SecondaryPhrase}"/>
+					
+					<CheckBox  Content="+" Width="40" Grid.Row="6" Grid.Column="2" IsChecked="{Binding CurrentFilter.UseTertiaryFilter}"/>
+					<ComboBox Grid.Row="6" Grid.Column="3" ItemsSource="{Binding Phrases}" SelectedItem="{Binding CurrentFilter.TertiaryPhrase}"/>
+					<CheckBox  Content="+" Width="40" Grid.Row="6" Grid.Column="6" IsChecked="{Binding CurrentFilter.UseBookmark}"/>
+					<TextBox Grid.Row="6" Grid.Column="7" Text="{Binding CurrentFilter.BookmarkText}" />
+					<CheckBox  Content="+" Width="40" Grid.Row="6" Grid.Column="4" IsChecked="{Binding CurrentFilter.UseDirector}"/>
+					<ComboBox Grid.Row="6" Grid.Column="5" ItemsSource="{Binding Directors}" SelectedItem="{Binding CurrentFilter.CurrentDirector}"/>
+					<CheckBox  Content="+" Width="40" Grid.Row="7" Grid.Column="0" IsChecked="{Binding CurrentFilter.UseActor}"/>
+					<TextBox  Grid.Row="7" Grid.Column="1" Text="{Binding CurrentFilter.ActorName}" />
+
+				</Grid>
+			</StackPanel>
+
+			<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Bottom" Height="100">
+				<StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center" Height="50">
+					<Button Content="OK" Margin="5" Click="Accept" HotKey="Enter">
+						<Image Source="/Assets/Tick16.ico" />
+					</Button>
+					<Button Content="Cancel" Margin="5" Click="Cancel" HotKey="Escape">
+						<Image Source="/Assets/Cross2.ico" />
+					</Button>
+					<Button Content="Save" Margin="5" Click="Save" HotKey="Ctrl+S">
+						<Image Source="/Assets/DISK01.ico" />
+					</Button>
+
+					<Button Content="Add" Margin="5" Click="InsertFilter" HotKey="Insert">
+						<Image Source="/Assets/Pharmacy.ico" />
+					</Button>
+					<Button Content="Clear" Click ="ClearElements" HotKey="Delete"/>
+
+				</StackPanel>
+			</Border>
+		</DockPanel>
+	</Border>
+</Window>

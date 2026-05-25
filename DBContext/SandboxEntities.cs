@@ -11,7 +11,7 @@ namespace TaymadeEntities.DBContext
 {
     using TaymadeEntities.Support;
     using TaymadeEntities.Models;
-   // using CSharpFunctionalExtensions;
+    // using CSharpFunctionalExtensions;
     using DocumentFormat.OpenXml.Office2010.Excel;
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
@@ -23,6 +23,7 @@ namespace TaymadeEntities.DBContext
     using System.Linq;
     using System.Threading.Tasks;
 
+#nullable enable
     /// <summary>
     /// Defines the <see cref="SandboxStatic" />.
     /// </summary>
@@ -183,7 +184,7 @@ namespace TaymadeEntities.DBContext
 
         public DbSet<StoryAuthor> StoryAuthor { get; set; }
         public virtual DbSet<StoryDictionary> StoryDictionary { get; set; }
-        
+
         public virtual DbSet<StoryHeadings> StoryHeadings { get; set; }
 
         /// <summary>
@@ -312,26 +313,48 @@ namespace TaymadeEntities.DBContext
             return result;
         }
 
-        public MovieGenre CreateMovieGenre(int movieId, string genre, string subGenre)
-       {
-            MovieGenre result = null;
+        private static SqlParameter? CreateIntegerParameter(int? param, string paramName)
+        {
+            SqlParameter? newParam = null;
+            var paramValue = param.HasValue ? (object)param.Value : DBNull.Value;
+            newParam = new SqlParameter(paramName, paramValue);
+            return newParam;
+        }
+
+        private static SqlParameter? CreateStringParameter(string? param, string parameterName)
+        {
+            SqlParameter? newParam = null;
+            object paramValue = DBNull.Value;
+            if (!string.IsNullOrEmpty(param))
+            {
+                paramValue = param;
+            }
+            newParam = new SqlParameter(parameterName, paramValue);
+
+            return newParam;
+        }
+
+        public MovieGenre CreateMovieGenre(int movieId, string? genre, string? subGenre)
+        {
+            MovieGenre? result = null;
             var _movieId = new SqlParameter("@MovieId", movieId);
             var _genre = new SqlParameter("@Genre", genre);
-            //var _subGenre = new SqlParameter("@SubGenre", subGenre);
-            int count = this.Database.ExecuteSqlRaw("exec CreateMovieGenre @MovieId, @Genre",
-                _movieId, _genre);
+            var _subGenre = SandboxEntities.CreateStringParameter(subGenre, "@SubGenre");
+            int count = this.Database.ExecuteSqlRaw("exec CreateMovieGenre @MovieId, @Genre, @SubGenre",
+                _movieId, _genre, _subGenre);
             if (count == 1)
             {
-                result = this.MovieGenre.FromSql($"select * from MovieGenre where id = (select max(id) from MovieGenre)").AsNoTracking().FirstOrDefault();
+                result = this.MovieGenre.FromSql($"select * from MovieGenre where id = (select max(id) from MovieGenre)").FirstOrDefault();
                 if (result != null)
                 {
-                    result.SubGenre = subGenre;
-                    result.Save();
+                    //   result.SubGenre = subGenre;
+                    //   result.Save();
                 }
-                this.MovieGenre.Attach(result);
+                // this.MovieGenre.Attach(result);
             }
             return result;
         }
+
 
         /// <summary>
         /// The CreateSeries.
@@ -497,6 +520,19 @@ namespace TaymadeEntities.DBContext
             return retValue;
         }
 
+
+
+        public async Task<List<Movies>?> GetMoviesByTitleAsync(string stub)
+        {
+            if (!stub.Contains("%")) // if wild card not present then add wild cards
+                stub = '%' + stub.Trim() + '%';
+
+            List<Movies>? tempList = await this.Movies
+                .FromSql($"GetMoviesByTitle {stub}")
+                .ToListAsync();
+            return tempList;
+        }
+
         public List<Movies> GetMoviesbyTitle(string stub)
         {
             if (!stub.Contains("%")) // if wild card not present then add wild cards
@@ -525,13 +561,14 @@ namespace TaymadeEntities.DBContext
                 stub = '%' + stub.Trim() + '%';
 
             var retValue = this.MovieIntResult.FromSql($"GetActorMovieIds {stub}").ToList();
-                      
+
 
             return retValue;
         }
 
 
-        public List<Movies>? GetMoviesByGenre(string genre, string subGenre = "")
+        public List<Movies>? GetMoviesByGenre(string genre,
+            string subGenre = "")
         {
             //var genreType = genre;
             List<Movies>? returnValue = null;
@@ -657,7 +694,7 @@ namespace TaymadeEntities.DBContext
             int rows = this.Database.ExecuteSqlRaw(" exec DeleteStory @Original_Id", id);
             if (rows == 1)
             {
-                this.Story.Remove(this.Story.Where(s => s.Id == iD).FirstOrDefault());  
+                this.Story.Remove(this.Story.Where(s => s.Id == iD).FirstOrDefault());
             }
         }
 

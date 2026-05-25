@@ -29,6 +29,7 @@ namespace TaymadeEntities.Support
         private Models.PhraseEntry id;
         private Models.PhraseEntry subId;
         private Models.SandboxDBContextFactory _contentFactory = new Models.SandboxDBContextFactory();
+        private ObservableCollection<Movies> movieList;
 
         #endregion Private Fields
 
@@ -106,7 +107,8 @@ namespace TaymadeEntities.Support
         }
 
         public Models.PhraseEntry? LastID { get; private set; }
-        public ObservableCollection<Movies> MovieList { get; set; }
+        public ObservableCollection<Movies> MovieList 
+        { get => movieList; set => movieList = value; }
 
         #endregion Public Properties
 
@@ -132,7 +134,7 @@ namespace TaymadeEntities.Support
 
         #region Internal Methods
 
-        internal void Run()
+        public void Run()
         {
             if (!backgroundMovieGetter.IsBusy)
             { 

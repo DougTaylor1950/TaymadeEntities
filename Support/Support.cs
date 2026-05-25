@@ -896,21 +896,24 @@ namespace TaymadeEntities.Support
             return extn;
         }
 
-        //public static void GetDefaultFilter()
-        //{
-        //    MainWindowViewModel? MVVM = GetMainWindowViewModel();
-        //    if (DataController.MovieProperties.DefaultFilter != null && MVVM != null)
-        //    {
-        //        MVVM.CurrentFilter = DataController.SandboxEntities.Filter.Find(DataController.MovieProperties.DefaultFilter);
-        //        if (MVVM.CurrentFilter != null)
-        //        {
-        //            MVVM.CurrentFilter.FromJson(MVVM.CurrentFilter.JSON);
-        //        }
-        //    }
-        //    else
+        public static Filter? GetDefaultFilter()
+        {
+            Filter returnValue = null;
+            if (
+                DataController.MovieProperties.DefaultFilter != null
+                )
+            {
+                returnValue = DataController.SandboxEntities.Filter.Find(DataController.MovieProperties.DefaultFilter);
+                if (returnValue != null)
+                {
+                    returnValue.FromJson(returnValue.JSON);
+                }
+            }
+            else
 
-        //        MVVM.CurrentFilter = new Filter();
-        //}
+                returnValue = new Filter();
+            return returnValue;
+        }
 
 
         public static List<int> StringIntListToIntList(string agestring)
@@ -1451,7 +1454,7 @@ namespace TaymadeEntities.Support
         {
             if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopLifetime)
             {
-                return desktopLifetime.MainWindow as Window ;
+                return desktopLifetime.MainWindow as Window;
             }
             return null;
         }

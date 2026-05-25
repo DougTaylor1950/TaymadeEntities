@@ -325,7 +325,7 @@
             return FilterName;
         }
 
-        internal void Update()
+        public void Update()
         {
             if (Id == 0)
             {
@@ -348,7 +348,7 @@
             }
         }
 
-        internal void Insert()
+        public void Insert()
         {
             DataController.SandboxEntities.Filter.Add(this);
             DataController.SandboxEntities.SaveChanges();
