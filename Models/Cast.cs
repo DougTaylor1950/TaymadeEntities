@@ -22,7 +22,7 @@ namespace TaymadeEntities.Models
     /// Defines the <see cref="Cast" />.
     /// </summary>
     [Table("Cast")]
-    public partial class Cast : ModelBase
+    public partial class Cast : ModelBase, IDisposable
     {
         #region Fields
 
@@ -38,6 +38,7 @@ namespace TaymadeEntities.Models
         private Movies? movies;
         private string? role;
         private bool actorChanged;
+        private bool disposedValue;
 
         #endregion
 
@@ -93,7 +94,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the credit_id.
         /// </summary>
-        public string credit_id { get => credit_id1; set => this.RaiseAndSetIfChanged(ref credit_id1, value); }
+        public string? credit_id { get => credit_id1; set => this.RaiseAndSetIfChanged(ref credit_id1, value); }
 
         /// <summary>
         /// Gets or sets the Id.
@@ -158,7 +159,7 @@ namespace TaymadeEntities.Models
 
         }
 
-        
+
         /// <summary>
         /// Add a new Cast entity into database 
         /// </summary>
@@ -190,6 +191,39 @@ namespace TaymadeEntities.Models
 
             DataController.SandboxEntities.Casts.Remove(this);
             DataController.SandboxEntities.SaveChanges();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    if (Actor != null)
+                    {
+                        Actor.Dispose();
+                        Actor = null;
+                    }
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~Cast()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         #endregion

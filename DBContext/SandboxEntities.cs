@@ -566,12 +566,20 @@ namespace TaymadeEntities.DBContext
             return retValue;
         }
 
+        public async Task<List<Cast>> GetCastByMovieId(int id)
+        {
+           List<Cast> returnValue = await this.Casts.FromSql($"Execute dbo.GetCastByMovieId {id}").ToListAsync();
+            return returnValue;
+        }
 
-        public List<Movies>? GetMoviesByGenre(string genre,
-            string subGenre = "")
+
+        public List<Movies>? GetMoviesByGenre(string? genre,
+            string? subGenre = "")
         {
             //var genreType = genre;
             List<Movies>? returnValue = null;
+
+            if (string.IsNullOrEmpty(genre)) return returnValue;
 
             if (!string.IsNullOrEmpty(subGenre))
             {

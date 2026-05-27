@@ -34,12 +34,12 @@ namespace TaymadeEntities.Support
         /// <summary>
         /// Gets or sets the Progress.
         /// </summary>
-        public string? Progress { get; internal set; }
+        public string? Progress { get;  set; }
 
         /// <summary>
         /// Gets or sets the TaskName.
         /// </summary>
-        public string TaskName { get; internal set; }
+        public string TaskName { get;  set; }
 
         #endregion
     }

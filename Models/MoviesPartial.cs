@@ -621,7 +621,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The FixMovieData.
         /// </summary>
-        public void FixMovieData()
+        public async void FixMovieData()
         {
             //if (Series == null) Series = 2;
             try
@@ -659,6 +659,16 @@ namespace TaymadeEntities.Models
                 if (!System.IO.File.Exists(Support.FixImagePath(MoviePath)))
                 {
                     BackColour = Avalonia.Media.Brushes.Red;
+                }
+
+                int count = Casts.Count;
+                if (count == 0)
+                {
+                    
+                    List<Cast> casts = await DataController.SandboxEntities.GetCastByMovieId(Id);
+                    Casts = new ObservableCollection<Cast>(
+                        casts);
+                    this.RaisePropertyChanged(nameof(Casts));
                 }
 
                 this.Save();

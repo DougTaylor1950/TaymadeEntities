@@ -47,7 +47,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Insert.
         /// </summary>
-        internal void Insert()
+        public void Insert()
         {
             DataController.SandboxEntities.Set<Season>().Add(this);
             DataController.SandboxEntities.SaveChanges();
@@ -56,7 +56,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Save.
         /// </summary>
-        internal void Save()
+        public void Save()
         {
             var local = DataController.SandboxEntities.Set<Season>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 

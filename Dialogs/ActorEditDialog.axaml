@@ -1,0 +1,114 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="450"
+		xmlns:vm="using:TaymadeEntities.ViewModels"
+		xmlns:uc="using:MovieDBViewer.Controls"
+        xmlns:viewmodels="using:TaymadeEntities.ViewModels"
+		xmlns:tc="using:TaymadeControls"
+		xmlns:tcb="using:TaymadeControls.Buttons"
+		x:Class="MovieDBViewer.Dialogs.ActorEditDialog"
+		x:DataType="vm:ActorViewModel"
+		Icon="/Assets/no_image.ico"
+		Title="Actor Editor">
+
+	<Design.DataContext>
+		<vm:ActorViewModel/>
+	</Design.DataContext>
+
+	<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
+		<DockPanel	LastChildFill="True" >
+			<StackPanel Orientation="Vertical" DockPanel.Dock="Top">
+				<tc:HeaderControl2
+				Title="Edit Actor"
+				Background="{SvgImage /Assets/svg/spectrum-gradient.svg}"
+
+				/>
+				<Grid>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="100"/>
+						<ColumnDefinition Width="500"/>
+						<ColumnDefinition Width="10"/>
+
+						<ColumnDefinition Width="100"/>
+						<ColumnDefinition Width="100"/>
+						<ColumnDefinition Width="500"/>
+
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="40"></RowDefinition>
+						<RowDefinition Height="60"></RowDefinition>
+						<RowDefinition Height="40"></RowDefinition>
+						<RowDefinition Height="40"></RowDefinition>
+						<RowDefinition Height="30"></RowDefinition>
+						<RowDefinition Height="30"></RowDefinition>
+
+					</Grid.RowDefinitions>
+					<TextBlock Classes="h2" Text="Actor Name"  Grid.Column="0" Grid.Row="0"/>
+					<TextBox Classes="c1" Text="{Binding CurrentActor.Name, Mode=TwoWay }"   Grid.Column="1" />
+					<TextBlock Classes="h2" Text="Adult"  Grid.Column="3" Grid.Row="0"/>
+					<CheckBox IsChecked="{Binding CurrentActor.Adult}" Grid.Column="4" Grid.Row="0" />
+
+					<TextBlock Classes="h2" Text="Aliases"  Grid.Column="0" Grid.Row="1"/>
+					<TextBox Classes="c1" Height="60" Text="{Binding CurrentActor.Aliases, Mode=TwoWay }" TextWrapping="Wrap" Grid.Row="1" Grid.Column="1" />
+					<TextBlock Classes="h2" Text="Date of Birth"  Grid.Column="3" Grid.Row="1"/>
+					<TextBox Classes="c1" Text="{Binding CurrentActor.DOB}" Grid.Column="4" Grid.Row="1" />
+
+					<TextBlock Classes="h2" Text="Info"  Grid.Column="0" Grid.Row="2"/>
+					<TextBox Classes="c1" Text="{Binding CurrentActor.Info, Mode=TwoWay }"  Grid.Row="2" Grid.Column="1" />
+					<TextBlock Classes="h2" Text="Date of Death"  Grid.Column="3" Grid.Row="2"/>
+					<TextBox Classes="c1" Text="{Binding CurrentActor.DeathDay}" Grid.Column="4" Grid.Row="2" />
+
+					<TextBlock Classes="h2" Text="Image Path"  Grid.Column="0" Grid.Row="3"/>
+					<TextBox Classes="c1" Text="{Binding CurrentActor.ImagePath, Mode=TwoWay }"  Grid.Row="3" Grid.Column="1" />
+					<TextBlock Classes="h2" Text="Gender"  Grid.Column="3" Grid.Row="3"/>
+					<TextBox Classes="c1" Text="{Binding CurrentActor.GenderDisplay}" Grid.Column="4" Grid.Row="3" />
+					<ComboBox Classes="c1" Name="Genders"  Grid.Row="3" Grid.Column="5" SelectedItem="{Binding CurrentActor.GenderValue}" />
+
+					<TextBlock Classes="h2" Text="Birth Place"  Grid.Column="0" Grid.Row="4"/>
+					<TextBox Classes="c1" Text="{Binding CurrentActor.PlaceOfBirth, Mode=TwoWay }"  Grid.Row="4" Grid.Column="1" />
+					<TextBlock Classes="h2" Text="TMDBID"  Grid.Column="3" Grid.Row="4"/>
+					<TextBox Classes="c1" Text="{Binding CurrentActor.TMDBID}" Grid.Column="4" Grid.Row="4" />
+
+					<tcb:ImagedButton
+					Grid.Column="5"
+					Grid.Row="4"
+					Name="SearchTMDB"
+					Command="{Binding Search}"
+					ImageSource="avares://TaymadeControls/Assets/search_icon.png"
+					LabelText="Search TMDB"
+					/>
+
+					<tcb:ImagedButton Grid.Column="5"
+									  Grid.Row="5"
+									  Name="GetActor"
+									  Command="{Binding GetActor}"
+									  ImageSource="avares://TaymadeControls/Assets/get.png"
+									  LabelText="Get Actor"
+									 />
+
+
+					<TextBlock Classes="h2" Text="IMDB"  Grid.Column="3" Grid.Row="5"/>
+					<TextBox Classes="c1" Text="{Binding CurrentActor.IMDB}" Grid.Column="4" Grid.Row="5" />
+					<Image Source="{Binding CurrentActor.ImageBMP}" Grid.Column="6" Grid.Row="0" Grid.RowSpan="6"/>
+
+
+				</Grid>
+			</StackPanel>
+			<StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center" Height="50">
+				<tcb:OKCancelPanel Name="OkButtonPanelActorDialog" />
+
+				<Button Content="Search" Margin="5"
+						Command="{Binding Search}" Name="SearchButton" >
+				</Button>
+
+
+			</StackPanel>
+
+		</DockPanel>
+	</Border>
+
+
+
+</Window>

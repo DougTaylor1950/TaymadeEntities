@@ -149,6 +149,7 @@ namespace TaymadeEntities.Models
         {
             get
             {
+                if (imageBMP == null)
                 SetImageBMP();
                 return imageBMP;
             }
@@ -205,10 +206,10 @@ namespace TaymadeEntities.Models
         /// Gets or sets the TmpRole.
         /// </summary>
         [NotMapped]
-        public string? TmpRole { get; internal set; }
+        public string? TmpRole { get;  set; }
 
-        [NotMapped]
-        public Cast? Parent { get; internal set; }
+        //[NotMapped]
+        //public Cast? Parent { get;  set; }
 
         #endregion
 
@@ -248,7 +249,7 @@ namespace TaymadeEntities.Models
         /// The SetDetailsFromCastMember.
         /// </summary>
         /// <param name="person">The person<see cref="CastMember"/>.</param>
-        public void SetDetailsFromCastMember(CastMember person)
+        public  void SetDetailsFromCastMember(CastMember person)
         {
             if (person != null)
             {
@@ -298,7 +299,7 @@ namespace TaymadeEntities.Models
         /// The SetDetailsFromPerson.
         /// </summary>
         /// <param name="person">The person<see cref="Person"/>.</param>
-        public void SetDetailsFromPerson(Person person)
+        public async void SetDetailsFromPerson(Person person)
         {
             if (person != null)
             {
@@ -325,7 +326,7 @@ namespace TaymadeEntities.Models
 
                 if (!string.IsNullOrEmpty(person.ProfilePath) && (string.IsNullOrEmpty(imagePath) || !System.IO.File.Exists(ImagePath)) && Id > 0)
                 {
-                    Avalonia.Media.Imaging.Bitmap temp = TmdbSupport.GetImageFromProfile(person.ProfilePath);
+                    Avalonia.Media.Imaging.Bitmap? temp =  await TmdbSupport.GetImageFromProfileAsync(person.ProfilePath);
 
 
                     if (temp != null && Id > 0)
@@ -407,7 +408,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Save.
         /// </summary>
-        internal void Save()
+        public void Save()
         {
             if (Dirty)
                 try
@@ -451,7 +452,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The SetImageBMP.
         /// </summary>
-        private void SetImageBMP()
+        public void SetImageBMP()
         {
             try
             {

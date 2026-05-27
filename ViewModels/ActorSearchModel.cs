@@ -229,16 +229,20 @@ namespace TaymadeEntities.ViewModels
                 if (disposing)
                 {
                     // TODO: dispose managed state (managed objects)
+                    foreach (var item in this.ActorList)
+                    {
+                        item.Dispose();
+                    }
                     this.ActorList?.Clear();
                     this.ActorList = null;
-                    //this.CurrentActor?.Dispose();
+                    this.CurrentActor?.Dispose();
                     this.CurrentActor = null;
                     this.FoundPeople?.Clear();
                     this.FoundPeople = null;
                     this.FoundPerson = null;
                     this.oldActorList?.Clear();
                     this.oldActorList = null;
-                    //this.SelectedActor?.Dispose();
+                    this.SelectedActor?.Dispose();
                     this.SelectedActor = null;
                 }
 
@@ -262,7 +266,7 @@ namespace TaymadeEntities.ViewModels
             GC.SuppressFinalize(this);
         }
 
-        internal string? GetTMIDB()
+        public string? GetTMIDB()
         {
             string? returnValue = null;
             if (FoundPerson != null)

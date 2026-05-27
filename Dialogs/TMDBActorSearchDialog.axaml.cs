@@ -187,6 +187,10 @@ namespace TaymadeEntities.Dialogs
             {
                 if (disposing)
                 {
+                    foreach (var item in actorList)
+                    {
+                        item.Dispose();
+                    }
                     this.actorList?.Clear();
                     this.actorList = null;
                     this.DataContext = null;

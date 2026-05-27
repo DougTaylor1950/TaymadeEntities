@@ -24,7 +24,7 @@ namespace TaymadeEntities.Models
     /// Defines the <see cref="Actor" />.
     /// </summary>
     [Table("Actor")]
-    public partial class Actor : ModelBase
+    public partial class Actor : ModelBase, IDisposable
     {
         #region Fields
 
@@ -74,6 +74,7 @@ namespace TaymadeEntities.Models
         private bool? mergeItem = false;
         private bool? mergeSource = false;
         private bool dirty;
+        private bool disposedValue;
 
         #endregion
 
@@ -94,8 +95,8 @@ namespace TaymadeEntities.Models
         {
             string name = e.PropertyName;
 
-            if (!(name == "MergeItem" || name == "MergeSource"  || name == "Casts"  || name == "BMPVisible"  || name == "GenderDisplay" || name == "GenderValue" 
-                || name == "ImageBMP" || name == "Movies"  || name == "TmpRole"))
+            if (!(name == "MergeItem" || name == "MergeSource" || name == "Casts" || name == "BMPVisible" || name == "GenderDisplay" || name == "GenderValue"
+                || name == "ImageBMP" || name == "Movies" || name == "TmpRole"))
             {
                 Dirty = true;
                 if (!string.IsNullOrEmpty(ChangedFields)) ChangedFields += ",";
@@ -169,6 +170,8 @@ namespace TaymadeEntities.Models
 
         [NotMapped]
         public bool? MergeSource { get => mergeSource; set => this.RaiseAndSetIfChanged(ref mergeSource, value); }
+
+        
 
         /// <summary>
         /// Gets or sets the Adult.
@@ -279,7 +282,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         public string? Info
         {
-            get => info; 
+            get => info;
             set
             {
                 if (!string.IsNullOrEmpty(value) && value.Length > 600) value = value.Substring(0, 600);
@@ -373,6 +376,35 @@ namespace TaymadeEntities.Models
                 this.TMDBID = temp.TMDBID;
                 this.WIKIPageID = temp.WIKIPageID;
             }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    imageBMP?.Dispose();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~Actor()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         #endregion

@@ -18,7 +18,7 @@ namespace TaymadeEntities.Models
     /// Defines the <see cref="Bookmark" />.
     /// </summary>
     [Table("Bookmarks")]
-    public partial class Bookmark : ModelBase
+    public partial class Bookmark : ModelBase,IDisposable
     {
         #region Fields
 
@@ -46,6 +46,7 @@ namespace TaymadeEntities.Models
         /// Defines the type.
         /// </summary>
         private string? type = string.Empty;
+        private bool disposedValue;
 
         #endregion
 
@@ -158,6 +159,35 @@ namespace TaymadeEntities.Models
             string returnVal = this.Name ;
             if (Time != null && time.Value > 0) returnVal += "-" + Time.ToString();
             return returnVal;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    ImageBMP?.Dispose();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~Bookmark()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

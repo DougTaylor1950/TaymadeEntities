@@ -25,7 +25,7 @@ namespace TaymadeEntities.Models
     /// </summary>
     [MetadataType(typeof(MovieMetaData))]
 
-    public partial class Movies : ModelBase
+    public partial class Movies : ModelBase, IDisposable
     {
         #region Fields
 
@@ -186,6 +186,7 @@ namespace TaymadeEntities.Models
         private string json;
         private bool? hasSeries;
         private bool? hasSeason;
+        private bool disposedValue;
 
         #endregion
 
@@ -341,6 +342,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the Casts.
         /// </summary>
+        [NotMapped]
         public ICollection<Cast> Casts
         {
             get
@@ -735,6 +737,36 @@ namespace TaymadeEntities.Models
             }
 
             set => this.RaiseAndSetIfChanged(ref year, value);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    imageBMP?.Dispose();
+                    // TODO: dispose managed state (managed objects)
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~Movies()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         #endregion

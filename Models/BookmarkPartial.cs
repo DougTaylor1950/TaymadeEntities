@@ -283,7 +283,7 @@ namespace TaymadeEntities.Models
             if (local != null)
             {
                 // detach
-                // DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
+                 DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
             }
             DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
            int count = await DataController.SandboxEntities.SaveChangesAsync();
