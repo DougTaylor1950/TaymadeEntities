@@ -9,6 +9,7 @@
 namespace TaymadeEntities.Support
 {
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -1795,6 +1796,7 @@ namespace TaymadeEntities.Support
         /// </summary>
         public MovieItem()
         {
+            // need to set Jobject value
         }
 
         /// <summary>
@@ -1817,6 +1819,14 @@ namespace TaymadeEntities.Support
         #endregion
 
         #region Properties
+
+        public JObject jObject 
+        { get
+            {
+                return jObject1;
+            }
+            set => jObject1 = value; 
+        }
 
         /// <summary>
         /// Gets or sets the Actors
@@ -1858,7 +1868,7 @@ namespace TaymadeEntities.Support
             {
                 if (countries == null)
                 {
-                    countries = TmdbSupport.GetProductionCountries(jObject);
+                    countries = TmdbSupport.GetProductionCountries();
                 }
 
                 return countries;
@@ -1905,13 +1915,13 @@ namespace TaymadeEntities.Support
         /// <summary>
         /// Gets or sets the Languages
         /// </summary>
-        public LanguageList Languages
+        public LanguageList? Languages
         {
             get
             {
                 if (languages == null)
                 {
-                    Languages = TmdbSupport.GetLanguages(jObject);
+                    Languages = TmdbSupport.GetLanguages();
                 }
                 return languages;
             }
@@ -1941,7 +1951,7 @@ namespace TaymadeEntities.Support
             {
                 if (productionCompanies == null)
                 {
-                    productionCompanies = TmdbSupport.GetProductionCompanies(jObject);
+                    productionCompanies = TmdbSupport.GetProductionCompanies();
                 }
                 return productionCompanies;
             }
@@ -2033,26 +2043,24 @@ namespace TaymadeEntities.Support
         //    If you prefer async propagation, convert this property into an async method instead.
 
         // Replacement: updated jObject property to synchronously obtain task result
-        private Newtonsoft.Json.Linq.JObject jObject
+        public static async Task<Newtonsoft.Json.Linq.JObject?> GetJObject(int ID)
         {
-            get
+
+            JObject jObject1 = null;
             {
-                if (jObject1 == null)
+                // Synchronously wait for the async call result to satisfy the string assignment.
+                // Using GetAwaiter().GetResult() avoids an extra AggregateException wrapper.
+                string nfoData = await TmdbSupport.GetMovieDBJsonAsync(ID);
+
+                if (!string.IsNullOrEmpty(nfoData))
                 {
-                    // Synchronously wait for the async call result to satisfy the string assignment.
-                    // Using GetAwaiter().GetResult() avoids an extra AggregateException wrapper.
-                    string nfoData = TmdbSupport.GetMovieDBJsonAsync(ID).GetAwaiter().GetResult();
-
-                    if (!string.IsNullOrEmpty(nfoData))
-                    {
-                        jObject1 = Newtonsoft.Json.Linq.JObject.Parse(nfoData);
-                    }
+                    jObject1 = Newtonsoft.Json.Linq.JObject.Parse(nfoData);
                 }
-
-                return jObject1;
             }
 
-            set => jObject1 = value;
+            return jObject1;
+
+
         }
 
         #endregion
@@ -2423,11 +2431,11 @@ namespace TaymadeEntities.Support
         [JsonProperty("id")]
         public int TMID { get => tMID; set => tMID = value; }
 
-    
+
         #endregion
 
         public static implicit operator Models.Season(Season v)
-    {
+        {
             if (v == null)
             {
                 return null;
@@ -2449,569 +2457,569 @@ namespace TaymadeEntities.Support
 
             return result;
         }
-}
-
-/// <summary>
-/// Defines the <see cref="SeasonList" />
-/// </summary>
-public class SeasonList : List<Season>
-{
-    public void Refresh()
-    {
-
     }
 
-    internal List<Models.Season>? GetSeasons()
+    /// <summary>
+    /// Defines the <see cref="SeasonList" />
+    /// </summary>
+    public class SeasonList : List<Season>
     {
-        List<Models.Season> returnList = new();
-        foreach (var item in this)
+        public void Refresh()
         {
-            returnList.Add(item);
+
         }
 
-        return returnList;
-
-    }
-
-
-}
-
-/// <summary>
-/// Defines the <see cref="StreamDetails" />
-/// </summary>
-public class StreamDetails
-{
-    #region Fields
-
-    /// <summary>
-    /// Defines the audioDetails
-    /// </summary>
-    private Audio? audioDetails = null;
-
-    /// <summary>
-    /// Defines the videoDetails
-    /// </summary>
-    private Video? videoDetails = null;
-
-    #endregion
-
-    #region Properties
-
-    /// <summary>
-    /// Gets or sets the audio details.
-    /// </summary>
-    public Audio AudioDetails
-    {
-        get
+        internal List<Models.Season>? GetSeasons()
         {
-            if (audioDetails == null)
+            List<Models.Season> returnList = new();
+            foreach (var item in this)
             {
-                audioDetails = new Audio();
+                returnList.Add(item);
             }
 
-            return audioDetails;
+            return returnList;
+
         }
-        set => audioDetails = value;
+
+
     }
 
     /// <summary>
-    /// Gets or sets the video details.
+    /// Defines the <see cref="StreamDetails" />
     /// </summary>
-    public Video VideoDetails
+    public class StreamDetails
     {
-        get
+        #region Fields
+
+        /// <summary>
+        /// Defines the audioDetails
+        /// </summary>
+        private Audio? audioDetails = null;
+
+        /// <summary>
+        /// Defines the videoDetails
+        /// </summary>
+        private Video? videoDetails = null;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets or sets the audio details.
+        /// </summary>
+        public Audio AudioDetails
         {
-            if (videoDetails == null)
+            get
             {
-                videoDetails = new Video();
+                if (audioDetails == null)
+                {
+                    audioDetails = new Audio();
+                }
+
+                return audioDetails;
+            }
+            set => audioDetails = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the video details.
+        /// </summary>
+        public Video VideoDetails
+        {
+            get
+            {
+                if (videoDetails == null)
+                {
+                    videoDetails = new Video();
+                }
+
+                return videoDetails;
+            }
+            set => videoDetails = value;
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Converts to xml.
+        /// </summary>
+        /// <returns></returns>
+        public XElement ToXML()
+        {
+            XElement returnXML = new XElement("streamdetails");
+            returnXML.Add(new XElement("video", VideoDetails));
+            returnXML.Add(new XElement("audio", AudioDetails));
+            return returnXML;
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Defines the <see cref="Tag" />
+    /// </summary>
+    public class Tag
+    {
+        #region Fields
+
+        /// <summary>
+        /// Defines the tagItem
+        /// </summary>
+        private string tagItem = string.Empty;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Tag"/> class.
+        /// </summary>
+        public Tag()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Tag"/> class.
+        /// </summary>
+        /// <param name="tagItem">The tagItem<see cref="string"/></param>
+        public Tag(string tagItem)
+        {
+            this.tagItem = tagItem;
+        }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets or sets the TagItem
+        /// </summary>
+        public string TagItem { get => tagItem; set => tagItem = value; }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Defines the <see cref="TagList" />
+    /// </summary>
+    public class TagList : List<Tag>
+    {
+        #region Methods
+
+        /// <summary>
+        /// The ToString
+        /// </summary>
+        /// <returns>The <see cref="string"/></returns>
+        public override string ToString()
+        {
+            string returnValue = string.Empty;
+
+            foreach (Tag item in this)
+            {
+                if (returnValue != string.Empty)
+                {
+                    returnValue += ",";
+                }
+
+                returnValue += item.TagItem;
             }
 
-            return videoDetails;
+            return returnValue;
         }
-        set => videoDetails = value;
-    }
 
-    #endregion
-
-    #region Methods
-
-    /// <summary>
-    /// Converts to xml.
-    /// </summary>
-    /// <returns></returns>
-    public XElement ToXML()
-    {
-        XElement returnXML = new XElement("streamdetails");
-        returnXML.Add(new XElement("video", VideoDetails));
-        returnXML.Add(new XElement("audio", AudioDetails));
-        return returnXML;
-    }
-
-    #endregion
-}
-
-/// <summary>
-/// Defines the <see cref="Tag" />
-/// </summary>
-public class Tag
-{
-    #region Fields
-
-    /// <summary>
-    /// Defines the tagItem
-    /// </summary>
-    private string tagItem = string.Empty;
-
-    #endregion
-
-    #region Constructors
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Tag"/> class.
-    /// </summary>
-    public Tag()
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="Tag"/> class.
-    /// </summary>
-    /// <param name="tagItem">The tagItem<see cref="string"/></param>
-    public Tag(string tagItem)
-    {
-        this.tagItem = tagItem;
-    }
-
-    #endregion
-
-    #region Properties
-
-    /// <summary>
-    /// Gets or sets the TagItem
-    /// </summary>
-    public string TagItem { get => tagItem; set => tagItem = value; }
-
-    #endregion
-}
-
-/// <summary>
-/// Defines the <see cref="TagList" />
-/// </summary>
-public class TagList : List<Tag>
-{
-    #region Methods
-
-    /// <summary>
-    /// The ToString
-    /// </summary>
-    /// <returns>The <see cref="string"/></returns>
-    public override string ToString()
-    {
-        string returnValue = string.Empty;
-
-        foreach (Tag item in this)
+        /// <summary>
+        /// The ToXml
+        /// </summary>
+        /// <param name="xml">The xml<see cref="XElement"/></param>
+        /// <returns>The <see cref="XElement"/></returns>
+        public XElement ToXml(XElement xml)
         {
-            if (returnValue != string.Empty)
+            foreach (Tag item in this)
             {
-                returnValue += ",";
+                xml.Add(new XElement("tag", item.TagItem));
             }
-
-            returnValue += item.TagItem;
+            return xml;
         }
 
-        return returnValue;
+        #endregion
     }
 
     /// <summary>
-    /// The ToXml
+    /// Defines the <see cref="TVShow" />
     /// </summary>
-    /// <param name="xml">The xml<see cref="XElement"/></param>
-    /// <returns>The <see cref="XElement"/></returns>
-    public XElement ToXml(XElement xml)
+    public class TVShow
     {
-        foreach (Tag item in this)
+        #region Fields
+
+        /// <summary>
+        /// Defines the backdropPath
+        /// </summary>
+        private string backdropPath = string.Empty;
+
+        /// <summary>
+        /// Defines the credits
+        /// </summary>
+        private CastList? credits;
+
+        /// <summary>
+        /// Defines the firstAirDate
+        /// </summary>
+        private DateTime? firstAirDate;
+
+        /// <summary>
+        /// Defines the genres
+        /// </summary>
+        private GenreList? genres;
+
+        /// <summary>
+        /// Defines the homePage
+        /// </summary>
+        private string homePage = string.Empty;
+
+        /// <summary>
+        /// Defines the inProduction
+        /// </summary>
+        private bool inProduction;
+
+        /// <summary>
+        /// Defines the languages
+        /// </summary>
+        private string[]? languages;
+
+        /// <summary>
+        /// Defines the name
+        /// </summary>
+        private string name = string.Empty;
+
+        /// <summary>
+        /// Defines the noOfEpisodes
+        /// </summary>
+        private int noOfEpisodes;
+
+        /// <summary>
+        /// Defines the noOfSeasons
+        /// </summary>
+        private int noOfSeasons;
+
+        /// <summary>
+        /// Defines the originalLanguage
+        /// </summary>
+        private string originalLanguage = string.Empty;
+
+        /// <summary>
+        /// Defines the originalName
+        /// </summary>
+        private string originalName = string.Empty;
+
+        /// <summary>
+        /// Defines the originCountries
+        /// </summary>
+        private string[]? originCountries;
+
+        /// <summary>
+        /// Defines the overview
+        /// </summary>
+        private string overview = string.Empty;
+
+        /// <summary>
+        /// Defines the productionCompanies
+        /// </summary>
+        //private ProductionCompanyList productionCompanies;
+
+        /// <summary>
+        /// Defines the showID
+        /// </summary>
+        private int showID = -1;
+
+        /// <summary>
+        /// The seasons
+        /// </summary>
+        /// <autogeneratedoc />
+        private SeasonList? seasons;
+
+        /// <summary>
+        /// The status
+        /// </summary>
+        /// <autogeneratedoc />
+        private string status = string.Empty;
+
+        /// <summary>
+        /// The type
+        /// </summary>
+        /// <autogeneratedoc />
+        private string type = string.Empty;
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TVShow"/> class.
+        /// </summary>
+        public TVShow()
         {
-            xml.Add(new XElement("tag", item.TagItem));
         }
-        return xml;
-    }
 
-    #endregion
-}
-
-/// <summary>
-/// Defines the <see cref="TVShow" />
-/// </summary>
-public class TVShow
-{
-    #region Fields
-
-    /// <summary>
-    /// Defines the backdropPath
-    /// </summary>
-    private string backdropPath = string.Empty;
-
-    /// <summary>
-    /// Defines the credits
-    /// </summary>
-    private CastList? credits;
-
-    /// <summary>
-    /// Defines the firstAirDate
-    /// </summary>
-    private DateTime? firstAirDate;
-
-    /// <summary>
-    /// Defines the genres
-    /// </summary>
-    private GenreList? genres;
-
-    /// <summary>
-    /// Defines the homePage
-    /// </summary>
-    private string homePage = string.Empty;
-
-    /// <summary>
-    /// Defines the inProduction
-    /// </summary>
-    private bool inProduction;
-
-    /// <summary>
-    /// Defines the languages
-    /// </summary>
-    private string[]? languages;
-
-    /// <summary>
-    /// Defines the name
-    /// </summary>
-    private string name = string.Empty;
-
-    /// <summary>
-    /// Defines the noOfEpisodes
-    /// </summary>
-    private int noOfEpisodes;
-
-    /// <summary>
-    /// Defines the noOfSeasons
-    /// </summary>
-    private int noOfSeasons;
-
-    /// <summary>
-    /// Defines the originalLanguage
-    /// </summary>
-    private string originalLanguage = string.Empty;
-
-    /// <summary>
-    /// Defines the originalName
-    /// </summary>
-    private string originalName = string.Empty;
-
-    /// <summary>
-    /// Defines the originCountries
-    /// </summary>
-    private string[]? originCountries;
-
-    /// <summary>
-    /// Defines the overview
-    /// </summary>
-    private string overview = string.Empty;
-
-    /// <summary>
-    /// Defines the productionCompanies
-    /// </summary>
-    //private ProductionCompanyList productionCompanies;
-
-    /// <summary>
-    /// Defines the showID
-    /// </summary>
-    private int showID = -1;
-
-    /// <summary>
-    /// The seasons
-    /// </summary>
-    /// <autogeneratedoc />
-    private SeasonList? seasons;
-
-    /// <summary>
-    /// The status
-    /// </summary>
-    /// <autogeneratedoc />
-    private string status = string.Empty;
-
-    /// <summary>
-    /// The type
-    /// </summary>
-    /// <autogeneratedoc />
-    private string type = string.Empty;
-
-    #endregion
-
-    #region Constructors
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TVShow"/> class.
-    /// </summary>
-    public TVShow()
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="TVShow"/> class.
-    /// </summary>
-    /// <param name="json">The json<see cref="string"/></param>
-    public TVShow(string json)
-    {
-        try
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TVShow"/> class.
+        /// </summary>
+        /// <param name="json">The json<see cref="string"/></param>
+        public TVShow(string json)
         {
-
-            JsonSerializerSettings settings = new JsonSerializerSettings();
-            settings.NullValueHandling = NullValueHandling.Ignore;
-            TVShow? tvShow = JsonConvert.DeserializeObject<TVShow>(json, settings);
-            if (tvShow != null)
+            try
             {
-                backdropPath = tvShow.backdropPath;
-                Credits = tvShow.Credits;
-                FirstAirDate = tvShow.FirstAirDate;
-                Genres = tvShow.Genres;
-                HomePage = tvShow.HomePage;
-                ShowID = tvShow.ShowID;
-                inProduction = tvShow.InProduction;
-                //this.Languages = tvShow.Languages;
-                Name = tvShow.Name;
-                OriginalName = tvShow.OriginalName;
-                OriginalLanguage = tvShow.OriginalLanguage;
-                OriginCountries = tvShow.OriginCountries;
-                Overview = tvShow.Overview;
-                //ProductionCompanies = tvShow.ProductionCompanies;
-                ShowID = tvShow.ShowID;
-                noOfEpisodes = tvShow.NoOfEpisodes;
-                NoOfSeasons = tvShow.NoOfSeasons;
-                Seasons = tvShow.Seasons;
-                Status = tvShow.Status;
-                Type = tvShow.Type;
+
+                JsonSerializerSettings settings = new JsonSerializerSettings();
+                settings.NullValueHandling = NullValueHandling.Ignore;
+                TVShow? tvShow = JsonConvert.DeserializeObject<TVShow>(json, settings);
+                if (tvShow != null)
+                {
+                    backdropPath = tvShow.backdropPath;
+                    Credits = tvShow.Credits;
+                    FirstAirDate = tvShow.FirstAirDate;
+                    Genres = tvShow.Genres;
+                    HomePage = tvShow.HomePage;
+                    ShowID = tvShow.ShowID;
+                    inProduction = tvShow.InProduction;
+                    //this.Languages = tvShow.Languages;
+                    Name = tvShow.Name;
+                    OriginalName = tvShow.OriginalName;
+                    OriginalLanguage = tvShow.OriginalLanguage;
+                    OriginCountries = tvShow.OriginCountries;
+                    Overview = tvShow.Overview;
+                    //ProductionCompanies = tvShow.ProductionCompanies;
+                    ShowID = tvShow.ShowID;
+                    noOfEpisodes = tvShow.NoOfEpisodes;
+                    NoOfSeasons = tvShow.NoOfSeasons;
+                    Seasons = tvShow.Seasons;
+                    Status = tvShow.Status;
+                    Type = tvShow.Type;
+                }
+            }
+            catch (Exception)
+            {
+
             }
         }
-        catch (Exception)
-        {
 
-        }
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets or sets the BackdropPath
+        /// </summary>
+        [JsonProperty("backdrop_path")]
+        public string BackdropPath { get => backdropPath; set => backdropPath = value; }
+
+        /// <summary>
+        /// Gets or sets the Credits
+        /// </summary>
+        [JsonProperty("created_by")]
+        public CastList? Credits { get => credits; set => credits = value; }
+
+        /// <summary>
+        /// Gets or sets the FirstAirDate
+        /// </summary>
+        [JsonProperty("first_air_date")]
+        public DateTime? FirstAirDate { get => firstAirDate; set => firstAirDate = value; }
+
+        /// <summary>
+        /// Gets or sets the Genres
+        /// </summary>
+        [JsonProperty("genres")]
+        public GenreList? Genres { get => genres; set => genres = value; }
+
+        /// <summary>
+        /// Gets or sets the HomePage
+        /// </summary>
+        [JsonProperty("homepage")]
+        public string HomePage { get => homePage; set => homePage = value; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether InProduction
+        /// </summary>
+        [JsonProperty("in_production")]
+        public bool InProduction { get => inProduction; set => inProduction = value; }
+
+        /// <summary>
+        /// Gets or sets the Languages
+        /// </summary>
+        [JsonProperty("languages")]
+        public string[] Languages { get => languages; set => languages = value; }
+
+        /// <summary>
+        /// Gets or sets the Name
+        /// </summary>
+        [JsonProperty("name")]
+        public string Name { get => name; set => name = value; }
+
+        /// <summary>
+        /// Gets or sets the NoOfEpisodes
+        /// </summary>
+        [JsonProperty("number_of_episodes")]
+        public int NoOfEpisodes { get => noOfEpisodes; set => noOfEpisodes = value; }
+
+        /// <summary>
+        /// Gets or sets the NoOfSeasons
+        /// </summary>
+        [JsonProperty("number_of_seasons")]
+        public int NoOfSeasons { get => noOfSeasons; set => noOfSeasons = value; }
+
+
+        /// <summary>
+        /// Gets or sets the OriginalLanguage
+        /// </summary>
+        [JsonProperty("original_language")]
+        public string OriginalLanguage { get => originalLanguage; set => originalLanguage = value; }
+
+        /// <summary>
+        /// Gets or sets the OriginalName
+        /// </summary>
+        [JsonProperty("original_name")]
+        public string OriginalName { get => originalName; set => originalName = value; }
+
+        /// <summary>
+        /// Gets or sets the OriginCountries
+        /// </summary>
+        [JsonProperty("origin_country")]
+        public string[]? OriginCountries { get => originCountries; set => originCountries = value; }
+
+        /// <summary>
+        /// Gets or sets the Overview
+        /// </summary>
+        [JsonProperty("overview")]
+        public string Overview { get => overview; set => overview = value; }
+
+        /// <summary>
+        /// Gets or sets the ProductionCompanies
+        /// </summary>
+        //[JsonProperty("production_companies")]
+        //public ProductionCompanyList ProductionCompanies { get => productionCompanies; set => productionCompanies = value; }
+
+        /// <summary>
+        /// Gets or sets the ShowID
+        /// </summary>
+        [JsonProperty("id")]
+        public int ShowID { get => showID; set => showID = value; }
+
+        /// <summary>
+        /// Gets or sets the seasons.
+        /// </summary>
+        /// <value>
+        /// The seasons.
+        /// </value>
+        /// <autogeneratedoc />
+        [JsonProperty("seasons")]
+        public SeasonList Seasons { get => seasons; set => seasons = value; }
+
+        /// <summary>
+        /// Gets or sets the status.
+        /// </summary>
+        /// <value>
+        /// The status.
+        /// </value>
+        /// <autogeneratedoc />
+        [JsonProperty("status")]
+        public string Status { get => status; set => status = value; }
+
+        /// <summary>
+        /// Gets or sets the type.
+        /// </summary>
+        /// <value>
+        /// The type.
+        /// </value>
+        /// <autogeneratedoc />
+        [JsonProperty("type")]
+        public string Type { get => type; set => type = value; }
+
+        #endregion
     }
 
-    #endregion
-
-    #region Properties
-
     /// <summary>
-    /// Gets or sets the BackdropPath
+    /// Defines the <see cref="Video" />
     /// </summary>
-    [JsonProperty("backdrop_path")]
-    public string BackdropPath { get => backdropPath; set => backdropPath = value; }
-
-    /// <summary>
-    /// Gets or sets the Credits
-    /// </summary>
-    [JsonProperty("created_by")]
-    public CastList? Credits { get => credits; set => credits = value; }
-
-    /// <summary>
-    /// Gets or sets the FirstAirDate
-    /// </summary>
-    [JsonProperty("first_air_date")]
-    public DateTime? FirstAirDate { get => firstAirDate; set => firstAirDate = value; }
-
-    /// <summary>
-    /// Gets or sets the Genres
-    /// </summary>
-    [JsonProperty("genres")]
-    public GenreList? Genres { get => genres; set => genres = value; }
-
-    /// <summary>
-    /// Gets or sets the HomePage
-    /// </summary>
-    [JsonProperty("homepage")]
-    public string HomePage { get => homePage; set => homePage = value; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether InProduction
-    /// </summary>
-    [JsonProperty("in_production")]
-    public bool InProduction { get => inProduction; set => inProduction = value; }
-
-    /// <summary>
-    /// Gets or sets the Languages
-    /// </summary>
-    [JsonProperty("languages")]
-    public string[] Languages { get => languages; set => languages = value; }
-
-    /// <summary>
-    /// Gets or sets the Name
-    /// </summary>
-    [JsonProperty("name")]
-    public string Name { get => name; set => name = value; }
-
-    /// <summary>
-    /// Gets or sets the NoOfEpisodes
-    /// </summary>
-    [JsonProperty("number_of_episodes")]
-    public int NoOfEpisodes { get => noOfEpisodes; set => noOfEpisodes = value; }
-
-    /// <summary>
-    /// Gets or sets the NoOfSeasons
-    /// </summary>
-    [JsonProperty("number_of_seasons")]
-    public int NoOfSeasons { get => noOfSeasons; set => noOfSeasons = value; }
-
-
-    /// <summary>
-    /// Gets or sets the OriginalLanguage
-    /// </summary>
-    [JsonProperty("original_language")]
-    public string OriginalLanguage { get => originalLanguage; set => originalLanguage = value; }
-
-    /// <summary>
-    /// Gets or sets the OriginalName
-    /// </summary>
-    [JsonProperty("original_name")]
-    public string OriginalName { get => originalName; set => originalName = value; }
-
-    /// <summary>
-    /// Gets or sets the OriginCountries
-    /// </summary>
-    [JsonProperty("origin_country")]
-    public string[]? OriginCountries { get => originCountries; set => originCountries = value; }
-
-    /// <summary>
-    /// Gets or sets the Overview
-    /// </summary>
-    [JsonProperty("overview")]
-    public string Overview { get => overview; set => overview = value; }
-
-    /// <summary>
-    /// Gets or sets the ProductionCompanies
-    /// </summary>
-    //[JsonProperty("production_companies")]
-    //public ProductionCompanyList ProductionCompanies { get => productionCompanies; set => productionCompanies = value; }
-
-    /// <summary>
-    /// Gets or sets the ShowID
-    /// </summary>
-    [JsonProperty("id")]
-    public int ShowID { get => showID; set => showID = value; }
-
-    /// <summary>
-    /// Gets or sets the seasons.
-    /// </summary>
-    /// <value>
-    /// The seasons.
-    /// </value>
-    /// <autogeneratedoc />
-    [JsonProperty("seasons")]
-    public SeasonList Seasons { get => seasons; set => seasons = value; }
-
-    /// <summary>
-    /// Gets or sets the status.
-    /// </summary>
-    /// <value>
-    /// The status.
-    /// </value>
-    /// <autogeneratedoc />
-    [JsonProperty("status")]
-    public string Status { get => status; set => status = value; }
-
-    /// <summary>
-    /// Gets or sets the type.
-    /// </summary>
-    /// <value>
-    /// The type.
-    /// </value>
-    /// <autogeneratedoc />
-    [JsonProperty("type")]
-    public string Type { get => type; set => type = value; }
-
-    #endregion
-}
-
-/// <summary>
-/// Defines the <see cref="Video" />
-/// </summary>
-public class Video
-{
-    #region Fields
-
-    /// <summary>
-    /// Defines the aspect
-    /// </summary>
-    private double aspect;
-
-    /// <summary>
-    /// Defines the codec
-    /// </summary>
-    private string codec = string.Empty;
-
-    /// <summary>
-    /// Defines the durationinseconds
-    /// </summary>
-    private int durationinseconds;
-
-    /// <summary>
-    /// Defines the height
-    /// </summary>
-    private int height;
-
-    /// <summary>
-    /// Defines the width
-    /// </summary>
-    private int width;
-
-    #endregion
-
-    #region Properties
-
-    /// <summary>
-    /// Gets or sets the Aspect
-    /// </summary>
-    public double Aspect { get => aspect; set => aspect = value; }
-
-    /// <summary>
-    /// Gets or sets the Codec
-    /// </summary>
-    public string Codec { get => codec; set => codec = value; }
-
-    /// <summary>
-    /// Gets or sets the Durationinseconds
-    /// </summary>
-    public int Durationinseconds { get => durationinseconds; set => durationinseconds = value; }
-
-    /// <summary>
-    /// Gets or sets the Height
-    /// </summary>
-    public int Height { get => height; set => height = value; }
-
-    /// <summary>
-    /// Gets or sets the Width
-    /// </summary>
-    public int Width { get => width; set => width = value; }
-
-    #endregion
-
-    #region Methods
-
-    /// <summary>
-    /// Converts to xml.
-    /// </summary>
-    /// <returns></returns>
-    public XElement ToXML()
+    public class Video
     {
-        XElement returnXML = new XElement("video");
-        returnXML.Add(new XElement("aspect", aspect));
-        returnXML.Add(new XElement("codec", codec));
-        returnXML.Add(new XElement("durationinseconds", durationinseconds));
-        returnXML.Add(new XElement("height", height));
-        returnXML.Add(new XElement("width", width));
+        #region Fields
 
-        return returnXML;
+        /// <summary>
+        /// Defines the aspect
+        /// </summary>
+        private double aspect;
+
+        /// <summary>
+        /// Defines the codec
+        /// </summary>
+        private string codec = string.Empty;
+
+        /// <summary>
+        /// Defines the durationinseconds
+        /// </summary>
+        private int durationinseconds;
+
+        /// <summary>
+        /// Defines the height
+        /// </summary>
+        private int height;
+
+        /// <summary>
+        /// Defines the width
+        /// </summary>
+        private int width;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets or sets the Aspect
+        /// </summary>
+        public double Aspect { get => aspect; set => aspect = value; }
+
+        /// <summary>
+        /// Gets or sets the Codec
+        /// </summary>
+        public string Codec { get => codec; set => codec = value; }
+
+        /// <summary>
+        /// Gets or sets the Durationinseconds
+        /// </summary>
+        public int Durationinseconds { get => durationinseconds; set => durationinseconds = value; }
+
+        /// <summary>
+        /// Gets or sets the Height
+        /// </summary>
+        public int Height { get => height; set => height = value; }
+
+        /// <summary>
+        /// Gets or sets the Width
+        /// </summary>
+        public int Width { get => width; set => width = value; }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Converts to xml.
+        /// </summary>
+        /// <returns></returns>
+        public XElement ToXML()
+        {
+            XElement returnXML = new XElement("video");
+            returnXML.Add(new XElement("aspect", aspect));
+            returnXML.Add(new XElement("codec", codec));
+            returnXML.Add(new XElement("durationinseconds", durationinseconds));
+            returnXML.Add(new XElement("height", height));
+            returnXML.Add(new XElement("width", width));
+
+            return returnXML;
+        }
+
+        #endregion
     }
-
-    #endregion
-}
 }

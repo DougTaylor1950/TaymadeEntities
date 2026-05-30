@@ -394,6 +394,8 @@ namespace TaymadeEntities.Support
         {
             iMovie? movie = null;
 
+            jObject = await MovieItem.GetJObject(id);
+            
             string json = await GetMovieDBJsonAsync(id, ImdbId, database);
 
             if (database == Database.MovieDb)
@@ -502,13 +504,13 @@ namespace TaymadeEntities.Support
                     //var genrelist = jObject["genres"];
                     returnValue.Genres = GetGenres(jObject);
 
-                    List<ProductionCompany> companies = GetProductionCompanies(jObject);
+                    List<ProductionCompany> companies = GetProductionCompanies();
 
                     returnValue.Companies = companies;
-                    CountryList countries = GetProductionCountries(jObject);
+                    CountryList countries = GetProductionCountries();
 
                     returnValue.Countries = countries;
-                    LanguageList spokenLanguages = GetLanguages(jObject);
+                    LanguageList spokenLanguages = GetLanguages();
 
                     returnValue.Languages = spokenLanguages;
 
@@ -518,19 +520,23 @@ namespace TaymadeEntities.Support
             return returnValue;
         }
 
-        public static LanguageList GetLanguages(JObject jObject)
+        public static LanguageList? GetLanguages()
         {
-            var languages = jObject["spoken_languages"];
-            if (languages != null)
+            LanguageList? spokenLanguages = null;
+            if (jObject != null)
             {
-                LanguageList? spokenLanguages = JsonConvert.DeserializeObject<LanguageList>(languages.ToString());
-                return spokenLanguages;
+                var languages = jObject["spoken_languages"];
+                if (languages != null)
+                {
+                    spokenLanguages = JsonConvert.DeserializeObject<LanguageList>(languages.ToString());
+                    
+                }
             }
-            else return null;
+            return spokenLanguages;
 
         }
 
-        public static CountryList GetProductionCountries(JObject jObject)
+        public static CountryList GetProductionCountries()
         {
             var productionCountries = jObject["production_countries"];
             if (productionCountries != null)
@@ -541,10 +547,16 @@ namespace TaymadeEntities.Support
             else return null;
         }
 
-        public static List<ProductionCompany> GetProductionCompanies(JObject jObject)
+        public static JObject? jObject { get; set; }
+
+        public static List<ProductionCompany> GetProductionCompanies()
         {
-            var productionCompanies = jObject["production_companies"];
-            List<ProductionCompany> companies = JsonConvert.DeserializeObject<List<ProductionCompany>>(productionCompanies.ToString());
+            List<ProductionCompany>? companies = null;
+            if (jObject != null)
+            {
+                var productionCompanies = jObject["production_companies"];
+                companies = JsonConvert.DeserializeObject<List<ProductionCompany>>(productionCompanies.ToString());
+            }
             return companies;
         }
 

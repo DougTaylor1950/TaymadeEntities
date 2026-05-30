@@ -173,6 +173,101 @@ namespace TaymadeEntities.Support
 
         #region Methods
 
+        public static void GetCastData(Movies movie, iMovie iMovie)
+        {
+            List<Cast> templist = new List<Cast>();
+
+            if (iMovie != null)
+            {
+                if (iMovie.CastList.Count > 0)
+                {
+                    // sort out cast
+
+                    if (movie.Casts == null) movie.Casts = new List<Cast>();
+                    foreach (var item in iMovie.CastList)
+                    {
+                        Cast? castMember = movie.Casts.Where(x => x.credit_id == item.CreditId).FirstOrDefault();
+
+                        if (castMember == null)
+                        {
+                            castMember = new Cast()
+                            {
+                                credit_id = item.CreditId,
+                                MovieID = movie.Id,
+                                CastId = item.CastID,
+                                Role = item.Character
+                            };
+
+                            Actor? actor = DataController.SandboxEntities.Actors.AsNoTracking().Where(x => x.TMDBID == item.ID).FirstOrDefault();
+
+                            if (actor == null)
+                            {
+                                actor = new Actor();
+                                actor.Save();
+                                actor.SetDetailsFromCastMember(item);
+                                DataController.SandboxEntities.Actors.Add(actor);
+                                DataController.SandboxEntities.SaveChanges();
+                            }
+
+                            if (actor != null)
+                                castMember.ActorId = actor.Id;
+
+                            templist.Add(castMember);
+
+                            //    DataController.SandboxEntities.Casts.Add(castMember);
+                            //    DataController.SandboxEntities.SaveChanges();
+                        }
+                        else
+                        {
+                            //castMember.Actor;
+                            if (castMember.Actor != null) castMember.Actor.SetDetailsFromCastMember(item);
+                            //actor.Save();
+                        }
+                    }
+
+                    foreach (var cast in templist)
+                    {
+                        DataController.SandboxEntities.Casts.Add(cast);
+                        DataController.SandboxEntities.SaveChanges();
+                    }
+                }
+
+                // take a look at directors
+                if (movie.DirectorID == null && !string.IsNullOrEmpty(iMovie.DirectorName))
+                {
+                    FindOrCreateDirector(movie, iMovie);
+                }
+
+                if (!string.IsNullOrEmpty(movie.DirectorsName) && !string.IsNullOrEmpty(iMovie.DirectorName) && iMovie.DirectorName != movie.DirectorsName)
+                {
+                    // need to change director 
+                    FindOrCreateDirector(movie, iMovie);
+                }
+            }
+        }
+
+        private static void FindOrCreateDirector(Movies movie, iMovie iMovie)
+        {
+            // look the director up
+            Models.Director? director = Models.DataController.DirectorList.Find(x => x.Name.ToLower() == iMovie.DirectorName.ToLower());
+
+            if (director != null)
+            {
+                movie.Director = director;
+                movie.DirectorID = director.Id;
+            }
+            else
+            {
+                // create new director
+                director = new Models.Director();
+                director.Name = iMovie.DirectorName;
+                Models.DataController.SandboxEntities.Directors.Add(director);
+                Models.DataController.SandboxEntities.SaveChanges();
+            }
+
+            movie.Save();
+        }
+
         /// <summary>
         ///   <br />
         /// </summary>
