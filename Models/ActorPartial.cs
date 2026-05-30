@@ -54,7 +54,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the movies.
         /// </summary>
-        private List<Movies> movies;
+        private List<Movies>? movies;
 
         /// <summary>
         /// Defines the nameList.
@@ -164,10 +164,10 @@ namespace TaymadeEntities.Models
         {
             get
             {
-                if (movies == null && Casts != null)
+                // need to get an updated list of Casts
+                Casts = DataController.SandboxEntities.Casts.Where(a => a.ActorId == this.Id).ToList();                if (movies == null && Casts != null)
                 {
                     movies = [];
-
                     foreach (var item in Casts)
                     {
                         Movies? movie = DataController.SandboxEntities.Movies.Find(item.MovieID);
@@ -175,6 +175,7 @@ namespace TaymadeEntities.Models
                             movies.Add(movie);
                     }
                 }
+                this.RaisePropertyChanged(nameof(Movies));
                 return movies;
             }
 

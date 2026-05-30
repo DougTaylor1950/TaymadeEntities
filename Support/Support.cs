@@ -64,10 +64,11 @@ namespace TaymadeEntities.Support
                         Name = "file",
                         Layout = "${longdate}|${level:uppercase=true}|${logger}|${message}|${environment-user}",
                         FileName = logDirectory + "\\Log.txt",
-                        ArchiveFileName = logDirectory + "\\log.{#}.txt",
+                        ArchiveFileName = logDirectory + "\\log.txt",
                         ArchiveSuffixFormat = "yyyyMMdd",
+
                         ArchiveEvery = FileArchivePeriod.Day,
-                        MaxArchiveDays = 30,
+                        MaxArchiveDays = 30
                     };
                     config.AddRule(LogLevel.Info, LogLevel.Fatal, consoleTarget, "*");
 
