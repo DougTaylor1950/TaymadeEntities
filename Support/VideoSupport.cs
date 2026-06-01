@@ -250,20 +250,20 @@ namespace TaymadeEntities.Support
         /// </summary>
         /// <param name="fileName">The fileName<see cref="string"/>.</param>
         /// <param name="newMovie">The newMovie<see cref="Movies"/>.</param>
-        public static async void GetDuration(string fileName, Movies newMovie)
-        {
-            MediaToolkit.Standard.Models.FfProbeOutput output = await VideoSupport.GetMetadataAsync(Support.FixImagePath(fileName));
+        //public static async void GetDuration(string fileName, Movies newMovie)
+        //{
+        //    MediaToolkit.Standard.Models.FfProbeOutput output = await VideoSupport.GetMetadataAsync(Support.FixImagePath(fileName));
 
-            if (output != null)
-            {
-                if (double.TryParse(output.Format.Duration, out double secs))
-                {
-                    System.TimeSpan ts = System.TimeSpan.FromSeconds(secs);
+        //    if (output != null)
+        //    {
+        //        if (double.TryParse(output.Format.Duration, out double secs))
+        //        {
+        //            System.TimeSpan ts = System.TimeSpan.FromSeconds(secs);
 
-                    newMovie.DurationSeconds = (int)ts.TotalSeconds;
-                }
-            }
-        }
+        //            newMovie.DurationSeconds = (int)ts.TotalSeconds;
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// The GetDurationSeconds.
@@ -271,25 +271,25 @@ namespace TaymadeEntities.Support
         /// <param name="fileName">The fileName<see cref="string"/>.</param>
         /// <param name="newMovie">The newMovie<see cref="Movies"/>.</param>
         /// <returns>The <see cref="Task{int}"/>.</returns>
-        public static async Task<int> GetDurationSecondsAsync(string fileName, Movies? newMovie)
-        {
-            MediaToolkit.Standard.Models.FfProbeOutput output = await VideoSupport.GetMetadataAsync(Support.FixImagePath(fileName));
+        //public static async Task<int> GetDurationSecondsAsync(string fileName, Movies? newMovie)
+        //{
+        //    MediaToolkit.Standard.Models.FfProbeOutput output = await VideoSupport.GetMetadataAsync(Support.FixImagePath(fileName));
 
-            int returnValue = 0;
+        //    int returnValue = 0;
 
-            if (output != null)
-            {
-                if (double.TryParse(output.Format.Duration, out double secs))
-                {
-                    System.TimeSpan ts = System.TimeSpan.FromSeconds(secs);
+        //    if (output != null)
+        //    {
+        //        if (double.TryParse(output.Format.Duration, out double secs))
+        //        {
+        //            System.TimeSpan ts = System.TimeSpan.FromSeconds(secs);
 
-                    if (newMovie != null) newMovie.DurationSeconds = (int)ts.TotalSeconds;
-                    returnValue = (int)ts.TotalSeconds;
-                }
-            }
+        //            if (newMovie != null) newMovie.DurationSeconds = (int)ts.TotalSeconds;
+        //            returnValue = (int)ts.TotalSeconds;
+        //        }
+        //    }
 
-            return returnValue;
-        }
+        //    return returnValue;
+        //}
 
         /// <summary>
         /// The GetMetadataAsync.
@@ -344,66 +344,40 @@ namespace TaymadeEntities.Support
         //    return output;
         //}
 
+
+
         /// <summary>
         /// The GrabBookmarkImage.
         /// </summary>
         /// <param name="Movie">The Movie<see cref="Models.Movies"/>.</param>
         /// <param name="bookmark">The bookmark<see cref="Models.Bookmark"/>.</param>
         /// <param name="offset">The offset<see cref="int"/>.</param>
-        public static async Task<string> GrabBookmarkImage(Models.Movies Movie, Models.Bookmark bookmark, int offset = 0)
+        public static async Task<string?> GrabBookmarkImage(Movies? currentMovie, Bookmark? currentBookmark)
         {
-            string ImagePath = string.Empty;
-            if (Movie != null && bookmark != null && bookmark.Time != null)
+            string? imagePath = null;
+            if (currentMovie != null && currentBookmark != null)
             {
-                string ffmpegFilePath = @"C:\Program Files\FFMpeg\bin\ffmpeg.exe";
-                string? ffprobeFilePath = null;
-                var videoPath = Support.FixImagePath(Movie.MoviePath);
-                double tempTime = bookmark.Time.Value;
-                string winThumbnailpath = Path.GetDirectoryName(Movie.MoviePath) + @"\" + Path.GetFileNameWithoutExtension(Movie.MoviePath) + tempTime.ToString().Trim() + ".BMP";
-                // temporarily add 2 to time
-                string dirSep = @"\";
-                if (Support.GetOS() != "WinNT")
-                {
-                    ffmpegFilePath = @"/usr/bin/ffmpeg";
-                    ffprobeFilePath = @"/usr/bin/ffprobe";
-                    dirSep = "/";
-                }
-                thumbnailPath = Path.GetDirectoryName(videoPath) + dirSep + Path.GetFileNameWithoutExtension(videoPath) + tempTime.ToString().Trim() + ".BMP";
+                double tempTime = currentBookmark.Time.Value;
 
-                if (!File.Exists(thumbnailPath))
-                {
+                string moviePath = currentMovie.MoviePath;
+                string bookmarkImagePath = Path.GetDirectoryName(currentMovie.MoviePath) + @"\" +
+                    Path.GetFileNameWithoutExtension(currentMovie.MoviePath)
+                    + tempTime.ToString().Trim() + ".BMP";
 
-                    try
-                    {
-                        tempTime = tempTime + offset;
-                        var serviceProvider = new ServiceCollection().AddMediaToolkit(ffmpegFilePath, ffprobeFilePath).BuildServiceProvider();
-                        // Get metadata
-                        var service = serviceProvider.GetService<IMediaToolkitService>();
-                        var metadataTask = new FfTaskGetMetadata(videoPath);
-                        if (service != null)
-                        {
-                            var metadataResult = await service.ExecuteAsync(metadataTask);
-                            var saveThumbnailTask = new FfTaskSaveThumbnail(videoPath, thumbnailPath, TimeSpan.FromSeconds(tempTime));
-                            await service.ExecuteAsync(saveThumbnailTask);
-                            bookmark.ImagePath = winThumbnailpath;
-                            ImagePath = bookmark.ImagePath;
-                            Avalonia.Media.Imaging.Bitmap? temp = bookmark.ImageBMP;
-                        }
-                    }
-                    catch (Exception ex)                                                                 
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
-                }
-                else
-                {
-                    bookmark.ImagePath = winThumbnailpath;
-                    ImagePath = bookmark.ImagePath;
-                    Avalonia.Media.Imaging.Bitmap? temp = bookmark.ImageBMP;
-                }
+                FFMpegSupport fFMpegSupport = new FFMpegSupport();
+                string winThumbnailpath = await fFMpegSupport.GrabImage(moviePath, bookmarkImagePath, currentBookmark.Time);
+                
+                var bmp = currentBookmark?.ImageBMP;
+                currentBookmark?.ImagePath = winThumbnailpath;
+                currentBookmark?.SetImageBMP();
+                imagePath = currentBookmark?.ImagePath;
+                // save changed bookmark
+                bool success = await currentBookmark?.SaveAsync();
+                fFMpegSupport = null;
             }
 
-            return ImagePath;
+
+            return imagePath;
         }
 
         /// <summary>

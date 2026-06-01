@@ -414,13 +414,16 @@ namespace TaymadeEntities.DBContext
         /// The DeleteMovie.
         /// </summary>
         /// <param name="Id">The Id<see cref="int"/>.</param>
-        public void DeleteMovie(int Id)
+        public bool DeleteMovie(int? Id)
         {
+            bool success = false;
             if (Id != null)
             {
                 var id = new SqlParameter("@MovieId", Id);
-                this.Database.ExecuteSqlRaw(" exec DeleteMovie @MovieId", id);
+                int result = this.Database.ExecuteSqlRaw(" exec DeleteMovie @MovieId", id);
+                success = result == 1;
             }
+            return success;
         }
 
         /// <summary>

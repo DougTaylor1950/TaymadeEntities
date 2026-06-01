@@ -60,7 +60,6 @@
 	  <Compile Remove="Dialogs\SearchMoviesDialog.axaml.cs" />
 	  <Compile Remove="Dialogs\TMDBSearchDialog.axaml.cs" />
 	  <Compile Remove="HeaderControl.axaml.cs" />
-	  <Compile Remove="Support\VideoSupport.cs" />
 
 	  <Compile Remove="UserControl1.axaml.cs" />
 	  

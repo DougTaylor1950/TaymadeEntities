@@ -821,9 +821,10 @@ namespace TaymadeEntities.Models
                 return filmDuration;
         }
 
-        public void Delete()
+        public bool  Delete()
         {
-            DataController.SandboxEntities.DeleteMovie(Id);
+            return DataController.SandboxEntities.DeleteMovie(Id);
+        
 
             //DataController.SandboxEntities.Movies.Remove(this);
             //DataController.SandboxEntities.SaveChanges();

@@ -59,18 +59,14 @@ namespace TaymadeEntities.Support
                     ScopeContext.PushProperty("UserName", "Doug Taylor");
 
                     var config = new LoggingConfiguration();
-                    var consoleTarget = new FileTarget
+                    var fileTarget = new FileTarget
                     {
                         Name = "file",
                         Layout = "${longdate}|${level:uppercase=true}|${logger}|${message}|${environment-user}",
-                        FileName = logDirectory + "\\Log.txt",
-                        ArchiveFileName = logDirectory + "\\log.txt",
-                        ArchiveSuffixFormat = "yyyyMMdd",
 
-                        ArchiveEvery = FileArchivePeriod.Day,
-                        MaxArchiveDays = 30
+                        FileName = Path.Combine(logDirectory,"${date:format=yyyyMMdd}.log")
                     };
-                    config.AddRule(LogLevel.Info, LogLevel.Fatal, consoleTarget, "*");
+                    config.AddRule(LogLevel.Info, LogLevel.Fatal, fileTarget, "*");
 
                     var sqlTarget = new NLog.Targets.DatabaseTarget
                     {
@@ -1191,9 +1187,9 @@ namespace TaymadeEntities.Support
         {
             string machineName = GetComputerName();
 
-            //MappedDrives? found = DataController.SandboxEntities.MappedDrives.Where(m => m.Computer == machineName && m.LocationType == "APP" && m.SourceDrive == AppName).FirstOrDefault();
+            MappedDrives? found = DataController.SandboxEntities.MappedDrives.Where(m => m.Computer == machineName && m.LocationType == "APP" && m.SourceDrive == AppName).FirstOrDefault();
 
-            //if (found != null) return found.DestinationDrive;
+            if (found != null) return found.DestinationDrive;
             return null;
         }
 
