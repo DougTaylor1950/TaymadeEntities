@@ -204,6 +204,14 @@ namespace TaymadeEntities.Support
             return returnJSON;
         }
 
+        public async static Task<string?> GetActorAsync(int id)
+        {
+            string searchUrl = "https://api.themoviedb.org/3/person/" + id.ToString().Trim() + "?api_key=" + ApiKey + "&language=en-US";
+
+            string? returnJSON = await CallWebClientAsync(searchUrl);
+            return returnJSON;
+        }
+
         public static string GetActorExternalIds(int id)
         {
             string searchUrl = "https://api.themoviedb.org/3/person/" + id.ToString().Trim() + "/external_ids?api_key=" + ApiKey + "&language=en-US";
@@ -338,6 +346,25 @@ namespace TaymadeEntities.Support
         public static Person GetPerson(int id)
         {
             string json = GetActor(id);
+
+            var settings = new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                MissingMemberHandling = MissingMemberHandling.Ignore
+            };
+
+            Person? person = JsonConvert.DeserializeObject<Person>(json, settings);
+
+            return person;
+        }
+
+        public async static Task<Person?> GetPersonAsync(int id)
+        {
+            string? json = await GetActorAsync(id);
+            if (string.IsNullOrEmpty(json))
+            {
+                return null;
+            }
 
             var settings = new JsonSerializerSettings
             {

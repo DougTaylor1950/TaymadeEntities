@@ -1044,7 +1044,13 @@ namespace TaymadeEntities.Models
             return success;
         }
 
-       
+        public void ReloadCasts()
+        {
+            using var ctx = DataController.SandboxEntities;
+            Casts = new ObservableCollection<Cast>(
+                    ctx.Casts.Where(c => c.MovieID == this.Id).OrderBy(c => c.ActorId).ToList());
+        }
+
         #endregion Methods
     }
 }

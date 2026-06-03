@@ -4341,7 +4341,7 @@ namespace TaymadeEntities.ViewModels
                                     //tempCastMember.Actor = actor;
 
                                     tempCastMember.MovieID = CurrentMovie.Id;
-                                    tempCastMember.Insert();
+                                    await tempCastMember.InsertAsync();
                                     tempCastMember.Actor = actor;
                                     tempCastMember.Movies = CurrentMovie;
                                     CurrentMovie.Casts.Add(tempCastMember);
@@ -4358,7 +4358,7 @@ namespace TaymadeEntities.ViewModels
                                 DataController.ActorList.Add(actor);
                                 tempCastMember.ActorId = actor.Id;
                                 tempCastMember.MovieID = CurrentMovie.Id;
-                                tempCastMember.Insert();
+                                await tempCastMember.InsertAsync();
                                 tempCastMember.Actor = actor;
                                 tempCastMember.Movies = CurrentMovie;
                                 CurrentMovie.Casts.Add(tempCastMember);
@@ -4368,7 +4368,7 @@ namespace TaymadeEntities.ViewModels
                         {
                             tempCastMember.ActorId = castModel.SelectedActor.Id;
                             tempCastMember.MovieID = CurrentMovie.Id;
-                            tempCastMember.Insert();
+                            await tempCastMember.InsertAsync();
                             tempCastMember.Actor = castModel.SelectedActor;
                             tempCastMember.Movies = CurrentMovie;
                             CurrentMovie.Casts.Add(tempCastMember);
@@ -4390,7 +4390,7 @@ namespace TaymadeEntities.ViewModels
                                                  //tempCastMember.Actor = actor;
                                 tempCastMember.ActorId = actor.Id;
                                 tempCastMember.MovieID = CurrentMovie.Id;
-                                tempCastMember.Insert();
+                                await tempCastMember.InsertAsync();
                                 tempCastMember.Actor = actor;
                                 tempCastMember.Movies = CurrentMovie;
                             }

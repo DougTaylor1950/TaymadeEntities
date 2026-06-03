@@ -286,6 +286,79 @@ namespace TaymadeEntities.DBContext
                 return null;
         }
 
+        public Cast? CreateCast(Cast cast)
+        {
+            try
+            {
+
+
+                var movieId = new SqlParameter("@MovieId", cast.MovieID);
+                var actorId = new SqlParameter("@ActorId", cast.ActorId);
+                var role = CreateStringParameter(cast.Role, "@Role");
+                var credit_id = CreateStringParameter(cast.credit_id, "@Credit_Id");
+                var castId = CreateIntegerParameter(cast.CastId, "@CastId");
+                int count = this.Database.ExecuteSqlRaw("exec CreateCast @ActorId, @MovieId, @Role, @Credit_Id, @CastId",
+                    actorId, movieId, role, credit_id, castId);
+                if (count == 1)
+                {
+                    var result = this.Casts.FromSql($"select * from Cast where id = (select max(id) from Cast)").FirstOrDefault();
+                   // this.Casts.Attach(result);
+                    return result;
+                }
+                else
+                    return null;
+            }
+            catch (SqlException ex)
+            {
+                // if the exception is a unique constraint violation then return null otherwise rethrow
+
+                return null;
+            }
+        }
+
+        public async Task<int?> CreateCastAsync(Cast cast)
+        {
+            try
+            {
+                var movieId = new SqlParameter("@MovieId", cast.MovieID);
+                var actorId = new SqlParameter("@ActorId", cast.ActorId);
+                var role = CreateStringParameter(cast.Role, "@Role");
+                var creditid = CreateStringParameter(cast.credit_id, "@CreditId");
+                var castId = CreateIntegerParameter(cast.CastId, "@CastId");
+
+                var results = await Database.SqlQuery<int>($"""
+        EXEC dbo.CreateCast
+            @ActorId={actorId},
+            @MovieId={movieId},
+            @Role={role},
+            @CreditId={creditid},
+            @CastId={castId}
+    """)
+     .FirstOrDefaultAsync();
+                return results;
+                //int newId = (int)(await command.ExecuteScalarAsync());
+
+
+                //var count = await this.Database.ExecuteSqlRawAsync("exec CreateCast @ActorId, @MovieId, @Role, @CreditId, @CastId",  
+                //    actorId, movieId, role, credit_id, castId);
+                //if (count == 1)
+                //{
+                //    var result = await this.Casts.FromSql($"select * from Cast where id = (select max(id) from Cast)").ToListAsync();
+                //    Cast? castReturn = result.FirstOrDefault();
+                //    this.Casts.Attach(castReturn);
+                //    return castReturn;
+                //}
+                //else
+                //    return null;
+            }
+            catch (Exception ex)
+            {
+                string exceptionMessage = ex.Message;
+                return null;
+
+            }
+        }
+
         /// <summary>
         /// The CreateMovie.
         /// </summary>
@@ -408,6 +481,18 @@ namespace TaymadeEntities.DBContext
                 }
             }
             return result;
+        }
+
+        public bool DeleteCastMember(int? id)
+        {
+            bool success = false;
+            if (id != null)
+            {
+                var idParam = new SqlParameter("@id", id);
+                int result = this.Database.ExecuteSqlRaw(" exec DeleteCastMember @id", idParam);
+                success = result == 1;
+            }
+            return success;
         }
 
         /// <summary>
@@ -569,9 +654,10 @@ namespace TaymadeEntities.DBContext
             return retValue;
         }
 
-        public async Task<List<Cast>> GetCastByMovieId(int id)
+        public async Task<List<Cast>?> GetCastByMovieId(int id)
         {
-           List<Cast> returnValue = await this.Casts.FromSql($"Execute dbo.GetCastByMovieId {id}").ToListAsync();
+            List<Cast>? returnValue = await this.Casts.FromSql($"Execute dbo.GetCastByMovieId {id}").ToListAsync();
+            if (returnValue == null) returnValue = new List<Cast>();
             return returnValue;
         }
 
@@ -738,7 +824,8 @@ namespace TaymadeEntities.DBContext
         /// <param name="optionsBuilder">The optionsBuilder<see cref="DbContextOptionsBuilder"/>.</param>
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Data Source=TAYMADE-8\\sqlexpress;Initial Catalog=sandbox;Persist Security Info=True;User Id=sandbox;Password=sandbox;Encrypt=false");
+            // Enable Multiple Active Result Sets to allow overlapping readers on the same connection
+            optionsBuilder.UseSqlServer("Data Source=TAYMADE-8\\sqlexpress;Initial Catalog=sandbox;Persist Security Info=True;User Id=sandbox;Password=sandbox;Encrypt=false;MultipleActiveResultSets=True");
             optionsBuilder.EnableSensitiveDataLogging();
         }
 
@@ -759,6 +846,7 @@ namespace TaymadeEntities.DBContext
 
             modelBuilder.Entity<Bookmark>().HasKey(b => b.Id);
             modelBuilder.Entity<Bookmark>().HasOne(b => b.Movies).WithMany(m => m.Bookmarks).HasForeignKey(ms => ms.MovieID);
+            modelBuilder.Entity<Cast>().Property(c => c.Id).ValueGeneratedOnAdd();
             modelBuilder.Entity<Cast>().HasKey(c => c.Id);
             modelBuilder.Entity<Cast>().HasOne(m => m.Movies).WithMany(c => c.Casts).HasForeignKey(ca => ca.MovieID);
             modelBuilder.Entity<Cast>().HasOne(a => a.Actor).WithMany(ma => ma.Casts).HasForeignKey(c => c.ActorId);

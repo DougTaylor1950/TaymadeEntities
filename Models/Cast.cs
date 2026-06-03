@@ -163,15 +163,44 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Add a new Cast entity into database 
         /// </summary>
-        public void Insert()
+        public async Task InsertAsync()
         {
 
             if (this.Id < 10)
             {
-                DataController.SandboxEntities.Casts.Add(this);
-                DataController.SandboxEntities.SaveChanges();
+                Cast? temp = DataController.SandboxEntities.Casts.Where(c => c.MovieID == this.MovieID && c.ActorId == this.ActorId).FirstOrDefault();
+                int? newId = null;
+                if (temp == null)
+                {
+                    newId = await DataController.SandboxEntities.CreateCastAsync(this);
+                }
+                if (newId != null) this.Id = temp.Id;
             }
 
+        }
+
+        /// <summary>
+        /// Inserts this instance.
+        /// </summary>
+        public void Insert()
+        {
+            try
+            {
+                if (this.Id <= 0)
+                {
+                    // using an EF context here is not ideal, but it is the only way to get the new ID back from the database
+                    using var ctx = DataController.SandboxEntities;
+                    // a synchronous version of the method 
+                    Cast? temp = ctx.CreateCast(this);
+                    if (temp != null) this.Id = temp.Id;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                string msg = "error inserting  cast : " + Id.ToString();
+                Support.Support.Logger.Error(ex, msg);
+            }
         }
 
         /// <summary>
@@ -180,17 +209,10 @@ namespace TaymadeEntities.Models
         public void Delete()
         {
             this.Movies = null;
-            var local = DataController.SandboxEntities.Set<Cast>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+            this.Actor = null;
+            bool success = DataController.SandboxEntities.DeleteCastMember(this.Id);
 
-            // check if local is not null
-            if (local != null)
-            {
-                // detach
-                DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-            }
-
-            DataController.SandboxEntities.Casts.Remove(this);
-            DataController.SandboxEntities.SaveChanges();
+            //int gone = DataController.SandboxEntities.SaveChanges();
         }
 
         protected virtual void Dispose(bool disposing)

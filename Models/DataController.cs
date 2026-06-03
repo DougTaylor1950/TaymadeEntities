@@ -30,7 +30,8 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the SandboxEntities.
         /// </summary>
-        private static DBContext.SandboxEntities sandboxEntities = new SandboxEntities();
+        // keep a field for backwards compatibility with the setter, but do not use
+        private static DBContext.SandboxEntities sandboxEntities;
 
         /// <summary>
         /// Defines the autoCompleteList.
@@ -97,7 +98,8 @@ namespace TaymadeEntities.Models
             {
                 if (productionCompanies == null)
                 {
-                    productionCompanies = SandboxEntities.ProductionCompany.ToList();
+                    using var ctx = SandboxEntities;
+                    productionCompanies = ctx.ProductionCompany.AsNoTracking().ToList();
                 }
                 return productionCompanies;
             }
@@ -112,7 +114,8 @@ namespace TaymadeEntities.Models
             get
             {
                 string computerName = Support.Support.GetComputerName();
-                var temp = sandboxEntities.MovieAppProperties.Where(p => p.Computer == computerName).ToList();
+                using var ctx = SandboxEntities;
+                var temp = ctx.MovieAppProperties.Where(p => p.Computer == computerName).ToList();
                 return temp;
             }
         }
@@ -142,7 +145,9 @@ namespace TaymadeEntities.Models
         {
             get
             {
-                return new ObservableCollection<Author>(SandboxEntities.Author.OrderBy(d => d.Name).ToList());
+                using var ctx = SandboxEntities;
+                var list = ctx.Author.AsNoTracking().OrderBy(d => d.Name).ToList();
+                return new ObservableCollection<Author>(list);
             }
 
             set
@@ -155,7 +160,8 @@ namespace TaymadeEntities.Models
             get
             {
 
-                storySeriesList = SandboxEntities.StorySeries.OrderBy(d => d.Name).ToList();
+                using var ctx = SandboxEntities;
+                storySeriesList = ctx.StorySeries.AsNoTracking().OrderBy(d => d.Name).ToList();
 
                 return storySeriesList;
             }
@@ -227,7 +233,8 @@ namespace TaymadeEntities.Models
             {
                 if (actorList.Count == 0)
                 {
-                    actorList = SandboxEntities.Actors.OrderBy(d => d.Name).ToList();
+                    using var ctx = SandboxEntities;
+                    actorList = ctx.Actors.AsNoTracking().OrderBy(d => d.Name).ToList();
                 }
                 return actorList;
             }
@@ -243,7 +250,8 @@ namespace TaymadeEntities.Models
 
                 if (directorList.Count == 0)
                 {
-                    directorList = SandboxEntities.Directors.OrderBy(d => d.Name).ToList();
+                    using var ctx = SandboxEntities;
+                    directorList = ctx.Directors.AsNoTracking().OrderBy(d => d.Name).ToList();
                 }
                 return directorList;
             }
@@ -258,7 +266,8 @@ namespace TaymadeEntities.Models
             {
                 if (genders.Count == 0)
                 {
-                    genders = SandboxEntities.PhraseEntry.Where(x => x.PhraseID == 2).OrderBy(x => x.Description).ToList();
+                    using var ctx = SandboxEntities;
+                    genders = ctx.PhraseEntry.AsNoTracking().Where(x => x.PhraseID == 2).OrderBy(x => x.Description).ToList();
                 }
 
                 return genders;
@@ -287,7 +296,8 @@ namespace TaymadeEntities.Models
             {
                 if (languages.Count == 0)
                 {
-                    languages = SandboxEntities.PhraseEntry.Where(x => x.PhraseID == 10).OrderBy(x => x.Description).ToList();
+                    using var ctx = SandboxEntities;
+                    languages = ctx.PhraseEntry.AsNoTracking().Where(x => x.PhraseID == 10).OrderBy(x => x.Description).ToList();
                 }
 
                 return languages;
@@ -390,7 +400,8 @@ namespace TaymadeEntities.Models
             {
                 if (storyProperties == null)
                 {
-                    storyProperties = SandboxEntities.StoryProperties.FirstOrDefault();
+                    using var ctx = SandboxEntities;
+                    storyProperties = ctx.StoryProperties.AsNoTracking().FirstOrDefault();
                 }
 
                 return storyProperties;
@@ -433,12 +444,12 @@ namespace TaymadeEntities.Models
         {
             get
             {
-                if (sandboxEntities != null)
-                {
-                    sandboxEntities.ChangeTracker.AutoDetectChangesEnabled = false;
-                }
-                return sandboxEntities;
+                // Return a new short-lived DbContext for each call to avoid shared context across threads
+                var ctx = new DBContext.SandboxEntities();
+                ctx.ChangeTracker.AutoDetectChangesEnabled = false;
+                return ctx;
             }
+            // keep setter for compatibility (sets the unused backing field)
             set => sandboxEntities = value;
         }
 
@@ -448,12 +459,24 @@ namespace TaymadeEntities.Models
 
         public static void ReloadBookMarks(Movies movie)
         {
-            SandboxEntities.Entry(movie).Collection(b => b.Bookmarks).Reload();
+            if (movie == null) return;
+            using var ctx = SandboxEntities;
+            var dbMovie = ctx.Movies.Find(movie.Id);
+            if (dbMovie != null)
+            {
+                ctx.Entry(dbMovie).Collection(b => b.Bookmarks).Reload();
+            }
         }
 
         public static void ReloadMovie(Movies movie)
         {
-            SandboxEntities.Entry(movie).Reload();
+            if (movie == null) return;
+            using var ctx = SandboxEntities;
+            var dbMovie = ctx.Movies.Find(movie.Id);
+            if (dbMovie != null)
+            {
+                ctx.Entry(dbMovie).Reload();
+            }
         }
 
         public static DownloadProperties GetDownloadProperties()
