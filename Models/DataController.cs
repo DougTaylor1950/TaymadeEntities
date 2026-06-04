@@ -8,11 +8,13 @@
 
 namespace TaymadeEntities.Models
 {
-    
     using Microsoft.EntityFrameworkCore;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
+    using TaymadeEntities.Controllers;
+    using TaymadeEntities.DAL;
+    using TaymadeEntities.DAL.Interfaces;
     using TaymadeEntities.DBContext;
 
     /// <summary>
@@ -20,18 +22,44 @@ namespace TaymadeEntities.Models
     /// </summary>
     public class DataController
     {
-        #region Fields
+
+        #region Public Fields
 
         /// <summary>
         /// Defines the MusicEntitiesContext.
         /// </summary>
         public static MusicEntitiesContext MusicEntitiesContext = new MusicEntitiesContext();
 
-        /// <summary>
-        /// Defines the SandboxEntities.
-        /// </summary>
-        // keep a field for backwards compatibility with the setter, but do not use
-        private static DBContext.SandboxEntities sandboxEntities;
+        #endregion Public Fields
+
+        #region Private Fields
+
+        private static List<Actor> actorList = new List<Actor>();
+
+        public static CastController? castController = null;
+        public static CastController CastController
+        {
+            get
+            {
+                if (castController == null)
+                {
+                    castController = new CastController(new CastRepository(SandboxEntities));
+                }
+                return castController;
+            }
+        }
+
+        //public static CastRepository CastRepository
+        //{
+        //    get
+        //    {
+        //        if (castRepository == null)
+        //        {
+        //            castRepository = new CastRepository(SandboxEntities);
+        //        }
+        //        return castRepository;
+        //    }
+        //}
 
         /// <summary>
         /// Defines the autoCompleteList.
@@ -53,6 +81,8 @@ namespace TaymadeEntities.Models
         /// </summary>
         private static List<Models.PhraseEntry> languages = new List<PhraseEntry>();
 
+        private static MovieImageEntity movieImageEntity = null;
+
         /// <summary>
         /// Defines the movieList.
         /// </summary>
@@ -68,6 +98,13 @@ namespace TaymadeEntities.Models
         /// </summary>
         private static List<Models.PhraseEntry> phraseEntries = new List<PhraseEntry>();
 
+        private static List<ProductionCompany> productionCompanies;
+
+        /// <summary>
+        /// Defines the SandboxEntities.
+        /// </summary>
+        // keep a field for backwards compatibility with the setter, but do not use
+        private static DBContext.SandboxEntities sandboxEntities;
         /// <summary>
         /// Defines the seriesEntries.
         /// </summary>
@@ -83,92 +120,27 @@ namespace TaymadeEntities.Models
         /// </summary>
         private static StoryProperties? storyProperties;
 
+        private static List<StorySeries> storySeriesList = new List<StorySeries>();
+
         /// <summary>
         /// Defines the subPhraseEntries.
         /// </summary>
         private static List<Models.PhraseEntry> subPhraseEntries = new List<PhraseEntry>();
 
-        #endregion
+        #endregion Private Fields
 
-        #region Properties
+        #region Public Properties
 
-        public static List<ProductionCompany> ProductionCompanies
+        public static List<Actor> ActorList
         {
             get
             {
-                if (productionCompanies == null)
+                if (actorList.Count == 0)
                 {
                     using var ctx = SandboxEntities;
-                    productionCompanies = ctx.ProductionCompany.AsNoTracking().ToList();
+                    actorList = ctx.Actors.AsNoTracking().OrderBy(d => d.Name).ToList();
                 }
-                return productionCompanies;
-            }
-
-            set => productionCompanies = value;
-        }
-
-        private static List<StorySeries> storySeriesList = new List<StorySeries>();
-
-        public static List<MovieAppProperties>  MovieAppPropertiesList
-        {
-            get
-            {
-                string computerName = Support.Support.GetComputerName();
-                using var ctx = SandboxEntities;
-                var temp = ctx.MovieAppProperties.Where(p => p.Computer == computerName).ToList();
-                return temp;
-            }
-        }
-
-        public static bool ShowOnAlternateScreen()
-        {
-            bool returnValue = false;
-
-            MovieAppProperties movieAppProperties = MovieAppPropertiesList.FirstOrDefault(p =>  string.IsNullOrEmpty(p.PropertyName) || p.PropertyName == "AltScreen" || p.PropertyName == "All");
-
-            if (movieAppProperties != null)
-            {
-                returnValue = movieAppProperties.BoolValue;
-            }
-
-            return returnValue;
-        }
-
-        /// <summary>
-        /// Gets or sets the author list.
-        /// </summary>
-        /// <value>
-        /// The author list.
-        /// </value>
-        /// <autogeneratedoc />
-        public static ObservableCollection<Author> AuthorList
-        {
-            get
-            {
-                using var ctx = SandboxEntities;
-                var list = ctx.Author.AsNoTracking().OrderBy(d => d.Name).ToList();
-                return new ObservableCollection<Author>(list);
-            }
-
-            set
-            {
-
-            }
-        }
-        public static List<StorySeries> StorySeriesList
-        {
-            get
-            {
-
-                using var ctx = SandboxEntities;
-                storySeriesList = ctx.StorySeries.AsNoTracking().OrderBy(d => d.Name).ToList();
-
-                return storySeriesList;
-            }
-
-            set
-            {
-
+                return actorList;
             }
         }
 
@@ -204,6 +176,27 @@ namespace TaymadeEntities.Models
         }
 
         /// <summary>
+        /// Gets or sets the author list.
+        /// </summary>
+        /// <value>
+        /// The author list.
+        /// </value>
+        /// <autogeneratedoc />
+        public static ObservableCollection<Author> AuthorList
+        {
+            get
+            {
+                using var ctx = SandboxEntities;
+                var list = ctx.Author.AsNoTracking().OrderBy(d => d.Name).ToList();
+                return new ObservableCollection<Author>(list);
+            }
+
+            set
+            {
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the AutoCompleteList.
         /// </summary>
         public static List<string> AutoCompleteList
@@ -223,23 +216,6 @@ namespace TaymadeEntities.Models
             set => autoCompleteList = value;
         }
 
-        private static List<Actor> actorList = new List<Actor>();
-        private static MovieImageEntity movieImageEntity = null;
-        private static List<ProductionCompany> productionCompanies;
-
-        public static List<Actor> ActorList
-        {
-            get
-            {
-                if (actorList.Count == 0)
-                {
-                    using var ctx = SandboxEntities;
-                    actorList = ctx.Actors.AsNoTracking().OrderBy(d => d.Name).ToList();
-                }
-                return actorList;
-            }
-        }
-
         /// <summary>
         /// Gets the DirectorList.
         /// </summary>
@@ -247,7 +223,6 @@ namespace TaymadeEntities.Models
         {
             get
             {
-
                 if (directorList.Count == 0)
                 {
                     using var ctx = SandboxEntities;
@@ -304,6 +279,31 @@ namespace TaymadeEntities.Models
             }
         }
 
+        public static List<MovieAppProperties> MovieAppPropertiesList
+        {
+            get
+            {
+                string computerName = Support.Support.GetComputerName();
+                using var ctx = SandboxEntities;
+                var temp = ctx.MovieAppProperties.Where(p => p.Computer == computerName).ToList();
+                return temp;
+            }
+        }
+
+        public static MovieImageEntity MovieImageEntity
+        {
+            get
+            {
+                if (movieImageEntity == null) movieImageEntity = new MovieImageEntity();
+                if (movieImageEntity != null)
+                {
+                    movieImageEntity.ChangeTracker.AutoDetectChangesEnabled = false;
+                }
+                return movieImageEntity;
+            }
+            set => movieImageEntity = value;
+        }
+
         /// <summary>
         /// Gets or sets the MovieList.
         /// </summary>
@@ -353,6 +353,33 @@ namespace TaymadeEntities.Models
 
                 return phraseEntries;
             }
+        }
+
+        public static List<ProductionCompany> ProductionCompanies
+        {
+            get
+            {
+                if (productionCompanies == null)
+                {
+                    using var ctx = SandboxEntities;
+                    productionCompanies = ctx.ProductionCompany.AsNoTracking().ToList();
+                }
+                return productionCompanies;
+            }
+
+            set => productionCompanies = value;
+        }
+        public static DBContext.SandboxEntities SandboxEntities
+        {
+            get
+            {
+                // Return a new short-lived DbContext for each call to avoid shared context across threads
+                var ctx = new DBContext.SandboxEntities();
+                ctx.ChangeTracker.AutoDetectChangesEnabled = false;
+                return ctx;
+            }
+            // keep setter for compatibility (sets the unused backing field)
+            set => sandboxEntities = value;
         }
 
         /// <summary>
@@ -410,6 +437,21 @@ namespace TaymadeEntities.Models
             set => storyProperties = value;
         }
 
+        public static List<StorySeries> StorySeriesList
+        {
+            get
+            {
+                using var ctx = SandboxEntities;
+                storySeriesList = ctx.StorySeries.AsNoTracking().OrderBy(d => d.Name).ToList();
+
+                return storySeriesList;
+            }
+
+            set
+            {
+            }
+        }
+
         /// <summary>
         /// Gets the SubPhraseEntries.
         /// </summary>
@@ -426,58 +468,9 @@ namespace TaymadeEntities.Models
             }
         }
 
-        public static MovieImageEntity MovieImageEntity
-        {
-            get
-            {
-                if (movieImageEntity == null) movieImageEntity = new MovieImageEntity();
-                if (movieImageEntity != null)
-                {
-                    movieImageEntity.ChangeTracker.AutoDetectChangesEnabled = false;
-                }
-                return movieImageEntity;
-            }
-            set => movieImageEntity = value;
-        }
+        #endregion Public Properties
 
-        public static DBContext.SandboxEntities SandboxEntities
-        {
-            get
-            {
-                // Return a new short-lived DbContext for each call to avoid shared context across threads
-                var ctx = new DBContext.SandboxEntities();
-                ctx.ChangeTracker.AutoDetectChangesEnabled = false;
-                return ctx;
-            }
-            // keep setter for compatibility (sets the unused backing field)
-            set => sandboxEntities = value;
-        }
-
-        #endregion
-
-        #region Methods
-
-        public static void ReloadBookMarks(Movies movie)
-        {
-            if (movie == null) return;
-            using var ctx = SandboxEntities;
-            var dbMovie = ctx.Movies.Find(movie.Id);
-            if (dbMovie != null)
-            {
-                ctx.Entry(dbMovie).Collection(b => b.Bookmarks).Reload();
-            }
-        }
-
-        public static void ReloadMovie(Movies movie)
-        {
-            if (movie == null) return;
-            using var ctx = SandboxEntities;
-            var dbMovie = ctx.Movies.Find(movie.Id);
-            if (dbMovie != null)
-            {
-                ctx.Entry(dbMovie).Reload();
-            }
-        }
+        #region Public Methods
 
         public static DownloadProperties GetDownloadProperties()
         {
@@ -509,7 +502,7 @@ namespace TaymadeEntities.Models
         {
             // get a list of phraseentries where phraseId = 1
             List<Models.PhraseEntry> temp = SandboxEntities.PhraseEntry.Where(x => x.PhraseID == 1).OrderBy(x => x.Description).ToList();
-            return new ObservableCollection<PhraseEntry>(temp); 
+            return new ObservableCollection<PhraseEntry>(temp);
         }
 
         /// <summary>
@@ -530,7 +523,7 @@ namespace TaymadeEntities.Models
                     PhraseID = 9,
                     Description = phrase.Description,
                     Id = phrase.Id + "." + phrase.Id,
-                    Order = subPhraseEntries.Count +1
+                    Order = subPhraseEntries.Count + 1
                 };
                 tempPhrase.Save();
                 temp.Add(tempPhrase);
@@ -539,6 +532,42 @@ namespace TaymadeEntities.Models
             return temp;
         }
 
-        #endregion
+        public static void ReloadBookMarks(Movies movie)
+        {
+            if (movie == null) return;
+            using var ctx = SandboxEntities;
+            var dbMovie = ctx.Movies.Find(movie.Id);
+            if (dbMovie != null)
+            {
+                ctx.Entry(dbMovie).Collection(b => b.Bookmarks).Reload();
+            }
+        }
+
+        public static void ReloadMovie(Movies movie)
+        {
+            if (movie == null) return;
+            using var ctx = SandboxEntities;
+            var dbMovie = ctx.Movies.Find(movie.Id);
+            if (dbMovie != null)
+            {
+                ctx.Entry(dbMovie).Reload();
+            }
+        }
+
+        public static bool ShowOnAlternateScreen()
+        {
+            bool returnValue = false;
+
+            MovieAppProperties movieAppProperties = MovieAppPropertiesList.FirstOrDefault(p => string.IsNullOrEmpty(p.PropertyName) || p.PropertyName == "AltScreen" || p.PropertyName == "All");
+
+            if (movieAppProperties != null)
+            {
+                returnValue = movieAppProperties.BoolValue;
+            }
+
+            return returnValue;
+        }
+
+        #endregion Public Methods
     }
 }

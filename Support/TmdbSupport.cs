@@ -40,6 +40,11 @@ namespace TaymadeEntities.Support
         /// </summary>
         public const string ImageURL = "https://image.tmdb.org/t/p/w500";
 
+        public static JsonSerializerSettings StandardSettings = new JsonSerializerSettings()
+        {
+            NullValueHandling = NullValueHandling.Ignore,
+            MissingMemberHandling = MissingMemberHandling.Ignore
+        };
         #endregion
 
         #region Enumeration
@@ -67,7 +72,7 @@ namespace TaymadeEntities.Support
             List<Person>? people = null;
             string searchUrl = "https://api.themoviedb.org/3/search/person?api_key=" + ApiKey + "&language=en-US&query=" + name.Replace(" ", "%20") + "&page=1&include_adult=true";
 
-            string? returnJSON =  await CallWebClientAsync(searchUrl);
+            string? returnJSON = await CallWebClientAsync(searchUrl);
 
             if (returnJSON.Contains("results\":"))
             {
@@ -79,7 +84,10 @@ namespace TaymadeEntities.Support
                     if (results != null)
                         people = JsonConvert.DeserializeObject<List<Person>>(results.ToString());
                     //if (people != null && people.Count > 0) person = people[0];
-
+                    if (people != null)
+                    {
+                        people = people.OrderByDescending(a => a.Adult).ThenBy(a => a.Name).ToList();
+                    }
 
                 }
                 catch (System.Exception e)
@@ -210,6 +218,26 @@ namespace TaymadeEntities.Support
 
             string? returnJSON = await CallWebClientAsync(searchUrl);
             return returnJSON;
+        }
+
+        public async static Task<string?> GetActorAsync(string id)
+        {
+            string searchUrl = "https://api.themoviedb.org/3/person/" + id.Trim() + "?api_key=" + ApiKey + "&language=en-US";
+
+            string? returnJSON = await CallWebClientAsync(searchUrl);
+            return returnJSON;
+        }
+
+        public async static Task<Person?> GetPersonDetailsAsync(string id)
+        {
+            string? returnJSON = await GetActorAsync(id);
+
+            Person? person = null;
+            if (!string.IsNullOrEmpty(returnJSON))
+            {
+                person = JsonConvert.DeserializeObject<Person>(returnJSON, TmdbSupport.StandardSettings);
+            }
+            return person;
         }
 
         public static string GetActorExternalIds(int id)
@@ -422,7 +450,7 @@ namespace TaymadeEntities.Support
             iMovie? movie = null;
 
             jObject = await MovieItem.GetJObject(id);
-            
+
             string json = await GetMovieDBJsonAsync(id, ImdbId, database);
 
             if (database == Database.MovieDb)
@@ -556,7 +584,7 @@ namespace TaymadeEntities.Support
                 if (languages != null)
                 {
                     spokenLanguages = JsonConvert.DeserializeObject<LanguageList>(languages.ToString());
-                    
+
                 }
             }
             return spokenLanguages;
@@ -1086,13 +1114,13 @@ namespace TaymadeEntities.Support
         /// <param name="imageUrl">The image URL.</param>
         /// <remarks> Support.TmdbSupport.ImageURL + mynfoData.Poster_Path</remarks>
         /// <returns>.</returns>
-        public  async static Task<Avalonia.Media.Imaging.Bitmap?> GetImage(string imageUrl)
+        public async static Task<Avalonia.Media.Imaging.Bitmap?> GetImage(string imageUrl)
         {
 
             Avalonia.Media.Imaging.Bitmap? returnValue = null;
             try
             {
-               returnValue = await TaymadeControls.ImageHelper.LoadFromWeb(new Uri(imageUrl));
+                returnValue = await TaymadeControls.ImageHelper.LoadFromWeb(new Uri(imageUrl));
             }
             catch (Exception)
             {
@@ -1100,10 +1128,10 @@ namespace TaymadeEntities.Support
             }
             finally
             {
-                
+
             }
 
-            
+
 
 
             return returnValue;
@@ -1116,7 +1144,7 @@ namespace TaymadeEntities.Support
             result = await GetImage(url);
             return result;
         }
-        public  static Avalonia.Media.Imaging.Bitmap? GetImageFromProfile(string profile)
+        public static Avalonia.Media.Imaging.Bitmap? GetImageFromProfile(string profile)
         {
             string url = ImageURL + profile;
             Avalonia.Media.Imaging.Bitmap? result;

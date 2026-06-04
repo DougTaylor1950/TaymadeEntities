@@ -444,27 +444,27 @@ namespace TaymadeEntities.Models
         public async Task<bool> SaveAsync()
         {
             bool success = false;
-            if (Dirty)
-                try
-                {
 
-                    DataController.SandboxEntities.Entry(this).State = EntityState.Modified;
+            try
+            {
+                using var ctx = DataController.SandboxEntities;
+                ctx.Entry(this).State = EntityState.Modified;
 
-                    // save
-                    int result = await DataController.SandboxEntities.SaveChangesAsync();
-                    success = result > 0;
+                // save
+                int result = await ctx.SaveChangesAsync();
+                success = result > 0;
 
-                    LogMessage("Saved " + ChangedFields);
+                LogMessage("Saved " + ChangedFields);
 
-                    Dirty = false;
-                    ChangedFields = string.Empty;
+                Dirty = false;
+                ChangedFields = string.Empty;
 
-                }
-                catch (Exception ex)
-                {
-                    string msg = "error Saving Actor : " + Id.ToString() + " : " + Name;
-                    Support.Logger.Error(ex, msg);
-                }
+            }
+            catch (Exception ex)
+            {
+                string msg = "error Saving Actor : " + Id.ToString() + " : " + Name;
+                Support.Logger.Error(ex, msg);
+            }
             return success;
         }
 
