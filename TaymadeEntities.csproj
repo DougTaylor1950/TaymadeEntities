@@ -30,6 +30,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <AvaloniaXaml Remove="Templates\**" />
+	  <Compile Remove="Templates\**" />
+	  <EmbeddedResource Remove="Templates\**" />
+	  <None Remove="Templates\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <AvaloniaXaml Remove="Buttons\CommandButton.axaml" />
 	  <AvaloniaXaml Remove="Buttons\OkButton.axaml" />
 	  <AvaloniaXaml Remove="Buttons\PlayButton.axaml" />

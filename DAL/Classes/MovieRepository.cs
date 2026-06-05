@@ -82,5 +82,11 @@ namespace TaymadeEntities.DAL.Classes
         {
             return _context.Movies.Find(id);
         }
+
+        public bool Add(Movies movie)
+        {
+             _context.Add(movie);
+            return _context.SaveChanges() >= 1;
+        }
     }
 }

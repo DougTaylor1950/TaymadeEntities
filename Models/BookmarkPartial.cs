@@ -235,17 +235,18 @@ namespace TaymadeEntities.Models
         public void Delete()
         {
             Movies = null;
-            var local = DataController.SandboxEntities.Set<Bookmark>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+            DataController.BookmarkController.Delete(this.Id);
+            //var local = DataController.SandboxEntities.Set<Bookmark>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
-            // check if local is not null
-            if (local != null)
-            {
-                // detach
-                DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-            }
+            //// check if local is not null
+            //if (local != null)
+            //{
+            //    // detach
+            //    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
+            //}
 
-            DataController.SandboxEntities.Bookmarks.Remove(this);
-            DataController.SandboxEntities.SaveChanges();
+            //DataController.SandboxEntities.Bookmarks.Remove(this);
+            //DataController.SandboxEntities.SaveChanges();
         }
 
         /// <summary>
@@ -253,8 +254,10 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void Insert()
         {
-            DataController.SandboxEntities.Bookmarks.Add(this);
-            DataController.SandboxEntities.SaveChanges();
+            DataController.BookmarkController.Add(this);
+            //var local = DataController.SandboxEntities.Set<Bookmark>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+            ////DataController.SandboxEntities.Bookmarks.Add(this);
+            ////DataController.SandboxEntities.SaveChanges();
         }
 
         /// <summary>
@@ -262,33 +265,35 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void Save()
         {
-            var local = DataController.SandboxEntities.Set<Bookmark>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+            DataController.BookmarkController.Update(this);
+            //var local = DataController.SandboxEntities.Set<Bookmark>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
-            // check if local is not null
-            if (local != null)
-            {
-                // detach
-               // DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-            }
-            DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            DataController.SandboxEntities.SaveChanges();
+            //// check if local is not null
+            //if (local != null)
+            //{
+            //    // detach
+            //   // DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
+            //}
+            //DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            //DataController.SandboxEntities.SaveChanges();
         }
 
         public async Task<bool> SaveAsync()
         {
-            bool success = false;
-            var local = DataController.SandboxEntities.Set<Bookmark>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+            return await DataController.BookmarkController.UpdateAsync(this);
+            // bool success = false;
+            // var local = DataController.SandboxEntities.Set<Bookmark>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
-            // check if local is not null
-            if (local != null)
-            {
-                // detach
-                 DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-            }
-            DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-           int count = await DataController.SandboxEntities.SaveChangesAsync();
-            success = (count == 1);
-            return success;
+            // // check if local is not null
+            // if (local != null)
+            // {
+            //     // detach
+            //      DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
+            // }
+            // DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            //int count = await DataController.SandboxEntities.SaveChangesAsync();
+            // success = (count == 1);
+            // return success;
         }
 
         /// <summary>

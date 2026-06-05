@@ -12,27 +12,28 @@ namespace TaymadeEntities.Support
     using Avalonia.Controls;
     using Avalonia.Controls.ApplicationLifetimes;
     using Avalonia.Platform;
+    using CliWrap;
+    using DocumentFormat.OpenXml.Office2010.Excel;
+    using Microsoft.EntityFrameworkCore;
     using NLog;
     using NLog.Common;
     using NLog.Config;
     using NLog.Targets;
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.Drawing;
+    using System.Drawing.Drawing2D;
+    using System.Drawing.Imaging;
+    using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
-    using System.IO;
-    using System.Collections.ObjectModel;
-    using System.ComponentModel;
-    using System.Drawing.Drawing2D;
-    using System.Drawing.Imaging;
-    using CliWrap;
-    using TaymadeEntities.Models;
-    using Microsoft.EntityFrameworkCore;
-    using TaymadeEntities.ViewModels;
     using TaymadeEntities.Dialogs;
+    using TaymadeEntities.Models;
+    using TaymadeEntities.ViewModels;
 
 
 
@@ -170,12 +171,13 @@ namespace TaymadeEntities.Support
 
         #region Methods
 
-        public static void GetCastData(Movies movie, iMovie iMovie)
+        public static async void GetCastData(Movies movie, iMovie iMovie)
         {
             List<Cast> templist = new List<Cast>();
 
-            if (iMovie != null)
+            if (iMovie != null && movie != null && movie.TMDBID != null)
             {
+                iMovie.CastList = await TmdbSupport.GetMovieCreditsAsync(movie.TMDBID.Value);
                 if (iMovie.CastList.Count > 0)
                 {
                     // sort out cast
@@ -431,7 +433,7 @@ namespace TaymadeEntities.Support
             handler?.Invoke(this, e);
         }
 
-        public static Color GetAverageColorFast(Bitmap bmp)
+        public static System.Drawing.Color GetAverageColorFast(Bitmap bmp)
         {
             Bitmap singlePixel = new Bitmap(1, 1);
             using (Graphics g = Graphics.FromImage(singlePixel))
@@ -1011,9 +1013,9 @@ namespace TaymadeEntities.Support
             return extn;
         }
 
-        public static Filter? GetDefaultFilter()
+        public static Models.Filter? GetDefaultFilter()
         {
-            Filter returnValue = null;
+            Models.Filter returnValue = null;
             if (
                 DataController.MovieProperties.DefaultFilter != null
                 )
@@ -1026,7 +1028,7 @@ namespace TaymadeEntities.Support
             }
             else
 
-                returnValue = new Filter();
+                returnValue = new Models.Filter();
             return returnValue;
         }
 

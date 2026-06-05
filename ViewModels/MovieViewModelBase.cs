@@ -2432,6 +2432,42 @@ namespace TaymadeEntities.ViewModels
             return returnVal;
         }
 
+        public async Task<Director> GetDirectorAsync()
+        {
+            Director returnVal = null;
+
+            if (CurrentMovie != null && CurrentMovie.TMDBID != null)
+            {
+                Support.CastList castMembers = await Support.TmdbSupport.GetMovieCreditsAsync(CurrentMovie.TMDBID.Value);
+
+                var director = castMembers.Where(cl => cl.IsDirector).FirstOrDefault();
+
+                if (director != null)
+                {
+                    Models.Director? mdirector = Models.DataController.SandboxEntities.Directors.Where(d => d.Name.ToLower() == director.Name.ToLower()).FirstOrDefault();
+                    if (mdirector != null)
+                    {
+                        CurrentMovie.Director = mdirector;
+                        CurrentMovie.DirectorID = mdirector.Id;
+                    }
+                    else
+                    {
+                        // create new director
+                        mdirector = new Models.Director();
+                        mdirector.Name = director.Name;
+                        Models.DataController.SandboxEntities.Directors.Add(mdirector);
+                        Models.DataController.SandboxEntities.SaveChanges();
+                        CurrentMovie.Director = mdirector;
+                        CurrentMovie.DirectorID = mdirector.Id;
+                        DirectorList.Add(mdirector);
+                    }
+                }
+                else { CurrentMovie.DirectorID = 14; }
+            }
+
+            return returnVal;
+        }
+
         public async void GetMissingGenres()
         {
             //List<MissingGenresMovies> missingGenrestemp = DataController.SandboxEntities.MissingGenresMovies.ToList();
@@ -2550,9 +2586,9 @@ namespace TaymadeEntities.ViewModels
             return myCommand;
         }
 
-        public void GetSearchDirector()
+        public async void GetSearchDirector()
         {
-            GetDirector();
+          Director director  =  await GetDirectorAsync();
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using TaymadeEntities.Controllers;
 using TaymadeEntities.Models;
 
 namespace TaymadeEntities.DAL.Interfaces
@@ -15,7 +16,6 @@ namespace TaymadeEntities.DAL.Interfaces
         void DeleteMovie(int id);
 
         Movies? GetMoviesById(int id);
-
-
+        bool Add(Movies movie);
     }
 }

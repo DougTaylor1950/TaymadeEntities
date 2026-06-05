@@ -8,43 +8,43 @@ using TaymadeEntities.Models;
 
 namespace TaymadeEntities.Controllers
 {
-    public class MovieController : IDisposable
+    public class Controller : IDisposable
     {
 
         private bool disposedValue;
-        private IMovieRepository movieRepository;
+        private IRepository Repository;
 
-        public MovieController()
+        public Controller()
         {
-            this.movieRepository = new MovieRepository(new DBContext.SandboxEntities());
+            this.Repository = new Repository(new DBContext.SandboxEntities());
         }
 
-        public MovieController(IMovieRepository movieRepository)
+        public Controller(IRepository Repository)
         {
-            this.movieRepository = movieRepository;
+            this.Repository = Repository;
         }
 
         public bool Save()
         {
-            return movieRepository.Save();
+            return Repository.Save();
         }
 
         public bool Save(Models.Movies movie)
         {
-            return movieRepository.Save(movie);
+            return Repository.Save(movie);
         }
 
-        public bool UpdateMovie(Models.Movies movie)
+        public bool Update(Models.Movies movie)
         {
             return movieRepository.UpdateMovie(movie);
         }
 
-        public void DeleteMovie(int id)
+        public void Delete(int id)
         {
             movieRepository.DeleteMovie(id);
         }
 
-        public Movies? GetMoviesById(int id)
+        public Movies? GetById(int id)
         {
             return movieRepository.GetMoviesById(id);
         }
@@ -76,11 +76,6 @@ namespace TaymadeEntities.Controllers
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
-        }
-
-        internal bool Add(Movies movies)
-        {
-            return movieRepository.Add(movies);
         }
     }
 }

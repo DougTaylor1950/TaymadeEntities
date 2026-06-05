@@ -26,6 +26,14 @@ namespace TaymadeEntities.Models
 
         #region Public Fields
 
+        public static ActorController? actorController = null;
+
+        public static BookmarkController? bookmarkController = null;
+
+        public static CastController? castController = null;
+
+        public static MovieController? movieController = null;
+
         /// <summary>
         /// Defines the MusicEntitiesContext.
         /// </summary>
@@ -36,48 +44,6 @@ namespace TaymadeEntities.Models
         #region Private Fields
 
         private static List<Actor> actorList = new List<Actor>();
-
-        public static CastController? castController = null;
-
-        public static ActorController? actorController = null;
-
-        public static MovieController? movieController = null;
-
-        public static ActorController ActorController
-        {
-            get
-            {
-                if (actorController == null)
-                {
-                    actorController = new ActorController(new ActorRepository(SandboxEntities));
-                }
-                return actorController;
-            }
-        }
-        public static CastController CastController
-        {
-            get
-            {
-                if (castController == null)
-                {
-                    castController = new CastController(new CastRepository(SandboxEntities));
-                }
-                return castController;
-            }
-        }
-
-        public static MovieController MovieController
-        {
-            get
-            {
-                if (movieController == null)
-                {
-                    movieController = new MovieController(new MovieRepository(SandboxEntities));
-                }
-                return movieController;
-            }
-        }
-        
         /// <summary>
         /// Defines the autoCompleteList.
         /// </summary>
@@ -122,6 +88,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         // keep a field for backwards compatibility with the setter, but do not use
         private static DBContext.SandboxEntities sandboxEntities;
+
         /// <summary>
         /// Defines the seriesEntries.
         /// </summary>
@@ -147,6 +114,18 @@ namespace TaymadeEntities.Models
         #endregion Private Fields
 
         #region Public Properties
+
+        public static ActorController ActorController
+        {
+            get
+            {
+                if (actorController == null)
+                {
+                    actorController = new ActorController(new ActorRepository(SandboxEntities));
+                }
+                return actorController;
+            }
+        }
 
         public static List<Actor> ActorList
         {
@@ -233,6 +212,30 @@ namespace TaymadeEntities.Models
             set => autoCompleteList = value;
         }
 
+        public static BookmarkController BookmarkController
+        {
+            get
+            {
+                if (bookmarkController == null)
+                {
+                    bookmarkController = new BookmarkController(new BookmarkRepository(SandboxEntities));
+                }
+                return bookmarkController;
+            }
+        }
+
+        public static CastController CastController
+        {
+            get
+            {
+                if (castController == null)
+                {
+                    castController = new CastController(new CastRepository(SandboxEntities));
+                }
+                return castController;
+            }
+        }
+
         /// <summary>
         /// Gets the DirectorList.
         /// </summary>
@@ -307,6 +310,17 @@ namespace TaymadeEntities.Models
             }
         }
 
+        public static MovieController MovieController
+        {
+            get
+            {
+                if (movieController == null)
+                {
+                    movieController = new MovieController(new MovieRepository(SandboxEntities));
+                }
+                return movieController;
+            }
+        }
         public static MovieImageEntity MovieImageEntity
         {
             get
@@ -386,6 +400,7 @@ namespace TaymadeEntities.Models
 
             set => productionCompanies = value;
         }
+
         public static DBContext.SandboxEntities SandboxEntities
         {
             get
@@ -586,5 +601,6 @@ namespace TaymadeEntities.Models
         }
 
         #endregion Public Methods
+
     }
 }

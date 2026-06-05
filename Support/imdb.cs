@@ -1857,6 +1857,8 @@ namespace TaymadeEntities.Support
             set => castMembers = value;
         }
 
+        
+
 
 
         /// <summary>
@@ -2086,9 +2088,14 @@ namespace TaymadeEntities.Support
         /// <summary>
         /// The getCast
         /// </summary>
-        private void getCast()
+        private async void getCast()
         {
-            castMembers = TmdbSupport.GetMovieCredits(ID);
+            castMembers = await TmdbSupport.GetMovieCreditsAsync(ID);
+        }
+
+        private async void getCastAsync()
+        {
+            castMembers = await TmdbSupport.GetMovieCreditsAsync(ID);
         }
 
         /// <summary>

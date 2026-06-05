@@ -12,6 +12,7 @@ namespace TaymadeEntities.Support
     using Newtonsoft.Json.Linq;
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Drawing;
     using System.IO;
     using System.Linq;
@@ -45,6 +46,9 @@ namespace TaymadeEntities.Support
             NullValueHandling = NullValueHandling.Ignore,
             MissingMemberHandling = MissingMemberHandling.Ignore
         };
+
+        public static JsonLoadSettings StandardLoadSettings = new JsonLoadSettings();
+       
         #endregion
 
         #region Enumeration
@@ -263,7 +267,45 @@ namespace TaymadeEntities.Support
 
             if (returnJSON != string.Empty)
             {
-                Newtonsoft.Json.Linq.JObject jObject = Newtonsoft.Json.Linq.JObject.Parse(returnJSON);
+                var jObject = JsonConvert.DeserializeObject<List<Credit>>(returnJSON,StandardSettings);
+                //var castList = jObject["cast"];
+
+                //if (castList != null)
+                //    castMembers = JsonConvert.DeserializeObject<CastList>(castList.ToString());
+
+                //var crewlist = jObject["crew"];
+
+                //if (crewlist != null)
+                //{
+                //    CastList? crewMembers = JsonConvert.DeserializeObject<CastList>(crewlist.ToString());
+
+                //    if (crewMembers != null && castMembers != null)
+                //    {
+                //        CastMember? director = crewMembers.Find(x => x.Department == "Directing");
+                //        if (director != null)
+                //        {
+                //            director.IsDirector = true;
+                //            castMembers.Add(director);
+                //        }
+                //    }
+                //}
+            }
+            return castMembers;
+        }
+
+        public static async Task<CastList> GetMovieCreditsAsync(int id)
+        {
+            CastList? castMembers = [];
+
+            string searchUrl = "https://api.themoviedb.org/3/movie/" + id.ToString().Trim() + "/credits?api_key=" + ApiKey + "&language=en-US";
+
+            string returnJSON = await CallWebClientAsync(searchUrl);
+
+            if (returnJSON != string.Empty)
+            {
+                var jObject = JObject.Parse(returnJSON);
+
+                //var jObject = JsonConvert.DeserializeObject<Credit>(returnJSON, StandardSettings);
                 var castList = jObject["cast"];
 
                 if (castList != null)
@@ -1090,19 +1132,30 @@ namespace TaymadeEntities.Support
             string returnJSON = string.Empty;
 
             // Create and dispose HttpClient. (For long-lived apps prefer a shared HttpClient instance.)
+
             using var client = new HttpClient();
 
-            try
-            {
-                // Use GetStringAsync to fetch the response body as a string.
-                // Block synchronously to maintain the original synchronous method signature.
-                returnJSON = await client.GetStringAsync(searchUrl);
-            }
-            catch (System.Exception e)
-            {
-                string err = e.ToString();
-                // preserve original behavior of swallowing the exception and returning empty string
-            }
+            var response = await client.GetAsync(searchUrl);
+
+            Debug.WriteLine(response.Content.Headers.ContentType);
+
+            string text = await response.Content.ReadAsStringAsync();
+
+            Debug.WriteLine(text);
+            return text;
+            //using var client = new HttpClient();
+
+            //try
+            //{
+            //    // Use GetStringAsync to fetch the response body as a string.
+            //    // Block synchronously to maintain the original synchronous method signature.
+            //    returnJSON = await client.GetStringAsync(searchUrl);
+            //}
+            //catch (System.Exception e)
+            //{
+            //    string err = e.ToString();
+            //    // preserve original behavior of swallowing the exception and returning empty string
+            //}
 
             return returnJSON;
         }

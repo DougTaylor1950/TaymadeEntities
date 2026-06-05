@@ -990,7 +990,7 @@ namespace TaymadeEntities.Models
 
                 if (Id == 0)
                 {
-                    success = Insert();
+                    success = DataController.MovieController.Add(this);
                 }
 
                 if (SeriesEntity != null && (Series == null || Series != SeriesEntity.Id))
@@ -1003,21 +1003,24 @@ namespace TaymadeEntities.Models
                 //    Director.Save();
                 //}
 
-                EntityState state = DataController.SandboxEntities.Entry(this).State;
-                if (state == EntityState.Detached) DataController.SandboxEntities.Movies.Attach(this);
+                //EntityState state = DataController.SandboxEntities.Entry(this).State;
+                //if (state == EntityState.Detached) DataController.SandboxEntities.Movies.Attach(this);
 
-                var local = DataController.SandboxEntities.Set<Movies>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+                //var local = DataController.SandboxEntities.Set<Movies>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
-                // check if local is not null
-                if (local != null)
-                {
-                    // detach
-                    //DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-                }
+                //// check if local is not null
+                //if (local != null)
+                //{
+                //    // detach
+                //    //DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
+                //}
                 // set Modified flag in your entry
                 ModifiedOn = DateTime.Now;
                 //DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                int saved = DataController.SandboxEntities.SaveChanges();
+                //int saved = DataController.SandboxEntities.SaveChanges();
+
+                success = DataController.MovieController.UpdateMovie(this);
+
                 ClearErrors();
                 LogMessage("Saved " + ChangedFields);
                 ChangedFields = string.Empty;
