@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using TaymadeEntities.DAL;
 using TaymadeEntities.DAL.Interfaces;
+using TaymadeEntities.Models;
 
 namespace TaymadeEntities.Controllers
 {
@@ -161,6 +162,11 @@ namespace TaymadeEntities.Controllers
         public void UpdateCast(Models.Cast cast)
         {
             castRepository.UpdateCast(cast);
+        }
+
+        internal Cast? GetCastByCreditId(string creditId)
+        {
+            return castRepository.GetCastByCreditId(creditId);
         }
 
         #endregion Public Methods

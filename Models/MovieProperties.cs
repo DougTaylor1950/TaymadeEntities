@@ -168,14 +168,14 @@ namespace TaymadeEntities.Models
             {
 
 
-                var local = DataController.SandboxEntities.Set<MovieProperties>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+                //var local = DataController.SandboxEntities.Set<MovieProperties>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
-                // check if local is not null
-                if (local != null)
-                {
-                    // detach
-                    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-                }
+                //// check if local is not null
+                //if (local != null)
+                //{
+                //    // detach
+                //    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
+                //}
                 // set Modified flag in your entry
 
                 DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;

@@ -671,7 +671,7 @@ namespace TaymadeEntities.Models
                     this.RaisePropertyChanged(nameof(Casts));
                 }
 
-                this.Save();
+                DataController.MovieController.UpdateMovie(this);
             }
             catch (Exception)
             {
@@ -924,7 +924,7 @@ namespace TaymadeEntities.Models
 
                     if (Director != null)
                     {
-                        Director.Save();
+                     //   Director.Save();
                     }
 
                     EntityState state = DataController.SandboxEntities.Entry(this).State;
@@ -970,7 +970,7 @@ namespace TaymadeEntities.Models
 
         public bool Save()
         {
-            bool success = true;
+            bool success = false;
             if (HasChapters == null) HasChapters = false;
             if (HasEpisodes == null) HasEpisodes = false;
             if (Series == null) Series = 2;
@@ -998,12 +998,13 @@ namespace TaymadeEntities.Models
                     Series = SeriesEntity.Id;
                 }
 
-                if (Director != null)
-                {
-                    Director.Save();
-                }
+                //if (Director != null)
+                //{
+                //    Director.Save();
+                //}
 
                 EntityState state = DataController.SandboxEntities.Entry(this).State;
+                if (state == EntityState.Detached) DataController.SandboxEntities.Movies.Attach(this);
 
                 var local = DataController.SandboxEntities.Set<Movies>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
@@ -1015,7 +1016,7 @@ namespace TaymadeEntities.Models
                 }
                 // set Modified flag in your entry
                 ModifiedOn = DateTime.Now;
-                DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                //DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                 int saved = DataController.SandboxEntities.SaveChanges();
                 ClearErrors();
                 LogMessage("Saved " + ChangedFields);

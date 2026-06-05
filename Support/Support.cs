@@ -64,7 +64,7 @@ namespace TaymadeEntities.Support
                         Name = "file",
                         Layout = "${longdate}|${level:uppercase=true}|${logger}|${message}|${environment-user}",
 
-                        FileName = Path.Combine(logDirectory,"${date:format=yyyyMMdd}.log")
+                        FileName = Path.Combine(logDirectory, "${date:format=yyyyMMdd}.log")
                     };
                     config.AddRule(LogLevel.Info, LogLevel.Fatal, fileTarget, "*");
 
@@ -183,7 +183,8 @@ namespace TaymadeEntities.Support
                     if (movie.Casts == null) movie.Casts = new List<Cast>();
                     foreach (var item in iMovie.CastList)
                     {
-                        Cast? castMember = movie.Casts.Where(x => x.credit_id == item.CreditId).FirstOrDefault();
+                        Cast? castMember = DataController.CastController.GetCastByCreditId(item.CreditId);
+                        //Cast? castMember = movie.Casts.Where(x => x.credit_id == item.CreditId).FirstOrDefault();
 
                         if (castMember == null)
                         {
@@ -195,19 +196,41 @@ namespace TaymadeEntities.Support
                                 Role = item.Character
                             };
 
-                            Actor? actor = DataController.SandboxEntities.Actors.AsNoTracking().Where(x => x.TMDBID == item.ID).FirstOrDefault();
+                            // see if we can find the actor in the database with the correct TMDB Id 
+                            Actor? actor = DataController.ActorController.GetActorByTMDBID(item.ID);
+                            // Actor? actor = DataController.SandboxEntities.Actors.Where(x => x.TMDBID == item.ID).FirstOrDefault();
 
                             if (actor == null)
                             {
-                                actor = new Actor();
-                                actor.Save();
-                                actor.SetDetailsFromCastMember(item);
-                                DataController.SandboxEntities.Actors.Add(actor);
-                                DataController.SandboxEntities.SaveChanges();
+                                // then it might be the actor does exist but has not been recorded yet
+                                actor = DataController.ActorController.GetActorByName(item.Name);
+                                if (actor != null)
+                                {
+                                    DataController.ActorController.SetDetailsFromCastMember(actor,item);
+                                    //actor.SetDetailsFromCastMember(item);
+                                    // DataController.ActorController.Save(actor);
+                                    //actor.Save();
+                                }
+                                else
+                                {
+
+                                    actor = DataController.ActorController.GetOrCreateActor(item.Name);
+                                    if (actor != null)
+                                    {
+                                        //actor.SetDetailsFromCastMember(item);
+                                        if (actor.Id == 0) DataController.ActorController.AddActor(actor);
+                                        else DataController.ActorController.Save(actor);
+                                        // DataController.SandboxEntities.Actors.Add(actor);
+                                        //  DataController.SandboxEntities.SaveChanges();
+                                    }
+                                }
                             }
 
                             if (actor != null)
+                            {
                                 castMember.ActorId = actor.Id;
+                                castMember.Insert();
+                            }
 
                             templist.Add(castMember);
 
@@ -217,16 +240,16 @@ namespace TaymadeEntities.Support
                         else
                         {
                             //castMember.Actor;
-                            if (castMember.Actor != null) castMember.Actor.SetDetailsFromCastMember(item);
+                            //if (castMember.Actor != null) castMember.Actor.SetDetailsFromCastMember(item);
                             //actor.Save();
                         }
                     }
 
-                    foreach (var cast in templist)
-                    {
-                        DataController.SandboxEntities.Casts.Add(cast);
-                        DataController.SandboxEntities.SaveChanges();
-                    }
+                    //foreach (var cast in templist)
+                    //{
+                    //    DataController.SandboxEntities.Casts.Add(cast);
+                    //    DataController.SandboxEntities.SaveChanges();
+                    //}
                 }
 
                 // take a look at directors

@@ -14,6 +14,7 @@ namespace TaymadeEntities.Models
     using System.Linq;
     using TaymadeEntities.Controllers;
     using TaymadeEntities.DAL;
+    using TaymadeEntities.DAL.Classes;
     using TaymadeEntities.DAL.Interfaces;
     using TaymadeEntities.DBContext;
 
@@ -37,6 +38,22 @@ namespace TaymadeEntities.Models
         private static List<Actor> actorList = new List<Actor>();
 
         public static CastController? castController = null;
+
+        public static ActorController? actorController = null;
+
+        public static MovieController? movieController = null;
+
+        public static ActorController ActorController
+        {
+            get
+            {
+                if (actorController == null)
+                {
+                    actorController = new ActorController(new ActorRepository(SandboxEntities));
+                }
+                return actorController;
+            }
+        }
         public static CastController CastController
         {
             get
@@ -49,18 +66,18 @@ namespace TaymadeEntities.Models
             }
         }
 
-        //public static CastRepository CastRepository
-        //{
-        //    get
-        //    {
-        //        if (castRepository == null)
-        //        {
-        //            castRepository = new CastRepository(SandboxEntities);
-        //        }
-        //        return castRepository;
-        //    }
-        //}
-
+        public static MovieController MovieController
+        {
+            get
+            {
+                if (movieController == null)
+                {
+                    movieController = new MovieController(new MovieRepository(SandboxEntities));
+                }
+                return movieController;
+            }
+        }
+        
         /// <summary>
         /// Defines the autoCompleteList.
         /// </summary>

@@ -136,6 +136,11 @@ namespace TaymadeEntities.DAL
             this.disposed = true;
         }
 
+        public Cast? GetCastByCreditId(string creditId)
+        {
+            return _context.Casts.FirstOrDefault(c => c.credit_id == creditId);
+        }
+
         #endregion Protected Methods
     }
 }

@@ -20,6 +20,7 @@ namespace TaymadeEntities.DAL.Interfaces
 
         Cast GetOrCreateCast(int movieId, int actorId);
         void UpdateCast(Cast cast);
+        Cast? GetCastByCreditId(string creditId);
 
         #endregion Public Methods
     }
