@@ -216,6 +216,20 @@ namespace TaymadeEntities.DBContext
 
         #region Methods
 
+        public List<UnboundGridData> GetUnboundGridDatabyFileName(string fileName)
+        {
+            if (!string.IsNullOrEmpty(fileName))
+            {
+                fileName = "%" + fileName + "%";
+                //var _stub = new SqlParameter("@FileName", fileName);
+                var retValue = this.UnboundGridData.FromSql($"GetUnboundByFileName {fileName}")
+                     .ToList();
+                return retValue;
+            }
+            else
+                return null;
+        }
+
         /// <summary>
         /// The DetachLocal.
         /// </summary>
@@ -422,8 +436,9 @@ namespace TaymadeEntities.DBContext
                 {
                     //   result.SubGenre = subGenre;
                     //   result.Save();
+                    this.MovieGenre.Attach(result);
                 }
-                // this.MovieGenre.Attach(result);
+                 
             }
             return result;
         }
@@ -662,23 +677,23 @@ namespace TaymadeEntities.DBContext
         }
 
 
-        public List<Movies>? GetMoviesByGenre(string? genre,
-            string? subGenre = "")
-        {
-            //var genreType = genre;
-            List<Movies>? returnValue = null;
+        //public List<Movies>? GetMoviesByGenre(string? genre,
+        //    string? subGenre = "")
+        //{
+        //    //var genreType = genre;
+        //    List<Movies>? returnValue = null;
 
-            if (string.IsNullOrEmpty(genre)) return returnValue;
+        //    if (string.IsNullOrEmpty(genre)) return returnValue;
 
-            if (!string.IsNullOrEmpty(subGenre))
-            {
-                returnValue = this.Movies.FromSql($"Execute dbo.GetMoviesBySubGenre {subGenre}").ToList();
-            }
-            else
-                returnValue = this.Movies.FromSql($"Execute dbo.GetMoviesByGenre {genre}").ToList();
+        //    if (!string.IsNullOrEmpty(subGenre))
+        //    {
+        //        returnValue = this.Movies.FromSql($"Execute dbo.GetMoviesBySubGenre {subGenre}").ToList();
+        //    }
+        //    else
+        //        returnValue = this.Movies.FromSql($"Execute dbo.GetMoviesByGenre {genre}").ToList();
 
-            return returnValue;
-        }
+        //    return returnValue;
+        //}
 
         /// <summary>
         /// Gets the moviesby information.
@@ -748,16 +763,16 @@ namespace TaymadeEntities.DBContext
             return success;
         }
 
-        public bool UpdataStoryTransInfo(StoryTransInfo storyTransInfo)
-        {
-            bool success = true;
-            if (storyTransInfo == null) return false;
-            var _Id = new SqlParameter("@Id", storyTransInfo.Id);
-            var _CurrentStoryId = new SqlParameter("@CurrentStoryId", storyTransInfo.CurrentStoryId);
-            int count = this.Database.ExecuteSqlRaw("exec SaveCurrentStoryID  @CurrentStoryId", _CurrentStoryId);
-            success = (count == 1);
-            return success;
-        }
+        //public bool UpdateStoryTransInfo(StoryTransInfo storyTransInfo)
+        //{
+        //    bool success = true;
+        //    if (storyTransInfo == null) return false;
+        //    var _Id = new SqlParameter("@Id", storyTransInfo.Id);
+        //    var _CurrentStoryId = new SqlParameter("@CurrentStoryId", storyTransInfo.CurrentStoryId);
+        //    int count = this.Database.ExecuteSqlRaw("exec SaveCurrentStoryID  @CurrentStoryId", _CurrentStoryId);
+        //    success = (count == 1);
+        //    return success;
+        //}
 
         public bool UpdateMovie(Movies movie)
         {
@@ -855,7 +870,7 @@ namespace TaymadeEntities.DBContext
             // add downloadProperties to model
             modelBuilder.Entity<DownloadProperties>().HasKey(dp => dp.Id);
 
-            modelBuilder.Entity<StoryTransInfo>().HasKey(av => av.Id);
+            //modelBuilder.Entity<StoryTransInfo>().HasKey(av => av.Id);
 
             modelBuilder.Entity<MapDrive>().HasKey(s => s.Id);
 
@@ -905,6 +920,7 @@ namespace TaymadeEntities.DBContext
             modelBuilder.Entity<Author>().HasKey(a => a.Id);
 
             modelBuilder.Entity<StoryCast>().HasKey(s => s.Pk);
+            modelBuilder.Entity<StoryTransInfo>().HasKey(s => s.Id);
 
             modelBuilder.Entity<UnboundGridData>().HasKey(u => u.Id);
             // modelBuilder.Entity<UnboundGridData>().hasd

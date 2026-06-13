@@ -301,6 +301,7 @@ namespace TaymadeEntities.ViewModels
         private MovieGenre currentGenre;
         private string? findText;
         private bool? hasMovie;
+        private MovieGenre currentMovieGenre;
 
         #endregion Private Fields
 
@@ -661,6 +662,8 @@ namespace TaymadeEntities.ViewModels
                             }
                         }
 
+
+
                         this.RaisePropertyChanged(nameof(IsMP4));
 
                         if (mainWindow == null) mainWindow = Support.Support.GetMainWindow();
@@ -671,6 +674,7 @@ namespace TaymadeEntities.ViewModels
                             // mainWindow.RowChanged(null, null);
                         }
                     }
+                    value.FixMovieData();
                 }
                 else
                 {
@@ -680,7 +684,15 @@ namespace TaymadeEntities.ViewModels
                     IsMP4 = false;
                 }
             }
+
+           
             //}
+        }
+
+        public MovieGenre CurrentMovieGenre
+        { 
+            get => currentMovieGenre;
+            set => this.RaiseAndSetIfChanged(ref currentMovieGenre, value);
         }
 
         /// <summary>
@@ -769,7 +781,7 @@ namespace TaymadeEntities.ViewModels
                     {
                         MovieList = new ObservableCollection<Movies>
                             (
-                            DataController.SandboxEntities.GetMoviesByGenre("SER-1")
+                            DataController.MovieController.GetMoviesByGenre("SER-1")
                             );
                     }
                     else if (value.Id > 0 && value.Id != 2)
@@ -2331,7 +2343,7 @@ namespace TaymadeEntities.ViewModels
 
                 foreach (Movies item in MovieList)
                 {
-                    item.FixMovieData();
+                    //item.FixMovieData();
 
                     if (item.Dirty)
                     {
@@ -2472,7 +2484,7 @@ namespace TaymadeEntities.ViewModels
         {
             //List<MissingGenresMovies> missingGenrestemp = DataController.SandboxEntities.MissingGenresMovies.ToList();
 
-            List<Movies> missingGenres = DataController.SandboxEntities.GetMoviesByGenre("PORN-1");
+            List<Movies>? missingGenres = DataController.MovieController.GetMoviesByGenre("PORN-1");
 
             //foreach (var item in missingGenres)
             //{
@@ -3074,7 +3086,9 @@ namespace TaymadeEntities.ViewModels
             {
                 //MovieList = Support.Support.GetMovieList(CurrentPhrase.Id);
 
-                MovieList = new ObservableCollection<Movies>(DataController.SandboxEntities.GetMoviesByGenre(CurrentPhrase.COMPKEY));
+                MovieList = new ObservableCollection<Movies>(
+                    DataController.MovieController.GetMoviesByGenre(CurrentPhrase.COMPKEY)
+                    );
 
                 //List<Models.Movies> tempList = MovieContext.Movies
                 //    .Where(x => x.FilmGroup.Contains(CurrentPhrase.Id))
@@ -4852,7 +4866,7 @@ namespace TaymadeEntities.ViewModels
 
             foreach (Movies item in movieList)
             {
-                item.FixMovieData();
+               // item.FixMovieData();
 
                 if (item.Dirty) item.Save();
             }
@@ -4864,17 +4878,19 @@ namespace TaymadeEntities.ViewModels
 
         private ObservableCollection<Movies> GetMatchingInfoFromDB()
         {
-            List<Movies> tempList = DataController.SandboxEntities.GetMoviesbyInfo(FindText);
-            movieList = new ObservableCollection<Movies>(tempList);
-            movieList = MovieCollection.GetAndSortObservableCollection(tempList, false);
-
-            foreach (Movies item in movieList)
+            List<Movies>? tempList = DataController.MovieController.GetMoviesByInfo(FindText);
+            if (tempList != null)
             {
-                item.FixMovieData();
+                movieList = new ObservableCollection<Movies>(tempList);
+                movieList = MovieCollection.GetAndSortObservableCollection(tempList, false);
 
-                if (item.Dirty) item.Save();
+                foreach (Movies item in movieList)
+                {
+                    //item.FixMovieData();
+
+                    if (item.Dirty) item.Save();
+                }
             }
-
             FindBookmarkText = string.Empty;
 
             return movieList;

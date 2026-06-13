@@ -353,7 +353,7 @@ namespace TaymadeEntities.Support
             ClipRectangle = new Rectangle();
         }
 
-        internal void Save(string configPath)
+        public void Save(string configPath)
         {
             // convert object to json and save as movie name +config.json
             string json = JsonConvert.SerializeObject(this, Formatting.Indented, new JsonSerializerSettings
@@ -364,7 +364,7 @@ namespace TaymadeEntities.Support
 
         }
 
-        internal void Load(string configPath)
+        public void Load(string configPath)
         {
             if (System.IO.File.Exists(configPath))
             {

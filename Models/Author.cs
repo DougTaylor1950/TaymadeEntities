@@ -104,17 +104,7 @@ namespace TaymadeEntities.Models
         {
             try
             {
-                var local = DataController.SandboxEntities.Set<Author>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-                // check if local is not null
-                //if (local != null)
-                //{
-                //    // detach
-                //    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-                //}
-                // set Modified flag in your entry
-                // ModifiedOn = DateTime.Now;
-                DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                if (Id == 0) DataController.SandboxEntities.Author.Add(this);
                 DataController.SandboxEntities.SaveChanges();
             }
             catch (Exception)

@@ -72,7 +72,7 @@ namespace TaymadeEntities.Models
                 if (string.IsNullOrEmpty(Codes)) Codes = "";
                 if (CastId == null) CastId = 0;
 
-                StoryCast? tempCast = DataController.SandboxEntities.CreateStoryCast(StoryId, CastId.Value, Codes, Character, Age);
+                StoryCast? tempCast = DataController.StoryController.CreateStoryCast(StoryId, CastId.Value, Codes, Character, Age);
                 if (tempCast != null) this.Pk = tempCast.Pk;
                 //int rowschanged = DataController.SandboxEntities.SaveChanges();
             }
@@ -115,8 +115,8 @@ namespace TaymadeEntities.Models
 
         internal void Delete()
         {
-            DataController.SandboxEntities.StoryCast.Remove(this);
-            int result = DataController.SandboxEntities.SaveChanges();
+            bool success = DataController.StoryController.DeleteStoryCast(this);
+            
         }
     }
 
@@ -133,7 +133,7 @@ namespace TaymadeEntities.Models
             // clear and fill from database
             this.Clear();
 
-            List<StoryCast> temp = DataController.SandboxEntities.StoryCast.Where(s => s.StoryId == storyId).ToList();
+            List<StoryCast> temp = DataController.StoryController.GetStoryCastByStoryId(storyId);
             foreach (var cast in temp)
             {
                 this.Add(cast);

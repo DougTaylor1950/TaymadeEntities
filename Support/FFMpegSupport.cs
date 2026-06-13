@@ -367,6 +367,23 @@ namespace TaymadeEntities.Support
             return FFMetaDataFile;
         }
 
+        public static async Task<int?> GetMovieDurationAsync(string tempMoviePath = "")
+        {
+            int? time = null;
+            if (string.IsNullOrEmpty(tempMoviePath)) tempMoviePath = tempMoviePath;
+            TaymadeEntities.Support.FFProbeInfo? info = await FFMpegSupport.GetFFProbeInfo(tempMoviePath);
+            if (info != null && info.Duration != null)
+            {
+                {
+                    TimeSpan duration = TimeSpan.Parse(info.Duration);
+                    time = (int)duration.TotalSeconds;
+                    
+                }
+            }
+
+            return time;
+        }
+
         public static async Task<FFProbeInfo?> GetFFProbeInfo(string filename)
         {
             FFProbeInfo? info = new FFProbeInfo();

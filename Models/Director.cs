@@ -131,31 +131,23 @@ namespace TaymadeEntities.Models
 
         public void Save()
         {
-            //if (!Dirty)
-            //{
-                try
-                {
-                    //var local = DataController.SandboxEntities.Set<Director>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
-                    //if (local != null)
-                    //{
-                    //    // detach
-                    //    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-                    //}
+            try
+            {
+                if (Id == 0) DataController.DirectorController.Insert(this);
 
-                    DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                    DataController.SandboxEntities.SaveChanges();
+                DataController.DirectorController.Update(this);
 
-                    LogMessage("Saved " + ChangedFields);
-                    ChangedFields = string.Empty;
-                    Dirty = false;                  // clear modified flag; 
+                LogMessage("Saved " + ChangedFields);
+                ChangedFields = string.Empty;
+                Dirty = false;                  // clear modified flag; 
 
-                }
-                catch (System.Exception ex)
-                {
-                    string msg = "error Saving director : " + Id.ToString() + " : " + Name;
-                    Support.Logger.Error(ex, msg);
-                }
+            }
+            catch (System.Exception ex)
+            {
+                string msg = "error Saving director : " + Id.ToString() + " : " + Name;
+                Support.Logger.Error(ex, msg);
+            }
 
             //}
         }
@@ -171,6 +163,11 @@ namespace TaymadeEntities.Models
         {
             DataController.SandboxEntities.Directors.Remove(this);
             DataController.SandboxEntities.SaveChanges();
+        }
+
+        internal async void SaveAsync()
+        {
+           await DataController.DirectorController.SaveAsync();
         }
 
         #endregion

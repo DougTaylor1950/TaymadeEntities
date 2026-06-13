@@ -15,7 +15,7 @@ namespace TaymadeEntities.Models
         #region Private Fields
 
         private PhraseEntry? mainGenreEntity;
-        private Movies movies;
+        private Movies? movies;
         private PhraseEntry? subGenreEntity;
 
         #endregion Private Fields
@@ -76,7 +76,7 @@ namespace TaymadeEntities.Models
         /// Gets or sets the Movies.
         /// </summary>
         [NotMapped]
-        public Movies Movies { get => movies; set => this.RaiseAndSetIfChanged(ref movies, value); }
+        public Movies? Movies { get => movies; set => this.RaiseAndSetIfChanged(ref movies, value); }
 
         /// <summary>
         /// Gets or sets the sub genre.
@@ -145,12 +145,13 @@ namespace TaymadeEntities.Models
         public void Delete()
         {
             this.Movies = null;
-            var local = DataController.SandboxEntities.Set<MovieGenre>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+            //var local = DataController.SandboxEntities.Set<MovieGenre>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
-            // check if local is not null
-
-            DataController.SandboxEntities.MovieGenre.Remove(this);
-            DataController.SandboxEntities.SaveChanges();
+            //// check if local is not null
+            //DataController.SandboxEntities.MovieGenre.Attach(this);
+            //DataController.SandboxEntities.MovieGenre.Remove(this);
+            //DataController.SandboxEntities.SaveChanges();
+            DataController.MovieGenreController.Delete(this.Id);
         }
 
         /// <summary>
@@ -163,11 +164,7 @@ namespace TaymadeEntities.Models
             {
                 if (this.Id < 10 && this.MovieId > 0)
                 {
-                    //DataController.SandboxEntities.MovieGenre.Add(this);
-                    //EntityState state = DataController.SandboxEntities.Entry(this).State;
-
-                    //DataController.SandboxEntities.SaveChanges();
-                    MovieGenre temp = DataController.SandboxEntities.CreateMovieGenre(this.MovieId, this.Genre, this.SubGenre);
+                    MovieGenre? temp = DataController.MovieGenreController.CreateMovieGenre(this.MovieId, this.Genre, this.SubGenre);
                     this.Id = temp.Id;
                 }
             }
@@ -185,18 +182,19 @@ namespace TaymadeEntities.Models
         {
             try
             {
+                bool succes = DataController.MovieGenreController.Update(this);
 
-                var local = DataController.SandboxEntities.Set<MovieGenre>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+                //var local = DataController.SandboxEntities.Set<MovieGenre>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
-                // check if local is not null 
-                if (local != null)
-                {
-                    // detach
-                    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-                }
-                // set Modified flag in your entry
-                DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                DataController.SandboxEntities.SaveChanges();
+                //// check if local is not null 
+                //if (local != null)
+                //{
+                //    // detach
+                //    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
+                //}
+                //// set Modified flag in your entry
+                //DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                //DataController.SandboxEntities.SaveChanges();
 
 
             }
@@ -212,7 +210,7 @@ namespace TaymadeEntities.Models
             bool success = false;
             try
             {
-
+                // add a repository method
                 var local = DataController.SandboxEntities.Set<MovieGenre>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
                 // check if local is not null 

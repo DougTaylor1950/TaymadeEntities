@@ -11,6 +11,7 @@ namespace TaymadeEntities.Models
     using Microsoft.EntityFrameworkCore;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using System.Diagnostics;
     using System.Linq;
 
     /// <summary>
@@ -166,20 +167,9 @@ namespace TaymadeEntities.Models
         {
             try
             {
-
-
-                //var local = DataController.SandboxEntities.Set<MovieProperties>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-                //// check if local is not null
-                //if (local != null)
-                //{
-                //    // detach
-                //    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-                //}
-                // set Modified flag in your entry
-
-                DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                DataController.SandboxEntities.SaveChanges();
+                
+                DataController.MoviePropertiesController.Update(this);
+                DataController.MoviePropertiesController.Save(this);
             }
             catch (System.Exception)
             {

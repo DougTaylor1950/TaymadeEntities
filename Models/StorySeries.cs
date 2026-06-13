@@ -40,7 +40,8 @@ namespace TaymadeEntities.Models
 
         public void Save()
         {
-
+            if (Id == 0) DataController.SandboxEntities.StorySeries.Add(this);
+            DataController.SandboxEntities.SaveChanges();
         }
 
         /// <summary>

@@ -639,7 +639,7 @@ namespace TaymadeEntities.Models
         {
             get
             {
-                if (this.cast == null)
+                if (this.cast == null || this.cast.Count == 0)
                 {
                     this.cast = new ObservableCollection<StoryCast>(new StoryCastList("", this.Id));
                 }
@@ -905,7 +905,8 @@ namespace TaymadeEntities.Models
             {
                 if (wordHeadingList == null || wordHeadingList.Count == 0)
                 {
-                    wordHeadingList = DataController.SandboxEntities.WordHeadings.Where(x => x.StoryId == this.Id).ToList();
+                    wordHeadingList = DataController.StoryController.GetWordHeadingsList(this.Id);
+                        //DataController.SandboxEntities.WordHeadings.Where(x => x.StoryId == this.Id).ToList();
                 }
 
                 return wordHeadingList;
@@ -1612,6 +1613,13 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void Save()
         {
+            if (WordHeadingList != null)
+            {
+                foreach (var item in WordHeadingList)
+                {
+                    item.Save();
+                }
+            }
             if (Added == null)
             {
                 Added = DateTime.Today;
@@ -1634,33 +1642,36 @@ namespace TaymadeEntities.Models
             //if (DataController.SandboxEntities.Entry(this).State == EntityState.Unchanged)
             //{
             LastModified = DateTime.Now;
+            if (Id == 0) DataController.StoryController.AddStory(this);
+            DataController.StoryController.Update(this);
 
-            var local = DataController.SandboxEntities.Set<Story>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
-            // check if local is not null
-            if (local != null)
-            {
-                // detach
-                DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-            }
+            //var local = DataController.SandboxEntities.Set<Story>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+
+            //// check if local is not null
+            //if (local != null)
+            //{
+            //    // detach
+            //    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
+            //}
             // set Modified flag in your entry
             try
             {
-                DataController.SandboxEntities.Entry(this).State = EntityState.Modified;
-                int rowschanged = DataController.SandboxEntities.SaveChanges();
-                if (rowschanged >= 1)
-                {
-                    Debug.WriteLine("saved ok : " + Id.ToString() + " rows changed " + rowschanged.ToString());
-                }
+                //DataController.SandboxEntities.Entry(this).State = EntityState.Modified;
+                //int rowschanged = DataController.SandboxEntities.SaveChanges();
+                //if (rowschanged >= 1)
+                //{
+                //    Debug.WriteLine("saved ok : " + Id.ToString() + " rows changed " + rowschanged.ToString());
+                //}
 
-                else if (rowschanged == 0)
-                {
-                    Debug.WriteLine("saved failed : " + Id.ToString());
-                }
-                else
-                {
-                    Debug.WriteLine("saved ok : " + Id.ToString());
-                }
+                //else if (rowschanged == 0)
+                //{
+                //    Debug.WriteLine("saved failed : " + Id.ToString());
+                //}
+                //else
+                //{
+                //    Debug.WriteLine("saved ok : " + Id.ToString());
+                //}
             }
             catch (Exception e)
             {
@@ -1696,34 +1707,34 @@ namespace TaymadeEntities.Models
             //if (DataController.SandboxEntities.Entry(this).State == EntityState.Unchanged)
             //{
             LastModified = DateTime.Now;
+            success = DataController.StoryController.Update(this);
+            //var local = DataController.SandboxEntities.Set<Story>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
-            var local = DataController.SandboxEntities.Set<Story>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-            // check if local is not null
-            if (local != null)
-            {
-                // detach
-                DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-            }
+            //// check if local is not null
+            //if (local != null)
+            //{
+            //    // detach
+            //    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
+            //}
             // set Modified flag in your entry
             try
             {
-                 DataController.SandboxEntities.Entry(this).State = EntityState.Modified;
-                int rowschanged = await DataController.SandboxEntities.SaveChangesAsync();
-                if (rowschanged >= 1)
-                {
-                    success = true;
-                    Debug.WriteLine("saved ok : " + Id.ToString() + " rows changed " + rowschanged.ToString());
-                }
+                // DataController.SandboxEntities.Entry(this).State = EntityState.Modified;
+                //int rowschanged = await DataController.SandboxEntities.SaveChangesAsync();
+                //if (rowschanged >= 1)
+                //{
+                //    success = true;
+                //    Debug.WriteLine("saved ok : " + Id.ToString() + " rows changed " + rowschanged.ToString());
+                //}
 
-                else if (rowschanged == 0)
-                {
-                    Debug.WriteLine("saved failed : " + Id.ToString());
-                }
-                else
-                {
-                    Debug.WriteLine("saved ok : " + Id.ToString());
-                }
+                //else if (rowschanged == 0)
+                //{
+                //    Debug.WriteLine("saved failed : " + Id.ToString());
+                //}
+                //else
+                //{
+                //    Debug.WriteLine("saved ok : " + Id.ToString());
+                //}
             }
             catch (Exception e)
             {

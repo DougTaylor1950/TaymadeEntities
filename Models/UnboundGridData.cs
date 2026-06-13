@@ -243,7 +243,7 @@ namespace TaymadeEntities.Models
 
         #region Methods
 
-        internal bool Insert()
+        public bool Insert()
         {
             bool success = false;
             if (this.Id <= 0 && !string.IsNullOrEmpty(FileName))  // new entity so save to get id for new entity
@@ -274,7 +274,7 @@ namespace TaymadeEntities.Models
 
         #region Internal Methods
 
-        internal bool Delete()
+        public bool Delete()
         {
             bool success = true;
             try
@@ -309,7 +309,7 @@ namespace TaymadeEntities.Models
 
             return unboundGridData;
         }
-        internal bool Save()
+        public bool Save()
         {
 
             bool success = false;
@@ -335,8 +335,8 @@ namespace TaymadeEntities.Models
                     //}
                     // set Modified flag in your entry
                     //DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                    DataController.SandboxEntities.SaveChanges();
-                    success = true;
+                    success = DataController.UnboundController.Update(this);
+                   
                 }
             }
             catch (Exception ex)
@@ -352,7 +352,7 @@ namespace TaymadeEntities.Models
             #endregion
         }
 
-        internal void Refresh()
+        public void Refresh()
         {
             // read file data and update filelength etc
             Support.DownloadSupport.GetFileInfo(this);

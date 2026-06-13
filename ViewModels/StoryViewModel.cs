@@ -186,12 +186,13 @@ namespace TaymadeEntities.ViewModels
         private Author currentAuthor;
         private StorySeries currentSeries;
         private ObservableCollection<Story> selectedStoryList;
+        private StoryCast currentCastMember;
         #endregion Fields
 
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StoryViewModel"/> class.
+        /// Initializes a new instance of the <see cref="MaintenaceViewModel"/> class.
         /// </summary>
         public StoryViewModel()
         {
@@ -239,13 +240,14 @@ namespace TaymadeEntities.ViewModels
 
         }
 
-        private void DoMaintenance()
+        private async void DoMaintenance()
         {
             // will open a dialog to run maintenance tasks such as maintaining authors, series, and other related data
             // remember to set datacontext to this on create
-            //StoryMaintenance storyMaintenance = new StoryMaintenance();
+            Window? main = Support.GetWindow() as Window;
+            using StoryMaintenance storyMaintenance = new StoryMaintenance(this);
             //storyMaintenance.DataContext = this;
-            //storyMaintenance.ShowDialog(MainWindow.Instance);
+            bool result = await storyMaintenance.ShowDialog<bool>(main);
 
             // no actions taken after return
 
@@ -766,9 +768,9 @@ namespace TaymadeEntities.ViewModels
                             }
 
                             // create a storytransinfo instance set currentstryId and update it
-                            StoryTransInfo? storyTransInfo = new StoryTransInfo();
-                            storyTransInfo.CurrentStoryId = CurrentStory.Id;
-                            storyTransInfo.Update();
+                            //StoryTransInfo? storyTransInfo = new StoryTransInfo();
+                            StoryTransInfo.GetInstance().CurrentStoryId = CurrentStory.Id;
+                            StoryTransInfo.Update();
 
                             // Get document properties to set creation time
 
@@ -964,7 +966,7 @@ namespace TaymadeEntities.ViewModels
         public int CurrentColumnIndex { get; set; }
         public string CurrentColumnContent { get; internal set; }
         public bool WasText { get; private set; }
-        public StoryCast CurrentCastMember { get; internal set; }
+        public StoryCast CurrentCastMember { get => currentCastMember; set => this.RaiseAndSetIfChanged(ref  currentCastMember, value); }
         public ReactiveCommand<string?, Unit> DoAuthorSearchCommand { get; internal set; }
         public ReactiveCommand<Unit, Unit> DoClearShownCommand { get; internal set; }
         public ReactiveCommand<string?, Unit> DoCodesSearchCommand { get; internal set; }
@@ -2006,13 +2008,15 @@ namespace TaymadeEntities.ViewModels
                 }
                 // create the custom dictionary file
                 storyDictionary.CreateCustomDictionary();
-                StoryTransInfo storyTransInfo = new StoryTransInfo();
-                storyTransInfo.Load();
-                storyTransInfo.CurrentStoryId = CurrentStory?.Id ?? 0;
-                storyTransInfo.Update();
+
+                if (CurrentStory.SeriesId == 0) CurrentStory.SeriesId = 1;
+                //StoryTransInfo.Load();
+                StoryTransInfo.GetInstance().CurrentStoryId = CurrentStory?.Id ?? 0;
+                StoryTransInfo.Update();
 
                 if (CurrentStory != null && this != null)
                 {
+                    CurrentStory.Save();
                     currentStory = CurrentStory;
 
                     string fixedPath = Support.FixImagePath(CurrentStory.Path);
@@ -2323,17 +2327,17 @@ namespace TaymadeEntities.ViewModels
                                                 }
                                                 else
                                                 {
-                                                    storyCast = Models.DataController.SandboxEntities.StoryCast.Find(pkInt);
+                                                    storyCast = Models.DataController.StoryController.GetStoryCastById(pkInt);
                                                     if (storyCast != null) CurrentStory.Cast.Add(storyCast);
                                                 }
                                             }
-                                            //ObservableCollection<StoryCast> storyCasts = new ObservableCollection<StoryCast>(new StoryCastList(cast, CurrentStory.Id));
-                                            //CurrentStory.Cast = storyCasts;
-                                            //// go through cast list and look for those with ids if there is a non null and value greater than 0 hunt for id:x; in codes
-                                            //foreach (var item in CurrentStory.Cast)
-                                            //{
-                                            //    item.FindCodesForItem(CurrentStory);
-                                            //}
+                                            ObservableCollection<StoryCast> storyCasts = new ObservableCollection<StoryCast>(new StoryCastList(cast, CurrentStory.Id));
+                                            CurrentStory.Cast = storyCasts;
+                                            // go through cast list and look for those with ids if there is a non null and value greater than 0 hunt for id:x; in codes
+                                            foreach (var item in CurrentStory.Cast)
+                                            {
+                                                item.FindCodesForItem(CurrentStory);
+                                            }
                                         }
                                     }
 

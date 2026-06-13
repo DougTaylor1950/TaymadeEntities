@@ -8,45 +8,50 @@ using TaymadeEntities.Models;
 
 namespace TaymadeEntities.Controllers
 {
-    public class TemplateController : IDisposable
+    public class MovieGenreController : IDisposable
     {
 
         private bool disposedValue;
-        private ITemplateRepository templateRepository;
+        private IMovieGenreRepository movieGenreRepository;
 
-        public TemplateController()
+        public MovieGenreController()
         {
-            this.Repository = new Repository(new DBContext.SandboxEntities());
+            this.movieGenreRepository = new MovieGenreRepository(new DBContext.SandboxEntities());
         }
 
-        public Controller(ITemplateRepository repository)
+        public MovieGenreController(IMovieGenreRepository repository)
         {
-            this.templateRepository = repository;
+            this.movieGenreRepository = repository;
         }
 
         public bool Save()
         {
-            return templateRepository.Save();
+            return movieGenreRepository.Save();
         }
 
-        public bool Save(Models.Movies movie)
+        public bool Save(Models.MovieGenre movie)
         {
-            return templateRepository.Save(movie);
+            return movieGenreRepository.Save(movie);
         }
 
-        public bool Update(Models.Movies movie)
+        public bool Update(Models.MovieGenre movie)
         {
-            return templateRepository.Update(movie);
+            return movieGenreRepository.Update(movie);
         }
 
         public void Delete(int id)
         {
-            templateRepository.DeleteMovie(id);
+            movieGenreRepository.Delete(id);
         }
 
-        public Movies? GetById(int id)
+        public MovieGenre? CreateMovieGenre(int movieId, string genre, string? subGenre)
         {
-            return templateRepository.GetById(id);
+            return movieGenreRepository.CreateMovieGenre(movieId, genre, subGenre);
+        }
+
+        public MovieGenre? GetById(int id)
+        {
+            return movieGenreRepository.GetById(id);
         }
 
         protected virtual void Dispose(bool disposing)

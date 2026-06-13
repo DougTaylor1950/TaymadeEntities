@@ -12,7 +12,7 @@ namespace TaymadeEntities.Models
     using TaymadeEntities.Support;
     using TaymadeEntities.ViewModels;
     //using DocumentFormat.OpenXml.Office2010.Excel;
-   // using DocumentFormat.OpenXml.Office2010.ExcelAc;
+    // using DocumentFormat.OpenXml.Office2010.ExcelAc;
     using DynamicData.Binding;
     using Microsoft.EntityFrameworkCore;
     using ReactiveUI;
@@ -480,27 +480,27 @@ namespace TaymadeEntities.Models
                 try
                 {
 
-                
-                bookmark = new Bookmark();
-                bookmark.Name = MovieName;
-                bookmark.Time = 10;
-                bookmark.Type = "BOOKMARK";
-                bookmark.MovieID = Id;
-                //VideoSupport videoSupport = new VideoSupport();
-                //VideoSupport.GrabBookmarkImage(this, bookmark);
 
-                //bookmark.ImagePath = VideoSupport.thumbnailPath;
-                //if (Id > 0)
-                //{
-                //    DataController.SandboxEntities.Bookmarks.Add(bookmark);
-                //    DataController.SandboxEntities.SaveChanges();
-                //    SetPercentUnmarked();
-                //}
+                    bookmark = new Bookmark();
+                    bookmark.Name = MovieName;
+                    bookmark.Time = 10;
+                    bookmark.Type = "BOOKMARK";
+                    bookmark.MovieID = Id;
+                    //VideoSupport videoSupport = new VideoSupport();
+                    //VideoSupport.GrabBookmarkImage(this, bookmark);
 
-                ImagePath = bookmark.ImagePath;
-                Save();
+                    //bookmark.ImagePath = VideoSupport.thumbnailPath;
+                    //if (Id > 0)
+                    //{
+                    //    DataController.SandboxEntities.Bookmarks.Add(bookmark);
+                    //    DataController.SandboxEntities.SaveChanges();
+                    //    SetPercentUnmarked();
+                    //}
+
+                    ImagePath = bookmark.ImagePath;
+                    Save();
                 }
-                catch (Exception ex )
+                catch (Exception ex)
                 {
 
                     string error = ex.ToString();
@@ -664,12 +664,14 @@ namespace TaymadeEntities.Models
                 int count = Casts.Count;
                 if (count == 0)
                 {
-                    
+
                     List<Cast> casts = await DataController.SandboxEntities.GetCastByMovieId(Id);
                     Casts = new ObservableCollection<Cast>(
                         casts);
                     this.RaisePropertyChanged(nameof(Casts));
                 }
+
+                SetPercentUnmarked();
 
                 DataController.MovieController.UpdateMovie(this);
             }
@@ -685,16 +687,22 @@ namespace TaymadeEntities.Models
         public async Task GetDuration(string tempMoviePath = "")
         {
             if (string.IsNullOrEmpty(tempMoviePath)) tempMoviePath = MoviePath;
-            TaymadeEntities.Support.FFProbeInfo? info = await FFMpegSupport.GetFFProbeInfo(tempMoviePath);
-            //int time = await VideoSupport.GetDurationSeconds(tempMoviePath, this);
-            if (info != null && info.Duration != null)
+            int? time = await FFMpegSupport.GetMovieDurationAsync(tempMoviePath);
+            if (time.HasValue)
             {
-                {
-                    TimeSpan duration = TimeSpan.Parse(info.Duration);
-                    int time = (int)duration.TotalSeconds;
-                    DurationSeconds = time;
-                }
+                DurationSeconds = time;
             }
+
+            //TaymadeEntities.Support.FFProbeInfo? info = await FFMpegSupport.GetFFProbeInfo(tempMoviePath);
+            ////int time = await VideoSupport.GetDurationSeconds(tempMoviePath, this);
+            //if (info != null && info.Duration != null)
+            //{
+            //    {
+            //        TimeSpan duration = TimeSpan.Parse(info.Duration);
+            //        int time = (int)duration.TotalSeconds;
+            //        DurationSeconds = time;
+            //    }
+            //}
         }
 
         public string? GetTempFileName()
@@ -821,10 +829,10 @@ namespace TaymadeEntities.Models
                 return filmDuration;
         }
 
-        public bool  Delete()
+        public bool Delete()
         {
-            return DataController.SandboxEntities.DeleteMovie(Id);
-        
+            return DataController.MovieController.DeleteMovie(Id);
+
 
             //DataController.SandboxEntities.Movies.Remove(this);
             //DataController.SandboxEntities.SaveChanges();
@@ -875,7 +883,7 @@ namespace TaymadeEntities.Models
 
                 // set bookmark count
                 if (Bookmarks != null) ImagesCount = Bookmarks.Count;
-                
+
             }
             catch (Exception)
             {
@@ -892,7 +900,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Save.
         /// </summary>
-        public async Task< bool> SaveAsync()
+        public async Task<bool> SaveAsync()
         {
             bool success = true;
             if (HasChapters == null) HasChapters = false;
@@ -901,69 +909,58 @@ namespace TaymadeEntities.Models
 
             //if (dirty)
             //{
-                if (MovieExtension == null)
+            if (MovieExtension == null)
+            {
+                MovieExtension = new MovieExtn();
+                MovieExtension.Rating = 0;
+                Json = MovieExtension.Serialise();
+            }
+            else Json = MovieExtension.Serialise();
+            try
+            {
+                this.ErrorText = "";
+
+                if (Id == 0)
                 {
-                    MovieExtension = new MovieExtn();
-                    MovieExtension.Rating = 0;
-                    Json = MovieExtension.Serialise();
+                    success = Insert();
                 }
-                else Json = MovieExtension.Serialise();
-                try
+
+                if (SeriesEntity != null && (Series == null || Series != SeriesEntity.Id))
                 {
-                    this.ErrorText = "";
-
-                    if (Id == 0)
-                    {
-                        success = Insert();
-                    }
-
-                    if (SeriesEntity != null && (Series == null || Series != SeriesEntity.Id))
-                    {
-                        Series = SeriesEntity.Id;
-                    }
-
-                    if (Director != null)
-                    {
-                     //   Director.Save();
-                    }
-
-                    EntityState state = DataController.SandboxEntities.Entry(this).State;
-
-                    var local = DataController.SandboxEntities.Set<Movies>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-                    // check if local is not null
-                    if (local != null)
-                    {
-                        // detach
-                        //DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-                    }
-                    // set Modified flag in your entry
-                    ModifiedOn = DateTime.Now;
-                    DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                    int saved =  await DataController.SandboxEntities.SaveChangesAsync();
-                    ClearErrors();
-                    LogMessage("Saved " + ChangedFields);
-                    ChangedFields = string.Empty;
-                    Dirty = false;                  // clear modified flag;
-                    success = (saved == 1  );
+                    Series = SeriesEntity.Id;
                 }
-                catch (Exception ex)
+
+                //if (Director != null)
+                //{
+                   // Director.SaveAsync();
+                //}
+
+                ModifiedOn = DateTime.Now;
+                success = await DataController.MovieController.UpdateMovieAsync(this);
+
+                ClearErrors();
+                LogMessage("Saved " + ChangedFields);
+                ChangedFields = string.Empty;
+                Dirty = false;                  // clear modified flag;
+                //success = (saved == 1);
+            }
+            catch (Exception ex)
+            {
+                string msg = "error Saving movie : " + Id.ToString() + " : " + MovieName;
+                Support.Logger.Error(ex, msg);
+
+                MVMLogs logs = new MVMLogs(ex, "database", "Error");
+
+                if (Errors == null) Errors = new System.Collections.Generic.List<ModelError>();
+
+                ModelError error = new ModelError()
                 {
-                    string msg = "error Saving movie : " + Id.ToString() + " : " + MovieName;
-                    Support.Logger.Error(ex, msg);
-
-                    MVMLogs logs = new MVMLogs(ex, "database", "Error");
-
-                    if (Errors == null) Errors = new System.Collections.Generic.List<ModelError>();
-
-                    ModelError error = new ModelError()
-                    {
-                        Error = ex.Message,
-                        Property = "save"
-                    };
-                    Errors.Add(error);
-                    success = false;
-                }
+                    Error = ex.Message,
+                    Property = "save"
+                };
+                Errors.Add(error);
+                success = false;
+            }
             //}
             return success;
         }

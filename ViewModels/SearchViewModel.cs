@@ -91,6 +91,7 @@ namespace TaymadeEntities.ViewModels
             get => movieTitle;
             set => this.RaiseAndSetIfChanged(ref movieTitle, value);
         }
+        public int Year { get; set; }
 
         protected virtual void Dispose(bool disposing)
         {

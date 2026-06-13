@@ -1,0 +1,99 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:vm="using:TaymadeEntities.ViewModels"
+		xmlns:tc="using:TaymadeControls"
+		xmlns:tcb="using:TaymadeControls.Buttons"
+		xmlns:mo="using:StoryViewer.Models"
+		mc:Ignorable="d" d:DesignWidth="1800" d:DesignHeight="1200"
+		x:Class="TaymadeEntities.Dialogs.StoryMaintenance"
+		x:DataType="vm:StoryViewModel"
+		Title="StoryMaintenance">
+
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+		to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<vm:StoryViewModel/>
+	</Design.DataContext>
+
+	<Window.Styles>
+		<StyleInclude Source="avares://TaymadeControls/Styles/TaymadeStyles.axaml"/>
+	</Window.Styles>
+
+	<Border CornerRadius="6" BorderBrush="Gray"
+			BorderThickness="2"
+			>
+		<StackPanel Orientation="Vertical">
+			<tc:HeaderControl2 Title="Story Maintenance"
+							   Height="80"
+							   Background="{Binding $self.BermudaTriangleBrush}"
+							   Name="StoryMaintenaceHeaderControl"
+							   SubtitleA=""
+							   SubtitleAIsVisible="True"
+							   />
+			<StackPanel Orientation="Vertical"
+						Height="400">
+				<Border BorderBrush="Black"
+						BorderThickness="2"
+						CornerRadius="10">
+					<StackPanel Orientation="Horizontal"	>
+						<StackPanel Orientation="Vertical"
+									Width="280"	>
+							<ListBox	ItemsSource="{Binding Authors}"
+									 SelectedItem="{Binding CurrentAuthor}"
+									 Height="300"/>
+							<StackPanel Orientation="Horizontal" Width="280" >
+								<tcb:ImagedButton
+								LabelText="Add Author"
+								ImageSource="avares://TaymadeControls/Assets/add_icon.png"
+								Click="AddAuthor_Click"
+								Margin="5,5,5,5"
+								/>
+								<TextBox Text=""
+										 PlaceholderText="Enter New Author"
+										 Margin="5,5,5,5"
+										 Name="NewAuthorName"/>
+
+							</StackPanel>
+						</StackPanel>
+						<StackPanel Width="20"
+									Background="LightGray"/>
+						<StackPanel Orientation="Vertical" Width="300">
+							<ListBox ItemsSource="{Binding SeriesList}"
+									 SelectedItem="{Binding CurrentSeries}"
+									 Height="300"/>
+							<StackPanel Orientation="Horizontal" Width="300" >
+								<tcb:ImagedButton
+								LabelText="Add Series"
+								ImageSource="avares://TaymadeControls/Assets/add_icon.png"
+								Click="AddSeries_Click"
+								Margin="5,5,5,5"
+								/>
+								<TextBox Text=""
+										 PlaceholderText="Enter Series"
+										 PlaceholderForeground="Black"
+										 Margin="5,5,5,5"
+										 Name="NewSeriesName"/>
+							</StackPanel>
+
+
+						</StackPanel>
+						<StackPanel Width="20"
+									Background="LightGray"/>
+						<StackPanel	Orientation="Vertical"	Width="300">
+							<tcb:ImagedButton LabelText="Phrases" Click="ImagedButton_Click" />
+						</StackPanel>
+
+					</StackPanel>
+				</Border>
+			</StackPanel>
+
+			<StackPanel Orientation="Horizontal"
+						HorizontalAlignment="Center">
+				<tcb:OkButton Click="OkButton_Click" />
+				<tcb:CancelButton Click="CancelButton_Click" />
+			</StackPanel>
+		</StackPanel>
+	</Border>
+</Window>

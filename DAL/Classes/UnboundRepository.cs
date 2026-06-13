@@ -10,13 +10,13 @@ using TaymadeEntities.Support;
 
 namespace TaymadeEntities.DAL.Classes
 {
-    public class TemplateRepository : ITemplateRepository, IDisposable
+    public class UnboundRepository : IUnboundRepository, IDisposable
     {
         private bool disposedValue;
 
         private readonly DBContext.SandboxEntities _context;
 
-        public TemplateRepository(SandboxEntities context)
+        public UnboundRepository(SandboxEntities context)
         {
             _context = context;
         }
@@ -37,7 +37,7 @@ namespace TaymadeEntities.DAL.Classes
         }
 
         // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~ActorRepository()
+        // ~UnboundGridDataRepository()
         // {
         //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         //     Dispose(disposing: false);
@@ -52,42 +52,41 @@ namespace TaymadeEntities.DAL.Classes
 
         public void Delete(int id)
         {
-            Actor actorToDelete = _context.Actors.Find(id);
-            if (actorToDelete != null)
+            UnboundGridData UnboundGridDataToDelete = _context.UnboundGridData.Find(id);
+            if (UnboundGridDataToDelete != null)
             {
-                _context.Actors.Remove(actorToDelete);
+                _context.UnboundGridData.Remove(UnboundGridDataToDelete);
+                Save();
+            }
+        }
+
+        public void DeleteUnboundGridData(UnboundGridData? unbound)
+        {
+            
+            if (unbound != null)
+            {
+                _context.UnboundGridData.Remove(unbound);
                 Save();
             }
         }
 
       
 
-        public Actor? GetById(int id)
+        public UnboundGridData? GetUnboundGridDataById(int id)
         {
-            return _context.Actors.Find(id);
+            return _context.UnboundGridData.Find(id);
         }
 
-        public void Insert(Actor actor)
+        public bool InsertUnboundGridData(UnboundGridData UnboundGridData)
         {
-            _context.Actors.Add(actor);
-            Save();
+            _context.UnboundGridData.Add(UnboundGridData);
+            return Save();
         }
 
-        public Actor? GetOrCreate(string actorName)
+        public bool Update(UnboundGridData UnboundGridData)
         {
-            Actor actor = _context.Actors.FirstOrDefault(a => a.Name == actorName);
-            if (actor == null)
-            {
-                actor = new Actor { Name = actorName };
-                InsertActor(actor);
-            }
-            return actor;
-        }
-
-        public void Update(Actor actor)
-        {
-            _context.Actors.Update(actor);
-            Save();
+            _context.UnboundGridData.Update(UnboundGridData);
+            return Save();
         }
 
         public bool Save()
@@ -96,19 +95,34 @@ namespace TaymadeEntities.DAL.Classes
             return success;
         }
 
-
-        public void Add(Actor actor)
+        public void Add(UnboundGridData UnboundGridData)
         {
-            _context.Actors.Add(actor);
+            _context.UnboundGridData.Add(UnboundGridData);
             Save();
         }
 
        
 
-        public void Save(Actor actor)
+        public bool Save(UnboundGridData UnboundGridData)
         {
-            _context.Actors.Update(actor);
-            Save();
+            _context.UnboundGridData.Update(UnboundGridData);
+            return Save();
         }
-}
+
+        public UnboundGridData? GetById(int id)
+        {
+            return _context.UnboundGridData.Find(id);
+        }
+
+        public bool Insert(UnboundGridData unboundGridData)
+        {
+            _context.Add(unboundGridData);
+            return Save();
+        }
+
+        public IEnumerable<UnboundGridData> GetData()
+        {
+            return _context.UnboundGridData.ToList();
+        }
+    }
 }

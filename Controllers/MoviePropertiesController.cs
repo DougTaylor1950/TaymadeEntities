@@ -8,45 +8,42 @@ using TaymadeEntities.Models;
 
 namespace TaymadeEntities.Controllers
 {
-    public class TemplateController : IDisposable
+    public class MoviePropertiesController : IDisposable
     {
 
         private bool disposedValue;
-        private ITemplateRepository templateRepository;
+        private IMoviePropertiesRepository moviePropertiesRepository;
 
-        public TemplateController()
+        public MoviePropertiesController()
         {
-            this.Repository = new Repository(new DBContext.SandboxEntities());
+            this.moviePropertiesRepository = new MoviePropertiesRepository(new DBContext.SandboxEntities());
         }
 
-        public Controller(ITemplateRepository repository)
+        public MoviePropertiesController(IMoviePropertiesRepository repository)
         {
-            this.templateRepository = repository;
+            this.moviePropertiesRepository = repository;
         }
 
         public bool Save()
         {
-            return templateRepository.Save();
+            return moviePropertiesRepository.Save();
         }
 
-        public bool Save(Models.Movies movie)
+        public void Save(Models.MovieProperties movie)
         {
-            return templateRepository.Save(movie);
+            moviePropertiesRepository.Save(movie);
         }
 
-        public bool Update(Models.Movies movie)
+        public void Update(Models.MovieProperties movie)
         {
-            return templateRepository.Update(movie);
+            moviePropertiesRepository.Update(movie);
         }
 
-        public void Delete(int id)
-        {
-            templateRepository.DeleteMovie(id);
-        }
+        
 
-        public Movies? GetById(int id)
+        public MovieProperties? GetById(int id)
         {
-            return templateRepository.GetById(id);
+            return moviePropertiesRepository.GetById(id);
         }
 
         protected virtual void Dispose(bool disposing)

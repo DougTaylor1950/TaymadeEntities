@@ -32,7 +32,15 @@ namespace TaymadeEntities.Models
 
         public static CastController? castController = null;
 
+        public static DirectorController directorController = null;
+
         public static MovieController? movieController = null;
+        public static MovieGenreController? movieGenreController = null;
+
+        public static MoviePropertiesController? moviePropertiesController;
+
+        public static PhrasesController? phrasesController = null;
+        public static UnboundController? unboundController = null;
 
         /// <summary>
         /// Defines the MusicEntitiesContext.
@@ -79,7 +87,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the phraseEntries.
         /// </summary>
-        private static List<Models.PhraseEntry> phraseEntries = new List<PhraseEntry>();
+        private static List<Models.PhraseEntry>? phraseEntries = new List<PhraseEntry>();
 
         private static List<ProductionCompany> productionCompanies;
 
@@ -102,7 +110,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the storyProperties.
         /// </summary>
-        private static StoryProperties? storyProperties;
+        private static StoryProperties? storyProperties = null;
 
         private static List<StorySeries> storySeriesList = new List<StorySeries>();
 
@@ -110,6 +118,7 @@ namespace TaymadeEntities.Models
         /// Defines the subPhraseEntries.
         /// </summary>
         private static List<Models.PhraseEntry> subPhraseEntries = new List<PhraseEntry>();
+        private static StoryController? storyController;
 
         #endregion Private Fields
 
@@ -236,6 +245,18 @@ namespace TaymadeEntities.Models
             }
         }
 
+        public static DirectorController DirectorController
+        {
+            get
+            {
+                if (directorController == null)
+                {
+                    directorController = new DirectorController(new DirectorRepository(SandboxEntities));
+                }
+                return directorController;
+            }
+        }
+
         /// <summary>
         /// Gets the DirectorList.
         /// </summary>
@@ -245,8 +266,9 @@ namespace TaymadeEntities.Models
             {
                 if (directorList.Count == 0)
                 {
-                    using var ctx = SandboxEntities;
-                    directorList = ctx.Directors.AsNoTracking().OrderBy(d => d.Name).ToList();
+                    //  using var ctx = SandboxEntities;
+                    List<Director>? tempList = DirectorController.GetDirectorList();
+                    if (tempList != null) directorList = tempList.OrderBy(d => d.Name).ToList();
                 }
                 return directorList;
             }
@@ -310,6 +332,18 @@ namespace TaymadeEntities.Models
             }
         }
 
+        public static MovieGenreController MovieGenreController
+        {
+            get
+            {
+                if (movieGenreController == null)
+                {
+                    movieGenreController = new MovieGenreController(new MovieGenreRepository(SandboxEntities));
+                }
+                return movieGenreController;
+            }
+        }
+
         public static MovieController MovieController
         {
             get
@@ -321,6 +355,55 @@ namespace TaymadeEntities.Models
                 return movieController;
             }
         }
+
+        public static MoviePropertiesController MoviePropertiesController
+        {
+            get
+            {
+                if (moviePropertiesController == null)
+                {
+                    moviePropertiesController = new MoviePropertiesController(new MoviePropertiesRepository(SandboxEntities));
+                }
+                return moviePropertiesController;
+            }
+        }
+        public static PhrasesController PhrasesController
+        {
+            get
+            {
+                if (phrasesController == null)
+                {
+                    phrasesController = new PhrasesController(new PhrasesRepository(SandboxEntities));
+                }
+                return phrasesController;
+            }
+        }
+
+        public static StoryController StoryController
+        {
+            get
+            {
+                if (storyController == null)
+                {
+                    storyController = new StoryController(new StoryRepository(SandboxEntities));
+                }
+                return storyController;
+            }
+        }
+
+        public static UnboundController UnboundController
+        {
+            get
+            {
+                if (unboundController == null)
+                {
+                    unboundController = new UnboundController(new UnboundRepository(SandboxEntities));
+                }
+                return unboundController;
+            }
+        }
+
+
         public static MovieImageEntity MovieImageEntity
         {
             get
@@ -361,7 +444,8 @@ namespace TaymadeEntities.Models
             {
                 if (movieProperties == null)
                 {
-                    movieProperties = SandboxEntities.MovieProperties.FirstOrDefault();
+                    movieProperties = MoviePropertiesController.GetById(1);
+                    //SandboxEntities.MovieProperties.Attach(movieProperties);
                 }
 
                 return movieProperties;
@@ -373,13 +457,14 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets the PhraseEntries.
         /// </summary>
-        public static List<Models.PhraseEntry> PhraseEntries
+        public static List<Models.PhraseEntry>? PhraseEntries
         {
             get
             {
-                if (phraseEntries.Count == 0)
+                if (phraseEntries?.Count == 0)
                 {
-                    phraseEntries = SandboxEntities.PhraseEntry.Where(x => x.PhraseID == 1).OrderBy(x => x.Description).ToList();
+                    phraseEntries = PhrasesController.GetPhrasesByPhraseHeaderId(1);
+                    //phraseEntries = SandboxEntities.PhraseEntry.Where(x => x.PhraseID == 1).OrderBy(x => x.Description).ToList();
                 }
 
                 return phraseEntries;
@@ -448,7 +533,8 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets the StoryList.
         /// </summary>
-        public static List<Story> StoryList => SandboxEntities.Story.Include(s => s.WordHeadingList).Include(s => s.StorySeries).ToList();
+        public static List<Story> StoryList => StoryController.GetStories().ToList();
+            //SandboxEntities.Story.Include(s => s.WordHeadingList).Include(s => s.StorySeries).ToList();
 
         /// <summary>
         /// Gets or sets the StoryProperties.
@@ -459,8 +545,7 @@ namespace TaymadeEntities.Models
             {
                 if (storyProperties == null)
                 {
-                    using var ctx = SandboxEntities;
-                    storyProperties = ctx.StoryProperties.AsNoTracking().FirstOrDefault();
+                    storyProperties = StoryController.GetStoryProperties();
                 }
 
                 return storyProperties;
@@ -546,22 +631,44 @@ namespace TaymadeEntities.Models
         {
             // get a temporary variable = the phraseId + '.' the subphrase identifier
             string tempPhraseId = phrase.Id + ".";
-            List<Models.PhraseEntry> temp = SandboxEntities.PhraseEntry.Where(p => p.Id.Contains(tempPhraseId) && p.PhraseID == 9).OrderBy(x => x.Description).ToList();
-            if (temp == null) temp = new List<Models.PhraseEntry>();
-            if (temp.Count == 0)
+            List<Models.PhraseEntry> tempList = PhrasesController.GetSubPhraseEntries(phrase.Id);
+            //List<Models.PhraseEntry> temp = SandboxEntities.PhraseEntry.Where(p => p.Id.Contains(tempPhraseId) && p.PhraseID == 9).OrderBy(x => x.Description).ToList();
+            if (tempList == null) tempList = new List<Models.PhraseEntry>();
+            if (tempList.Count == 0)
             {
-                PhraseEntry tempPhrase = new PhraseEntry()
-                {
-                    PhraseID = 9,
-                    Description = phrase.Description,
-                    Id = phrase.Id + "." + phrase.Id,
-                    Order = subPhraseEntries.Count + 1
-                };
-                tempPhrase.Save();
-                temp.Add(tempPhrase);
+                PhraseEntry tempPhrase = GetTempPhrase(phrase);
+
+                PhrasesController.Add(tempPhrase);
+                PhrasesController.Update(tempPhrase);
+                tempList.Add(phrase);
             }
-            //temp.Add(phrase);
-            return temp;
+            else
+            {
+                tempPhraseId += phrase.Id;
+                Models.PhraseEntry tempPhrase = tempList.Where(p => p.Id == tempPhraseId).FirstOrDefault();
+
+                if (tempPhrase == null)
+                {
+                    // add phrase
+                    tempPhrase = GetTempPhrase(phrase);
+                    PhrasesController.Add(tempPhrase);
+                    PhrasesController.Update(tempPhrase);
+                    tempList.Add(phrase);
+                }
+            }
+            
+            return tempList;
+        }
+
+        private static PhraseEntry GetTempPhrase(PhraseEntry phrase)
+        {
+            return new PhraseEntry()
+            {
+                PhraseID = 9,
+                Description = phrase.Description,
+                Id = phrase.Id + "." + phrase.Id,
+                Order = subPhraseEntries.Count + 1
+            };
         }
 
         public static void ReloadBookMarks(Movies movie)

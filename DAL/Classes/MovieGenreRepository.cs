@@ -1,4 +1,5 @@
 ﻿using DocumentFormat.OpenXml.EMMA;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.Collections.Generic;
@@ -10,13 +11,13 @@ using TaymadeEntities.Support;
 
 namespace TaymadeEntities.DAL.Classes
 {
-    public class TemplateRepository : ITemplateRepository, IDisposable
+    public class MovieGenreRepository : IMovieGenreRepository, IDisposable
     {
         private bool disposedValue;
 
         private readonly DBContext.SandboxEntities _context;
 
-        public TemplateRepository(SandboxEntities context)
+        public MovieGenreRepository(SandboxEntities context)
         {
             _context = context;
         }
@@ -52,42 +53,31 @@ namespace TaymadeEntities.DAL.Classes
 
         public void Delete(int id)
         {
-            Actor actorToDelete = _context.Actors.Find(id);
+            MovieGenre? actorToDelete = _context.MovieGenre.Find(id);
             if (actorToDelete != null)
             {
-                _context.Actors.Remove(actorToDelete);
+                _context.MovieGenre.Remove(actorToDelete);
                 Save();
             }
         }
 
       
 
-        public Actor? GetById(int id)
+        public MovieGenre? GetActorById(int id)
         {
-            return _context.Actors.Find(id);
+            return _context.MovieGenre.Find(id);
         }
 
-        public void Insert(Actor actor)
+        public void Insert(MovieGenre genre)
         {
-            _context.Actors.Add(actor);
+            _context.MovieGenre.Add(genre);
             Save();
         }
 
-        public Actor? GetOrCreate(string actorName)
+        public bool Update(MovieGenre genre)
         {
-            Actor actor = _context.Actors.FirstOrDefault(a => a.Name == actorName);
-            if (actor == null)
-            {
-                actor = new Actor { Name = actorName };
-                InsertActor(actor);
-            }
-            return actor;
-        }
-
-        public void Update(Actor actor)
-        {
-            _context.Actors.Update(actor);
-            Save();
+            _context.MovieGenre.Update(genre);
+            return Save();
         }
 
         public bool Save()
@@ -97,18 +87,37 @@ namespace TaymadeEntities.DAL.Classes
         }
 
 
-        public void Add(Actor actor)
+        public void Add(MovieGenre genre)
         {
-            _context.Actors.Add(actor);
+            _context.MovieGenre.Add(genre);
             Save();
         }
 
-       
 
-        public void Save(Actor actor)
+        public bool Save(MovieGenre genre)
         {
-            _context.Actors.Update(actor);
-            Save();
+            _context.MovieGenre.Update(genre);
+            return Save();
         }
-}
+
+        public MovieGenre? GetById(int id)
+        {
+            return _context.MovieGenre.Find(id);
+        }
+
+        public void DeleteMovieGenre(MovieGenre genre)
+        {
+           
+            if (genre != null)
+            {
+                _context.MovieGenre.Remove(genre);
+                Save();
+            }
+        }
+
+        public MovieGenre CreateMovieGenre(int movieId, string genre, string? subGenre)
+        {
+            return _context.CreateMovieGenre(movieId, genre, subGenre);
+        }
+    }
 }

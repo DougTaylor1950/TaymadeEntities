@@ -8,45 +8,45 @@ using TaymadeEntities.Models;
 
 namespace TaymadeEntities.Controllers
 {
-    public class TemplateController : IDisposable
+    public class UnboundController : IDisposable
     {
 
         private bool disposedValue;
-        private ITemplateRepository templateRepository;
+        private IUnboundRepository unboundRepository;
 
-        public TemplateController()
+        public UnboundController()
         {
-            this.Repository = new Repository(new DBContext.SandboxEntities());
+            this.unboundRepository = new UnboundRepository(new DBContext.SandboxEntities());
         }
 
-        public Controller(ITemplateRepository repository)
+        public UnboundController(IUnboundRepository repository)
         {
-            this.templateRepository = repository;
+            this.unboundRepository = repository;
         }
 
         public bool Save()
         {
-            return templateRepository.Save();
+            return unboundRepository.Save();
         }
 
-        public bool Save(Models.Movies movie)
+        public bool Save(Models.UnboundGridData movie)
         {
-            return templateRepository.Save(movie);
+            return unboundRepository.Save(movie);
         }
 
-        public bool Update(Models.Movies movie)
+        public bool Update(Models.UnboundGridData movie)
         {
-            return templateRepository.Update(movie);
+            return unboundRepository.Update(movie);
         }
 
         public void Delete(int id)
         {
-            templateRepository.DeleteMovie(id);
+            unboundRepository.Delete(id);
         }
 
-        public Movies? GetById(int id)
+        public UnboundGridData? GetById(int id)
         {
-            return templateRepository.GetById(id);
+            return unboundRepository.GetById(id);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -76,6 +76,11 @@ namespace TaymadeEntities.Controllers
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+
+        public List<UnboundGridData> GetData()
+        {
+            return unboundRepository.GetData().ToList();
         }
     }
 }

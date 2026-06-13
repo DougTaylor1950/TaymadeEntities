@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using TaymadeEntities.DAL.Interfaces;
@@ -68,14 +69,23 @@ namespace TaymadeEntities.DAL.Classes
             return _context.SaveChanges() > 0;
         }
 
-        public void DeleteMovie(int id)
+        public async Task<bool> UpdateMovieAsync(Movies movie)
+        {
+            _context.Movies.Update(movie);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public bool DeleteMovie(int id)
         {
             var movie = _context.Movies.Find(id);
+            bool success = false;
             if (movie != null)
             {
-                _context.Movies.Remove(movie);
-                _context.SaveChanges();
+                _context.Entry(movie).State = EntityState.Detached;
+                success = _context.DeleteMovie(id);
             }
+
+            return success;
         }
 
         public Movies? GetMoviesById(int id)
@@ -85,8 +95,73 @@ namespace TaymadeEntities.DAL.Classes
 
         public bool Add(Movies movie)
         {
-             _context.Add(movie);
+            _context.Add(movie);
             return _context.SaveChanges() >= 1;
+        }
+
+        public IEnumerable<Movies>? GetMoviesByDirector(int id)
+        {
+            return _context.Movies.Where(d => d.DirectorID == id).ToList();
+        }
+
+        public IEnumerable<Movies>? GetMoviesByGenre(string? genre, string? subGenre = "")
+        {
+            List<Movies>? returnValue = null;
+
+            if (string.IsNullOrEmpty(genre)) return returnValue;
+
+            if (!string.IsNullOrEmpty(subGenre))
+            {
+                returnValue = _context.Movies.FromSql($"Execute dbo.GetMoviesBySubGenre {subGenre}").ToList();
+            }
+            else
+                returnValue = _context.Movies.FromSql($"Execute dbo.GetMoviesByGenre {genre}").ToList();
+
+            return returnValue;
+        }
+
+        public IEnumerable<Movies>? GetMoviesByActor(int id)
+        {
+            List<Movies> tempList = new List<Movies>();
+
+            IEnumerable<Cast> actorCasts = _context.Casts.Where(c => c.ActorId == id).ToList();
+
+            List<int?> actorMovieIds = actorCasts.Select(c => c.MovieID).ToList();
+
+            var result = from x in _context.Movies
+                         where actorMovieIds.Contains(x.Id)
+                         select x;
+            // should be a list of movies
+            tempList = result.ToList();
+            result = null;
+            return tempList;
+        }
+
+        public IEnumerable<Movies>? GetMoviesByInfo(string stub)
+        {
+            return _context.GetMoviesbyInfo(stub);
+        }
+
+        public IEnumerable<Movies>? GetMoviesByTitle(string title)
+        {
+            return _context.GetMoviesbyTitle(title);
+        }
+
+        public async Task<IEnumerable<Movies>>? GetMoviesByTitleAsync(string title)
+        {
+            List<Movies>? tempList = await _context.GetMoviesByTitleAsync(title);
+            return tempList;
+        }
+
+        public IEnumerable<Movies>? GetMoviesbyBookmarkName(string bookmarkText)
+        {
+            List<Movies>? tempList = _context.GetMoviesbyBookmarkName(bookmarkText);
+            return tempList;
+        }
+
+        public List<MovieIntResult> GetActorMovieIds(string actorName)
+        {
+            return _context.GetActorMovieIds(actorName);
         }
     }
 }

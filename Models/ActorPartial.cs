@@ -60,6 +60,8 @@ namespace TaymadeEntities.Models
         /// Defines the nameList.
         /// </summary>
         private string[] nameList;
+        [NotMapped]
+        public Cast Parent;
 
         #endregion
 

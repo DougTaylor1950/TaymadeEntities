@@ -283,8 +283,8 @@ namespace TaymadeEntities.Support
                 // create new director
                 director = new Models.Director();
                 director.Name = iMovie.DirectorName;
-                Models.DataController.SandboxEntities.Directors.Add(director);
-                Models.DataController.SandboxEntities.SaveChanges();
+                Models.DataController.DirectorController.Insert(director);
+                Models.DataController.DirectorController.Save();
             }
 
             movie.Save();

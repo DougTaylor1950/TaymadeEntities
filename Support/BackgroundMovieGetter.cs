@@ -203,14 +203,14 @@ namespace TaymadeEntities.Support
                     //            .Include(b => b.Bookmarks)
                     //            .Include(d => d.Director)
                     //            .ToList();
-                    List<Models.Movies>? tempList = _SandboxEntities.GetMoviesByGenre(Phrase.COMPKEY);
+                    List<Models.Movies>? tempList = DataController.MovieController.GetMoviesByGenre(Phrase.COMPKEY);
 
                     MovieList = MovieCollection.GetAndSortObservableCollection(tempList);
                     //}
                 }
                 else
                 {
-                    List<Models.Movies> tempList = _SandboxEntities.GetMoviesByGenre(Phrase.COMPKEY, SubPhrase.COMPKEY);
+                    List<Models.Movies>? tempList = DataController.MovieController.GetMoviesByGenre(Phrase.COMPKEY, SubPhrase.COMPKEY);
                         
                     MovieList = MovieCollection.GetAndSortObservableCollection(tempList);
                 }

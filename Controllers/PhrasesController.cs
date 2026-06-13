@@ -8,45 +8,45 @@ using TaymadeEntities.Models;
 
 namespace TaymadeEntities.Controllers
 {
-    public class TemplateController : IDisposable
+    public class PhrasesController : IDisposable
     {
 
         private bool disposedValue;
-        private ITemplateRepository templateRepository;
+        private IPhrasesRepository phrasesRepository;
 
-        public TemplateController()
+        public PhrasesController()
         {
-            this.Repository = new Repository(new DBContext.SandboxEntities());
+            this.phrasesRepository = new PhrasesRepository(new DBContext.SandboxEntities());
         }
 
-        public Controller(ITemplateRepository repository)
+        public PhrasesController(IPhrasesRepository repository)
         {
-            this.templateRepository = repository;
+            this.phrasesRepository = repository;
         }
 
         public bool Save()
         {
-            return templateRepository.Save();
+            return phrasesRepository.Save();
         }
 
-        public bool Save(Models.Movies movie)
+        public void Save(Models.PhraseEntry phrase)
         {
-            return templateRepository.Save(movie);
+            phrasesRepository.Save(phrase);
         }
 
-        public bool Update(Models.Movies movie)
+        public void Update(Models.PhraseEntry phrase)
         {
-            return templateRepository.Update(movie);
+            phrasesRepository.Update(phrase);
         }
 
         public void Delete(int id)
         {
-            templateRepository.DeleteMovie(id);
+            phrasesRepository.Delete(id);
         }
 
-        public Movies? GetById(int id)
+        public PhraseEntry? GetById(int id)
         {
-            return templateRepository.GetById(id);
+            return phrasesRepository.GetById(id);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -65,7 +65,7 @@ namespace TaymadeEntities.Controllers
         }
 
         // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~MovieController()
+        // ~phraseController()
         // {
         //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         //     Dispose(disposing: false);
@@ -77,5 +77,25 @@ namespace TaymadeEntities.Controllers
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+
+        internal List<PhraseEntry>? GetPhrasesByPhraseHeaderId(int v)
+        {
+            return phrasesRepository.GetPhrasesByPhraseHeaderId(v)?.ToList();
+        }
+
+        internal List<PhraseEntry>? GetSubPhraseEntries(string phraseId)
+        {
+            return phrasesRepository.GetSubPhrasesByPhraseID(phraseId)?.ToList();
+        }
+
+        internal void Add(PhraseEntry tempPhrase)
+        {
+            phrasesRepository.Add(tempPhrase);
+        }
+
+        //internal void Update(PhraseEntry Phrase)
+        //{
+        //    phrasesRepository.Update(phrase);
+        //}
     }
 }

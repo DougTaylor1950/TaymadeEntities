@@ -1,52 +1,24 @@
-﻿using ShimSkiaSharp;
+﻿using DocumentFormat.OpenXml.EMMA;
+using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using TaymadeEntities.DAL.Classes;
 using TaymadeEntities.DAL.Interfaces;
+using TaymadeEntities.DBContext;
 using TaymadeEntities.Models;
+using TaymadeEntities.Support;
 
-namespace TaymadeEntities.Controllers
+namespace TaymadeEntities.DAL.Classes
 {
-    public class TemplateController : IDisposable
+    public class MoviePropertiesRepository : IMoviePropertiesRepository, IDisposable
     {
-
         private bool disposedValue;
-        private ITemplateRepository templateRepository;
 
-        public TemplateController()
-        {
-            this.Repository = new Repository(new DBContext.SandboxEntities());
-        }
+        private readonly DBContext.SandboxEntities _context;
 
-        public Controller(ITemplateRepository repository)
+        public MoviePropertiesRepository(SandboxEntities context)
         {
-            this.templateRepository = repository;
-        }
-
-        public bool Save()
-        {
-            return templateRepository.Save();
-        }
-
-        public bool Save(Models.Movies movie)
-        {
-            return templateRepository.Save(movie);
-        }
-
-        public bool Update(Models.Movies movie)
-        {
-            return templateRepository.Update(movie);
-        }
-
-        public void Delete(int id)
-        {
-            templateRepository.DeleteMovie(id);
-        }
-
-        public Movies? GetById(int id)
-        {
-            return templateRepository.GetById(id);
+            _context = context;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -65,7 +37,7 @@ namespace TaymadeEntities.Controllers
         }
 
         // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~MovieController()
+        // ~ActorRepository()
         // {
         //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         //     Dispose(disposing: false);
@@ -76,6 +48,30 @@ namespace TaymadeEntities.Controllers
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+
+
+        public bool Save()
+        {
+            bool success = _context.SaveChanges() > 0;
+            return success;
+        }
+
+        public MovieProperties? GetById(int id)
+        {
+            MovieProperties? movieProperties = _context.MovieProperties.Find(id);
+            return movieProperties;
+        }
+
+        public void Update(MovieProperties movieProperties)
+        {
+            _context.MovieProperties.Update(movieProperties);
+            _context.SaveChanges();
+        }
+
+        public void Save(MovieProperties MovieProperties)
+        {
+            _context.SaveChanges();
         }
     }
 }

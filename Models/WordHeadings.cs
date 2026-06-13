@@ -277,8 +277,9 @@ namespace TaymadeEntities.Models
         {
             try
             {
-                DataController.SandboxEntities.WordHeadings.Add(this);
-                DataController.SandboxEntities.SaveChanges();
+                bool success = DataController.StoryController.AddWordHeading(this);
+                //DataController.SandboxEntities.WordHeadings.Add(this);
+                //DataController.SandboxEntities.SaveChanges();
 
             }
             catch (Exception ex)
@@ -302,18 +303,10 @@ namespace TaymadeEntities.Models
                     HeadingText = HeadingText.Substring(0, 200);
                 }
 
-                EntityState state = DataController.SandboxEntities.Entry(this).State;
-
-                var local = DataController.SandboxEntities.Set<WordHeadings>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-                // check if local is not null
-                if (local != null)
-                {
-                    // detach
-                    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-                }
-                DataController.SandboxEntities.WordHeadings.Update(this);
-                DataController.SandboxEntities.SaveChanges();
+                DataController.StoryController.UpdateWordHeading(this);
+                
+                //DataController.SandboxEntities.WordHeadings.Update(this);
+                //DataController.SandboxEntities.SaveChanges();
             }
             catch (Exception ex)
             {
@@ -321,6 +314,11 @@ namespace TaymadeEntities.Models
                 string error = ex.Message;
             }
 
+        }
+
+        internal void Save()
+        {
+            Update();
         }
         #endregion
     }

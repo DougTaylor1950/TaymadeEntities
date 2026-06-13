@@ -13,9 +13,21 @@ namespace TaymadeEntities.DAL.Interfaces
         bool Save(Movies movie);
 
         bool UpdateMovie(Movies movie);
-        void DeleteMovie(int id);
+
+        Task<bool> UpdateMovieAsync(Movies movie);
+
+        bool DeleteMovie(int id);
 
         Movies? GetMoviesById(int id);
+        IEnumerable<Movies>? GetMoviesByGenre(string? genre,
+            string? subGenre = "");
         bool Add(Movies movie);
+        IEnumerable<Movies>? GetMoviesByDirector( int id);
+        IEnumerable<Movies>? GetMoviesByActor(int id);
+        IEnumerable<Movies>? GetMoviesByInfo(string stub);
+        IEnumerable<Movies>? GetMoviesByTitle(string title);
+        Task<IEnumerable<Movies>> GetMoviesByTitleAsync(string title);
+        IEnumerable<Movies>? GetMoviesbyBookmarkName(string bookmarkText);
+        List<MovieIntResult> GetActorMovieIds(string actorName);
     }
 }

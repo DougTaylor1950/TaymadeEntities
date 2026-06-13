@@ -68,23 +68,9 @@ namespace TaymadeEntities.Models
         {
             try
             {
-
-
-                var local = DataController.SandboxEntities.Set<StoryProperties>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-                // check if local is not null
-                if (local != null)
-                {
-                    // detach
-                    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-                }
-                // set Modified flag in your entry
-
-
-
-                DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                DataController.SandboxEntities.SaveChanges();
-
+                bool success = DataController.StoryController.SaveStoryProperties(this);
+                //DataController.SandboxEntities.StoryProperties.Update(this);
+                //DataController.SandboxEntities.SaveChanges();
             }
             catch (Exception)
             {
@@ -99,7 +85,7 @@ namespace TaymadeEntities.Models
             get
             {
                 System.ComponentModel.ListSortDirection defaultDirection = System.ComponentModel.ListSortDirection.Ascending;
-                if (SortDirection == -1) defaultDirection = System.ComponentModel.ListSortDirection.Descending;
+                if (SortDirection == 1) defaultDirection = System.ComponentModel.ListSortDirection.Descending;
                 return defaultDirection;
 
             }
@@ -108,11 +94,11 @@ namespace TaymadeEntities.Models
             {
                 if (value == System.ComponentModel.ListSortDirection.Ascending)
                 {
-                    SortDirection = 1;
+                    SortDirection = 0;
                 }
                 else
                 {
-                    SortDirection = -1;
+                    SortDirection = 1;
                 }
             }
         }
