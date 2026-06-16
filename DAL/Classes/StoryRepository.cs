@@ -13,6 +13,7 @@ namespace TaymadeEntities.DAL.Classes
 {
     public class StoryRepository : IStoryRepository, IDisposable
     {
+
         #region Private Fields
 
         private readonly DBContext.SandboxEntities _context;
@@ -40,18 +41,27 @@ namespace TaymadeEntities.DAL.Classes
 
         public bool? AddStoryCast(StoryCast storyCast)
         {
-            StoryCast temp = null;
-            _context.StoryCast.Add(storyCast);
+            StoryCast? temp = 
+            _context.CreateStoryCast(storyCast.StoryId, 
+                storyCast.CastId, storyCast.Codes, storyCast.Character, storyCast.Age);
             int result = _context.SaveChanges();
+            if (temp.Id > 0) storyCast.Id = temp.Id;
             return (result > 0);
         }
 
-        public bool SaveWordHeading(WordHeadings item)
+        public bool AddStoryDictionary(StoryDictionary? dictionary)
         {
-            _context.WordHeadings.Update(item);
-            int result = _context.SaveChanges();
-            return (result > 0);
+            bool success = false;
+            if (dictionary != null)
+            {
+                _context.StoryDictionary.Add(dictionary);
+                int result = _context.SaveChanges();
+                success = result > 0;
+            }
+
+            return success;
         }
+
         public bool AddWordHeading(WordHeadings item)
         {
             _context.WordHeadings.Add(item);
@@ -62,12 +72,14 @@ namespace TaymadeEntities.DAL.Classes
         {
             return _context.CreateStoryCast(StoryId, CastId, Codes, Character, Age);
         }
+
         public void Delete(int id)
         {
             Story StoryToDelete = _context.Story.Find(id);
             if (StoryToDelete != null)
             {
-                _context.Story.Remove(StoryToDelete);
+                // stored procedure used to delete items where story is the foriegn key.
+                _context.DeleteStory(id);
                 Save();
             }
         }
@@ -127,7 +139,12 @@ namespace TaymadeEntities.DAL.Classes
 
         public IEnumerable<StoryCast>? GetStoryCastList(int storyId)
         {
-            return _context.StoryCast.Where(s => s.StoryId == storyId);
+            return _context.StoryCast.Where(s => s.StoryId == storyId).OrderBy(s => s.CastId);
+        }
+
+        public StoryDictionary? GetStoryDictionaryByStoryId(int storyId)
+        {
+            return _context.StoryDictionary.Where(s => s.StoryId == storyId).FirstOrDefault();
         }
 
         public StoryProperties? GetStoryProperties()
@@ -149,7 +166,7 @@ namespace TaymadeEntities.DAL.Classes
         {
             _context.Story.Add(story);
             if (story.SeriesId == 0) story.SeriesId = 1;
-                Save();
+            Save();
         }
 
         public bool Save()
@@ -164,13 +181,13 @@ namespace TaymadeEntities.DAL.Classes
 
                 return false;
             }
-            
+
         }
 
         public bool Save(Story story)
         {
             if (story.SeriesId == 0) story.SeriesId = 1;
-                _context.Story.Update(story);
+            _context.Story.Update(story);
             return Save();
         }
 
@@ -192,6 +209,12 @@ namespace TaymadeEntities.DAL.Classes
             return success;
         }
 
+        public bool SaveWordHeading(WordHeadings item)
+        {
+            _context.WordHeadings.Update(item);
+            int result = _context.SaveChanges();
+            return (result > 0);
+        }
         public bool Update(int storyId)
         {
             Story? temp = _context.Story.Find(storyId);
@@ -200,6 +223,18 @@ namespace TaymadeEntities.DAL.Classes
                 _context.Story.Update(temp);
             }
             return Save();
+        }
+        public bool UpdateStoryDictionary(StoryDictionary? storyDictionary)
+        {
+            bool success = false;
+            if (storyDictionary != null)
+            {
+                _context.StoryDictionary.Update(storyDictionary);
+                int result = _context.SaveChanges();
+                success = result > 0;
+            }
+
+            return success; 
         }
 
         #endregion Public Methods
@@ -222,5 +257,6 @@ namespace TaymadeEntities.DAL.Classes
         }
 
         #endregion Protected Methods
+
     }
 }

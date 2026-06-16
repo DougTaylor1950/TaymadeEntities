@@ -79,6 +79,16 @@ namespace TaymadeEntities.DAL.Classes
             return tempList;
         }
 
+        public IEnumerable<Actor> GetActors()
+        {
+            return _context.Actors.ToList().OrderBy(a=> a.Name) ?? Enumerable.Empty<Actor>();
+        }
+
+        public IEnumerable<Actor> GetActorsByName(string findText)
+        {
+            return _context.Actors.Where(a => a.Name.ToLower().Contains(findText.ToLower()))
+                .OrderBy(a => a.Name).ToList() ?? Enumerable.Empty<Actor>();
+        }
         public Actor? GetActorById(int id)
         {
             return _context.Actors.Find(id);

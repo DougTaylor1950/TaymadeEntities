@@ -113,7 +113,7 @@ namespace TaymadeEntities.Models
         /// <param name="actorId">The actorId<see cref="int"/>.</param>
         public Actor(int actorId) : base()
         {
-            var actor = DataController.SandboxEntities.Actors.Find(actorId);
+            var actor = DataController.ActorController.GetActorById(actorId);
             this.Casts = new HashSet<Cast>();
 
 
@@ -357,7 +357,7 @@ namespace TaymadeEntities.Models
         /// <param name="filmGroup">The filmGroup<see cref="string"/>.</param>
         private void GetActorFromName(string name, string filmGroup)
         {
-            Actor temp = DataController.SandboxEntities.Actors.AsNoTracking().Where(x => x.Name.ToLower() == name.ToLower()).FirstOrDefault();
+            Actor? temp = DataController.ActorController.GetActorByName(name);
 
             if (temp != null)
             {

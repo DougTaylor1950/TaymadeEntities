@@ -119,6 +119,8 @@ namespace TaymadeEntities.Models
         /// </summary>
         private static List<Models.PhraseEntry> subPhraseEntries = new List<PhraseEntry>();
         private static StoryController? storyController;
+        private static MaintenaceController? maintenaceController;
+        private static MusicController? musicController;
 
         #endregion Private Fields
 
@@ -142,8 +144,9 @@ namespace TaymadeEntities.Models
             {
                 if (actorList.Count == 0)
                 {
-                    using var ctx = SandboxEntities;
-                    actorList = ctx.Actors.AsNoTracking().OrderBy(d => d.Name).ToList();
+                    actorList = ActorController.GetActors();
+                    //using var ctx = SandboxEntities;
+                    //actorList = ctx.Actors.AsNoTracking().OrderBy(d => d.Name).ToList();
                 }
                 return actorList;
             }
@@ -332,6 +335,18 @@ namespace TaymadeEntities.Models
             }
         }
 
+        public static MaintenaceController MaintenaceController
+        {
+            get
+            {
+                if (maintenaceController == null)
+                {
+                    maintenaceController = new MaintenaceController(new MaintenanceRepository(SandboxEntities));
+                }
+                return maintenaceController;
+            }
+        }
+
         public static MovieGenreController MovieGenreController
         {
             get
@@ -367,6 +382,20 @@ namespace TaymadeEntities.Models
                 return moviePropertiesController;
             }
         }
+
+        public static MusicController MusicController
+        {
+            get
+            {
+                if (musicController == null)
+                {
+                    musicController = new MusicController(new MusicRepository(MusicEntitiesContext));
+                }
+                return musicController;
+            }
+        }
+
+        //public static Phras
         public static PhrasesController PhrasesController
         {
             get

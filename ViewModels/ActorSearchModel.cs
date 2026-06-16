@@ -167,7 +167,8 @@ namespace TaymadeEntities.ViewModels
         {
             if (!string.IsNullOrEmpty(findText))
             {
-                List<Actor> tempList = DataController.SandboxEntities.Actors.AsNoTracking().Where(a => a.Name.ToLower().Contains(findText.ToLower())).ToList();
+                List<Actor> tempList = DataController.ActorController.GetActorsByName(findText.ToLower());
+                //List <Actor> tempList = DataController.SandboxEntities.Actors.AsNoTracking().Where(a => a.Name.ToLower().Contains(findText.ToLower())).ToList();
                 if (tempList == null || tempList.Count == 0)
                 {
                     Actor actor = new Actor();

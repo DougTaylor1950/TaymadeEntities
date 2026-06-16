@@ -87,5 +87,20 @@ namespace TaymadeEntities.Controllers
         {
             actorRepository.SetDetailsFromCastMember(actor, person);
         }
+
+        internal Actor? GetActorById(int id)
+        {
+            return actorRepository.GetActorById(id);
+        }
+
+        internal List<Actor> GetActors()
+        {
+            return actorRepository.GetActors().ToList();
+        }
+
+        internal List<Actor> GetActorsByName(string v)
+        {
+            return actorRepository.GetActorsByName(v).ToList();
+        }
     }
 }

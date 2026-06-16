@@ -86,7 +86,7 @@ public partial class ErrorDialog : Window
             }
             ErrorViewModel.ErrorLogs.Clear();
             ErrorViewModel.ErrorLogs = new System.Collections.ObjectModel.ObservableCollection<MVMLogs>(
-                DataController.SandboxEntities.MVMLogs.ToList());
+                DataController.MaintenaceController.GetLogs().ToList());
         }
     }
 }

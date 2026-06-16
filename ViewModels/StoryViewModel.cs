@@ -479,6 +479,7 @@ namespace TaymadeEntities.ViewModels
                 headingsCollection = new(value.SectionBreaks);
             }
 
+
             List<StoryHeadings> headingsList = Models.DataController.SandboxEntities.StoryHeadings
                     .Where(h => h.StoryId == CurrentStory.Id)
                     .OrderBy(s => s.SectionLevel)
@@ -717,6 +718,7 @@ namespace TaymadeEntities.ViewModels
                                 {
                                     File.SetCreationTime(newStoryPath, lastWriteTime);
                                 }
+                                // we should have a .docx file at this stage
                             }
                             else if (ext == ".doc")
                             {
@@ -827,6 +829,7 @@ namespace TaymadeEntities.ViewModels
                             Models.DataController.StoryProperties.LastStoryId = CurrentStory.Id;
                             Models.DataController.StoryProperties.Save();
                             LastStoryId = CurrentStory.Id;
+                            CurrentStory.Save();
                         }
                     }
                 }
@@ -2323,12 +2326,16 @@ namespace TaymadeEntities.ViewModels
                                                 StoryCast? storyCast = CurrentStory.Cast.Where(s => s.Pk == pkInt).FirstOrDefault();
                                                 if (storyCast != null)
                                                 {
-                                                    await Models.DataController.SandboxEntities.ReloadIfModified<StoryCast>(storyCast);
+                                                    await Models.DataController.SandboxEntities.ReloadIfModifiedAsync<StoryCast>(storyCast);
+                                                    CurrentCastMember = storyCast;
+                                                    this.RaisePropertyChanged(nameof(CurrentCastMember));
                                                 }
                                                 else
                                                 {
                                                     storyCast = Models.DataController.StoryController.GetStoryCastById(pkInt);
                                                     if (storyCast != null) CurrentStory.Cast.Add(storyCast);
+                                                    //CurrentStory.RaisePropertyChanged("Cast");
+                                                    
                                                 }
                                             }
                                             ObservableCollection<StoryCast> storyCasts = new ObservableCollection<StoryCast>(new StoryCastList(cast, CurrentStory.Id));

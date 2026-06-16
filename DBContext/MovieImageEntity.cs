@@ -6,8 +6,9 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TaymadeEntities.Models;
 
-namespace TaymadeEntities.Models
+namespace TaymadeEntities.DBContext
 {
     public partial class MovieImageEntity : DbContext
     {
@@ -29,7 +30,7 @@ namespace TaymadeEntities.Models
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-           // modelBuilder.Entity<MovieImage>().HasKey(mf => mf.Id);
+            modelBuilder.Entity<MovieImage>().HasKey(mf => mf.Id);
         }
     }
 }

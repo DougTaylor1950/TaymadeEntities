@@ -22,8 +22,8 @@ namespace TaymadeEntities.ViewModels
 
         public ErrorViewModel()
         {
-           
-            ErrorLogs = new(DataController.SandboxEntities.MVMLogs.OrderByDescending(e=>e.CreatedOn).ToList());
+            ErrorLogs = new ObservableCollection<MVMLogs>(DataController.MaintenaceController.GetLogs().ToList());
+            //ErrorLogs = new(DataController.SandboxEntities.MVMLogs.OrderByDescending(e=>e.CreatedOn).ToList());
         }
 
         #endregion Public Constructors

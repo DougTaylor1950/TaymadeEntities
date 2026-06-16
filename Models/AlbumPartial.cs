@@ -214,8 +214,8 @@ namespace TaymadeEntities.Models
 
         internal void Insert()
         {
-            DataController.SandboxEntities.Album.Add(this);
-            DataController.SandboxEntities.SaveChanges();
+            DataController.MusicEntitiesContext.Albums.Add(this);
+            DataController.MusicEntitiesContext.SaveChanges();
         }
 
         internal void Save()

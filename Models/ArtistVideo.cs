@@ -56,8 +56,8 @@ namespace TaymadeEntities.Models
 
         internal void Insert()
         {
-            DataController.SandboxEntities.ArtistVideo.Add(this);
-            DataController.SandboxEntities.SaveChanges();
+            DataController.MusicEntitiesContext.ArtistVideos.Add(this);
+            DataController.MusicEntitiesContext.SaveChanges();
         }
 
         public void Save()

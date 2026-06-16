@@ -4427,10 +4427,12 @@ namespace TaymadeEntities.ViewModels
                         {
                             // we can't find the person in Internet database
 
-                            Actor? actor = DataController.SandboxEntities.Actors
-                                .AsNoTracking()
-                                .Where(x => x.Name.ToLower() == castModel.FindText.ToLower())
-                                .FirstOrDefault();
+                            Actor? actor = DataController.ActorController.GetActorByName(castModel.FindText.ToLower());
+
+                            //Actor? actor = DataController.SandboxEntities.Actors
+                            //    .AsNoTracking()
+                            //    .Where(x => x.Name.ToLower() == castModel.FindText.ToLower())
+                            //    .FirstOrDefault();
 
                             if (actor == null)  // found  new actor
                             {

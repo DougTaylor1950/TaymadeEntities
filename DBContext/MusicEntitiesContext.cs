@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using TaymadeEntities.Models;
 
-namespace TaymadeEntities.Models
+namespace TaymadeEntities.DBContext
 {
     public class MusicEntitiesContext : DbContext
     {

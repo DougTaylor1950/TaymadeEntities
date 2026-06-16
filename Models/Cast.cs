@@ -70,7 +70,7 @@ namespace TaymadeEntities.Models
                 if (actor == null)
                 {
                     //actor = new Actor(ActorId);
-                    actor = DataController.SandboxEntities.Actors.Find(ActorId);
+                    actor = DataController.ActorController.GetActorById(Id);
 
                 }
                 if (actor != null) actor.SetGenderDisplay();

@@ -51,14 +51,12 @@ namespace TaymadeEntities.Models
 
         public void Delete()
         {
-            DataController.SandboxEntities.MVMLogs.Remove(this);
-            int rowschanged = DataController.SandboxEntities.SaveChanges();
+            DataController.MaintenaceController.DeleteLog(this.Id);
         }
 
         public void Insert()
         {
-            DataController.SandboxEntities.MVMLogs.Add(this);
-            int rowschanged = DataController.SandboxEntities.SaveChanges();
+            DataController.MaintenaceController.InsertLog(this);
         }
 
         #endregion Internal Methods

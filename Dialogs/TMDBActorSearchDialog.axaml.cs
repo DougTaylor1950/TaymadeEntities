@@ -89,7 +89,10 @@ namespace TaymadeEntities.Dialogs
 
                 if (!string.IsNullOrEmpty(searchText))
                 {
-                    ViewModel.ActorList = new System.Collections.ObjectModel.ObservableCollection<Actor>(DataController.SandboxEntities.Actors.AsNoTracking().Where(a => a.Name.ToLower().Contains(searchText.ToLower())).ToList());
+                    ViewModel.ActorList = new System.Collections.ObjectModel.ObservableCollection<Actor>(
+                        DataController.ActorController.GetActorsByName(searchText.ToLower())
+                        //DataController.SandboxEntities.Actors.AsNoTracking().Where(a => a.Name.ToLower().Contains(searchText.ToLower())).ToList()
+                        );
 
                     List<Person>? peopleList = await TmdbSupport.GetPeopleListAsync(searchText);
 

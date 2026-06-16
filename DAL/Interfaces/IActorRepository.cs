@@ -9,21 +9,30 @@ namespace TaymadeEntities.DAL.Interfaces
     public interface IActorRepository : IDisposable
     {
         #region Public Methods
+        void AddActor(Actor actor);
+
         void DeleteActor(int id);
-        
-        IEnumerable<Movies>? GetActorMovies(int actorId);
+
         Actor? GetActorById(int id);
+
         Actor? GetActorByName(string actorName);
+
         Actor? GetActorByTMID(int tmdbId);
-        void InsertActor(Actor actor);
-        bool Save();
+
+        IEnumerable<Movies>? GetActorMovies(int actorId);
+        IEnumerable<Actor> GetActors();
+
+        IEnumerable<Actor> GetActorsByName(string findText);
 
         Actor? GetOrCreateActor(string actorName);
-        void UpdateActor(Actor actor);
-        void AddActor(Actor actor);
+
+        void InsertActor(Actor actor);
+        bool Save();
         void Save(Actor actor);
+
         void SetDetailsFromCastMember(Actor actor, CastMember person);
 
+        void UpdateActor(Actor actor);
         #endregion Public Methods
     }
 }

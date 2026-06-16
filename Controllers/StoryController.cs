@@ -155,6 +155,21 @@ namespace TaymadeEntities.Controllers
             return storyRepository.SaveWordHeading(wordHeadings);
         }
 
+        internal bool AddStoryDictionary(StoryDictionary storyDictionary)
+        {
+            return storyRepository.AddStoryDictionary(storyDictionary);
+        }
+
+        internal  StoryDictionary? GetStoryDictionaryByStoryId(int storyId)
+        {
+            return storyRepository.GetStoryDictionaryByStoryId(storyId);
+        }
+
+        internal bool UpdateStoryDictionary(StoryDictionary dictionary)
+        {
+            return storyRepository.UpdateStoryDictionary(dictionary);
+        }
+
         #endregion Protected Methods
     }
 }

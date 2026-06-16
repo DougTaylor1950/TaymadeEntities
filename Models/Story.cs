@@ -1012,7 +1012,7 @@ namespace TaymadeEntities.Models
         {
             Story newStory = Story.Create();
 
-            // ensure we are storing the Window spath not the Linux virtual path
+            // ensure we are storing the Windows path not the Linux virtual path
             newStory.Path = SupportCore.MiscSupport.FixPathBack(path).ToLower();
 
             string extn = System.IO.Path.GetExtension(path);
@@ -1045,7 +1045,7 @@ namespace TaymadeEntities.Models
                 }
 
             }
-            newStory.Save();
+            newStory.Insert();
             return newStory;
         }
 
@@ -1590,7 +1590,7 @@ namespace TaymadeEntities.Models
             // set Modified flag in your entry
 
 
-            DataController.SandboxEntities.DeleteStory(Id);
+            DataController.StoryController.Delete(Id);
             // var rowsDeleted = DataController.SandboxEntities.Database.ExecuteSqlRaw("DELETE FROM [WordHeadings] WHERE ([StoryId] = @Original_Id)", Original_Id);
 
             //var rowsReturned = DataController.SandboxEntities.Database.ExecuteSqlRaw("DELETE FROM [Stories] WHERE ([Id] = @Original_Id)", Original_Id);
@@ -1604,8 +1604,8 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void Insert()
         {
-            DataController.SandboxEntities.Story.Add(this);
-            int rowschanged = DataController.SandboxEntities.SaveChanges();
+            DataController.StoryController.AddStory(this);
+            //int rowschanged = DataController.SandboxEntities.SaveChanges();
         }
 
         /// <summary>
@@ -2073,8 +2073,9 @@ namespace TaymadeEntities.Models
                     // add new
                     this.cast.Add(currentCastMember);
                 }
-                else
+                else  
                 {
+                    DataController.SandboxEntities.ReloadIfModified(currentCastMember);
                     // update existing
                     existingCastMember.Character = currentCastMember.Character;
                     existingCastMember.Age = currentCastMember.Age;

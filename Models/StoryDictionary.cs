@@ -36,7 +36,7 @@ namespace TaymadeEntities.Models
         {
             StoryId = storyId;
             // get the data from database
-            StoryDictionary? temp = DataController.SandboxEntities.StoryDictionary.Where(sd => sd.StoryId == storyId).FirstOrDefault();
+            StoryDictionary? temp = DataController.StoryController.GetStoryDictionaryByStoryId(storyId);
 
             // if the temp is not null, set the properties
             if (temp != null)
@@ -102,7 +102,7 @@ namespace TaymadeEntities.Models
 
 
                 // check if the current story dictionary already exists in the database
-                var existing = DataController.SandboxEntities.StoryDictionary.AsNoTracking().FirstOrDefault(entry => entry.Id.Equals(Id));
+                var existing = DataController.SandboxEntities.StoryDictionary.FirstOrDefault(entry => entry.Id.Equals(Id));
                 if (existing != null)
                 {
                     // If it exists, update it instead
@@ -114,8 +114,8 @@ namespace TaymadeEntities.Models
                     // Ensure the Id is set to 0 so that EF Core treats this as a new entity
                     Id = 0;
                     // Insert the current story dictionary into the database
-                    DataController.SandboxEntities.StoryDictionary.Add(this);
-                    DataController.SandboxEntities.SaveChanges();
+                   bool success =  DataController.StoryController.AddStoryDictionary(this);
+                    
                 }
             }
             catch (Exception ex)
@@ -200,7 +200,7 @@ namespace TaymadeEntities.Models
             try
             {
                 // Check if the current story dictionary exists in the database
-                var existing = DataController.SandboxEntities.StoryDictionary.AsNoTracking().FirstOrDefault(entry => entry.Id.Equals(Id));
+                var existing = DataController.StoryController.GetStoryDictionaryByStoryId(this.StoryId);
                 if (existing == null)
                 {
                     // If it does not exist, insert it
@@ -209,16 +209,7 @@ namespace TaymadeEntities.Models
                 }
                 // If it exists, update the existing entry
                 // Update the current story dictionary in the database
-                var local = DataController.SandboxEntities.Set<StoryDictionary>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-                // check if local is not null
-                if (local != null)
-                {
-                    // detach
-                    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-                }
-                DataController.SandboxEntities.StoryDictionary.Update(this);
-                DataController.SandboxEntities.SaveChanges();
+                bool success = DataController.StoryController.UpdateStoryDictionary(this);
             }
             catch (Exception ex)
             {

@@ -97,9 +97,7 @@ namespace TaymadeEntities.DBContext
         [NotMapped]
         public virtual DbSet<MovieIntResult> MovieIntResult { get; set; }
 
-        public virtual DbSet<Album> Album { get; set; }
 
-        public virtual DbSet<ArtistVideo> ArtistVideo { get; set; }
         /// <summary>
         /// Gets or sets the Author.
         /// </summary>
@@ -127,7 +125,7 @@ namespace TaymadeEntities.DBContext
         /// </summary>
         public virtual DbSet<MapDrive> MapDrive { get; set; }
 
-        // public virtual DbSet<MovieImage> MovieImage { get; set; }
+        public virtual DbSet<MovieImage> MovieImage { get; set; }
         /// <summary>
         /// Gets or sets the MappedDrives.
         /// </summary>
@@ -248,20 +246,27 @@ namespace TaymadeEntities.DBContext
             }
         }
 
-        public async Task ReloadIfModified<TEntity>(TEntity entityObject) where TEntity : class
+        public async Task ReloadIfModifiedAsync<TEntity>(TEntity entityObject) where TEntity : class
         {
             var entry = Entry(entityObject);
             //if (entry.State != EntityState.Modified) return;
             await entry.ReloadAsync();
         }
 
-        public StoryCast? CreateStoryCast(int StoryId, int CastId, string Codes, string Character, string Age)
+        public void ReloadIfModified<TEntity>(TEntity entityObject) where TEntity : class
+        {
+            var entry = Entry(entityObject);
+            //if (entry.State != EntityState.Modified) return;
+            entry.Reload();
+        }
+
+        public StoryCast? CreateStoryCast(int StoryId, int? CastId, string? Codes, string? Character, string? Age)
         {
             var storyId = new SqlParameter("@StoryId", StoryId);
-            var characterId = new SqlParameter("@Character", Character);
-            var castId = new SqlParameter("@CastId", CastId);
-            var age = new SqlParameter("@Age", Age);
-            var codes = new SqlParameter("@Codes", Codes);
+            var characterId = CreateStringParameter(Character, "@Character");
+            var castId = CreateIntegerParameter(CastId, "@CastId");
+            var age = CreateStringParameter(Age,"@Age");
+            var codes = CreateStringParameter(Codes,"@Codes");
             int count = this.Database.ExecuteSqlRaw(" exec InsertStoryCast @StoryId, @Character, @Age, @Codes,@CastId"
                 , storyId, characterId, age, codes, castId);
 
@@ -316,7 +321,7 @@ namespace TaymadeEntities.DBContext
                 if (count == 1)
                 {
                     var result = this.Casts.FromSql($"select * from Cast where id = (select max(id) from Cast)").FirstOrDefault();
-                   // this.Casts.Attach(result);
+                    // this.Casts.Attach(result);
                     return result;
                 }
                 else
@@ -438,7 +443,7 @@ namespace TaymadeEntities.DBContext
                     //   result.Save();
                     this.MovieGenre.Attach(result);
                 }
-                 
+
             }
             return result;
         }

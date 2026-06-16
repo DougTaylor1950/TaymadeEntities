@@ -11,7 +11,11 @@ namespace TaymadeEntities.DAL.Interfaces
         #region Public Methods
         void Add(Story Story);
 
+        bool? AddStoryCast(StoryCast storyCast);
+
         bool AddWordHeading(WordHeadings item);
+
+        bool AddStoryDictionary(StoryDictionary? dictionary);
 
         StoryCast? CreateStoryCast(int StoryId, int CastId, string Codes, string Character, string Age);
         void Delete(int id);
@@ -30,6 +34,8 @@ namespace TaymadeEntities.DAL.Interfaces
 
         IEnumerable<StoryCast>? GetStoryCastList(int storyId);
 
+        StoryDictionary? GetStoryDictionaryByStoryId(int storyId);
+
         StoryProperties? GetStoryProperties();
 
         StoryTransInfo? GetStoryTransInfo();
@@ -45,10 +51,9 @@ namespace TaymadeEntities.DAL.Interfaces
         bool SaveStoryTransInfo(StoryTransInfo item);
 
         bool SaveWordHeading(WordHeadings item);
-
-        bool? AddStoryCast(StoryCast storyCast);
-
         bool Update(int storyId);
+
+        bool UpdateStoryDictionary(StoryDictionary? storyDictionary);
         #endregion Public Methods
     }
 }
