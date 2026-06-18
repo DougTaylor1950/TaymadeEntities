@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.EMMA;
 using DocumentFormat.OpenXml.Wordprocessing;
+using OpenXmlPowerTools;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -77,10 +78,24 @@ namespace TaymadeEntities.DAL.Classes
             return success;
         }
 
-        MVMLogs? IMaintenaceRepository.GetById(int id)
+        public MVMLogs? GetById(int id)
         {
             return _context.MVMLogs.Find(id);
         }
+
+
+        public List<MappedDrives> GetDrivesByComputerName(string machineName)
+        {
+            return _context.MappedDrives.Where(s => s.Computer == machineName && s.Reversible == true && s.LocationType == "PATH").ToList()
+                ?? new List<MappedDrives>();
+        }
+
+        public MappedDrives? GetDriveByComputerAndApplicationName(string machineName, string appName)
+        {
+            return _context.MappedDrives.Where(m => m.Computer == machineName && m.LocationType == "APP" && m.SourceDrive == appName).FirstOrDefault()
+                ;
+        }
+
 
         public void InsertLog(MVMLogs log)
         {

@@ -628,7 +628,9 @@ namespace TaymadeEntities.Models
             {
                 if (Bookmarks.Count == 0)
                 {
-                    Bookmarks = new ObservableCollection<Bookmark>(Models.DataController.SandboxEntities.Bookmarks.Where(x => x.MovieID == Id).ToList());
+                    Bookmarks = new ObservableCollection<Bookmark>(
+                        DataController.BookmarkController.GetBookmarksByMovieId(Id) ?? new List<Bookmark>());
+                    //Models.DataController.SandboxEntities.Bookmarks.Where(x => x.MovieID == Id).ToList());
                 }
 
                 if (Bookmarks.Count > 0)
@@ -665,7 +667,7 @@ namespace TaymadeEntities.Models
                 if (count == 0)
                 {
 
-                    List<Cast> casts = await DataController.SandboxEntities.GetCastByMovieId(Id);
+                    List<Cast> casts = await DataController.CastController.GetCastsByMovieIdAsync(Id);
                     Casts = new ObservableCollection<Cast>(
                         casts);
                     this.RaisePropertyChanged(nameof(Casts));
@@ -876,9 +878,11 @@ namespace TaymadeEntities.Models
             try
             {
                 Casts = new ObservableCollection<Cast>(
-                    DataController.SandboxEntities.Casts.Where(c => c.MovieID == this.Id).OrderBy(c => c.ActorId).ToList());
+                    DataController.CastController.GetCastsByMovieId(this.Id)
+                    );
                 Bookmarks = new ObservableCollection<Bookmark>(
-                    DataController.SandboxEntities.Bookmarks.Where(b => b.MovieID == this.Id).OrderBy(b => b.Id).ToList());
+                    DataController.BookmarkController.GetBookmarksByMovieId(this.Id));
+                //DataController.SandboxEntities.Bookmarks.Where(b => b.MovieID == this.Id).OrderBy(b => b.Id).ToList());
                 Director = DataController.SandboxEntities.Directors.Where(d => d.Movies.Contains(this)).FirstOrDefault();
 
                 // set bookmark count
@@ -932,7 +936,7 @@ namespace TaymadeEntities.Models
 
                 //if (Director != null)
                 //{
-                   // Director.SaveAsync();
+                // Director.SaveAsync();
                 //}
 
                 ModifiedOn = DateTime.Now;
@@ -1047,9 +1051,12 @@ namespace TaymadeEntities.Models
 
         public void ReloadCasts()
         {
-            using var ctx = DataController.SandboxEntities;
             Casts = new ObservableCollection<Cast>(
-                    ctx.Casts.Where(c => c.MovieID == this.Id).OrderBy(c => c.ActorId).ToList());
+                DataController.CastController.GetCastsByMovieId(this.Id).ToList()
+                );
+            //using var ctx = DataController.SandboxEntities;
+            //Casts = new ObservableCollection<Cast>(
+            //        ctx.Casts.Where(c => c.MovieID == this.Id).OrderBy(c => c.ActorId).ToList());
         }
 
         #endregion Methods

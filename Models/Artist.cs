@@ -20,7 +20,7 @@ namespace TaymadeEntities.Models
     {
         private readonly List<Artist> groupArtists = new List<Artist>();
         private readonly List<Artist> artistGroups = new List<Artist>();
-        private ICollection<GroupMembers> groupMembers;
+        private ICollection<GroupMembers>? groupMembers;
         private ICollection<ArtistAlbum> artistAlbums;
         private string name;
         private string photoPath;
@@ -99,6 +99,10 @@ namespace TaymadeEntities.Models
 
         internal void InitialiseGroups()
         {
+            if (groupMembers == null || groupMembers.Count == 0)
+            {
+                groupMembers = DataController.MusicController.GetGroupMembersByArtistId(this.Id);
+            }
             if (groupMembers != null && groupMembers.Count >= 0)
             {
                 if (ArtistType == "Group")

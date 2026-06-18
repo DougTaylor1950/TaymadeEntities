@@ -11,7 +11,7 @@ namespace TaymadeEntities.DAL.Interfaces
         #region Public Methods
         void Delete(int id);
 
-        IEnumerable<Bookmark>? GetBookmarksByMovieId(int id);
+        IEnumerable<Bookmark> GetBookmarksByMovieId(int id);
         Bookmark? GetById(int id);
         
       

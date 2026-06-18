@@ -22,13 +22,15 @@ namespace TaymadeEntities.Models
         private string playListPath;
         private string comment;
         private string albumPath;
+        private List<AlbumTrack> albumTracks;
+        private List<ArtistAlbum> artistAlbums;
+        private List<ArtistVideo> artistVideos;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Album()
         {
-            this.AlbumTracks = new HashSet<AlbumTrack>();
-            this.ArtistAlbums = new HashSet<ArtistAlbum>();
-            this.ArtistVideos = new HashSet<ArtistVideo>();
+            this.AlbumTracks = new List<AlbumTrack>();
+            this.ArtistAlbums = new List<ArtistAlbum>();
+            this.ArtistVideos = new List<ArtistVideo>();
         }
 
 
@@ -50,11 +52,38 @@ namespace TaymadeEntities.Models
         public string DiscogsID { get; set; }
         public string DiscogsReleaseID { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<AlbumTrack> AlbumTracks { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ArtistAlbum> ArtistAlbums { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ArtistVideo> ArtistVideos { get; set; }
+        public virtual List<AlbumTrack> AlbumTracks
+        {
+            get
+            {
+                if (albumTracks == null || albumTracks.Count == 0)
+                {
+                    albumTracks = DataController.MusicController.GetAlbumTracksByAlbumId(this.Id);
+                }
+
+                return albumTracks;
+            }
+
+            set => this.RaiseAndSetIfChanged(ref albumTracks, value);
+        }
+        public virtual List<ArtistAlbum> ArtistAlbums
+        {
+            get
+            {
+                if (artistAlbums == null || artistAlbums.Count == 0)
+                {
+                    artistAlbums = DataController.MusicController.GetArtistAlbumsByAlbumId(this.Id);
+                }
+                return artistAlbums;
+            }
+
+            set => this.RaiseAndSetIfChanged(ref artistAlbums, value);
+        }
+        public virtual List<ArtistVideo> 
+            ArtistVideos 
+        { 
+            get => artistVideos; 
+            set => this.RaiseAndSetIfChanged(ref artistVideos, value); 
+        }
     }
 }

@@ -45,9 +45,10 @@ namespace TaymadeEntities.Controllers
             GC.SuppressFinalize(this);
         }
 
-        public List<Bookmark>? GetBookmarksByMovieId(int id)
+        public List<Bookmark> GetBookmarksByMovieId(int id)
         {
-            List<Bookmark> tempList = bookmarkRepository.GetBookmarksByMovieId(id).ToList();
+            List<Bookmark> tempList = bookmarkRepository.GetBookmarksByMovieId(id).ToList() 
+                ?? new List<Bookmark>();
 
             return tempList;
         }

@@ -87,12 +87,9 @@ namespace TaymadeEntities.Models
             DataController.MusicEntitiesContext.SaveChanges();
         }
 
-        internal void Insert()
+        public void Insert()
         {
-
-
-            DataController.MusicEntitiesContext.Add(this);
-            DataController.MusicEntitiesContext.SaveChanges();
+            DataController.MusicController.AddArtist(this);
         }
 
         #endregion

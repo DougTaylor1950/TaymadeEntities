@@ -1095,8 +1095,9 @@ namespace TaymadeEntities.Support
                 string os = GetOS();
 
                 string machineName = GetComputerName();
+                List<MappedDrives> mappedDrives = DataController.MaintenaceController.GetDrivesByComputerName(machineName);
 
-                List<MappedDrives> mappedDrives = DataController.SandboxEntities.MappedDrives.Where(s => s.Computer == machineName && s.LocationType == "PATH").ToList();
+              // List <MappedDrives> mappedDrives = DataController.SandboxEntities.MappedDrives.Where(s => s.Computer == machineName && s.LocationType == "PATH").ToList();
 
                 MappedDrives? mapped = mappedDrives.Where(d => filename.ToLower().Contains(d.SourceDrive)).FirstOrDefault();
 
@@ -1121,7 +1122,7 @@ namespace TaymadeEntities.Support
                         tPath = tPath.Replace(stub, @"W:\Drive-P\");
                     }
 
-                    if (mpath.Contains(@"j:\"))
+                    if (mpath.Contains(@"j:\",StringComparison.OrdinalIgnoreCase))
                     {
                         string stub = tPath.Substring(0, 3);
                         tPath = tPath.Replace(stub, @"W:\Drive-j\");
@@ -1212,7 +1213,8 @@ namespace TaymadeEntities.Support
         {
             string machineName = GetComputerName();
 
-            MappedDrives? found = DataController.SandboxEntities.MappedDrives.Where(m => m.Computer == machineName && m.LocationType == "APP" && m.SourceDrive == AppName).FirstOrDefault();
+            MappedDrives? found = DataController.MaintenaceController.GetDriveByComputerAndApplicationName(machineName, AppName);
+            //MappedDrives? found = DataController.SandboxEntities.MappedDrives.Where(m => m.Computer == machineName && m.LocationType == "APP" && m.SourceDrive == AppName).FirstOrDefault();
 
             if (found != null) return found.DestinationDrive;
             return null;
@@ -1235,8 +1237,8 @@ namespace TaymadeEntities.Support
                 string machineName = GetComputerName();
 
                 // add mapped drive support
-
-                List<MappedDrives> mappedDrives = DataController.SandboxEntities.MappedDrives.Where(s => s.Computer == machineName && s.Reversible == true && s.LocationType == "PATH").ToList();
+                List<MappedDrives> mappedDrives = DataController.MaintenaceController.GetDrivesByComputerName(machineName);
+                //List <MappedDrives> mappedDrives = DataController.SandboxEntities.MappedDrives.Where(s => s.Computer == machineName && s.Reversible == true && s.LocationType == "PATH").ToList();
 
                 MappedDrives? mapped = mappedDrives.Where(d => filename.ToLower().Contains(d.DestinationDrive)).FirstOrDefault();
 
@@ -1839,6 +1841,7 @@ namespace TaymadeEntities.Support
         public static void PlayMovie(string moviePath, Bookmark? currentBookmark)
         {
             string mPath = FixImagePath(moviePath);
+            string localPath = mPath;
             Uri uri = new Uri(mPath);
             string path = string.Empty;
             string os = Support.GetOS();
@@ -1856,7 +1859,25 @@ namespace TaymadeEntities.Support
             {
                 psi.Arguments = '"' + mPath + '"' + " --start-time=" + currentBookmark.Time.ToString();
             }
-            else psi.Arguments = '"' + mPath + '"';
+            else psi.Arguments = '"' + mPath +'"' ;
+            VLCProcess = Process.Start(psi);
+        }
+
+        public static void PlayTrack(string trackPath)
+        {
+            string mPath = FixImagePath(trackPath);
+            string os = Support.GetOS();
+            string path = string.Empty;
+            if (os == "WinNT")
+            {
+                path = @"C:\Program Files\ffmpeg\bin\ffplay.exe";
+            }
+            else
+            {
+                path = "/snap/bin/vlc";
+            }
+            ProcessStartInfo psi = new ProcessStartInfo(path);
+            psi.Arguments = '"' + mPath + '"';
             VLCProcess = Process.Start(psi);
         }
 

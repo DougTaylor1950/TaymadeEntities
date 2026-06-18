@@ -21,6 +21,7 @@ namespace TaymadeEntities.DAL.Interfaces
         Cast GetOrCreateCast(int movieId, int actorId);
         void UpdateCast(Cast cast);
         Cast? GetCastByCreditId(string creditId);
+        Task<List<Cast>> GetCastsByMovieIdAsync(int id);
 
         #endregion Public Methods
     }

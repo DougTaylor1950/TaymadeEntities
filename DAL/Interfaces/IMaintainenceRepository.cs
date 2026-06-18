@@ -13,6 +13,8 @@ namespace TaymadeEntities.DAL.Interfaces
         
         
         MVMLogs? GetById(int id);
+        List<MappedDrives> GetDrivesByComputerName(string machineName);
+        MappedDrives? GetDriveByComputerAndApplicationName(string machineName, string appName);
         IEnumerable<MVMLogs> GetLogs();
 
         void InsertLog(MVMLogs MVMLogs);

@@ -16,7 +16,8 @@ namespace TaymadeEntities.Models
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
-   // using MusicBrainzSupport;
+    using TaymadeEntities.MusicBrainzSupport;
+    // using MusicBrainzSupport;
     using TaymadeEntities.Support;
 
 
@@ -112,11 +113,14 @@ namespace TaymadeEntities.Models
         [NotMapped]
         public string ReturnUrl { get; set; }
 
+        [NotMapped]
+        public MBAlbum MBAlbum { get; set; }
+
         //[NotMapped]
         //public MBAlbum MBAlbum { get;  set; }
 
         //[NotMapped]
-      //  public DCAlbumDetails DCAlbum { get; private set; }
+        //  public DCAlbumDetails DCAlbum { get; private set; }
 
         #endregion
 
@@ -212,10 +216,11 @@ namespace TaymadeEntities.Models
             }
         }
 
-        internal void Insert()
+        public void Insert()
         {
-            DataController.MusicEntitiesContext.Albums.Add(this);
-            DataController.MusicEntitiesContext.SaveChanges();
+            DataController.MusicController.AddAlbum(this);
+            //DataController.MusicEntitiesContext.Albums.Add(this);
+            //DataController.MusicEntitiesContext.SaveChanges();
         }
 
         internal void Save()

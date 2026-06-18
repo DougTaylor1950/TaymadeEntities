@@ -57,7 +57,19 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the Artist.
         /// </summary>
-        public virtual Artist Artist { get => artist; set => this.RaiseAndSetIfChanged(ref artist, value); }
+        public virtual Artist Artist
+        {
+            get
+            {
+                if (artist == null && ArtistID > 0)
+                {
+                    artist = DataController.MusicController.GetArtistById(ArtistID);
+                }
+                return artist;
+            }
+
+            set => this.RaiseAndSetIfChanged(ref artist, value);
+        }
 
         /// <summary>
         /// Gets or sets the ArtistID.

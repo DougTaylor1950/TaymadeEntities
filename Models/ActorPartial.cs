@@ -167,7 +167,10 @@ namespace TaymadeEntities.Models
             get
             {
                 // need to get an updated list of Casts
-                Casts = DataController.SandboxEntities.Casts.Where(a => a.ActorId == this.Id).ToList(); if (movies == null && Casts != null)
+                Casts = DataController.CastController.GetActorCasts(this.Id).ToList();
+                //Casts = DataController.SandboxEntities.Casts.Where(a => a.ActorId == this.Id).ToList(); 
+
+                if (movies == null && Casts != null)
                 {
                     movies = [];
                     foreach (var item in Casts)

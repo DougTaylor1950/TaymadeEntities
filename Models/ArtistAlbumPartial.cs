@@ -33,10 +33,11 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Insert.
         /// </summary>
-        internal void Insert()
+        public void Insert()
         {
-            DataController.MusicEntitiesContext.ArtistAlbums.Add(this);
-            DataController.MusicEntitiesContext.SaveChanges();
+            DataController.MusicController.AddArtistAlbum(this);
+
+           
         }
 
         /// <summary>

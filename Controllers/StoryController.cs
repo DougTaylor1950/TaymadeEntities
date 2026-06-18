@@ -170,6 +170,11 @@ namespace TaymadeEntities.Controllers
             return storyRepository.UpdateStoryDictionary(dictionary);
         }
 
+        internal bool AddAuthor(Author author)
+        {
+            return storyRepository.AddAuthor(author);
+        }
+
         #endregion Protected Methods
     }
 }

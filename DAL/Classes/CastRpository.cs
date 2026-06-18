@@ -83,7 +83,7 @@ namespace TaymadeEntities.DAL
 
         public IEnumerable<Cast> GetActorCasts(int actorId)
         {
-            return _context.Casts.Where(c => c.ActorId == actorId).ToList();
+            return _context.Casts.Where(c => c.ActorId == actorId).ToList() ?? new List<Cast>();
         }
 
         public Cast GetCastById(int id)
@@ -99,6 +99,11 @@ namespace TaymadeEntities.DAL
         public IEnumerable<Cast> GetMovieCasts(int movieId)
         {
             return _context.Casts.Where(c => c.MovieID == movieId).ToList();
+        }
+
+        public async Task<List<Cast>> GetCastsByMovieIdAsync(int id)
+        {
+            return await _context.Casts.Where(c => c.MovieID == id).ToListAsync();
         }
 
         public void InsertCast(Cast cast)

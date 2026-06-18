@@ -39,6 +39,17 @@ namespace TaymadeEntities.DAL.Classes
             Save();
         }
 
+        public bool AddAuthor(Author author)
+        {
+            Author? temp = _context.Author.Find(author.Id);
+            if (temp != null)
+            {
+                _context.Author.Add(author);
+                return Save();
+            }
+            else return false;
+        }
+
         public bool? AddStoryCast(StoryCast storyCast)
         {
             StoryCast? temp = 

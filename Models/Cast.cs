@@ -168,7 +168,8 @@ namespace TaymadeEntities.Models
 
             if (this.Id < 10)
             {
-                Cast? temp = DataController.SandboxEntities.Casts.Where(c => c.MovieID == this.MovieID && c.ActorId == this.ActorId).FirstOrDefault();
+                Cast? temp = DataController.CastController.GetOrCreateCast(this.MovieID.Value, this.ActorId.Value);
+                
                 int? newId = null;
                 if (temp == null)
                 {

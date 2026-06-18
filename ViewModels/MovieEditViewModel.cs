@@ -544,9 +544,9 @@ namespace TaymadeEntities.ViewModels
                 CurrentMovie.Save();
                 DataController.ReloadMovie(CurrentMovie);
                 CurrentMovie.Bookmarks = new ObservableCollection<Bookmark>();
-                CurrentMovie.Bookmarks = new ObservableCollection<Bookmark>(DataController.SandboxEntities.Bookmarks
-                    .Where(m => m.MovieID == CurrentMovie.Id)
-                    .ToList());
+                CurrentMovie.Bookmarks = new ObservableCollection<Bookmark>(
+                    DataController.BookmarkController.GetBookmarksByMovieId(CurrentMovie.Id)
+                    );
                 CurrentMovie.ImagesCount = CurrentMovie.Bookmarks.Count;
                 CurrentMovie.SetPercentUnmarked();
 

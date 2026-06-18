@@ -126,39 +126,45 @@ namespace TaymadeEntities.Models
         [NotMapped]
         public string TrackURL { get; set; } = string.Empty;
 
-        #endregion
-
-        internal void Insert()
+        public bool Update()
         {
-            var local = DataController.MusicEntitiesContext.Set<AlbumTrack>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-            // check if local is not null
-            if (local != null)
-            {
-                // detach
-                DataController.MusicEntitiesContext.Entry(local).State = EntityState.Detached;
-            }
-
-            DataController.MusicEntitiesContext.AlbumTracks.Add(this);
-            DataController.MusicEntitiesContext.SaveChanges();
-
-
+            return DataController.MusicController.UpdateTrack(this);
         }
 
-        internal void Save()
-        {
-            var local = DataController.MusicEntitiesContext.Set<AlbumTrack>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+        #endregion
 
-            // check if local is not null
-            if (local != null)
-            {
-                // detach
-                DataController.MusicEntitiesContext.Entry(local).State = EntityState.Detached;
-            }
-            // set Modified flag in your entry
-            //ModifiedOn = DateTime.Now;
-            DataController.MusicEntitiesContext.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            DataController.MusicEntitiesContext.SaveChanges();
+        public void Insert()
+        {
+            //var local = DataController.MusicEntitiesContext.Set<AlbumTrack>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+
+            //// check if local is not null
+            //if (local != null)
+            //{
+            //    // detach
+            //    DataController.MusicEntitiesContext.Entry(local).State = EntityState.Detached;
+            //}
+
+            //DataController.MusicEntitiesContext.AlbumTracks.Add(this);
+            //DataController.MusicEntitiesContext.SaveChanges();
+
+            DataController.MusicController.AddTrack(this);
+        }
+
+        public void Save()
+        {
+            //var local = DataController.MusicEntitiesContext.Set<AlbumTrack>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+
+            //// check if local is not null
+            //if (local != null)
+            //{
+            //    // detach
+            //    DataController.MusicEntitiesContext.Entry(local).State = EntityState.Detached;
+            //}
+            //// set Modified flag in your entry
+            ////ModifiedOn = DateTime.Now;
+            //DataController.MusicEntitiesContext.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            //DataController.MusicEntitiesContext.SaveChanges();
+            DataController.MusicController.Save();
 
 
             // ClearErrors();

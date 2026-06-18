@@ -50,7 +50,19 @@ namespace TaymadeEntities.Models
         /// Gets or sets the Artist.
         /// </summary>
         [ForeignKey("ArtistId")]
-        public Artist? Artist { get => artist; set => this.RaiseAndSetIfChanged(ref artist, value); }
+        public Artist? Artist
+        {
+            get
+            {
+                if (artist == null && ArtistId >0)
+                {
+                    artist = DataController.MusicController.GetArtistById(ArtistId);
+                }
+                return artist;
+            }
+
+            set => this.RaiseAndSetIfChanged(ref artist, value);
+        }
 
         /// <summary>
         /// Gets or sets the ArtistGroup.

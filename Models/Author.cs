@@ -104,8 +104,8 @@ namespace TaymadeEntities.Models
         {
             try
             {
-                if (Id == 0) DataController.SandboxEntities.Author.Add(this);
-                DataController.SandboxEntities.SaveChanges();
+                if (Id == 0) DataController.StoryController.AddAuthor(this);
+                DataController.StoryController.Save();
             }
             catch (Exception)
             {

@@ -97,9 +97,9 @@ namespace TaymadeEntities.DAL.Classes
             _context.SaveChanges();
         }
 
-        public IEnumerable<Bookmark>? GetBookmarksByMovieId(int id)
+        public IEnumerable<Bookmark> GetBookmarksByMovieId(int id)
         {
-            return _context.Bookmarks.Where(b => b.MovieID == id);
+            return _context.Bookmarks.Where(b => b.MovieID == id).OrderBy(b => b.Id);
         }
 
         public async Task<bool> UpdateAsync(Bookmark bookmark)

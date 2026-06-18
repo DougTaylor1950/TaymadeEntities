@@ -54,6 +54,7 @@ namespace TaymadeEntities.DAL.Interfaces
         bool Update(int storyId);
 
         bool UpdateStoryDictionary(StoryDictionary? storyDictionary);
+        bool AddAuthor(Author author);
         #endregion Public Methods
     }
 }

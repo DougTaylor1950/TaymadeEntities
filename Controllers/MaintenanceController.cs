@@ -84,5 +84,15 @@ namespace TaymadeEntities.Controllers
         {
             maintenaceRepository.InsertLog(mVMLogs);
         }
+
+        internal List<MappedDrives> GetDrivesByComputerName(string machineName)
+        {
+            return maintenaceRepository.GetDrivesByComputerName(machineName);
+        }
+
+        internal MappedDrives? GetDriveByComputerAndApplicationName(string machineName, string appName)
+        {
+            return maintenaceRepository.GetDriveByComputerAndApplicationName(machineName, appName);
+        }
     }
 }

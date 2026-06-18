@@ -192,7 +192,8 @@ namespace TaymadeEntities.Models
             {
                 if (casts == null)
                 {
-                    casts = DataController.SandboxEntities.Casts.Where(x => x.ActorId == this.Id).ToList();
+                    casts = DataController.CastController.GetActorCasts(this.Id).ToList();
+                    //casts = DataController.SandboxEntities.Casts.Where(x => x.ActorId == this.Id).ToList();
                 }
                 return casts;
             }

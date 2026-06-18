@@ -169,6 +169,11 @@ namespace TaymadeEntities.Controllers
             return castRepository.GetCastByCreditId(creditId);
         }
 
+        internal async Task<List<Cast>> GetCastsByMovieIdAsync(int id)
+        {
+            return await castRepository.GetCastsByMovieIdAsync(id);
+        }
+
         #endregion Public Methods
     }
 }
