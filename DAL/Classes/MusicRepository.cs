@@ -143,6 +143,11 @@ namespace TaymadeEntities.DAL.Classes
             return success;
         }
 
+        public bool UpdateAlbum(Album album)
+        {
+            _context.Albums.Update(album);
+            return Save();
+        }
         public bool UpdateTrack(AlbumTrack albumTrack)
         {
             _context.AlbumTracks.Update(albumTrack);

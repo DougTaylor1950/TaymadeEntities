@@ -223,24 +223,30 @@ namespace TaymadeEntities.Models
             //DataController.MusicEntitiesContext.SaveChanges();
         }
 
-        internal void Save()
+        public void Save()
         {
-            var local = DataController.MusicEntitiesContext.Set<Album>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+            //var local = DataController.MusicEntitiesContext.Set<Album>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
-            // check if local is not null
-            if (local != null)
-            {
-                // detach
-                DataController.MusicEntitiesContext.Entry(local).State = EntityState.Detached;
-            }
-            // set Modified flag in your entry
-            //ModifiedOn = DateTime.Now;
-            DataController.MusicEntitiesContext.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            DataController.MusicEntitiesContext.SaveChanges();
+            //// check if local is not null
+            //if (local != null)
+            //{
+            //    // detach
+            //    DataController.MusicEntitiesContext.Entry(local).State = EntityState.Detached;
+            //}
+            //// set Modified flag in your entry
+            ////ModifiedOn = DateTime.Now;
+            //DataController.MusicEntitiesContext.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            //DataController.MusicEntitiesContext.SaveChanges();
 
 
-           // ClearErrors();
-           // TimeSpan ts = MovieDuration;
+            // ClearErrors();
+            // TimeSpan ts = MovieDuration;
+            Update();
+        }
+
+        public void Update()
+        {
+            DataController.MusicController.UpdateAlbum(this);
         }
 
         #endregion

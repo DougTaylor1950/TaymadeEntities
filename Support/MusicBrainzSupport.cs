@@ -379,7 +379,7 @@ namespace TaymadeEntities.MusicBrainzSupport
         [JsonProperty("relations")]
         public List<MBArtistRelationship> Relations { get; set; }
 
-        public List<MBArtistRelationship> BandMembers => Relations.Where((MBArtistRelationship x) => x.TargetType.ToLower() == "artist").ToList();
+        public List<MBArtistRelationship> BandMembers => Relations?.Where((MBArtistRelationship x) => x.TargetType.ToLower() == "artist").ToList();
 
         public List<MBArtistRelationship> Urls => Relations.Where((MBArtistRelationship x) => x.TargetType.ToLower() == "url").ToList();
 

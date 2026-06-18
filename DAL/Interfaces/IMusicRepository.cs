@@ -25,7 +25,7 @@ namespace TaymadeEntities.DAL.Interfaces
         List<Artist>? GetArtists();
         List<GroupMembers>? GetGroupMembersByArtistId(int id);
         bool Save();
-
+        bool UpdateAlbum(Album album);
         bool UpdateTrack(AlbumTrack albumTrack);
 
         #endregion Public Methods

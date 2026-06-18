@@ -25,6 +25,7 @@ namespace TaymadeEntities.Models
         private List<AlbumTrack> albumTracks;
         private List<ArtistAlbum> artistAlbums;
         private List<ArtistVideo> artistVideos;
+        private string musicBrainzReleaseGroupID1;
 
         public Album()
         {
@@ -43,7 +44,10 @@ namespace TaymadeEntities.Models
         public Nullable<decimal> Rating { get; set; }
         public string MusicBrainzID { get; set; }
         public string Genre { get; set; }
-        public string musicBrainzReleaseGroupID { get; set; }
+        public string musicBrainzReleaseGroupID
+        { get => musicBrainzReleaseGroupID1; 
+            set => this.RaiseAndSetIfChanged(ref musicBrainzReleaseGroupID1, value); 
+        }
         public Nullable<int> PrimaryArtistID { get; set; }
         public string PlexKey { get; set; }
         public string AlbumPath { get => albumPath; set => this.RaiseAndSetIfChanged(ref albumPath , value); }

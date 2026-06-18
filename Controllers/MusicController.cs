@@ -140,6 +140,11 @@ namespace TaymadeEntities.Controllers
             return musicRepository.AddAlbum(album);
         }
 
+        internal bool UpdateAlbum(Album album)
+        {
+            return musicRepository.UpdateAlbum(album);
+        }
+
         #endregion Protected Methods
     }
 }
