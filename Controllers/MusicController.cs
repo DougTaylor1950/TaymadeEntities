@@ -49,6 +49,52 @@ namespace TaymadeEntities.Controllers
             return musicRepository.GetAlbumsByArtistId(value);
         }
 
+        public Album? GetAlbumsByName(string findText)
+        {
+            return musicRepository.GetAlbumsByName(findText);
+        }
+
+        public List<ArtistAlbum>? GetAllArtistAlbums(int artistId)
+        {
+            return musicRepository.GetAllArtistAlbums(artistId);
+        }
+
+        public ObservableCollection<Artist>? GetArtists()
+        {
+            List<Artist>? temp = musicRepository.GetArtists();
+            if (temp != null)
+                return new ObservableCollection<Artist>(temp);
+            else return new ObservableCollection<Artist>();
+        }
+
+        public Artist? GetArtistsByMBID(string? id)
+        {
+            return musicRepository.GetArtistByMBID(id);
+        }
+
+        public List<Artist>? GetArtistsByName(string findText, string artistType = "Person")
+        {
+            return musicRepository.GetArtistsByName(findText, artistType);
+        }
+
+
+        public IEnumerable<ArtistVideo> GetArtistVideos()
+        {
+            return musicRepository.GetArtistVideos();
+        }
+
+        public ObservableCollection<Artist>? GetGroups()
+        {
+            List<Artist>? temp = musicRepository.GetGroups();
+            if (temp != null)
+                return new ObservableCollection<Artist>(temp);
+            else return new ObservableCollection<Artist>();
+        }
+        public List<Artist>? GetGroupsByName(string name)
+        {
+            return musicRepository.GetGroupsByName(name);
+        }
+
         public bool Save()
         {
             return musicRepository.Save();
@@ -56,12 +102,51 @@ namespace TaymadeEntities.Controllers
 
         #endregion Public Methods
 
+        #region Internal Methods
+
         //public void Delete(int id)
         //{
         //    templateRepository.DeleteMovie(id);
         //}
+        internal bool AddAlbum(Album album)
+        {
+            return musicRepository.AddAlbum(album);
+        }
 
-        #region Internal Methods
+        internal bool AddArtist(Artist artist)
+        {
+            return musicRepository.AddArtist(artist);
+        }
+
+        internal bool AddArtistAlbum(ArtistAlbum artistAlbum)
+        {
+            return musicRepository.AddArtistAlbum(artistAlbum);
+        }
+
+        internal bool AddArtistVideo(ArtistVideo artistVideo)
+        {
+            return musicRepository.AddArtistVideo(artistVideo);
+        }
+
+        internal bool AddTrack(AlbumTrack albumTrack)
+        {
+            return musicRepository.AddAlbumTrack(albumTrack);
+        }
+
+        internal bool DeleteArtist(Artist artist)
+        {
+            return musicRepository.DeleteArtist(artist);
+        }
+
+        internal bool DeleteArtistVideo(ArtistVideo artistVideo)
+        {
+            return musicRepository.DeleteArtistVideo(artistVideo);
+        }
+
+        internal bool DeleteGroupMember(GroupMembers groupMembers)
+        {
+            return musicRepository.DeleteGroupMember(groupMembers);
+        }
 
         internal List<AlbumTrack>? GetAlbumTracksByAlbumId(int id)
         {
@@ -72,6 +157,10 @@ namespace TaymadeEntities.Controllers
         {
             return musicRepository.GetArtistAlbumsByAlbumId(id);
         }
+        internal List<ArtistAlbum>? GetArtistAlbumsByArtistId(int id)
+        {
+            return musicRepository.GetArtistAlbumsByArtistId(id);
+        }
 
         internal Artist? GetArtistById(int artistID)
         {
@@ -81,6 +170,21 @@ namespace TaymadeEntities.Controllers
         internal List<GroupMembers>? GetGroupMembersByArtistId(int id)
         {
             return musicRepository.GetGroupMembersByArtistId(id);
+        }
+
+        internal bool UpdateAlbum(Album album)
+        {
+            return musicRepository.UpdateAlbum(album);
+        }
+
+        internal bool UpdateArtist(Artist artist)
+        {
+            return musicRepository.UpdateArtist(artist);
+        }
+
+        internal bool UpdateArtistVideo(ArtistVideo artistVideo)
+        {
+            return musicRepository.UpdateArtistVideo(artistVideo);
         }
 
         internal bool UpdateTrack(AlbumTrack albumTrack)
@@ -107,44 +211,18 @@ namespace TaymadeEntities.Controllers
             }
         }
 
-        public Album? GetAlbumsByName(string findText)
+
+        public bool DeleteArtistAlbum(ArtistAlbum artistAlbum)
         {
-            return musicRepository.GetAlbumsByName(findText);
+            return musicRepository.DeleteArtistAlbum(artistAlbum);
         }
 
-        public ObservableCollection<Artist>? GetArtists()
+        internal bool DeleteAlbumTrack(AlbumTrack albumTrack)
         {
-            List<Artist>? temp = musicRepository.GetArtists();
-            if (temp != null)
-                return new ObservableCollection<Artist>(temp);
-            else return new ObservableCollection<Artist>();
-        }
-
-        internal bool AddArtistAlbum(ArtistAlbum artistAlbum)
-        {
-           return  musicRepository.AddArtistAlbum(artistAlbum);
-        }
-
-        internal bool AddArtist(Artist artist)
-        {
-            return musicRepository.AddArtist(artist);
-        }
-
-        internal bool AddTrack(AlbumTrack albumTrack)
-        {
-            return musicRepository.AddAlbumTrack(albumTrack);
-        }
-
-        internal bool AddAlbum(Album album)
-        {
-            return musicRepository.AddAlbum(album);
-        }
-
-        internal bool UpdateAlbum(Album album)
-        {
-            return musicRepository.UpdateAlbum(album);
+            return musicRepository.DeleteAlbumTrack(albumTrack);
         }
 
         #endregion Protected Methods
+
     }
 }

@@ -15,7 +15,7 @@ namespace TaymadeEntities.Models
     using DocumentFormat.OpenXml.Packaging;
     using DocumentFormat.OpenXml.Wordprocessing;
     using IronPdf;
-    
+
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
     using OpenXmlPowerTools;
@@ -38,57 +38,9 @@ namespace TaymadeEntities.Models
     /// Defines the <see cref="Story" />.
     /// </summary>
     [Table("Stories")]
-
-    //    The Story class in the provided code is a model class that represents a story entity in the application.
-    //    It inherits from ModelBase and includes various properties, fields, constants, and methods to manage the story's data and behavior.
-    //    Here's a breakdown of its components:
-
-    //Constants
-    //•	divEnd, LiStyle, UlStyle: Constants for HTML styling.
-
-    //Fields
-
-    //•	Various fields to store story-related data such as added, age, author, characters, codes, creation, documentExtn, group, language,
-    // lastModified, lines, lowestAge, lowestAgeInt, myBreaks, myopenBookmarks,
-    // myOpenXMLHeadingList1, myOpenXMLHeadingList2, myOpenXMLHeadingList3, myWmlDocument, originalLanguage, pages, path, pathWrong,
-    // published, score, sectionBreaks, seriesId, storySeries, title, translation, wordHeadingList, wordHeadings2, wordHeadings3, wpDocument.
-
-    //Properties
-    //•	Various properties to get and set story-related data, including:
-    //•	Added, AddedString, Age, Author, AuthorItem, Breaks, Characters, Codes, CreatedString, Creation, Dirty, DocumentExtn, FixedPath,
-    //  Group, Heading1List, Heading2List, Heading3List, HeadingCount, Id, IDAuthor, Language, LastModified, Lines, LowestAge, LowestAgeInt,
-    //  ModifiedString, OpenBookmarks, OriginalLanguage, Pages, Path, PathWrong, Published, Score, SectionBreaks, SeriesId, StorySeries, Title,
-    //  Translation, WmlDocument, WordHeadingList, WordHeadings1, WordHeadings2, WordHeadings3.
-
-    //    Methods
-    //•	Story() : Constructor that subscribes to the PropertyChanged event.
-    //•	Story_PropertyChanged(): Event handler that sets the Dirty flag to true when a property changes.
-    //•	Create(): Static method to create a new Story instance and save it to the database.
-    //•	Create(string path): Static method to create a new Story instance from a file path and extract metadata.
-    //•	GetProperties(string path): Static method to get properties from a document.
-    //•	CheckExists(): Method to check if the story's file exists.
-    //•	GetBreaksAndHeadings(): Method to extract breaks and headings from the document.
-    //•	GetPropertiesFromDocument(): Method to get properties from the document and update the story.
-    //•	OpenDocument(): Method to open the document and extract bookmarks, breaks, and headings.
-    //•	SetProperties(WordProperties currentProperties): Method to set properties from a WordProperties object.
-    //•	ToHtml(): Method to convert the story to HTML format.
-    //•	Delete(): Method to delete the story from the database.
-    //•	Insert(): Method to insert the story into the database.
-    //•	Save(): Method to save the story to the database.
-    //•	ParagraphText(Paragraph para): Helper method to get text from a paragraph.
-    //•	GetBookmarks(WordprocessingDocument document): Helper method to get bookmarks from a document.
-    //•	GetBreaks(int sectID, Paragraph para): Helper method to get breaks from a paragraph.
-    //•	GetHeadings(ref int heading1, ref int heading2, ref int heading3, Paragraph para): Helper method to get headings from a paragraph.
-    //•	GetHeadingsFromList(BreakList headingList): Helper method to get headings from a break list.
-    //•	GetHeadingsFromList(OpenXMLHeadingList headingList): Helper method to get headings from a heading list.
-
-    //The class uses various libraries and frameworks, including ReactiveUI, OpenXML, IronPdf, EntityFramework, and others, to manage the story's data
-    // and behavior. The class also interacts with other classes such as Author, BookmarkList, BreakList, PhraseEntry, StorySeries, WordHeadings,
-    // WordProperties, and OpenXmlBookmark.
-
     public partial class Story : ModelBase
     {
-        #region Constants
+        #region Public Fields
 
         /// <summary>
         /// Defines the divEnd.
@@ -105,19 +57,23 @@ namespace TaymadeEntities.Models
         /// </summary>
         public const string UlStyle = "ul {   background-color: #F2C777; }  li a {   display: block;   padding: 10px;   color: #7C785B; } li a:hover {   background-color: #EC8C65; } ";
 
-        #endregion
-
-        #region Fields
-
         /// <summary>
         /// Defines the div.
         /// </summary>
         public string div = "<div style=" + '"' + "display: flex; justify-content: flex-start" + '"' + ">";
 
+        #endregion Public Fields
+
+        #region Internal Fields
+
         /// <summary>
         /// Defines the w.
         /// </summary>
         internal static XNamespace w = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+
+        #endregion Internal Fields
+
+        #region Private Fields
 
         private DateTime? added;
 
@@ -134,6 +90,8 @@ namespace TaymadeEntities.Models
         private Author? authorItem;
 
         private ObservableCollection<StoryAuthor>? authors;
+
+        private ObservableCollection<StoryCast> cast;
 
         /// <summary>
         /// Defines the characters.
@@ -158,6 +116,10 @@ namespace TaymadeEntities.Models
         private string? group;
 
         private int? iDAuthor;
+
+        private string info;
+
+        private string? json = string.Empty;
 
         /// <summary>
         /// Defines the language.
@@ -250,6 +212,8 @@ namespace TaymadeEntities.Models
 
         private int? seriesId;
 
+        private StoryInfo? storyInfo = null;
+
         /// <summary>
         /// Defines the storySeries.
         /// </summary>
@@ -289,21 +253,20 @@ namespace TaymadeEntities.Models
         /// Defines the wpDocument.
         /// </summary>
         private WordprocessingDocument? wpDocument = null;
-        private string? json = string.Empty;
+        private StoryDictionary? storyDictionary;
+
+        #endregion Private Fields
+
+        #region Public Constructors
 
         public Story()
         {
             this.PropertyChanged += Story_PropertyChanged;
         }
 
-        private void Story_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            Dirty = true;
-        }
+        #endregion Public Constructors
 
-        #endregion
-
-        #region Properties
+        #region Public Properties
 
         /// <summary>
         /// Gets or sets the Added.
@@ -457,6 +420,25 @@ namespace TaymadeEntities.Models
             set => myBreaks = value;
         }
 
+        [NotMapped]
+        public ObservableCollection<StoryCast> Cast
+        {
+            get
+            {
+                if (this.cast == null || this.cast.Count == 0)
+                {
+                    this.cast = new ObservableCollection<StoryCast>(new StoryCastList("", this.Id));
+                }
+
+                return this.cast;
+            }
+
+            set
+            {
+                this.RaiseAndSetIfChanged(ref cast, value);
+            }
+        }
+
         /// <summary>
         /// Gets or sets the Characters.
         /// </summary>
@@ -474,7 +456,6 @@ namespace TaymadeEntities.Models
                     codes = codes.Replace("_x000d_", Environment.NewLine);
                     return codes;
                 }
-
                 else return string.Empty;
             }
             set => this.RaiseAndSetIfChanged(ref codes, value);
@@ -495,7 +476,6 @@ namespace TaymadeEntities.Models
             }
             set
             {
-
             }
         }
 
@@ -556,36 +536,31 @@ namespace TaymadeEntities.Models
         public string? Group { get => group; set => this.RaiseAndSetIfChanged(ref group, value); }
 
         /// <summary>
-        /// Gets or sets the Heading1List.
+        /// Gets the HeadingCount.
         /// </summary>
-        //[NotMapped]
-        //public OpenXMLHeadingList Heading1List { get => myOpenXMLHeadingList1; set => this.RaiseAndSetIfChanged(ref myOpenXMLHeadingList1, value); }
-
-        /// <summary>
-        /// Gets or sets the Heading2List.
-        /// </summary>
-        //[NotMapped]
-        //public OpenXMLHeadingList Heading2List { get => myOpenXMLHeadingList2; set => this.RaiseAndSetIfChanged(ref myOpenXMLHeadingList2, value); }
+        public int? HeadingCount => WordHeadingList?.Count;
 
         /// <summary>
         /// Gets or sets the Heading3List.
         /// </summary>
         //[NotMapped]
         //public OpenXMLHeadingList Heading3List { get => myOpenXMLHeadingList3; set => this.RaiseAndSetIfChanged(ref myOpenXMLHeadingList3, value); }
-
-        /// <summary>
-        /// Gets the HeadingCount.
-        /// </summary>
-        public int? HeadingCount => WordHeadingList?.Count;
-
         /// <summary>
         /// Gets or sets the Id.
         /// </summary>
         public new int Id { get; set; }
 
+        /// <summary>
+        /// Gets or sets the Heading2List.
+        /// </summary>
+        //[NotMapped]
+        //public OpenXMLHeadingList Heading2List { get => myOpenXMLHeadingList2; set => this.RaiseAndSetIfChanged(ref myOpenXMLHeadingList2, value); }
         public int? IDAuthor
         {
-            get => iDAuthor;
+            get
+            {
+                return iDAuthor;
+            }
 
             set
             {
@@ -613,9 +588,8 @@ namespace TaymadeEntities.Models
             }
         }
 
-        /// <summary>
-        /// Gets or sets the Language.
-        /// </summary>
+        [NotMapped]
+        public string Info { get => info; set => this.RaiseAndSetIfChanged(ref info, value); }
 
         public string? Json
         {
@@ -625,56 +599,6 @@ namespace TaymadeEntities.Models
             }
 
             set => json = value;
-        }
-
-        [NotMapped]
-        public string Info { get => info; set => this.RaiseAndSetIfChanged(ref info, value); }
-
-        private StoryInfo? storyInfo = null;
-        private string info;
-        private ObservableCollection<StoryCast> cast;
-
-        [NotMapped]
-        public ObservableCollection<StoryCast> Cast
-        {
-            get
-            {
-                if (this.cast == null || this.cast.Count == 0)
-                {
-                    this.cast = new ObservableCollection<StoryCast>(new StoryCastList("", this.Id));
-                }
-
-                return this.cast;
-            }
-
-            set
-            {
-                this.RaiseAndSetIfChanged(ref cast, value);
-            }
-        }
-
-        [NotMapped]
-        public StoryInfo? StoryInfo
-        {
-            get
-            {
-                if (storyInfo == null)
-                {
-
-                    storyInfo = new StoryInfo(Json, this);
-
-                }
-                return storyInfo;
-            }
-            set
-            {
-                this.RaiseAndSetIfChanged(ref storyInfo, value);
-
-                if (value != null)
-                {
-                    Json = value.ToJSON();
-                }
-            }
         }
 
         [NotMapped]
@@ -810,7 +734,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         public bool? PathWrong { get => pathWrong; set => this.RaiseAndSetIfChanged(ref pathWrong, value); }
 
-        public string? Percent { get => percent;  set => this.RaiseAndSetIfChanged(ref percent, value); }
+        public string? Percent { get => percent; set => this.RaiseAndSetIfChanged(ref percent, value); }
 
         /// <summary>
         /// Gets or sets the Published.
@@ -825,6 +749,7 @@ namespace TaymadeEntities.Models
         /// </value>
         /// <autogeneratedoc />
         public int? Score { get => score; set => this.RaiseAndSetIfChanged(ref score, value); }
+
         /// <summary>
         /// Gets or sets the SectionBreaks
         /// Gets the SectionBreaks..
@@ -860,9 +785,63 @@ namespace TaymadeEntities.Models
                     {
                         StorySeries = sSeries;
                     }
-
                 }
                 this.RaiseAndSetIfChanged(ref seriesId, value);
+            }
+        }
+
+        [NotMapped]
+        public StoryDictionary? StoryDictionary
+        {
+            get
+            {
+                if (storyDictionary == null && Id > 0)
+                {
+                    storyDictionary = DataController.StoryController.GetStoryDictionaryByStoryId(Id);
+                    if (storyDictionary == null )
+                    {
+                        storyDictionary = new StoryDictionary()
+                        {
+                            StoryId = this.Id,
+                            DictionaryText = ""
+                        };
+                        storyDictionary.Insert();
+                    }
+                }
+                storyDictionary.Update();
+                return storyDictionary;
+            }
+
+            set => this.RaiseAndSetIfChanged(ref storyDictionary, value);
+        }
+
+        /// <summary>
+        /// Gets or sets the Heading1List.
+        /// </summary>
+        //[NotMapped]
+        //public OpenXMLHeadingList Heading1List { get => myOpenXMLHeadingList1; set => this.RaiseAndSetIfChanged(ref myOpenXMLHeadingList1, value); }
+        /// <summary>
+        /// Gets or sets the Language.
+        /// </summary>
+        [NotMapped]
+        public StoryInfo? StoryInfo
+        {
+            get
+            {
+                if (storyInfo == null)
+                {
+                    storyInfo = new StoryInfo(Json, this);
+                }
+                return storyInfo;
+            }
+            set
+            {
+                this.RaiseAndSetIfChanged(ref storyInfo, value);
+
+                if (value != null)
+                {
+                    Json = value.ToJSON();
+                }
             }
         }
 
@@ -871,6 +850,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         [ForeignKey("SeriesId")]
         public StorySeries? StorySeries { get => storySeries; set => this.RaiseAndSetIfChanged(ref storySeries, value); }
+
         /// <summary>
         /// Gets or sets the Title.
         /// </summary>
@@ -906,7 +886,7 @@ namespace TaymadeEntities.Models
                 if (wordHeadingList == null || wordHeadingList.Count == 0)
                 {
                     wordHeadingList = DataController.StoryController.GetWordHeadingsList(this.Id);
-                        //DataController.SandboxEntities.WordHeadings.Where(x => x.StoryId == this.Id).ToList();
+                    //DataController.SandboxEntities.WordHeadings.Where(x => x.StoryId == this.Id).ToList();
                 }
 
                 return wordHeadingList;
@@ -970,9 +950,10 @@ namespace TaymadeEntities.Models
             }
             set => this.RaiseAndSetIfChanged(ref wordHeadings3, value);
         }
-        #endregion
 
-        #region Methods
+        #endregion Public Properties
+
+        #region Public Methods
 
         /// <summary>
         /// The Create.
@@ -990,14 +971,14 @@ namespace TaymadeEntities.Models
                 newStory.IDAuthor = 1;
                 newStory.SeriesId = 1;
 
+                newStory.Insert();
 
-                DataController.SandboxEntities.Story.Add(newStory);
-                DataController.SandboxEntities.SaveChanges();
+                //DataController.SandboxEntities.Story.Add(newStory);
+                //DataController.SandboxEntities.SaveChanges();
                 newStory.Dirty = false;
             }
             catch (Exception ex)
             {
-
                 string error = ex.ToString();
             }
             return newStory;
@@ -1017,16 +998,13 @@ namespace TaymadeEntities.Models
 
             string extn = System.IO.Path.GetExtension(path);
 
-
             if (extn == ".pdf")
             {
-
                 var Pdf = PdfDocument.FromFile(path);
                 newStory.Author = Pdf.MetaData.Author;
                 newStory.Title = Pdf.MetaData.Title;
                 newStory.Creation = Pdf.MetaData.CreationDate;
                 newStory.Added = DateTime.Now;
-
             }
             else
             {
@@ -1043,13 +1021,19 @@ namespace TaymadeEntities.Models
                     newStory.LowestAge = wordProperties.LowestAge;
                     newStory.Codes = wordProperties.Keywords;
                 }
-
             }
-            newStory.Insert();
+            if (newStory.Id == 0)
+            {
+                newStory.Insert();
+                newStory.StoryDictionary = new StoryDictionary()
+                {
+                    StoryId = newStory.Id,
+                    DictionaryText = ""
+                };
+                newStory.StoryDictionary.Insert();
+            }
             return newStory;
         }
-
-
 
         /// <summary>
         /// The GetProperties.
@@ -1060,6 +1044,63 @@ namespace TaymadeEntities.Models
         {
             WordProperties properties = OpenXML.GetProperties(path);
             return properties;
+        }
+
+        /// <summary>
+        /// Create a new Cast Member and save in database, set CastId to cast.Count
+        /// </summary>
+        /// <param name="currentCastMember">The current cast member.</param>
+        /// <author>
+        /// Doug Taylor - Taymade Software Services
+        /// </author>
+        /// <remarks>
+        ///   <created> 18/01/2026 18/01/2026 </created>
+        /// </remarks>
+        public void AddCastMember(StoryCast currentCastMember)
+        {
+            // create new cast member
+            if (currentCastMember != null)
+            {
+                currentCastMember.StoryId = this.Id;
+                currentCastMember.Insert();
+                this.cast.Add(currentCastMember);
+                // set cast id to cast.Count
+                currentCastMember.CastId = this.cast.Count;
+                currentCastMember.Update();
+            }
+        }
+
+        /// <summary>
+        /// Build Code List from Cast Members
+        /// </summary>
+        /// <author>
+        /// Doug Taylor - Taymade Software Services
+        /// </author>
+        /// <remarks>
+        ///   <created> 18/01/2026 18/01/2026 </created>
+        /// </remarks>
+        public void BuildCodesFromCast()
+        {
+            if (cast != null && cast.Count > 0)
+            {
+                string tempCodes = string.Empty;
+                foreach (var member in cast)
+                {
+                    // add id: + CastId + ; to tempCodes
+                    tempCodes += "id:" + member.CastId + "; ";
+                    // add Codes  to tempCodes
+                    if (!string.IsNullOrEmpty(member.Codes))
+                    {
+                        tempCodes += member.Codes + "; ";
+                    }
+                    // add a space
+                    tempCodes += " ";
+                }
+                // add closeing 'Id:;' to tempCodes
+                tempCodes += "Id:;";
+                // set codes to tempCodes
+                Codes = string.Join(", ", tempCodes);
+            }
         }
 
         /// <summary>
@@ -1095,6 +1136,25 @@ namespace TaymadeEntities.Models
         }
 
         /// <summary>
+        /// The Delete.
+        /// </summary>
+        public void Delete()
+        {
+            DataController.StoryController.Delete(Id);
+        }
+
+        public void DeleteCastMember(StoryCast currentCastMember)
+        {
+            //throw new NotImplementedException();
+            if (currentCastMember != null)
+            {
+                currentCastMember.Delete();
+                // set Modified flag in your entry
+                this.cast.Remove(currentCastMember);
+            }
+        }
+
+        /// <summary>
         /// The GetBreaksAndHeadings.
         /// </summary>
         public void GetBreaksAndHeadings()
@@ -1115,14 +1175,11 @@ namespace TaymadeEntities.Models
                 WordHeadings? currentHeading2 = null;
                 WordHeadings? currentHeading3 = null;
 
-
                 int heading1 = 0;
                 int heading2 = 0;
                 int heading3 = 0;
 
                 var body = document?.MainDocumentPart?.Document.Body;
-
-
 
                 int nPara = 0;
 
@@ -1186,7 +1243,6 @@ namespace TaymadeEntities.Models
                                     heading3 = 0;
                                     heading1++;
 
-
                                     string text = ParagraphText(para);
                                     string string_id = "Heading1_" + heading1.ToString("00");
 
@@ -1204,8 +1260,6 @@ namespace TaymadeEntities.Models
                                         };
                                         WordHeadingList.Add(currentHeading1);
                                     }
-
-
                                     else if (currentHeading1.PageNumber != nPara)
                                     {
                                         currentHeading1.HeadingText = text;
@@ -1218,7 +1272,7 @@ namespace TaymadeEntities.Models
 
                                     if (currentSection != null)
                                     {
-                                        if (currentHeading1.ParentId is 0 )
+                                        if (currentHeading1.ParentId is 0)
                                         {
                                             // this is a new heading so set the parent to the current section
 
@@ -1231,7 +1285,6 @@ namespace TaymadeEntities.Models
 
                                         if (temp == null) currentSection.Children.Add(currentHeading1);
                                     }
-
                                 }  // heading 1 complete
                                 else if (attrib.Value.Value == "Heading2")
                                 {
@@ -1257,8 +1310,6 @@ namespace TaymadeEntities.Models
                                         };
                                         WordHeadingList.Add(currentHeading2);
                                     }
-
-
                                     else if (currentHeading2.PageNumber != nPara || currentHeading2.HeadingText != text)
                                     {
                                         currentHeading2.HeadingText = text;
@@ -1281,9 +1332,7 @@ namespace TaymadeEntities.Models
                                         WordHeadings? temp = currentHeading1.Children.FirstOrDefault(h => h.StringId.ToLower() == currentHeading2.StringId.ToLower() && h.HeadingLevel == 2);
                                         // then add it if null
                                         if (temp == null) currentHeading1.Children.Add(currentHeading2);
-
                                     }
-
                                 } // heading 2 complete
                                 else if (attrib.Value.Value == "Heading3")
                                 {
@@ -1320,11 +1369,9 @@ namespace TaymadeEntities.Models
                                         WordHeadings? temp = currentHeading2.Children.FirstOrDefault(h => h.StringId.ToLower() == currentHeading3.StringId.ToLower() && h.HeadingLevel == 2);
                                         // then add it if null
                                         if (temp == null) currentHeading2.Children.Add(currentHeading3);
-
                                     }
                                 }
                             }
-
                         }
                         // GetHeadings(ref heading1, ref heading2, ref heading3, para, nPara);
 
@@ -1366,6 +1413,14 @@ namespace TaymadeEntities.Models
             }
 
             return properties;
+        }
+
+        /// <summary>
+        /// The Insert.
+        /// </summary>
+        public void Insert()
+        {
+            DataController.StoryController.AddStory(this);
         }
 
         /// <summary>
@@ -1415,6 +1470,89 @@ namespace TaymadeEntities.Models
                     //}
                 }
             }
+        }
+
+        /// <summary>
+        /// The Save.
+        /// </summary>
+        public void Save()
+        {
+            if (WordHeadingList != null)
+            {
+                foreach (var item in WordHeadingList)
+                {
+                    item.Save();
+                }
+            }
+            if (Added == null)
+            {
+                Added = DateTime.Today;
+            }
+
+            if (this.Id < 1) this.Insert();
+
+            Json = StoryInfo?.ToJSON();
+
+            if (Score == null) Score = 1;
+
+            // find file creation time from directory
+            if (Creation == null && Path != null)
+            {
+                System.IO.FileInfo info = new System.IO.FileInfo(this.Path);
+
+                Creation = info.CreationTime;
+            }
+
+            //if (DataController.SandboxEntities.Entry(this).State == EntityState.Unchanged)
+            //{
+            LastModified = DateTime.Now;
+            if (Id == 0) DataController.StoryController.AddStory(this);
+            DataController.StoryController.Update(this);
+
+            Dirty = false;
+        }
+
+        public async Task<bool> SaveAsync()
+        {
+            bool success = false;
+            if (Added == null)
+            {
+                Added = DateTime.Today;
+            }
+
+            if (this.Id < 1) success = await this.InsertAsync(this);
+
+            Json = StoryInfo?.ToJSON();
+
+            if (Score == null) Score = 1;
+
+            // find file creation time from directory
+            if (Creation == null && Path != null)
+            {
+                System.IO.FileInfo info = new System.IO.FileInfo(this.Path);
+
+                Creation = info.CreationTime;
+            }
+
+            LastModified = DateTime.Now;
+            success = await DataController.StoryController.UpdateAsync(this);
+
+            try
+            {
+            }
+            catch (Exception e)
+            {
+                string error = e.ToString();
+            }
+            //}
+            Dirty = false;
+
+            return success;
+        }
+
+        private async Task<bool> InsertAsync(Story story)
+        {
+            return await DataController.StoryController.InsertStoryAsync(story);
         }
 
         /// <summary>
@@ -1504,7 +1642,6 @@ namespace TaymadeEntities.Models
         /// <returns>The <see cref="XElement"/>.</returns>
         public XElement ToHtml()
         {
-
             OpenDocument();
             XElement? structuredHTML = null;
             if (WmlDocument != null)
@@ -1530,9 +1667,7 @@ namespace TaymadeEntities.Models
                     }
                     navigation = navigation.Substring(0, navigation.Length - 4);
                     navigation += "</ul>" + divEnd + "<br/>" + Environment.NewLine;
-
                 }
-
 
                 if (WordHeadings1 != null && WordHeadings1.Count > 0)
                 {
@@ -1574,178 +1709,58 @@ namespace TaymadeEntities.Models
             return structuredHTML;
         }
 
-        /// <summary>
-        /// The Delete.
-        /// </summary>
-        public void Delete()
+        public void UpdateCastMember(StoryCast currentCastMember)
         {
-            var local = DataController.SandboxEntities.Set<Story>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-            // check if local is not null
-            if (local != null)
+            if (currentCastMember != null)
             {
-                // detach
-               // DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-            }
-            // set Modified flag in your entry
-
-
-            DataController.StoryController.Delete(Id);
-            // var rowsDeleted = DataController.SandboxEntities.Database.ExecuteSqlRaw("DELETE FROM [WordHeadings] WHERE ([StoryId] = @Original_Id)", Original_Id);
-
-            //var rowsReturned = DataController.SandboxEntities.Database.ExecuteSqlRaw("DELETE FROM [Stories] WHERE ([Id] = @Original_Id)", Original_Id);
-
-            //DataController.SandboxEntities.Story.Remove(this);
-            //DataController.SandboxEntities.SaveChanges();
-        }
-
-        /// <summary>
-        /// The Insert.
-        /// </summary>
-        public void Insert()
-        {
-            DataController.StoryController.AddStory(this);
-            //int rowschanged = DataController.SandboxEntities.SaveChanges();
-        }
-
-        /// <summary>
-        /// The Save.
-        /// </summary>
-        public void Save()
-        {
-            if (WordHeadingList != null)
-            {
-                foreach (var item in WordHeadingList)
+                // see if already in list
+                StoryCast? existingCastMember = this.cast.Where(c => c.Pk == currentCastMember.Pk).FirstOrDefault();
+                if (existingCastMember == null)
                 {
-                    item.Save();
+                    // add new
+                    this.cast.Add(currentCastMember);
+                }
+                else
+                {
+                    DataController.SandboxEntities.ReloadIfModified(currentCastMember);
+                    // update existing
+                    existingCastMember.Character = currentCastMember.Character;
+                    existingCastMember.Age = currentCastMember.Age;
+                    existingCastMember.CastId = currentCastMember.CastId;
+                    existingCastMember.Codes = currentCastMember.Codes;
+                    existingCastMember.Update();
                 }
             }
-            if (Added == null)
-            {
-                Added = DateTime.Today;
-            }
-
-            if (this.Id < 1) this.Insert();
-
-            Json = StoryInfo?.ToJSON();
-
-            if (Score == null) Score = 1;
-
-            // find file creation time from directory
-            if (Creation == null && Path != null)
-            {
-                System.IO.FileInfo info = new System.IO.FileInfo(this.Path);
-
-                Creation = info.CreationTime;
-            }
-
-            //if (DataController.SandboxEntities.Entry(this).State == EntityState.Unchanged)
-            //{
-            LastModified = DateTime.Now;
-            if (Id == 0) DataController.StoryController.AddStory(this);
-            DataController.StoryController.Update(this);
-
-
-            //var local = DataController.SandboxEntities.Set<Story>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-            //// check if local is not null
-            //if (local != null)
-            //{
-            //    // detach
-            //    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-            //}
-            // set Modified flag in your entry
-            try
-            {
-                //DataController.SandboxEntities.Entry(this).State = EntityState.Modified;
-                //int rowschanged = DataController.SandboxEntities.SaveChanges();
-                //if (rowschanged >= 1)
-                //{
-                //    Debug.WriteLine("saved ok : " + Id.ToString() + " rows changed " + rowschanged.ToString());
-                //}
-
-                //else if (rowschanged == 0)
-                //{
-                //    Debug.WriteLine("saved failed : " + Id.ToString());
-                //}
-                //else
-                //{
-                //    Debug.WriteLine("saved ok : " + Id.ToString());
-                //}
-            }
-            catch (Exception e)
-            {
-
-                string error = e.ToString();
-            }
-            //}
-            Dirty = false;
         }
 
-        public async Task<bool> SaveAsync()
+        #endregion Public Methods
+
+        #region Internal Methods
+
+        internal void OpenDocumentDoc()
         {
-            bool success = false;
-            if (Added == null)
-            {
-                Added = DateTime.Today;
-            }
-
-            if (this.Id < 1) this.Insert();
-
-            Json = StoryInfo?.ToJSON();
-
-            if (Score == null) Score = 1;
-
-            // find file creation time from directory
-            if (Creation == null && Path != null)
-            {
-                System.IO.FileInfo info = new System.IO.FileInfo(this.Path);
-
-                Creation = info.CreationTime;
-            }
-
-            //if (DataController.SandboxEntities.Entry(this).State == EntityState.Unchanged)
-            //{
-            LastModified = DateTime.Now;
-            success = DataController.StoryController.Update(this);
-            //var local = DataController.SandboxEntities.Set<Story>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-            //// check if local is not null
-            //if (local != null)
-            //{
-            //    // detach
-            //    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-            //}
-            // set Modified flag in your entry
-            try
-            {
-                // DataController.SandboxEntities.Entry(this).State = EntityState.Modified;
-                //int rowschanged = await DataController.SandboxEntities.SaveChangesAsync();
-                //if (rowschanged >= 1)
-                //{
-                //    success = true;
-                //    Debug.WriteLine("saved ok : " + Id.ToString() + " rows changed " + rowschanged.ToString());
-                //}
-
-                //else if (rowschanged == 0)
-                //{
-                //    Debug.WriteLine("saved failed : " + Id.ToString());
-                //}
-                //else
-                //{
-                //    Debug.WriteLine("saved ok : " + Id.ToString());
-                //}
-            }
-            catch (Exception e)
-            {
-
-                string error = e.ToString();
-            }
-            //}
-            Dirty = false;
-
-            return success;
+            // create an instance of Word application
+            Microsoft.Office.Interop.Word.Application wordApp = new Microsoft.Office.Interop.Word.Application();
+            // open the document
+            Microsoft.Office.Interop.Word.Document doc = wordApp.Documents.Open(SupportCore.MiscSupport.FixImagePath(Path));
+            // read built in properties
+            object builtInProps = doc.BuiltInDocumentProperties;
+            // get categories
+            var builtInPropsType = builtInProps.GetType();
+            var categoryProp = builtInPropsType.InvokeMember("Item", System.Reflection.BindingFlags.Default | System.Reflection.BindingFlags.GetProperty, null, builtInProps, new object[] { Microsoft.Office.Interop.Word.WdBuiltInProperty.wdPropertyCategory });
+            var categoryValue = categoryProp.GetType().InvokeMember("Value", System.Reflection.BindingFlags.Default | System.Reflection.BindingFlags.GetProperty, null, categoryProp, null);
+            var categories = categoryValue;
+            // close the document
+            // set codes = to categories
+            Codes = categories.ToString();
+            doc.Close();
+            // quit word application
+            wordApp.Quit();
         }
+
+        #endregion Internal Methods
+
+        #region Private Methods
 
         /// <summary>
         /// The ParagraphText.
@@ -1787,9 +1802,7 @@ namespace TaymadeEntities.Models
                     {
                         OpenXmlBookmark? newBookmark = OpenBookmarks?.Find(x => x?.Start?.Name?.ToString()?.ToUpper() == bookmarkStart?.Name?.ToString()?.ToUpper());
 
-
                         ////If the bookmark name is not in our list. Just continue with the loop
-
 
                         if (newBookmark == null && OpenBookmarks != null)
                         {
@@ -1818,52 +1831,6 @@ namespace TaymadeEntities.Models
             return bookmarks;
         }
 
-        ///// <summary>
-        ///// The GetBreaks.
-        ///// </summary>
-        ///// <param name="sectID">The sectID<see cref="int"/>.</param>
-        ///// <param name="para">The para<see cref="Paragraph"/>.</param>
-        ///// <returns>The <see cref="int"/>.</returns>
-        //private int GetBreaks(int sectID, Paragraph para)
-        //{
-        //    IEnumerable<SectionProperties> elems = para.Descendants<SectionProperties>();
-        //    foreach (SectionProperties elem in elems)
-        //    {
-        //        SectionProperties paraelement = elem;
-        //        OpenXMLBreak openXMLBreak = new OpenXMLBreak();
-        //        openXMLBreak.BreakID = sectID;
-        //        openXMLBreak.StringId = "Sect_" + sectID.ToString("00").Trim();
-        //        Breaks.Add(openXMLBreak);
-
-        //        WordHeadings? newHeading = this.wordHeadingList?.Find(h => h.StringId.ToLower() == openXMLBreak.StringId.ToLower());
-
-        //        OpenXmlElement openXml = elem.NextSibling();
-
-        //        // add new heading and section break if not already in list
-        //        if (newHeading == null)
-        //        {
-        //            newHeading = new WordHeadings
-        //            {
-        //                StoryId = Id,
-        //                StringId = openXMLBreak.StringId,
-        //                HeadingLevel = 0,
-        //                HeadingText = openXMLBreak.StringId
-        //            };
-        //            newHeading.Insert();
-        //            if (WordHeadingList != null) WordHeadingList.Add(newHeading);
-        //            if (SectionBreaks != null)
-        //            {
-        //                SectionBreaks.Add(newHeading);
-        //            }
-        //        }
-
-        //        sectID += 1;
-
-        //    }
-
-        //    return sectID;
-        //}
-
         /// <summary>
         /// The GetHeadings.
         /// </summary>
@@ -1883,8 +1850,6 @@ namespace TaymadeEntities.Models
                     OpenXmlAttribute? attrib = paraStyle.GetAttribute("val", w.NamespaceName);
                     if (attrib != null)
                     {
-
-
                         if (attrib.Value.Value == "Heading1")
                         {
                             string text = ParagraphText(para);
@@ -1905,11 +1870,9 @@ namespace TaymadeEntities.Models
                                 heading1 += 1;
                                 // Heading1List.Add(newHeading);
                             }
-
                         }
                         else if (attrib.Value.Value == "Heading2")
                         {
-
                             string text = ParagraphText(para);
                             if (!string.IsNullOrEmpty(text))
                             {
@@ -1953,6 +1916,8 @@ namespace TaymadeEntities.Models
             }
         }
 
+        //    return sectID;
+        //}
         /// <summary>
         /// The GetHeadingsFromList.
         /// </summary>
@@ -1979,6 +1944,7 @@ namespace TaymadeEntities.Models
             }
         }
 
+        //    }
         /// <summary>
         /// /// The GetHeadingsFromList.
         /// </summary>
@@ -2005,87 +1971,53 @@ namespace TaymadeEntities.Models
             }
         }
 
-        internal void OpenDocumentDoc()
+        private void Story_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            // create an instance of Word application
-            Microsoft.Office.Interop.Word.Application wordApp = new Microsoft.Office.Interop.Word.Application();
-            // open the document
-            Microsoft.Office.Interop.Word.Document doc = wordApp.Documents.Open(SupportCore.MiscSupport.FixImagePath(Path));
-            // read built in properties
-            object builtInProps = doc.BuiltInDocumentProperties;
-            // get categories
-            var builtInPropsType = builtInProps.GetType();
-            var categoryProp = builtInPropsType.InvokeMember("Item", System.Reflection.BindingFlags.Default | System.Reflection.BindingFlags.GetProperty, null, builtInProps, new object[] { Microsoft.Office.Interop.Word.WdBuiltInProperty.wdPropertyCategory });
-            var categoryValue = categoryProp.GetType().InvokeMember("Value", System.Reflection.BindingFlags.Default | System.Reflection.BindingFlags.GetProperty, null, categoryProp, null);
-            var categories = categoryValue;
-            // close the document
-            // set codes = to categories
-            Codes = categories.ToString();
-            doc.Close();
-            // quit word application
-            wordApp.Quit();
-
-
+            Dirty = true;
         }
 
-        /// <summary>
-        /// Build Code List from Cast Members
-        /// </summary>
-        /// <author>
-        /// Doug Taylor - Taymade Software Services
-        /// </author>
-        /// <remarks>
-        ///   <created> 18/01/2026 18/01/2026 </created>
-        /// </remarks>
-        public void BuildCodesFromCast()
-        {
-            if (cast != null && cast.Count > 0)
-            {
-                string tempCodes = string.Empty;
-                foreach (var member in cast)
-                {
-                    // add id: + CastId + ; to tempCodes
-                    tempCodes += "id:" + member.CastId + "; ";
-                    // add Codes  to tempCodes
-                    if (!string.IsNullOrEmpty(member.Codes))
-                    {
-                        tempCodes += member.Codes + "; ";
-                    }
-                    // add a space
-                    tempCodes += " ";
-                }
-                // add closeing 'Id:;' to tempCodes
-                tempCodes += "Id:;";
-                // set codes to tempCodes
-                Codes = string.Join(", ", tempCodes);
-            }
+        #endregion Private Methods
 
-        }
+        ///// <summary>
+        ///// The GetBreaks.
+        ///// </summary>
+        ///// <param name="sectID">The sectID<see cref="int"/>.</param>
+        ///// <param name="para">The para<see cref="Paragraph"/>.</param>
+        ///// <returns>The <see cref="int"/>.</returns>
+        //private int GetBreaks(int sectID, Paragraph para)
+        //{
+        //    IEnumerable<SectionProperties> elems = para.Descendants<SectionProperties>();
+        //    foreach (SectionProperties elem in elems)
+        //    {
+        //        SectionProperties paraelement = elem;
+        //        OpenXMLBreak openXMLBreak = new OpenXMLBreak();
+        //        openXMLBreak.BreakID = sectID;
+        //        openXMLBreak.StringId = "Sect_" + sectID.ToString("00").Trim();
+        //        Breaks.Add(openXMLBreak);
 
-        public void UpdateCastMember(StoryCast currentCastMember)
-        {
-            if (currentCastMember != null)
-            {
-                // see if already in list
-                StoryCast? existingCastMember = this.cast.Where(c => c.Id == currentCastMember.Id).FirstOrDefault();
-                if (existingCastMember == null)
-                {
-                    // add new
-                    this.cast.Add(currentCastMember);
-                }
-                else  
-                {
-                    DataController.SandboxEntities.ReloadIfModified(currentCastMember);
-                    // update existing
-                    existingCastMember.Character = currentCastMember.Character;
-                    existingCastMember.Age = currentCastMember.Age;
-                    existingCastMember.CastId = currentCastMember.CastId;
-                    existingCastMember.Codes = currentCastMember.Codes;
-                    existingCastMember.Update();
-                }
-            }
-        }
+        //        WordHeadings? newHeading = this.wordHeadingList?.Find(h => h.StringId.ToLower() == openXMLBreak.StringId.ToLower());
 
+        //        OpenXmlElement openXml = elem.NextSibling();
+
+        //        // add new heading and section break if not already in list
+        //        if (newHeading == null)
+        //        {
+        //            newHeading = new WordHeadings
+        //            {
+        //                StoryId = Id,
+        //                StringId = openXMLBreak.StringId,
+        //                HeadingLevel = 0,
+        //                HeadingText = openXMLBreak.StringId
+        //            };
+        //            newHeading.Insert();
+        //            if (WordHeadingList != null) WordHeadingList.Add(newHeading);
+        //            if (SectionBreaks != null)
+        //            {
+        //                SectionBreaks.Add(newHeading);
+        //            }
+        //        }
+
+        //        sectID += 1;
         //internal async void EditCastMember(StoryCast currentCastMember, StoryViewModel viewModel)
         //{
         //    Dialogs.EditCastMemberDialog? EditCastMemberDialog = new();
@@ -2117,42 +2049,5 @@ namespace TaymadeEntities.Models
         //        }
         //    }
         //}
-
-        public void DeleteCastMember(StoryCast currentCastMember)
-        {
-            //throw new NotImplementedException();
-            if (currentCastMember != null)
-            {
-                currentCastMember.Delete();
-                // set Modified flag in your entry
-                this.cast.Remove(currentCastMember);
-            }
-        }
-
-        /// <summary>
-        /// Create a new Cast Member and save in database, set CastId to cast.Count
-        /// </summary>
-        /// <param name="currentCastMember">The current cast member.</param>
-        /// <author>
-        /// Doug Taylor - Taymade Software Services
-        /// </author>
-        /// <remarks>
-        ///   <created> 18/01/2026 18/01/2026 </created>
-        /// </remarks>
-        public void AddCastMember(StoryCast currentCastMember)
-        {
-            // create new cast member
-            if (currentCastMember != null)
-            {
-                currentCastMember.StoryId = this.Id;
-                currentCastMember.Insert();
-                this.cast.Add(currentCastMember);
-                // set cast id to cast.Count
-                currentCastMember.CastId = this.cast.Count;
-                currentCastMember.Update();
-            }
-        }
-
-        #endregion
     }
 }

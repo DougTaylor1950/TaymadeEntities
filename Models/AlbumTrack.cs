@@ -23,18 +23,24 @@ namespace TaymadeEntities.Models
         private string imagePath;
         private string trackName;
         private string comment;
+        private int? duration;
+        private int? trackNo;
+        private string musicBrainzID;
+        private string musicBrainzTrackID;
 
         [Key]
         public new int Id { get; set; }
         public int AlbumID { get; set; }
         public string TrackName { get => trackName; set => this.RaiseAndSetIfChanged(ref trackName, value); }
         public string TrackPath { get => trackPath; set => this.RaiseAndSetIfChanged(ref trackPath, value); }
-        public Nullable<int> TrackNo { get; set; }
-        public Nullable<int> Duration { get; set; }
+        public int? TrackNo { get => trackNo; set => this.RaiseAndSetIfChanged(ref trackNo, value); }
+        public int? Duration { get => duration; set => this.RaiseAndSetIfChanged(ref duration, value); }
         public string ImagePath { get => imagePath; set => this.RaiseAndSetIfChanged(ref imagePath, value); }
         public string Comment { get => comment; set => this.RaiseAndSetIfChanged(ref comment, value); }
-        public Nullable<decimal> Rating { get; set; }
-        public string MusicBrainzID { get; set; }
+        public decimal? Rating { get; set; }
+        public string? MusicBrainzID { get => musicBrainzID; set => this.RaiseAndSetIfChanged(ref musicBrainzID, value); }
+
+        public string? MusicBrainzTrackID { get => musicBrainzTrackID; set => this.RaiseAndSetIfChanged(ref musicBrainzTrackID, value); }
         public string PlexKey { get; set; }
         public string DiscogsID { get; set; }
         public string TrackPosition { get; set; }

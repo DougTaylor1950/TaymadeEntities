@@ -186,7 +186,8 @@ namespace TaymadeEntities.ViewModels
                 // if phraseId = 1 then load the subphrases of phraseheader id = 9 into a list of subphrases
                 if (selectedPhrase != null && selectedPhrase.PhraseID == 1)
                 {
-                    var subPhrases = DataController.SandboxEntities.PhraseEntry.Where(pe => pe.PhraseID == 9 && pe.Id.Contains(selectedPhrase.Id)).ToList();
+                    var subPhrases = DataController.PhrasesController.GetSubPhraseEntries(selectedPhrase.Id);
+                    //var subPhrases = DataController.SandboxEntities.PhraseEntry.Where(pe => pe.PhraseID == 9 && pe.Id.Contains(selectedPhrase.Id)).ToList();
                     // Do something with the subPhrases, e.g., display them in the UI
                     // You can create a new ObservableCollection for subphrases if needed
                     SubPhraseEntries = new ObservableCollection<Models.PhraseEntry>(subPhrases);
@@ -270,7 +271,7 @@ namespace TaymadeEntities.ViewModels
                 return;
             }
             // Load the PhraseEntries for the selected header into a list phrases
-            var phrases = DataController.SandboxEntities.PhraseEntry.Where(pe => pe.PhraseID == SelectedPhraseHeader.Id).ToList();
+            var phrases = DataController.PhrasesController.GetPhrasesByPhraseHeaderId(SelectedPhraseHeader.Id);
             // Do something with the phrases, e.g., display them in the UI
             PhraseEntries = new ObservableCollection<Models.PhraseEntry>(phrases);
             // if you want to set the first phrase as selected, you can do so here
@@ -345,7 +346,8 @@ namespace TaymadeEntities.ViewModels
                 //newPhrase.Save(); can't save as it requires the id to be obtained
                 SubPhraseEntries?.Add(newPhrase);
                 // repopulate the subphrase entries for the selected phrase to ensure the new subphrase is included
-                var subPhrases = DataController.SandboxEntities.PhraseEntry.Where(pe => pe.PhraseID == 9 && pe.Id.Contains(SelectedPhrase.Id)).ToList();
+                var subPhrases = DataController.PhrasesController.GetSubPhraseEntries(SelectedPhrase.Id);
+                // var subPhrases = DataController.SandboxEntities.PhraseEntry.Where(pe => pe.PhraseID == 9 && pe.Id.Contains(SelectedPhrase.Id)).ToList();
                 SubPhraseEntries = new ObservableCollection<Models.PhraseEntry>(subPhrases);
                 // Optionally, set the new phrase as the selected phrase
                 SelectedSubPhrase = newPhrase;

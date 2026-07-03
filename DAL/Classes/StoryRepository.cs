@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 using TaymadeEntities.DAL.Interfaces;
 using TaymadeEntities.DBContext;
@@ -13,7 +14,6 @@ namespace TaymadeEntities.DAL.Classes
 {
     public class StoryRepository : IStoryRepository, IDisposable
     {
-
         #region Private Fields
 
         private readonly DBContext.SandboxEntities _context;
@@ -32,17 +32,17 @@ namespace TaymadeEntities.DAL.Classes
 
         #region Public Methods
 
-        public void Add(Story Story)
+        public bool Add(Story Story)
         {
             Story.StorySeries = null;
             _context.Story.Add(Story);
-            Save();
+            return Save();
         }
 
         public bool AddAuthor(Author author)
         {
             Author? temp = _context.Author.Find(author.Id);
-            if (temp != null)
+            if (temp == null)
             {
                 _context.Author.Add(author);
                 return Save();
@@ -52,8 +52,8 @@ namespace TaymadeEntities.DAL.Classes
 
         public bool? AddStoryCast(StoryCast storyCast)
         {
-            StoryCast? temp = 
-            _context.CreateStoryCast(storyCast.StoryId, 
+            StoryCast? temp =
+            _context.CreateStoryCast(storyCast.StoryId,
                 storyCast.CastId, storyCast.Codes, storyCast.Character, storyCast.Age);
             int result = _context.SaveChanges();
             if (temp.Id > 0) storyCast.Id = temp.Id;
@@ -63,20 +63,32 @@ namespace TaymadeEntities.DAL.Classes
         public bool AddStoryDictionary(StoryDictionary? dictionary)
         {
             bool success = false;
-            if (dictionary != null)
+            if (dictionary != null && dictionary.StoryId > 0)
             {
+                // see if the story is present in the repository 
+                Story? story = this.GetById(dictionary.StoryId);
                 _context.StoryDictionary.Add(dictionary);
-                int result = _context.SaveChanges();
-                success = result > 0;
+                // cannot save changes as the story may not have been added
+                if (story != null)
+                {
+                    int result = _context.SaveChanges();
+                    success = result > 0;
+                } else 
+                success = true;
             }
 
             return success;
         }
 
+        public bool AddStoryTransInfo(StoryTransInfo storyTransInfo)
+        {
+            _context.StoryTransInfo.Add(storyTransInfo);
+            return Save();
+        }
         public bool AddWordHeading(WordHeadings item)
         {
             _context.WordHeadings.Add(item);
-            return SaveWordHeading(item);
+            return Save();
         }
 
         public StoryCast? CreateStoryCast(int StoryId, int CastId, string Codes, string Character, string Age)
@@ -101,8 +113,7 @@ namespace TaymadeEntities.DAL.Classes
             if (temp != null)
             {
                 _context.StoryCast.Remove(temp);
-                int result = _context.SaveChanges();
-                return (result > 0);
+                return Save();
             }
             return false;
         }
@@ -120,6 +131,11 @@ namespace TaymadeEntities.DAL.Classes
         //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         //     Dispose(disposing: false);
         // }
+
+        public IEnumerable<Author> GetAuthors()
+        {
+            return _context.Author.OrderBy(a => a.Name).ToList();
+        }
         public Story? GetById(int id)
         {
             return _context.Story.Find(id);
@@ -145,7 +161,7 @@ namespace TaymadeEntities.DAL.Classes
 
         public StoryCast? GetStoryCastById(int castId)
         {
-            return _context.StoryCast.Where(s => s.Id == castId).FirstOrDefault();
+            return _context.StoryCast.Where(s => s.Pk == castId).ToList().FirstOrDefault();
         }
 
         public IEnumerable<StoryCast>? GetStoryCastList(int storyId)
@@ -157,6 +173,12 @@ namespace TaymadeEntities.DAL.Classes
         {
             return _context.StoryDictionary.Where(s => s.StoryId == storyId).FirstOrDefault();
         }
+
+        public StoryDictionary? GetStoryDictionary(int id)
+        {
+            return _context.StoryDictionary.Where(s => s.Id == id).FirstOrDefault();
+        }
+        
 
         public StoryProperties? GetStoryProperties()
         {
@@ -180,6 +202,13 @@ namespace TaymadeEntities.DAL.Classes
             Save();
         }
 
+        public Task<bool> InsertStoryAsync(Story story)
+        {
+            _context.Story.Add(story);
+            if (story.SeriesId == 0) story.SeriesId = 1;
+            return SaveAsync();
+        }
+
         public bool Save()
         {
             try
@@ -187,12 +216,32 @@ namespace TaymadeEntities.DAL.Classes
                 bool success = _context.SaveChanges() > 0;
                 return success;
             }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                foreach (var entry in ex.Entries)
+                {
+                    Debug.Write(entry.Entity.GetType().Name + " : ");
+                    Debug.WriteLine(entry.State);
+                }
+
+                //foreach (var e in _context.ChangeTracker.Entries())
+                //{
+                //    Debug.WriteLine($"{e.Entity.GetType().Name}  {e.State}");
+
+                //    foreach (var p in e.Properties)
+                //    {
+                //        if (p.IsModified && e.Entity.GetType().Name == "StoryDictionary")
+                //            Debug.WriteLine($"    {p.Metadata.Name}");
+                //    }
+                //}
+                return false; 
+               // throw;
+            }
             catch (Exception ex)
             {
-
+                string error = ex.ToString();
                 return false;
             }
-
         }
 
         public bool Save(Story story)
@@ -204,19 +253,31 @@ namespace TaymadeEntities.DAL.Classes
 
         public bool SaveStoryProperties(StoryProperties item)
         {
-            bool success = false;
+            //bool success = false;
             _context.StoryProperties.Update(item);
-            int result = _context.SaveChanges();
-            success = (result > 0);
-            return success;
+            return Save();
+                       
         }
 
-        public bool SaveStoryTransInfo(StoryTransInfo item)
+        public bool SaveStoryTransInfo(StoryTransInfo? item)
         {
             bool success = false;
-            _context.StoryTransInfo.Update(item);
-            int result = _context.SaveChanges(true);
-            success = (result > 0);
+            if (item != null)
+            {
+                //item = _context.StoryTransInfo.Find(item.Id);
+                _context.StoryTransInfo.Update(item);
+                //if (item.CurrentStoryId > 0)
+                //{
+                //    Story? story = _context.Story.Find(item.CurrentStoryId);
+                //    if (story != null)
+                //    {
+                //        _context.Story.Update(story);
+                //        _context.SaveChanges();
+                //    }
+                //}
+                int result = _context.SaveChanges();
+                success = (result > 0);
+            }
             return success;
         }
 
@@ -226,6 +287,7 @@ namespace TaymadeEntities.DAL.Classes
             int result = _context.SaveChanges();
             return (result > 0);
         }
+
         public bool Update(int storyId)
         {
             Story? temp = _context.Story.Find(storyId);
@@ -235,6 +297,13 @@ namespace TaymadeEntities.DAL.Classes
             }
             return Save();
         }
+
+        public async Task<bool> UpdateAsync(Story story)
+        {
+            _context.Story.Update(story);
+            return await SaveAsync();
+        }
+
         public bool UpdateStoryDictionary(StoryDictionary? storyDictionary)
         {
             bool success = false;
@@ -245,7 +314,7 @@ namespace TaymadeEntities.DAL.Classes
                 success = result > 0;
             }
 
-            return success; 
+            return success;
         }
 
         #endregion Public Methods
@@ -269,5 +338,21 @@ namespace TaymadeEntities.DAL.Classes
 
         #endregion Protected Methods
 
+        #region Private Methods
+
+        private async Task<bool> SaveAsync()
+        {
+            try
+            {
+                bool success = await _context.SaveChangesAsync() > 0;
+                return success;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        #endregion Private Methods
     }
 }

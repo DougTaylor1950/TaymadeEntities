@@ -18,8 +18,8 @@ namespace TaymadeEntities.Models
     [Table("Artist")]
     public partial class Artist : ModelBase
     {
-        private readonly List<Artist> groupArtists = new List<Artist>();
-        private readonly List<Artist> artistGroups = new List<Artist>();
+        private  List<Artist> groupArtists = new List<Artist>();
+        private  List<Artist> artistGroups = new List<Artist>();
         private ICollection<GroupMembers>? groupMembers;
         private ICollection<ArtistAlbum> artistAlbums;
         private string name;
@@ -63,19 +63,44 @@ namespace TaymadeEntities.Models
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ArtistAlbum> ArtistAlbums
         {
-            get => artistAlbums;
+            get
+            {
+                if (artistAlbums == null || artistAlbums.Count == 0)
+                {
+                    artistAlbums = DataController.MusicController.GetArtistAlbumsByArtistId(this.Id);
+                }
+                return artistAlbums;
+            }
 
-
-            set => artistAlbums = value;
+            set => this.RaiseAndSetIfChanged(ref artistAlbums, value);
 
         }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
 
         [NotMapped]
-        public List<Artist> GroupArtists => groupArtists;
+        public List<Artist> GroupArtists
+        {
+            get
+            {
+                return groupArtists;
+            }
+
+            set { this.RaiseAndSetIfChanged(ref groupArtists,value); }
+        }
 
         [NotMapped]
-        public List<Artist> ArtistGroups => artistGroups;
+        public List<Artist> ArtistGroups
+        {
+            get
+            {
+                return artistGroups;
+            }
+
+            set
+            {
+                this.RaiseAndSetIfChanged(ref artistGroups, value);
+            }
+        }
 
         [NotMapped]
         public virtual ICollection<GroupMembers> GroupMembers
@@ -89,7 +114,7 @@ namespace TaymadeEntities.Models
             set => this.RaiseAndSetIfChanged(ref groupMembers , value);
         }
 
-        internal void RefreshGroups()
+        public void RefreshGroups()
         {
             GroupMembers.Clear();
             GroupArtists.Clear();

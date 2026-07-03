@@ -275,9 +275,16 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void Insert()
         {
+            bool success = false;
             try
             {
-                bool success = DataController.StoryController.AddWordHeading(this);
+                if (this.StoryId > 0)
+                {
+                    if (this.Id == 0)
+                        success = DataController.StoryController.AddWordHeading(this);
+                    else
+                        success = DataController.StoryController.UpdateWordHeading(this);
+                }
                 //DataController.SandboxEntities.WordHeadings.Add(this);
                 //DataController.SandboxEntities.SaveChanges();
 
@@ -304,9 +311,7 @@ namespace TaymadeEntities.Models
                 }
 
                 DataController.StoryController.UpdateWordHeading(this);
-                
-                //DataController.SandboxEntities.WordHeadings.Update(this);
-                //DataController.SandboxEntities.SaveChanges();
+                  
             }
             catch (Exception ex)
             {

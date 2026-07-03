@@ -1,4 +1,5 @@
-﻿using MetaBrainz.MusicBrainz.Interfaces.Entities;
+﻿using DocumentFormat.OpenXml.Bibliography;
+using MetaBrainz.MusicBrainz.Interfaces.Entities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -360,6 +361,20 @@ namespace TaymadeEntities.MusicBrainzSupport
         public string? Resource { get; set; }
     }
 
+    public class ArtistSearch
+    {
+        [JsonProperty("artists")]
+        public List<MBArtist>? Artists { get; set; }
+
+        
+
+        [JsonProperty("count")]
+        public int? Count { get; set; }
+
+        [JsonProperty("created")]
+        public DateTime? Created { get; set; }
+    }
+
     public class AlbumSearch
     {
         [JsonProperty("count")]
@@ -377,11 +392,11 @@ namespace TaymadeEntities.MusicBrainzSupport
         public string ArtistType { get; set; }
 
         [JsonProperty("relations")]
-        public List<MBArtistRelationship> Relations { get; set; }
+        public List<MBArtistRelationship>? Relations { get; set; }
 
-        public List<MBArtistRelationship> BandMembers => Relations?.Where((MBArtistRelationship x) => x.TargetType.ToLower() == "artist").ToList();
+        public List<MBArtistRelationship>? BandMembers => Relations?.Where((MBArtistRelationship x) => x.TargetType.ToLower() == "artist").ToList();
 
-        public List<MBArtistRelationship> Urls => Relations.Where((MBArtistRelationship x) => x.TargetType.ToLower() == "url").ToList();
+        public List<MBArtistRelationship>? Urls => Relations?.Where((MBArtistRelationship x) => x.TargetType.ToLower() == "url").ToList();
 
         [JsonProperty("begin_area")]
         public MBArea BeginArea { get; set; }
@@ -425,6 +440,7 @@ namespace TaymadeEntities.MusicBrainzSupport
             get
             {
                 string text = string.Empty;
+                if (Genres != null)
                 foreach (MBGenre genre in Genres)
                 {
                     if (!string.IsNullOrEmpty(text))
@@ -435,7 +451,7 @@ namespace TaymadeEntities.MusicBrainzSupport
                     text += genre.Name;
                 }
 
-                return text.Split(new char[1] { ',' });
+                return text?.Split(new char[1] { ',' });
             }
         }
 
@@ -529,6 +545,61 @@ namespace TaymadeEntities.MusicBrainzSupport
                 return text.Split(new char[1] { ',' });
             }
         }
+    }
+
+    public class MBTrackInfo
+    {
+        [JsonProperty("artist-credit")]
+        public List<MBArtistCredit>? ArtistCredits { get; set; }
+
+        //[JsonProperty("first-release-date",)]
+        //public DateTime? FirstReleaseDate { get; set; }
+
+        [JsonProperty("id")]
+        public string? Id { get; set; }
+
+        [JsonProperty("length")]
+        public int? Length { get; set; }
+
+        private string performers = string.Empty;
+        public string? Performers
+        {
+            get
+            {
+                if (Relations != null && Relations.Count > 0)
+                {
+                    performers = string.Empty;
+                    foreach (MBRelationship relation in Relations)
+                    {
+                        if (relation.Artist != null)
+                        {
+                            performers = performers + relation.Artist.Name + ":" + relation.Type;
+                            if (relation.Attributes?.Count > 0)
+                            {
+                                performers = performers + " " + string.Join(", ", relation.Attributes.Select((string x) => x).ToArray());
+                            }
+                        }
+
+                        performers += "|";
+                    }
+                }
+
+                return performers;
+            }
+        }
+
+        [JsonProperty("title")]
+        public string? Title { get; set; }
+
+        [JsonProperty("releases")]
+        public List<SearchRelease>? Releases { get; set; }
+
+        [JsonProperty("relations")]
+        public List<MBRelationship>? Relations { get; set; }
+
+        [JsonProperty("video")]
+        public bool Video { get; set; }
+
     }
 
     public class SearchRelease
@@ -655,7 +726,7 @@ namespace TaymadeEntities.MusicBrainzSupport
         }
 
         [JsonProperty("releases")]
-        public List<SearchRelease> Releases { get; set; }
+        public List<SearchRelease>? Releases { get; set; }
     }
 
 }

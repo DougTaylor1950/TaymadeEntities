@@ -105,7 +105,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the storyFields.
         /// </summary>
-        private static List<Models.PhraseEntry> storyFields = new List<PhraseEntry>();
+        private static List<Models.PhraseEntry>? storyFields = new List<PhraseEntry>();
 
         /// <summary>
         /// Defines the storyProperties.
@@ -117,7 +117,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the subPhraseEntries.
         /// </summary>
-        private static List<Models.PhraseEntry> subPhraseEntries = new List<PhraseEntry>();
+        private static List<Models.PhraseEntry>? subPhraseEntries = new List<PhraseEntry>();
         private static StoryController? storyController;
         private static MaintenaceController? maintenaceController;
         private static MusicController? musicController;
@@ -165,23 +165,23 @@ namespace TaymadeEntities.Models
             }
         }
 
-        /// <summary>
-        /// Gets the ArtistList.
-        /// </summary>
-        public static List<Artist> ArtistList => MusicEntitiesContext.Artists.ToList();
+        ///// <summary>
+        ///// Gets the ArtistList.
+        ///// </summary>
+        //public static List<Artist> ArtistList => MusicEntitiesContext.Artists.ToList();
 
         /// <summary>
         /// Gets the ArtistSelectionList.
         /// </summary>
-        public static List<SelectEntry> ArtistSelectionList
-        {
-            get
-            {
-                var temp = MusicEntitiesContext.Artists.Where(a => a.ArtistType == "Person").Select(a => new SelectEntry { Description = a.Name, Id = a.Id.ToString() }).Distinct().ToList();
+        //public static List<SelectEntry> ArtistSelectionList
+        //{
+        //    get
+        //    {
+        //        var temp = MusicEntitiesContext.Artists.Where(a => a.ArtistType == "Person").Select(a => new SelectEntry { Description = a.Name, Id = a.Id.ToString() }).Distinct().ToList();
 
-                return new List<SelectEntry>((IEnumerable<SelectEntry>)temp);
-            }
-        }
+        //        return new List<SelectEntry>((IEnumerable<SelectEntry>)temp);
+        //    }
+        //}
 
         /// <summary>
         /// Gets or sets the author list.
@@ -194,8 +194,9 @@ namespace TaymadeEntities.Models
         {
             get
             {
-                using var ctx = SandboxEntities;
-                var list = ctx.Author.AsNoTracking().OrderBy(d => d.Name).ToList();
+                var list =  StoryController.GetAuthors();
+               // using var ctx = SandboxEntities;
+               // var list = ctx.Author.AsNoTracking().OrderBy(d => d.Name).ToList();
                 return new ObservableCollection<Author>(list);
             }
 
@@ -297,15 +298,15 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets the GroupSelectionList.
         /// </summary>
-        public static List<SelectEntry> GroupSelectionList
-        {
-            get
-            {
-                var temp = MusicEntitiesContext.Artists.Where(a => a.ArtistType == "Group").Select(a => new SelectEntry { Description = a.Name, Id = a.Id.ToString() }).Distinct().ToList();
+        //public static List<SelectEntry> GroupSelectionList
+        //{
+        //    get
+        //    {
+        //        var temp = MusicEntitiesContext.Artists.Where(a => a.ArtistType == "Group").Select(a => new SelectEntry { Description = a.Name, Id = a.Id.ToString() }).Distinct().ToList();
 
-                return new List<SelectEntry>((IEnumerable<SelectEntry>)temp);
-            }
-        }
+        //        return new List<SelectEntry>((IEnumerable<SelectEntry>)temp);
+        //    }
+        //}
 
         /// <summary>
         /// Gets the LanguageList.
@@ -490,7 +491,7 @@ namespace TaymadeEntities.Models
         {
             get
             {
-                if (phraseEntries?.Count == 0)
+                if (phraseEntries == null || phraseEntries.Count == 0)
                 {
                     phraseEntries = PhrasesController.GetPhrasesByPhraseHeaderId(1);
                     //phraseEntries = SandboxEntities.PhraseEntry.Where(x => x.PhraseID == 1).OrderBy(x => x.Description).ToList();
@@ -535,7 +536,7 @@ namespace TaymadeEntities.Models
         {
             get
             {
-                if (seriesEntries.Count == 0)
+                if (seriesEntries == null || seriesEntries.Count == 0)
                 {
                     seriesEntries = SandboxEntities.Series.OrderBy(s => s.Name).ToList();
                 }
@@ -546,13 +547,14 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets the StoryFields.
         /// </summary>
-        public static List<Models.PhraseEntry> StoryFields
+        public static List<Models.PhraseEntry>? StoryFields
         {
             get
             {
-                if (storyFields.Count == 0)
+                if (storyFields == null || storyFields.Count == 0)
                 {
-                    storyFields = SandboxEntities.PhraseEntry.Where(x => x.PhraseID == 11).OrderBy(x => x.Description).ToList();
+                    storyFields = PhrasesController.GetPhrasesByPhraseHeaderId(11);
+                    //storyFields = SandboxEntities.PhraseEntry.Where(x => x.PhraseID == 11).OrderBy(x => x.Description).ToList();
                 }
 
                 return storyFields;
@@ -601,13 +603,14 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets the SubPhraseEntries.
         /// </summary>
-        public static List<Models.PhraseEntry> SubPhraseEntries
+        public static List<Models.PhraseEntry>? SubPhraseEntries
         {
             get
             {
-                if (subPhraseEntries.Count == 0)
+                if (subPhraseEntries == null || subPhraseEntries.Count == 0)
                 {
-                    subPhraseEntries = SandboxEntities.PhraseEntry.Where(x => x.PhraseID == 9).OrderBy(x => x.Id).OrderBy(x => x.Description).ToList();
+                    subPhraseEntries = PhrasesController.GetPhrasesByPhraseHeaderId(9);
+                    //subPhraseEntries = SandboxEntities.PhraseEntry.Where(x => x.PhraseID == 9).OrderBy(x => x.Id).OrderBy(x => x.Description).ToList();
                 }
 
                 return subPhraseEntries;
@@ -628,6 +631,7 @@ namespace TaymadeEntities.Models
                 downloadProperties.SortDirection = temp.SortDirection;
                 downloadProperties.SortedColumn = temp.SortedColumn;
                 downloadProperties.LastUnboundIndex = temp.LastUnboundIndex;
+                downloadProperties.SortMemberPath = temp.SortMemberPath;
             }
             else
             {
@@ -635,6 +639,7 @@ namespace TaymadeEntities.Models
                 downloadProperties.SortDirection = 0;
                 downloadProperties.SortedColumn = 0;
                 downloadProperties.LastUnboundIndex = 0;
+                downloadProperties.SortMemberPath = "CreationDate";
             }
             return downloadProperties;
         }
@@ -644,11 +649,14 @@ namespace TaymadeEntities.Models
         /// </summary>
         /// <returns></returns>
         /// <autogeneratedoc />
-        public static ObservableCollection<PhraseEntry> GetPhraseEntries()
+        public static ObservableCollection<PhraseEntry>? GetPhraseEntries()
         {
             // get a list of phraseentries where phraseId = 1
-            List<Models.PhraseEntry> temp = SandboxEntities.PhraseEntry.Where(x => x.PhraseID == 1).OrderBy(x => x.Description).ToList();
-            return new ObservableCollection<PhraseEntry>(temp);
+            List<Models.PhraseEntry>? temp = PhrasesController.GetPhrasesByPhraseHeaderId(1);
+            //List <Models.PhraseEntry> temp = SandboxEntities.PhraseEntry.Where(x => x.PhraseID == 1).OrderBy(x => x.Description).ToList();
+            if (temp != null)
+                return new ObservableCollection<PhraseEntry>(temp);
+            else return null;
         }
 
         /// <summary>
@@ -656,11 +664,11 @@ namespace TaymadeEntities.Models
         /// </summary>
         /// <param name="phrase">The phrase<see cref="PhraseEntry"/>.</param>
         /// <returns>The <see cref="List{Models.PhraseEntry}"/>.</returns>
-        public static List<Models.PhraseEntry> GetSubPhraseEntries(PhraseEntry phrase)
+        public static List<Models.PhraseEntry>? GetSubPhraseEntries(PhraseEntry phrase)
         {
             // get a temporary variable = the phraseId + '.' the subphrase identifier
             string tempPhraseId = phrase.Id + ".";
-            List<Models.PhraseEntry> tempList = PhrasesController.GetSubPhraseEntries(phrase.Id);
+            List<Models.PhraseEntry>? tempList = PhrasesController.GetSubPhraseEntries(phrase.Id);
             //List<Models.PhraseEntry> temp = SandboxEntities.PhraseEntry.Where(p => p.Id.Contains(tempPhraseId) && p.PhraseID == 9).OrderBy(x => x.Description).ToList();
             if (tempList == null) tempList = new List<Models.PhraseEntry>();
             if (tempList.Count == 0)

@@ -19,6 +19,10 @@ namespace TaymadeEntities.Models
     [MetadataType(typeof(ArtistAlbumMetadata))]
     public partial class ArtistAlbum
     {
+        public void Delete()
+        {
+            DataController.MusicController.DeleteArtistAlbum(this);
+        }
         #region Methods
 
         /// <summary>

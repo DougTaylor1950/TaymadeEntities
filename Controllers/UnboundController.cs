@@ -82,5 +82,12 @@ namespace TaymadeEntities.Controllers
         {
             return unboundRepository.GetData().ToList();
         }
+
+        internal bool UpdateDownloadProperties(DownloadProperties downloadProperties)
+        {
+            return unboundRepository.UpdateDownloadProperties(downloadProperties);
+        }
+
+        
     }
 }

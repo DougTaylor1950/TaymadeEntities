@@ -227,7 +227,19 @@ namespace TaymadeEntities.ViewModels
                 CurrentStory = Models.DataController.StoryList.Where(x => x.Id == LastStoryId).FirstOrDefault();
             }
 
+            RefreshCastList = ReactiveCommand.Create(DoRefreshCastList);
+
             LoadProperties();
+        }
+
+        private void DoRefreshCastList()
+        {
+            if (CurrentStory != null)
+            {
+                var tempList = DataController.StoryController.GetStoryCastByStoryId(CurrentStory.Id);
+                CurrentStory.Cast = new ObservableCollection<StoryCast>(tempList);
+
+            }
         }
 
         private void DoSeriesAuthorLists()
@@ -355,9 +367,12 @@ namespace TaymadeEntities.ViewModels
                 //        .OrderBy(x => x.StringId).Distinct(new WordHeadingsComparer()).ToList());
                 //}
 
+                if (this.CurrentStory?.IDAuthor != null)
+                {
+                    this.CurrentStory.AuthorItem = this.Authors.FirstOrDefault(x => x.Id == this.CurrentStory.IDAuthor);
+                }
 
-
-                this.CreateNewHierachy(value);
+                //this.CreateNewHierachy(value);
             }
         }
 
@@ -479,85 +494,40 @@ namespace TaymadeEntities.ViewModels
                 headingsCollection = new(value.SectionBreaks);
             }
 
-
-            List<StoryHeadings> headingsList = Models.DataController.SandboxEntities.StoryHeadings
-                    .Where(h => h.StoryId == CurrentStory.Id)
-                    .OrderBy(s => s.SectionLevel)
-                    .ThenBy(s => s.SectionId)
-                    .ToList();
-
-            //List<WordHeadings> sections = headingsList.Where(s => s.HeadingLevel == 0).ToList();
-
-            //List<WordHeadingFlat> headings = new List<WordHeadingFlat>();
-            //foreach (var item in sections)
-            //{
-            //    WordHeadingFlat wordHeadingFlat = new WordHeadingFlat(item);
-            //    headings.Add(wordHeadingFlat);
-            //    item.Children = new ObservableCollection<WordHeadings>( headingsList.Where(h => h.Id == item.ParentId && h.HeadingLevel == 1).ToList());
-            //    if (item.HasChildren)
-            //    {
-            //        foreach (var heading1 in item.Children)
-            //        {
-            //            wordHeadingFlat = new WordHeadingFlat(heading1);
-            //            headings.Add(wordHeadingFlat);  // this should be a heading 1
-            //            wordHeadingFlat.Section = item.HeadingText;
-
-            //            if (heading1.HasChildren)
-            //            {
-            //                foreach (var heading2 in heading1.Children)
-            //                {
-            //                    wordHeadingFlat = new WordHeadingFlat(heading2);
-            //                    headings.Add(wordHeadingFlat);  // this should be a heading 1
-            //                    wordHeadingFlat.Section = item.HeadingText;
-            //                    wordHeadingFlat.Heading1 = heading1.HeadingText;
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
-
-            GroupedHeadings = new DataGridCollectionView(headingsList);
-            GroupedHeadings.GroupDescriptions.Add(
-            new DataGridPathGroupDescription("Section"));
-            //GroupedHeadings.GroupDescriptions.Add(
-
-            //    new DataGridPathGroupDescription("Heading1"));
-
-            if (GroupedHeadings.Groups is { } groups && Hierarchy != null)
+            if (CurrentStory != null)
             {
-                foreach (var group in groups.OfType<DataGridCollectionViewGroup>())
-                {
-                    try
-                    {
-                        Hierarchy.CollapseRowGroup(group, false);
-                    }
-                    catch (Exception e)
-                    {
-                        string error = e.ToString();
+                List<StoryHeadings> headingsList = Models.DataController.SandboxEntities.StoryHeadings
+                        .Where(h => h.StoryId == CurrentStory.Id)
+                        .OrderBy(s => s.SectionLevel)
+                        .ThenBy(s => s.SectionId)
+                        .ToList();
 
+
+
+                GroupedHeadings = new DataGridCollectionView(headingsList);
+                GroupedHeadings.GroupDescriptions.Add(
+                new DataGridPathGroupDescription("Section"));
+                //GroupedHeadings.GroupDescriptions.Add(
+
+                //    new DataGridPathGroupDescription("Heading1"));
+
+                if (GroupedHeadings.Groups is { } groups && Hierarchy != null)
+                {
+                    foreach (var group in groups.OfType<DataGridCollectionViewGroup>())
+                    {
+                        try
+                        {
+                            Hierarchy.CollapseRowGroup(group, false);
+                        }
+                        catch (Exception e)
+                        {
+                            string error = e.ToString();
+
+                        }
                     }
                 }
             }
-
-            //DataGridCollectionViewGroup? top = GroupedHeadings.Groups[0] as DataGridCollectionViewGroup;
-            //if (Hierarchy != null && top != null)
-            //{
-            //    Hierarchy.CollapseRowGroup(top, collapseAllSubgroups: true);
-            //}
-            // set up hierarchy source columns are what are displayed in the tree data grid
-            //HeadingsSource = new HierarchicalTreeDataGridSource<WordHeadings>(headingsCollection.HierarchicalList)
-            //{
-            //    Columns =
-            //    {
-            //        new HierarchicalExpanderColumn<WordHeadings>(
-            //            new TextColumn<WordHeadings, string>
-            //                ("String Id", x => x.StringId),x => x.Children),
-            //        new TextColumn<WordHeadings, string>
-            //                ("Heading Text", x => x.HeadingText),
-            //        new TextColumn<WordHeadings, int>("Para Num", x => x.PageNumber),
-            //        new TextColumn<WordHeadings, int>("Parent ID", x => x.ParentId),
-            //    },
-            //};
+            
         }
 
         public void CreateNewStory()
@@ -759,7 +729,7 @@ namespace TaymadeEntities.ViewModels
 
                             // add fileinfo
 
-
+                            if (CurrentStory == null) return;
 
                             if (fileInfo != null)
                             {
@@ -778,11 +748,11 @@ namespace TaymadeEntities.ViewModels
 
                             GetPropsOverride(lastWriteTime);
 
-                            StoryDictionary? storyDictionary = new StoryDictionary(currentStory.Id);
-                            if (storyDictionary.Id < 1)
-                            {
-                                storyDictionary.Insert();
-                            }
+                            //StoryDictionary? storyDictionary = new StoryDictionary(currentStory.Id);
+                            //if (storyDictionary.Id < 1)
+                            //{
+                            //    storyDictionary.Insert();
+                            //}
 
                             // create the dictionary file
                             // if the file exists delete it
@@ -790,12 +760,12 @@ namespace TaymadeEntities.ViewModels
 
                             // clear the file K:\Drive_I\Stories\CurrentStory.dic
 
-                            if (File.Exists(storyDictionary.DictionaryPath))
+                            if (File.Exists(CurrentStory.StoryDictionary?.DictionaryPath))
                             {
-                                File.Delete(storyDictionary.DictionaryPath);
+                                File.Delete(CurrentStory.StoryDictionary?.DictionaryPath);
                             }
 
-                            storyDictionary.CreateCustomDictionary();
+                            CurrentStory.StoryDictionary.CreateCustomDictionary();
 
                             // check wordheadingslist and section breaks exist if not create the list and add a section break
                             if (CurrentStory.WordHeadingList == null || CurrentStory.WordHeadingList.Count == 0)
@@ -813,23 +783,30 @@ namespace TaymadeEntities.ViewModels
                             {
                                 HeadingLevel = 0,
                                 StringId = "Sect_01",
-                                HeadingText = "Sect_01"
+                                HeadingText = "Sect_01",
+                                StoryId = CurrentStory.Id
                             };
                             CurrentStory.SectionBreaks.Add(heading);
                             CurrentStory.WordHeadingList.Add(heading);
+                            heading.StoryId = CurrentStory.Id;
                             heading.Insert();
 
-                            if (StoryList != null)
+                            
+                            
+                            if (CurrentStory != null)
                             {
-                                StoryList.Add(CurrentStory);
+
+                                if (StoryList != null)
+                                {
+                                    StoryList.Add(CurrentStory);
+                                }
+                                // set this story in StoryProperties as current story
+                                Models.DataController.StoryProperties.LastStoryId = CurrentStory.Id;
+                                Models.DataController.StoryProperties.Save();
+                                LastStoryId = CurrentStory.Id;
+                                CurrentStory.Save();
                             }
                             DoClear();
-
-                            // set this story in StoryProperties as current story
-                            Models.DataController.StoryProperties.LastStoryId = CurrentStory.Id;
-                            Models.DataController.StoryProperties.Save();
-                            LastStoryId = CurrentStory.Id;
-                            CurrentStory.Save();
                         }
                     }
                 }
@@ -969,7 +946,11 @@ namespace TaymadeEntities.ViewModels
         public int CurrentColumnIndex { get; set; }
         public string CurrentColumnContent { get; internal set; }
         public bool WasText { get; private set; }
-        public StoryCast CurrentCastMember { get => currentCastMember; set => this.RaiseAndSetIfChanged(ref  currentCastMember, value); }
+        public StoryCast CurrentCastMember 
+        {
+            get => currentCastMember; 
+            set => this.RaiseAndSetIfChanged(ref currentCastMember, value);
+        }
         public ReactiveCommand<string?, Unit> DoAuthorSearchCommand { get; internal set; }
         public ReactiveCommand<Unit, Unit> DoClearShownCommand { get; internal set; }
         public ReactiveCommand<string?, Unit> DoCodesSearchCommand { get; internal set; }
@@ -1022,6 +1003,7 @@ namespace TaymadeEntities.ViewModels
         public List<double>? AgeList { get; private set; }
         public List<string> RelationList { get; private set; }
 
+        public ReactiveCommand<Unit,Unit>? RefreshCastList { get; }
         public string? CurrentRelationship { get; set; }
         public double? CurrentAge { get; set; }
         public bool RelationalVisible
@@ -2004,13 +1986,9 @@ namespace TaymadeEntities.ViewModels
         {
             try
             {
-                StoryDictionary storyDictionary = new StoryDictionary(CurrentStory.Id);
-                if (storyDictionary.Id < 1)
-                {
-                    storyDictionary.Insert();
-                }
+                
                 // create the custom dictionary file
-                storyDictionary.CreateCustomDictionary();
+                CurrentStory.StoryDictionary?.CreateCustomDictionary();
 
                 if (CurrentStory.SeriesId == 0) CurrentStory.SeriesId = 1;
                 //StoryTransInfo.Load();
@@ -2027,31 +2005,33 @@ namespace TaymadeEntities.ViewModels
                     if (!string.IsNullOrEmpty(fixedPath) && CurrentStory.CheckExists())
                     {
                         string extn = Path.GetExtension(fixedPath).ToLower();
-
+                        DataController.StoryProperties.LastStoryId = CurrentStory.Id;
+                        StoryTransInfo.GetInstance().CurrentStoryId = CurrentStory.Id;
+                        StoryTransInfo.Update();
                         // if extn is .docx set StoryProperties.Macro to null, if .doc set saveasdocx if .txt|.text set ToParagraphs
                         if (extn == ".docx")
                         {
                             Models.DataController.StoryProperties.Macro = "";
-                            Models.DataController.StoryProperties.Save();
+                            
                         }
                         else if (WasText)
                         {
                             Models.DataController.StoryProperties.Macro = "ToParagraphs";
-                            Models.DataController.StoryProperties.Save();
+                           
                         }
                         else if (extn == ".doc")
                         {
                             Models.DataController.StoryProperties.Macro = "ToDocX";
-                            Models.DataController.StoryProperties.Save();
+                            
 
                         }
                         else if (extn == ".txt" || extn == ".text")
                         {
                             Models.DataController.StoryProperties.Macro = "ToParagraphs";
-                            Models.DataController.StoryProperties.Save();
+                            
                         }
                         WasText = false; // clear text flag, a new story will set it again if it starts as a text file
-
+                        Models.DataController.StoryProperties.Save();
                         currentStory.PathWrong = false;
                         bool success = await currentStory.SaveAsync();
                         string appPath = Support.GetApplicationPath("word");
@@ -2066,8 +2046,8 @@ namespace TaymadeEntities.ViewModels
 
                         var result = Cli.Wrap(appPath)
                             .WithArguments(parameters);
-                        //.WithValidation(CommandResultValidation.None);
-                        //.ExecuteAsync();
+                        
+                        
 
                         await foreach (var cmdEvent in result.ListenAsync())
                         {
@@ -2329,16 +2309,22 @@ namespace TaymadeEntities.ViewModels
                                                     await Models.DataController.SandboxEntities.ReloadIfModifiedAsync<StoryCast>(storyCast);
                                                     CurrentCastMember = storyCast;
                                                     this.RaisePropertyChanged(nameof(CurrentCastMember));
+                                                    this.RaisePropertyChanged(nameof(CurrentStory.Cast));
                                                 }
                                                 else
                                                 {
                                                     storyCast = Models.DataController.StoryController.GetStoryCastById(pkInt);
                                                     if (storyCast != null) CurrentStory.Cast.Add(storyCast);
                                                     //CurrentStory.RaisePropertyChanged("Cast");
-                                                    
+                                                    CurrentCastMember = storyCast; 
+                                                    this.RaisePropertyChanged(nameof(CurrentCastMember));
+                                                    this.RaisePropertyChanged(nameof(CurrentStory.Cast));
                                                 }
                                             }
-                                            ObservableCollection<StoryCast> storyCasts = new ObservableCollection<StoryCast>(new StoryCastList(cast, CurrentStory.Id));
+
+                                            var storyCastList = DataController.StoryController.GetStoryCastByStoryId(CurrentStory.Id);
+                                            ObservableCollection<StoryCast> storyCasts = new ObservableCollection<StoryCast>(storyCastList
+                                                );
                                             CurrentStory.Cast = storyCasts;
                                             // go through cast list and look for those with ids if there is a non null and value greater than 0 hunt for id:x; in codes
                                             foreach (var item in CurrentStory.Cast)
@@ -2530,15 +2516,15 @@ namespace TaymadeEntities.ViewModels
                                                 success = await CurrentStory.SaveAsync();
                                             }
                                         }
-                                        CreateNewHierachy(currentStory);
+                                        
 
                                         // check to see if there is a storydictionary file
-                                        if (storyDictionary != null)
+                                        if (CurrentStory.StoryDictionary != null)
                                         {
                                             try
                                             {
-                                                storyDictionary.LoadDictionary();
-                                                storyDictionary.Update();
+                                                CurrentStory.StoryDictionary.LoadDictionary();
+                                                
 
                                             }
                                             catch (Exception)
@@ -2546,8 +2532,9 @@ namespace TaymadeEntities.ViewModels
 
                                                 // throw;
                                             }
+                                            CurrentStory.StoryDictionary = null;
                                         }
-
+                                        CreateNewHierachy(currentStory);
                                     }
                                     break;
 
@@ -3029,12 +3016,13 @@ namespace TaymadeEntities.ViewModels
 
         private async System.Threading.Tasks.Task ShowStoryList(List<Story> tempList)
         {
-            //AuthorStoriesList? authorStoriesList = new AuthorStoriesList();
-            //this.AuthorStoriesList = new ObservableCollection<Story>(tempList);
-            //authorStoriesList.DataContext = this;
+            AuthorStoriesList? authorStoriesList = new AuthorStoriesList();
+            this.AuthorStoriesList = new ObservableCollection<Story>(tempList);
+            authorStoriesList.DataContext = this;
             //this.Caller = authorStoriesList;
-
-            //await authorStoriesList.ShowDialog(Views.MainWindow.Instance);
+            Window? main = Support.GetWindow() ;
+            if (main != null)
+            await authorStoriesList.ShowDialog(main);
         }
         #endregion Methods
     }

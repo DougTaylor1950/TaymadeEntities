@@ -104,10 +104,10 @@ namespace TaymadeEntities.ViewModels
         /// Defines the unbounds.
         /// </summary>
         private ObservableCollection<UnboundGridData>? unbounds;
-        private PhraseEntry currentPhrase;
-        private PhraseEntry currentSubPhrase;
-        private List<PhraseEntry> phraseList;
-        private List<PhraseEntry> subPhraseList;
+        private PhraseEntry? currentPhrase;
+        private PhraseEntry? currentSubPhrase;
+        private List<PhraseEntry>? phraseList;
+        private List<PhraseEntry>? subPhraseList;
 
         #endregion Fields
 
@@ -501,7 +501,8 @@ namespace TaymadeEntities.ViewModels
                 if (value != null && value.PhraseID == 1)
                 {
                     // set subphrase list to the list of subphrases for this phrase
-                    var subPhrases = DataController.SandboxEntities.PhraseEntry.Where(pe => pe.PhraseID == 9 && pe.Id.Contains(value.Id)).ToList();
+                    var subPhrases = DataController.PhrasesController.GetSubPhraseEntries(value.Id);
+                    //var subPhrases = DataController.SandboxEntities.PhraseEntry.Where(pe => pe.PhraseID == 9 && pe.Id.Contains(value.Id)).ToList();
                     // Do something with the subPhrases, e.g., display them in the UI
                     // You can create a new ObservableCollection for subphrases if needed
                     SubPhraseList = subPhrases;
@@ -515,13 +516,13 @@ namespace TaymadeEntities.ViewModels
             set => this.RaiseAndSetIfChanged(ref currentSubPhrase, value);
         }
 
-        public List<PhraseEntry> PhraseList
+        public List<PhraseEntry>? PhraseList
         {
             get
             {
                 if (phraseList == null || phraseList.Count == 0)
                 {
-                    phraseList = DataController.SandboxEntities.PhraseEntry.Where(p => p.PhraseID == 1).ToList();
+                    phraseList = DataController.PhrasesController.GetPhrasesByPhraseHeaderId(1);
                 }
                 return phraseList;
             }
@@ -837,7 +838,8 @@ namespace TaymadeEntities.ViewModels
         private void BuildList()
         {
             Unbounds = new ObservableCollection<UnboundGridData>(
-                               DataController.SandboxEntities.UnboundGridData.OrderByDescending(x => x.CreationTime).ToList()
+                DataController.UnboundController.GetData()
+                               //DataController.SandboxEntities.UnboundGridData.OrderByDescending(x => x.CreationTime).ToList()
                                );
             SortList();
             this.RaisePropertyChanged(nameof(Unbounds));
@@ -1899,7 +1901,7 @@ namespace TaymadeEntities.ViewModels
             // load from database and order by creation time desc if empty
             if (Unbounds == null || Unbounds.Count < 10) Unbounds = new ObservableCollection<UnboundGridData>
             (
-                DataController.SandboxEntities.UnboundGridData.OrderByDescending(u => u.CreationTime).ToList()
+                DataController.UnboundController.GetData()
             );
 
             // find the Download directory and get all the files in it and

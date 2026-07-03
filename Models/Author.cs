@@ -104,7 +104,11 @@ namespace TaymadeEntities.Models
         {
             try
             {
-                if (Id == 0) DataController.StoryController.AddAuthor(this);
+                if (Id == 0)
+                {
+                    DataController.StoryController.AddAuthor(this);
+                    DataController.AuthorList.Add(this);
+                }
                 DataController.StoryController.Save();
             }
             catch (Exception)

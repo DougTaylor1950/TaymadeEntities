@@ -31,6 +31,8 @@ namespace TaymadeEntities.DAL.Interfaces
         IEnumerable<PhraseEntry>? GetSubPhrasesByPhraseID(int id, string phraseId);
 
         IEnumerable<PhraseHeader>? GetPhraseHeaders();
+        PhraseEntry? GetByPhraseId(string value);
+        PhraseEntry? GetByCompKey(int phraseId, string genre);
 
         #endregion Public Methods
     }

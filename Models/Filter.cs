@@ -200,7 +200,8 @@
 
                 if (!string.IsNullOrEmpty(value))
                 {
-                    secondaryPhrase = DataController.SandboxEntities.PhraseEntry.Where(x => x.Id == value).FirstOrDefault();
+                    secondaryPhrase = DataController.PhrasesController.GetByPhraseId(value);
+                    //secondaryPhrase = DataController.SandboxEntities.PhraseEntry.Where(x => x.Id == value).FirstOrDefault();
                 }
             }
         }
@@ -216,7 +217,8 @@
 
                 if (!string.IsNullOrEmpty(value))
                 {
-                    tertiaryPhrase = DataController.SandboxEntities.PhraseEntry.Where(x => x.Id == value).FirstOrDefault();
+                    tertiaryPhrase = DataController.PhrasesController.GetByPhraseId(value);
+                    //tertiaryPhrase = DataController.SandboxEntities.PhraseEntry.Where(x => x.Id == value).FirstOrDefault();
                 }
             }
         }

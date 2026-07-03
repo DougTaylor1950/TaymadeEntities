@@ -16,6 +16,7 @@ namespace TaymadeEntities.Models
     using System.Linq;
    // using MusicBrainzSupport;
     using Microsoft.EntityFrameworkCore;
+    using TaymadeEntities.MusicBrainzSupport;
 
     /// <summary>
     /// Defines the <see cref="Artist" />.
@@ -34,8 +35,8 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the MBArtist.
         /// </summary>
-        //[NotMapped]
-        //public MBArtist? MBArtist { get; set; }
+        [NotMapped]
+        public MBArtist? MBArtist { get; set; }
 
         [NotMapped]
         public string? DCHtml { get; set; }
@@ -49,10 +50,10 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void GetArtistInfo()
         {
-            //if (MBArtist == null && !string.IsNullOrEmpty(MusicBrainzID))
-            //{
-            //    MBArtist = MusicBrainzSupport.MusicBrainz.GetArtist(MusicBrainzID);
-            //}
+            if (MBArtist == null && !string.IsNullOrEmpty(MusicBrainzID))
+            {
+               // MBArtist = GetArtist(MusicBrainzID);
+            }
 
             //if (DCArtist == null && !string.IsNullOrEmpty(DiscogsID))
             //{
@@ -65,21 +66,22 @@ namespace TaymadeEntities.Models
             //}
         }
 
-        internal void Save()
+        public void Save()
         {
-            var local = DataController.MusicEntitiesContext.Set<Artist>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+            DataController.MusicController.UpdateArtist(this);
+            //var local = DataController.MusicEntitiesContext.Set<Artist>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
-            // check if local is not null
-            if (local != null)
-            {
-                // detach
-                DataController.MusicEntitiesContext.Entry(local).State = EntityState.Detached;
-            }
-            // stop group members being saved
-            foreach (var item in GroupMembers)
-            {
-                DataController.MusicEntitiesContext.Entry(item).State = EntityState.Detached;
-            }
+            //// check if local is not null
+            //if (local != null)
+            //{
+            //    // detach
+            //    DataController.MusicEntitiesContext.Entry(local).State = EntityState.Detached;
+            //}
+            //// stop group members being saved
+            //foreach (var item in GroupMembers)
+            //{
+            //    DataController.MusicEntitiesContext.Entry(item).State = EntityState.Detached;
+            //}
 
             // set Modified flag in your entry
             //ModifiedOn = DateTime.Now;
@@ -90,6 +92,11 @@ namespace TaymadeEntities.Models
         public void Insert()
         {
             DataController.MusicController.AddArtist(this);
+        }
+
+        public void Delete()
+        {
+            DataController.MusicController.DeleteArtist(this);
         }
 
         #endregion

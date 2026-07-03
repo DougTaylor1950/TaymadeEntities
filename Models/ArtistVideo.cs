@@ -7,6 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+#nullable enable
 namespace TaymadeEntities.Models
 {
     using System;
@@ -20,12 +21,12 @@ namespace TaymadeEntities.Models
     [Table("ArtistVideo")]
     public partial class ArtistVideo : ModelBase
     {
-        private Movies movy;
+        private Movies? movy;
         private int movieId;
         private int artistID;
         private int? albumId;
-        private Artist artist;
-        private Album album;
+        private Artist? artist;
+        private Album? album;
 
         [Key]
         public new int Id { get; set; }
@@ -37,7 +38,7 @@ namespace TaymadeEntities.Models
         public virtual Artist Artist { get => artist; set => this.RaiseAndSetIfChanged(ref artist, value); }
 
         [ForeignKey("MovieId")]
-        public virtual Movies Movy
+        public virtual Movies? Movy
         {
             get
             {
@@ -52,26 +53,22 @@ namespace TaymadeEntities.Models
         }
 
         [NotMapped]
-        public virtual Album Album { get => album; set => this.RaiseAndSetIfChanged(ref album, value); }
+        public virtual Album? Album { get => album; set => this.RaiseAndSetIfChanged(ref album, value); }
 
-        internal void Insert()
+        public void Delete()
         {
-            DataController.MusicEntitiesContext.ArtistVideos.Add(this);
-            DataController.MusicEntitiesContext.SaveChanges();
+            DataController.MusicController.DeleteArtistVideo(this);
+        }
+
+        public void Insert()
+        {
+            DataController.MusicController.AddArtistVideo(this);
+            
         }
 
         public void Save()
         {
-            var local = DataController.SandboxEntities.Set<ArtistVideo>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-            // check if local is not null
-            if (local != null)
-            {
-                // detach
-                DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-            }
-            DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            DataController.SandboxEntities.SaveChanges();
+            DataController.MusicController.UpdateArtistVideo(this);
         }
     }
 }

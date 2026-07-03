@@ -244,7 +244,7 @@ namespace TaymadeEntities.Support
                         if (viewModel.Unbounds == null || viewModel.Unbounds.Count < 50)
                         {  // generate collection from database if not already generated
                             viewModel.Unbounds = new System.Collections.ObjectModel.ObservableCollection<UnboundGridData>(
-                                DataController.SandboxEntities.UnboundGridData.ToList());
+                                DataController.UnboundController.GetData());  //SandboxEntities.UnboundGridData.ToList());
                         }
                         UnboundGridData? unboundGridData = viewModel.Unbounds.Where(u => u.FileName.ToLower() == file.ToLower()).FirstOrDefault();
                         if (unboundGridData == null)

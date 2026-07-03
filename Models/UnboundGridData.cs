@@ -397,7 +397,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         public UnboundGridDataCollection()
         {
-            List<UnboundGridData> unbounds = DataController.SandboxEntities.UnboundGridData.ToList();
+            List<UnboundGridData> unbounds = DataController.UnboundController.GetData();
 
             foreach (var item in unbounds)
             {

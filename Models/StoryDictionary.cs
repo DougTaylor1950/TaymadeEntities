@@ -84,6 +84,7 @@ namespace TaymadeEntities.Models
         public bool Delete()
         {
             // Delete the current story dictionary from the database using the procedure in Sand=boxEntities
+            DataController.SandboxEntities.StoryDictionary.Remove(this);
             bool result = DataController.SandboxEntities.DeleteStoryDictionary(StoryId);
             // remove from local database if the value exists
 
@@ -102,8 +103,10 @@ namespace TaymadeEntities.Models
 
 
                 // check if the current story dictionary already exists in the database
-                var existing = DataController.SandboxEntities.StoryDictionary.FirstOrDefault(entry => entry.Id.Equals(Id));
-                if (existing != null)
+                //
+                //var existing = DataController.SandboxEntities.StoryDictionary.FirstOrDefault(entry => entry.Id.Equals(Id));
+                
+                if (Id  != 0)
                 {
                     // If it exists, update it instead
                     Update();
@@ -199,9 +202,7 @@ namespace TaymadeEntities.Models
         {
             try
             {
-                // Check if the current story dictionary exists in the database
-                var existing = DataController.StoryController.GetStoryDictionaryByStoryId(this.StoryId);
-                if (existing == null)
+                if (Id == 0)
                 {
                     // If it does not exist, insert it
                     Insert();

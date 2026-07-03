@@ -288,8 +288,8 @@ namespace TaymadeEntities.DBContext
         /// <returns>The <see cref="Bookmark?"/>.</returns>
         public Bookmark? CreateBookmark(int MovieId, double time, string name = "<new>")
         {
-            var id = new SqlParameter("@MovieId", MovieId);
-            var ftime = new SqlParameter("@Time", time);
+            var id = CreateIntegerParameter( MovieId, "@MovieId");
+            var ftime = CreateDoubleParameter( time, "@Time");
 
             int count = this.Database.ExecuteSqlRaw("exec InsertBookmark @MovieId, @Time", id, ftime);
 
@@ -386,14 +386,14 @@ namespace TaymadeEntities.DBContext
         /// <param name="path">The path<see cref="string"/>.</param>
         /// <param name="group">The group<see cref="string"/>.</param>
         /// <returns>The <see cref="Movies?"/>.</returns>
-        public Movies? CreateMovie(string name, int year = 0, string path = "", string group = "PORN")
+        public Movies? CreateMovie(string? name, int year = 0, string? path = "", string? group = "PORN")
         {
             Movies result = null;
 
-            var _name = new SqlParameter("@MovieName", name);
-            var _year = new SqlParameter("@Year", year);
-            var _path = new SqlParameter("@Path", path);
-            var _group = new SqlParameter("@FilmGroup", group);
+            var _name = CreateStringParameter( name, "@MovieName");
+            var _year = CreateIntegerParameter( year, "@Year");
+            var _path = CreateStringParameter( path, "@Path");
+            var _group = CreateStringParameter( group, "@FilmGroup");
 
             int count = this.Database.ExecuteSqlRaw("exec CreateMinimalMovie @MovieName, @Year, @Path, @FilmGroup ", _name, _year, _path, _group);
 
@@ -406,6 +406,22 @@ namespace TaymadeEntities.DBContext
         }
 
         private static SqlParameter? CreateIntegerParameter(int? param, string paramName)
+        {
+            SqlParameter? newParam = null;
+            var paramValue = param.HasValue ? (object)param.Value : DBNull.Value;
+            newParam = new SqlParameter(paramName, paramValue);
+            return newParam;
+        }
+
+        private static SqlParameter? CreateLongParameter(long? param, string paramName)
+        {
+            SqlParameter? newParam = null;
+            var paramValue = param.HasValue ? (object)param.Value : DBNull.Value;
+            newParam = new SqlParameter(paramName, paramValue);
+            return newParam;
+        }
+
+        private static SqlParameter? CreateDoubleParameter(double? param, string paramName)
         {
             SqlParameter? newParam = null;
             var paramValue = param.HasValue ? (object)param.Value : DBNull.Value;
@@ -429,8 +445,8 @@ namespace TaymadeEntities.DBContext
         public MovieGenre CreateMovieGenre(int movieId, string? genre, string? subGenre)
         {
             MovieGenre? result = null;
-            var _movieId = new SqlParameter("@MovieId", movieId);
-            var _genre = new SqlParameter("@Genre", genre);
+            var _movieId = CreateIntegerParameter(movieId, "@MovieId");
+            var _genre = CreateStringParameter( genre, "@Genre");
             var _subGenre = SandboxEntities.CreateStringParameter(subGenre, "@SubGenre");
             int count = this.Database.ExecuteSqlRaw("exec CreateMovieGenre @MovieId, @Genre, @SubGenre",
                 _movieId, _genre, _subGenre);
@@ -482,14 +498,14 @@ namespace TaymadeEntities.DBContext
             if (result == null)
             {
 
-                var _fileName = new SqlParameter("@FileName", fileName);
+                var _fileName = CreateStringParameter( fileName, "@FileName");
 
                 //result = this.UnboundGridData.FromSql($"select * from UnboundGridData where fileName = (select FileName from UnboundGridData where filename = @FileName)").AsNoTracking().FirstOrDefault();
 
                 var _year = new SqlParameter("@FileLength", fileLength);
-                var _path = new SqlParameter("@DurationSeconds", durationSeconds);
-                var _group = new SqlParameter("@CreationTime", group);
-                var _name = new SqlParameter("@Name", name);
+                var _path = CreateIntegerParameter( durationSeconds, "@DurationSeconds");
+                var _group = CreateStringParameter( group, "@CreationTime");
+                var _name = CreateStringParameter( name, "@Name");
 
                 int count = this.Database.ExecuteSqlRaw("exec CreateUnboundGrid @FileName, @FileLength, @DurationSeconds, @CreationTime, @Name "
                     , _fileName, _year, _path, _group, _name);
@@ -757,11 +773,11 @@ namespace TaymadeEntities.DBContext
 
             string codes = storyCast.Codes;
             if (storyCast.Codes != null && storyCast.Codes.Length > 1500) codes = codes.Substring(0, 1499);
-            var _Pk = new SqlParameter("@Original_Pk", storyCast.Pk);
-            var _Character = new SqlParameter("@Character", storyCast.Character);
-            var _Age = new SqlParameter("@Age", storyCast.Age);
-            var _Codes = new SqlParameter("@Codes", codes);
-            var _CastId = new SqlParameter("@CastId", storyCast.CastId);
+            var _Pk = CreateIntegerParameter( storyCast.Pk, "@Original_Pk");
+            var _Character = CreateStringParameter(storyCast.Character, "@Character");
+            var _Age = CreateStringParameter( storyCast.Age, "@Age");
+            var _Codes = CreateStringParameter( codes, "@Codes");
+            var _CastId = CreateIntegerParameter( storyCast.CastId, "@CastId");
             int count = this.Database.ExecuteSqlRaw("exec UpdateStoryCodes @Character,@Age,@Codes,@CastId,@Original_Pk", _Character, _Age, _Codes, _CastId, _Pk);
             success = (count == 1);
 
@@ -788,11 +804,11 @@ namespace TaymadeEntities.DBContext
             if (movie.ImagePath == null) movie.ImagePath = string.Empty;
             if (movie.DurationSeconds == null) movie.DurationSeconds = 0;
 
-            var _Id = new SqlParameter("@Id", movie.Id);
-            var _path = new SqlParameter("@MoviePath", movie.MoviePath);
-            var _imagePath = new SqlParameter("@ImagePath", movie.ImagePath);
-            var _novieName = new SqlParameter("@MovieName", movie.MovieName);
-            var _duration = new SqlParameter("@Duration", movie.DurationSeconds);
+            var _Id = CreateIntegerParameter( movie.Id, "@Id");
+            var _path = CreateStringParameter(movie.MoviePath, "@MoviePath");
+            var _imagePath = CreateStringParameter( movie.ImagePath, "@ImagePath");
+            var _novieName = CreateStringParameter( movie.MovieName, "@MovieName");
+            var _duration = CreateIntegerParameter( movie.DurationSeconds, "@Duration");
 
             int count = this.Database.ExecuteSqlRaw("exec MovieUpdate @Id, @MoviePath, @ImagePath, @MovieName, @Duration ",
                 _Id, _path, _imagePath, _novieName, _duration);
@@ -809,9 +825,9 @@ namespace TaymadeEntities.DBContext
         {
             var id = new SqlParameter("@Original_Id", iD);
             int rows = this.Database.ExecuteSqlRaw(" exec DeleteStory @Original_Id", id);
-            if (rows == 1)
-            {
-                this.Story.Remove(this.Story.Where(s => s.Id == iD).FirstOrDefault());
+            if (rows == 1)            {
+                Story? temp = this.Story.Where(s => s.Id == iD).FirstOrDefault();
+                if (temp != null) this.Story.Remove(temp);
             }
         }
 
@@ -824,7 +840,8 @@ namespace TaymadeEntities.DBContext
         {
             var id = new SqlParameter("@StoryId", iD);
             int result = this.Database.ExecuteSqlRaw(" exec DeleteStoryDictionary @StoryId", id);
-            return (result == 1);
+            
+            return (result > 0);
         }
 
         /// <summary>

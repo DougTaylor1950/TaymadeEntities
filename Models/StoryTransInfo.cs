@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Migrations.Operations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -41,31 +43,20 @@ namespace TaymadeEntities.Models
         private static void Load()
         {
             _instance = DataController.StoryController.GetStoryTransInfo();
-                //DataController.SandboxEntities.StoryTransInfo.Where(st => st.Id == 1).FirstOrDefault();
-
-            //if (st != null)
-            //{
-            //    StoryTransInfo.Id = st.Id;
-            //    StoryTransInfo.CurrentStoryId = st.CurrentStoryId;
-            //}
-            //else
-            //{
-            //    // If no translation info exists, initialize with default values
-            //    Id = 1; // Default ID
-            //    CurrentStoryId = 0; // Default story ID
-            //}
+                
         }
 
-        //public void Insert()
-        //{
-        //    // Insert the current story translation info into the database
-        //    DataController.SandboxEntities.StoryTransInfo.Add(this);
-        //    DataController.SandboxEntities.SaveChanges();
-        //}   
+        public static bool Insert()
+        {
+            // Insert the current story translation info into the database
+            return DataController.StoryController.AddStoryTransfer(_instance);
+           
+        }
         public static void Update()
         {
             // Update the current story translation info in the database
-
+            if (_instance != null && _instance.Id == 0) Insert();
+           
             DataController.StoryController.SaveStoryTransInfo(_instance);
         }
 

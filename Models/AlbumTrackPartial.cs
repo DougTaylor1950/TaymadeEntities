@@ -171,6 +171,10 @@ namespace TaymadeEntities.Models
             // TimeSpan ts = MovieDuration;
         }
 
+        public void Delete()
+        {
+            DataController.MusicController.DeleteAlbumTrack(this);
+        }
     }
 
     public class AlbumTrackMetadata

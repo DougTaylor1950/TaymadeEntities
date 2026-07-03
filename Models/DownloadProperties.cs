@@ -20,6 +20,8 @@ namespace TaymadeEntities.Models
 
         public int? SortedColumn { get; set; }
 
+        public string? SortMemberPath { get; set; }
+
         #endregion Public Properties
 
         #region Constructors
@@ -46,20 +48,9 @@ namespace TaymadeEntities.Models
                     success = Insert();
                 }
 
-                EntityState state = DataController.SandboxEntities.Entry(this).State;
+                success = DataController.UnboundController.UpdateDownloadProperties(this);
 
-                var local = DataController.SandboxEntities.Set<DownloadProperties>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
-                // check if local is not null
-                if (local != null)
-                {
-                    // detach
-                    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-                }
-                // set Modified flag in your entry
-                DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                DataController.SandboxEntities.SaveChanges();
-                success = true;
             }
             catch (Exception ex)
             {

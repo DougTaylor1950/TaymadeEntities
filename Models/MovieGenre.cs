@@ -49,7 +49,8 @@ namespace TaymadeEntities.Models
                 {
                     try
                     {
-                        mainGenreEntity = DataController.SandboxEntities.PhraseEntry.Where(p => p.PhraseID == 1 && p.COMPKEY == Genre).FirstOrDefault();
+                        mainGenreEntity = DataController.PhrasesController.GetByCompKey(1,Genre);
+                        //mainGenreEntity = DataController.SandboxEntities.PhraseEntry.Where(p => p.PhraseID == 1 && p.COMPKEY == Genre).FirstOrDefault();
                     }
                     catch (Exception)
                     {
@@ -95,7 +96,8 @@ namespace TaymadeEntities.Models
                 {
                     try
                     {
-                        subGenreEntity = DataController.SandboxEntities.PhraseEntry.Where(p => p.PhraseID == 9 && p.COMPKEY == SubGenre).FirstOrDefault();
+                        subGenreEntity = DataController.PhrasesController.GetByCompKey(9,SubGenre);
+                        //subGenreEntity = DataController.SandboxEntities.PhraseEntry.Where(p => p.PhraseID == 9 && p.COMPKEY == SubGenre).FirstOrDefault();
                     }
                     catch (Exception)
                     {

@@ -192,18 +192,18 @@ namespace TaymadeEntities.Models
             {
                 try
                 {
-                    var local = DataController.SandboxEntities.Set<PhraseEntry>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
+                    //var local = DataController.SandboxEntities.Set<PhraseEntry>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
 
-                    // check if local is not null
-                    if (local != null)
-                    {
-                        // detach
-                        DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-                    }
+                    //// check if local is not null
+                    //if (local != null)
+                    //{
+                    //    // detach
+                    //    DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
+                    //}
                     // set Modified flag in your entry
                     // ModifiedOn = DateTime.Now;
-                    DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                    DataController.SandboxEntities.SaveChanges();
+                    //DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                    DataController.PhrasesController.Save(this);
                 }
                 catch (Exception)
                 {
@@ -212,18 +212,18 @@ namespace TaymadeEntities.Models
             }
             else
             {
-                if ( this.PhraseID == 1 && DataController.SandboxEntities.Entry(this).State == EntityState.Detached)
-                {
-                    DataController.SandboxEntities.PhraseEntry.Add(this);
-                    DataController.SandboxEntities.SaveChanges();
+               
+                    DataController.PhrasesController.Add(this);
+                    //DataController.SandboxEntities.PhraseEntry.Add(this);
+                    //DataController.SandboxEntities.SaveChanges();
                     DataController.SandboxEntities.Entry(this).ReloadEntity();
-                }
-                else
-                {
-                    DataController.SandboxEntities.PhraseEntry.Add(this);
-
-                    DataController.SandboxEntities.SaveChanges();
-                }
+                //}
+                //else
+                //{
+                //    DataController.PhrasesController.Add(this);
+                //    //DataController.SandboxEntities.PhraseEntry.Add(this);
+                //    //DataController.SandboxEntities.SaveChanges();
+                //}
             }
         }
 

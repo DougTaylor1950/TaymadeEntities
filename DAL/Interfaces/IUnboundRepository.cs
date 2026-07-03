@@ -23,6 +23,7 @@ namespace TaymadeEntities.DAL.Interfaces
         void Add(UnboundGridData UnboundGridData);
         bool Save(UnboundGridData UnboundGridData);
         IEnumerable<UnboundGridData> GetData();
+        bool UpdateDownloadProperties(DownloadProperties downloadProperties);
 
 
         #endregion Public Methods

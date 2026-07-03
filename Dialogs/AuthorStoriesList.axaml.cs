@@ -29,28 +29,18 @@ public partial class AuthorStoriesList : Window
                     if (vm != null) vm.CurrentStory = dgAuthorStories.SelectedItem as Story;
                 }
             };
+
+        Closed += AuthorStoriesList_Closed;
+    }
+
+    private void AuthorStoriesList_Closed(object? sender, EventArgs e)
+    {
+        
     }
 
     private void AuthorStoriesList_DataContextChanged(object? sender, EventArgs e)
     {
-        if (OKCancelPanel != null)
-        {
-            //OKCancelPanel.CancelButton.Click += (sender, e) =>
-            //{
-            //    this.Close();
-            //};
-
-            //OKCancelPanel.OkButton.Click += (sender, e) =>
-            //{
-            //    this.Close();
-            //};
-
-            StoryViewModel? vm = DataContext as StoryViewModel;
-            if (vm != null)
-            {
-                vm.SetOkCancelPanelCommands(OKCancelPanel);
-            }
-        }
+      
     }
 
     private void Button_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -60,5 +50,15 @@ public partial class AuthorStoriesList : Window
         {
             vm.EditStory();
         }
+    }
+
+    private void OkButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        this.Close(true);
+    }
+
+    private void CancelButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        this.Close(false);
     }
 }

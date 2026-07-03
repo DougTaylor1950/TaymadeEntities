@@ -9,7 +9,7 @@ namespace TaymadeEntities.DAL.Interfaces
     public interface IStoryRepository : IDisposable
     {
         #region Public Methods
-        void Add(Story Story);
+        bool Add(Story Story);
 
         bool? AddStoryCast(StoryCast storyCast);
 
@@ -55,6 +55,11 @@ namespace TaymadeEntities.DAL.Interfaces
 
         bool UpdateStoryDictionary(StoryDictionary? storyDictionary);
         bool AddAuthor(Author author);
+        Task<bool> UpdateAsync(Story story);
+        StoryDictionary? GetStoryDictionary(int id);
+        bool AddStoryTransInfo(StoryTransInfo storyTransInfo);
+        Task<bool> InsertStoryAsync(Story story);
+        IEnumerable<Author> GetAuthors();
         #endregion Public Methods
     }
 }

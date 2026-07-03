@@ -86,6 +86,11 @@ namespace TaymadeEntities.Models
         [Key]
         public new int Id { get; set; }
 
+        public void Delete()
+        {
+            DataController.MusicController.DeleteGroupMember(this);
+        }
+
         #endregion
 
         #region Methods
@@ -93,7 +98,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// The Insert.
         /// </summary>
-        internal void Insert()
+        public void Insert()
         {
             DataController.MusicEntitiesContext.GroupMembers.Add(this);
             DataController.MusicEntitiesContext.SaveChanges();

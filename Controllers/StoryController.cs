@@ -135,9 +135,9 @@ namespace TaymadeEntities.Controllers
             return storyRepository.GetStoryCastById(pkInt);
         }
 
-        internal void AddStory(Story story)
+        internal bool AddStory(Story story)
         {
-            storyRepository.Add(story);
+            return storyRepository.Add(story);
         }
 
         internal List<WordHeadings>? GetWordHeadingsList(int id)
@@ -173,6 +173,31 @@ namespace TaymadeEntities.Controllers
         internal bool AddAuthor(Author author)
         {
             return storyRepository.AddAuthor(author);
+        }
+
+        internal async Task<bool> UpdateAsync(Story story)
+        {
+            return await storyRepository.UpdateAsync(story);
+        }
+
+        internal StoryDictionary? GetStoryDictionary(int id)
+        {
+            return storyRepository.GetStoryDictionary(id);
+        }
+
+        internal bool AddStoryTransfer(StoryTransInfo storyTransInfo)
+        {
+            return storyRepository.AddStoryTransInfo(storyTransInfo);
+        }
+
+        internal Task<bool> InsertStoryAsync(Story story)
+        {
+            return storyRepository.InsertStoryAsync(story);
+        }
+
+        internal IEnumerable<Author> GetAuthors()
+        {
+            return storyRepository.GetAuthors();
         }
 
         #endregion Protected Methods

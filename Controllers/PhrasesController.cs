@@ -93,6 +93,17 @@ namespace TaymadeEntities.Controllers
             phrasesRepository.Add(tempPhrase);
         }
 
+        internal PhraseEntry? GetByPhraseId(string value)
+        {
+            return phrasesRepository.GetByPhraseId(value);
+
+        }
+
+        internal PhraseEntry? GetByCompKey(int phraseId, string genre)
+        {
+            return phrasesRepository.GetByCompKey(phraseId, genre);
+        }
+
         //internal void Update(PhraseEntry Phrase)
         //{
         //    phrasesRepository.Update(phrase);

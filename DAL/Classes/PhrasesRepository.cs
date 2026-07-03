@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml.EMMA;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Wordprocessing;
+using OpenXmlPowerTools;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -58,6 +59,16 @@ namespace TaymadeEntities.DAL.Classes
         {
             PhraseEntry? phraseEntry = _context.PhraseEntry.Find(id);
             return phraseEntry;
+        }
+
+        public PhraseEntry? GetByPhraseId(string value)
+        {
+            return _context.PhraseEntry.Where(x => x.Id == value).FirstOrDefault();
+        }
+
+        public PhraseEntry? GetByCompKey(int phraseId, string genre)
+        {
+            return _context.PhraseEntry.Where(p => p.PhraseID == phraseId && p.COMPKEY == genre).FirstOrDefault();
         }
 
         public List<PhraseHeader>? GetPhraseHeaders()

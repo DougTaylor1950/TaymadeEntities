@@ -186,9 +186,11 @@
 		</StackPanel>
 		<StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center" Height="50">
 
-			<tcb:OKCancelPanel HorizontalAlignment="Center"
-							   Name="OKCancelPanel"
-							   Margin="5" Height="40" />
+			<tcb:OkButton Name="OkButton" Width="100" Height="40" HorizontalContentAlignment="Center"
+						  Click="OkButton_Click"/>
+			<tcb:CancelButton Name="CancelButton" Width="100" Height="40" HorizontalContentAlignment="Center"
+						  Click="CancelButton_Click"/>
+
 		</StackPanel>
 
 

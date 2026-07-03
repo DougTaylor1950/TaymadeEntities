@@ -42,7 +42,7 @@ public partial class StoryMaintenance : Window, IDisposable
         if (DataContext != null)
         {
             StoryViewModel = DataContext as StoryViewModel;
-            
+
             StoryViewModel?.Caller = this;
         }
     }
@@ -74,7 +74,7 @@ public partial class StoryMaintenance : Window, IDisposable
 
 
             // build the path to the new author's story directory
-            string authorStoryPath = System.IO.Path.Combine(StoryViewModel.DefaultStoryDirectory + @"\pd\", newAuthor.Name);
+            string authorStoryPath = System.IO.Path.Combine(StoryViewModel.DefaultStoryDirectory + @"\pd\done\", newAuthor.Name);
             if (!Directory.Exists(authorStoryPath))
             {
                 // create directory
@@ -83,8 +83,10 @@ public partial class StoryMaintenance : Window, IDisposable
             newAuthor.StoryPath = authorStoryPath;
             newAuthor.Save();
 
+            StoryViewModel?.Authors = new ObservableCollection<Author>(
+                DataController.StoryController.GetAuthors());
             StoryViewModel?.Authors.Add(newAuthor);
-            StoryViewModel?.Authors = new ObservableCollection<Author>(StoryViewModel?.Authors);
+
         }
 
     }
@@ -129,6 +131,14 @@ public partial class StoryMaintenance : Window, IDisposable
         GC.SuppressFinalize(this);
     }
 
+    private void SaveAuthor_Click(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (StoryViewModel != null && StoryViewModel.CurrentAuthor != null)
+        {
+            // properties are bound to the CurrentAuthor, so no need to set the name explicitly
+            StoryViewModel.CurrentAuthor.Save();
+        }
+    }
     private void OkButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         this.Close(true);

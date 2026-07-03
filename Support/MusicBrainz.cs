@@ -12,7 +12,9 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using TaymadeEntities.Models;
 using TaymadeEntities.MusicBrainzSupport;
+using static System.Net.WebRequestMethods;
 using Query = MetaBrainz.MusicBrainz.Query;
 
 namespace TaymadeEntities.Support
@@ -58,26 +60,46 @@ namespace TaymadeEntities.Support
 
         }
 
-        public async Task<string> GetArtist(string name)
+        public  static MBArtist GetArtist(string mbid)
         {
-            string result = string.Empty;
-
-            if (query == null) query = new Query("MusicBox", "1.00", "mailto:Doug.Taylor@taymade.Co.Uk");
-
-            string searchquery = "artist:" + '"' + name + '"';
-            var person = await query.FindArtistsAsync("artist:" + '"' + name + '"');
-
-            var list = person.Results;
-            if (list.Count > 0)
+            string empty = string.Empty;
+            string searchUrl = baseAddress + "artist/" + mbid + artistInclude + jsonFormat;
+            empty = CallWebClient(searchUrl);
+            MBArtist mBArtist = JsonConvert.DeserializeObject<MBArtist>(empty);
+            if (mBArtist != null)
             {
-                var topPerson = list[0];
-                if (topPerson.Score > 95)
-                {
-                    result = topPerson.Item.Id.ToString();
-                }
+                mBArtist.JSON = empty;
             }
 
-            return result;
+            return mBArtist;
+        }
+
+        public async static Task<MBArtist?> GetArtistAsync(string mbid)
+        {
+            string empty = string.Empty;
+            string searchUrl = baseAddress + "artist/" + mbid + artistInclude + jsonFormat;
+            empty = await CallWebClientAsync(searchUrl);
+            MBArtist? mBArtist = JsonConvert.DeserializeObject<MBArtist>(empty);
+            if (mBArtist != null)
+            {
+                mBArtist.JSON = empty;
+            }
+
+            return mBArtist;
+        }
+
+        public static MBArtist GetArtistReleases(string mbid)
+        {
+            string empty = string.Empty;
+            string searchUrl = baseAddress + "artist/" + mbid + artistRecordingsInclude + jsonFormat;
+            empty = CallWebClient(searchUrl);
+            MBArtist mBArtist = JsonConvert.DeserializeObject<MBArtist>(empty);
+            if (mBArtist != null)
+            {
+                mBArtist.JSON = empty;
+            }
+
+            return mBArtist;
         }
 
         private async static Task<string> CallWebClientAsync(string searchUrl)
@@ -140,7 +162,7 @@ namespace TaymadeEntities.Support
         //}
 
         public static SearchRelease GetReleaseInfo(string mbid)
-        {
+        { 
             SearchRelease searchRelease = null;
             string empty = string.Empty;
             string searchUrl = baseAddress + "release/" + mbid + "?inc=labels+recordings+media+artists+artist-rels" + jsonFormat;
@@ -148,11 +170,16 @@ namespace TaymadeEntities.Support
             return JsonConvert.DeserializeObject<SearchRelease>(empty);
         }
 
-        public static async Task<SearchRelease> GetReleaseInfoAsync(string mbid)
+        public static async Task<SearchRelease> GetReleaseInfoAsync(string mbid, string? additionrels ="")
         {
             _ = string.Empty;
-            string query = baseAddress + "release/" + mbid + "?inc=labels+recordings+media+artists+artist-rels" + jsonFormat;
-            return JsonConvert.DeserializeObject<SearchRelease>(await CallWebClientAsync(query));
+            string query = baseAddress + "release/" + mbid 
+                + "?inc=labels+recordings+media+artists+artist-rels" 
+                + additionrels
+                + jsonFormat;
+
+            string? resp = await CallWebClientAsync(query);
+            return JsonConvert.DeserializeObject<SearchRelease>(resp);
         }
 
         public static MBReleaseGroup GetReleases(string musicBrainzReleaseGroup)
@@ -178,56 +205,78 @@ namespace TaymadeEntities.Support
             return mBReleaseGroup;
         }
 
-        public static MBTrack GetTrack(string mbid)
+        public static async Task<bool> GetTrackAsync(AlbumTrack albumTrack)
         {
-            string empty = string.Empty;
-            string searchUrl = baseAddress + "recording/" + mbid + trackInclude + jsonFormat;
-            empty = CallWebClient(searchUrl);
-            MBTrack mBTrack;
-            try
-            {
-                mBTrack = JsonConvert.DeserializeObject<MBTrack>(empty);
-                if (mBTrack != null)
+            bool success = false;
+
+            if (string.IsNullOrEmpty(albumTrack.MusicBrainzTrackID))
+                if (!string.IsNullOrEmpty(albumTrack.MusicBrainzID))
                 {
-                    mBTrack.JSON = empty;
+                    albumTrack.MusicBrainzTrackID = albumTrack.MusicBrainzID;
                 }
-            }
-            catch (Exception)
+                else return success;
+
+            string query = baseAddress + "recording/" + albumTrack.MusicBrainzTrackID
+                + "?inc=releases+artist-credits+artist-rels"
+                + jsonFormat;
+
+            string? resp = await CallWebClientAsync(query);
+
+            var settings = new JsonSerializerSettings
             {
-                return null;
+                NullValueHandling = NullValueHandling.Ignore,
+                MissingMemberHandling = MissingMemberHandling.Ignore
+            };
+
+            var trackInfo = JsonConvert.DeserializeObject<MBTrackInfo>(resp,settings);
+
+            MBTrack mBTrack = null;
+            if (trackInfo != null)
+            {
+                success = true;
+                albumTrack.Comment = trackInfo.Performers;
+                albumTrack.Duration = trackInfo.Length;
+                albumTrack.TrackName = trackInfo.Title;
+
             }
 
-            return mBTrack;
+            return success;
         }
 
-        public static AlbumSearch FindAlbum(string query)
+        public static AlbumSearch FindAlbum(string query, string? artist = "")
         {
             string empty = string.Empty;
-            string searchUrl = baseAddress + "release?query=" + query.Replace(" ", "%20") + jsonFormat;
+            string searchUrl = baseAddress + "release?query=" + query.Replace(" ", "%20");
+            // check for artist 
+            if (!string.IsNullOrEmpty(artist))
+            {
+                searchUrl += "%20AND%20artist:" + artist.Replace(" ", "%20");
+            }
+            searchUrl  += jsonFormat;
             empty = CallWebClient(searchUrl);
             return JsonConvert.DeserializeObject<AlbumSearch>(empty);
         }
 
         //public static async Task<MBAlbum> FindAlbumFromArtistAsync(string artistMBID, string query)
         //{
-            //MBArtist artist = GetArtistReleases(artistMBID);
-            //SearchRelease release = artist.Releases.Find((SearchRelease x) => x.Title.ToLower() == query.ToLower());
-            //MBAlbum mbAlbum = null;
-            //if (release != null)
-            //{
-            //    mbAlbum = await GetAlbumAsync(release.Id);
-            //}
-
-            //return mbAlbum;
-        //}
-
-        //public static ArtistSearch FindArtist(string query)
+        //MBArtist artist = GetArtistReleases(artistMBID);
+        //SearchRelease release = artist.Releases.Find((SearchRelease x) => x.Title.ToLower() == query.ToLower());
+        //MBAlbum mbAlbum = null;
+        //if (release != null)
         //{
-        //    string empty = string.Empty;
-        //    string searchUrl = baseAddress + "artist?query=" + query.Replace(" ", "%20") + jsonFormat;
-        //    empty = CallWebClient(searchUrl);
-        //    return JsonConvert.DeserializeObject<ArtistSearch>(empty);
+        //    mbAlbum = await GetAlbumAsync(release.Id);
         //}
+
+        //return mbAlbum;
+        //}
+
+        public static ArtistSearch FindArtist(string query)
+        {
+            string empty = string.Empty;
+            string searchUrl = baseAddress + "artist?query=" + query.Replace(" ", "%20") + jsonFormat;
+            empty = CallWebClient(searchUrl);
+            return JsonConvert.DeserializeObject<ArtistSearch>(empty);
+        }
 
         public static WikiSearch GetWikiInfo(string queryInfo)
         {
