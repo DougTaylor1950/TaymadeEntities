@@ -30,10 +30,10 @@ namespace TaymadeEntities.Support
         /// <summary>
         /// Gets or sets the Result.
         /// </summary>
-        public int Result { get; internal set; }
+        public int Result { get;  set; }
 
 
-      //  public List<MissingFile>? Missing { get; set; }
+        public List<MissingFile>? Missing { get; set; }
 
         public List<string>? Paths { get; set; }
         #endregion

@@ -37,6 +37,7 @@ namespace TaymadeEntities.ViewModels
         private int? progressPercent;
         private string? missingInfo;
         private int? progressPercentShow;
+        private FileMonitor _monitor;
 
         internal Avalonia.Media.IBrush backgroundColor { get; set; }
 
@@ -50,6 +51,7 @@ namespace TaymadeEntities.ViewModels
             CreateSubFolder = ReactiveCommand.Create(DoCreateSubFolder);
             EditPicture = ReactiveCommand.Create(DoEditPicture);
             ReloadPictures = ReactiveCommand.Create(DoReloadPictures);
+            ReloadPicture = ReactiveCommand.Create(DoReloadPicture);
             DeletePicture = ReactiveCommand.Create(DoDeletePicture);
 
             UsePicturesAsItems = true;
@@ -57,6 +59,8 @@ namespace TaymadeEntities.ViewModels
 
             //MVVM = Support.Support.GetMainWindowViewModel();
         }
+
+       
 
         #endregion Public Constructors
 
@@ -126,6 +130,7 @@ namespace TaymadeEntities.ViewModels
         public ReactiveCommand<Unit, Unit> DeletePicture { get; private set; }
         public ReactiveCommand<Unit, Unit> EditPicture { get; private set; }
         public ReactiveCommand<Unit, Unit> ReloadPictures { get; private set; }
+        public ReactiveCommand<Unit, Unit> ReloadPicture { get; private set; }
         public RootFolder? RootFolder
         {
             get
@@ -755,6 +760,8 @@ namespace TaymadeEntities.ViewModels
         {
             string PSP = @"C:\Program Files (x86)\Corel\Corel Paint Shop Pro X\Paint Shop Pro X.exe";
 
+
+
             //clear old image from last image item if it exists
             if (lastImageItem != null && lastImageItem != RootFolder.CurrentImageItem)
             {
@@ -770,6 +777,27 @@ namespace TaymadeEntities.ViewModels
 
             // quate image path
             string imagepath = '"' + RootFolder.CurrentImageItem.ImagePath + '"';
+
+            // fire up Monitor to watch for changes to the file and reload it when it is saved
+           
+            if (_monitor != null)
+            {
+                _monitor.Cancel();
+                _monitor.Dispose();
+            }
+
+            _monitor = new FileMonitor();
+                
+            _monitor.FileFound += (_, _) =>
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    RootFolder.CurrentImageItem.ReloadImage();
+                });
+                
+            };
+
+            _ = _monitor.RunAsync(RootFolder.CurrentImageItem.ImagePath);
 
             int ec = await FFMpegSupport.DoCliWrap(PSP, imagepath);
             if (ec == 0 && lastImageItem != null)
@@ -914,6 +942,10 @@ namespace TaymadeEntities.ViewModels
             //}
         }
 
+        private void DoReloadPicture()
+        {
+            RootFolder.CurrentImageItem.ReloadImage();
+        }
         private void DoReloadPictures()
         {
             RootFolder.ReloadPictures();
