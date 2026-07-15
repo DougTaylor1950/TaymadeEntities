@@ -1025,13 +1025,15 @@ namespace TaymadeEntities.Models
             if (newStory.Id == 0)
             {
                 newStory.Insert();
-                newStory.StoryDictionary = new StoryDictionary()
-                {
-                    StoryId = newStory.Id,
-                    DictionaryText = ""
-                };
-                newStory.StoryDictionary.Insert();
+                
             }
+            newStory.StoryDictionary = new StoryDictionary()
+            {
+                StoryId = newStory.Id,
+                DictionaryText = ""
+            };
+            newStory.Save();
+            newStory.StoryDictionary.Insert();
             return newStory;
         }
 

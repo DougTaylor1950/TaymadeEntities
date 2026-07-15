@@ -1,0 +1,26 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        xmlns:controls="using:TaymadeEntities.Controls"
+        xmlns:vm="using:TaymadeEntities.ViewModels"
+        x:Class="TaymadeEntities.PlayerDialog"
+        Title="PlayerDialog"
+        WindowState="Maximized"
+        x:DataType="vm:PlayerViewModel"
+        >
+
+    <Border BorderBrush="Black" BorderThickness="1">
+        <StackPanel>
+            <StackPanel IsVisible="{Binding !IsMusic}">
+                <controls:VideoPlayer Name="ControlledPlayer" IsVisible="{Binding !FullScreen}" />
+                <controls:VideoPlayerFull Name="FullScreenPlayer" IsVisible="{Binding FullScreen}" />
+            </StackPanel>
+            <StackPanel IsVisible="{Binding IsMusic}">
+                <controls:MusicPlayer Name="MusicPlayer" />
+            </StackPanel>
+
+        </StackPanel>
+    </Border>
+</Window>

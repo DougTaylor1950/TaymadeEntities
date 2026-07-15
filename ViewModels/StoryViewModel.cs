@@ -729,9 +729,11 @@ namespace TaymadeEntities.ViewModels
 
                             // add fileinfo
 
+                            if (CurrentStory == null) CurrentStory = DataController.StoryController.GetStories().MaxBy(s => s.Id);
+
                             if (CurrentStory == null) return;
 
-                            if (fileInfo != null)
+                                if (fileInfo != null)
                             {
                                 CurrentStory.Added = DateTime.Now;
                                 CurrentStory.Creation = lastWriteTime;

@@ -674,8 +674,16 @@ namespace TaymadeEntities.Models
                 }
 
                 SetPercentUnmarked();
+                try
+                {
+                    DataController.MovieController.UpdateMovie(this);
+                }
+                catch (Exception ex)
+                {
 
-                DataController.MovieController.UpdateMovie(this);
+                    
+                }
+                
             }
             catch (Exception)
             {

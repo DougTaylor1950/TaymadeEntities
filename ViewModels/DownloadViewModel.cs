@@ -9,10 +9,12 @@
 namespace TaymadeEntities.ViewModels
 {
     using Avalonia.Controls;
-    using TaymadeEntities.Models;
-    using TaymadeEntities.Support;
-    using TaymadeEntities.Views;
+    using Avalonia.Threading;
+    using DocumentFormat.OpenXml.Bibliography;
     using DynamicData;
+    using FileSupport;
+    using MsBox.Avalonia;
+    using MsBox.Avalonia.Enums;
     using ReactiveUI;
     using System;
     using System.Collections.Generic;
@@ -23,10 +25,10 @@ namespace TaymadeEntities.ViewModels
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using System.Windows.Input;
-    using MsBox.Avalonia;
-    using MsBox.Avalonia.Enums;
     using TaymadeEntities.Dialogs;
-    using FileSupport;
+    using TaymadeEntities.Models;
+    using TaymadeEntities.Support;
+    using TaymadeEntities.Views;
 
     /// <summary>
     /// Defines the <see cref="DownloadViewModel" />.
@@ -44,6 +46,7 @@ namespace TaymadeEntities.ViewModels
         /// Defines the currentMovie.
         /// </summary>
         private Movies currentMovie;
+        private FileMonitor _monitor;
 
         private UnboundGridData? currentRow;
 
@@ -128,7 +131,10 @@ namespace TaymadeEntities.ViewModels
             SetUpCommands();
 
             this.SetupProperties();
+
+            
         }
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DownloadViewModel"/> class.
@@ -151,6 +157,46 @@ namespace TaymadeEntities.ViewModels
             Unbounds = new ObservableCollection<UnboundGridData>(unboundData);
 
             this.SetupProperties();
+
+            if (_monitor != null)
+            {
+                _monitor.Cancel();
+                _monitor.Dispose();
+            }
+
+            SetUpMonitor();
+
+        }
+
+
+        public void SetUpMonitor()
+        {
+            _monitor = new FileMonitor();
+
+            _monitor.NewFileFound += (Object? sender, FileFoundEventArgs args) =>
+            {
+                if (args != null && !string.IsNullOrEmpty(args.FilePath))
+                {
+                    UnboundGridData? newData = new UnboundGridData()
+                    {
+                        FileName = args.FilePath,
+                        Name = Path.GetFileNameWithoutExtension(args.FilePath)
+                    };
+
+                    if (newData != null)
+                    {
+                        Unbounds.Add(newData);
+                        UpdateMainWindow(newData, " --added");
+                    }
+                }
+
+                //Dispatcher.UIThread.Post(() =>
+                //{
+
+                //});
+                _ = _monitor.GetLatestFileAsync(@"K:\TD1\White\Download");
+
+            };
         }
 
         private void SetupProperties()
@@ -176,6 +222,9 @@ namespace TaymadeEntities.ViewModels
                 SortDirection = -1;
             }
             SortList();
+
+            //System.IO.FileInfo latest = FileMonitorSupport.GetLatestFile(@"K:\TD1\White\Download);
+
 
             //this.MoveToLastItem();
         }

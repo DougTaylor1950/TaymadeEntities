@@ -1,0 +1,206 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vlc="using:LibVLCSharp.Avalonia"
+			 xmlns:viewModels="using:TaymadeEntities.ViewModels"
+			 xmlns:tcb="using:TaymadeControls.Buttons"
+			 xmlns:views="using:TaymadeEntities.Views"
+			 xmlns:controls="using:TaymadeEntities.Controls"
+			 mc:Ignorable="d" d:DesignWidth="1900"
+			 d:DesignHeight="1400"
+			 x:Class="TaymadeEntities.Controls.MusicPlayer"
+			 x:DataType="viewModels:PlayerViewModel"
+			 >
+
+	<Design.DataContext>
+		<viewModels:PlayerViewModel />
+	</Design.DataContext>
+	<StackPanel>
+
+		<Border BorderBrush="Black"
+				BorderThickness="2"
+				Background="LightGray"
+				CornerRadius="5">
+
+			<StackPanel Orientation="Vertical"   >
+
+				<vlc:VideoView MediaPlayer="{Binding MediaPlayerMusic}"
+							   Width="{Binding MusicPlayerWidth}"
+							   Height="{Binding MusicPlayerHeight}"
+							   IsVisible="{Binding IsTrackOnly}"
+							   Opacity="20"
+							   HorizontalAlignment="Stretch"
+							   VerticalAlignment="Stretch"
+							   PointerEntered="VideoViewOnPointerEntered"
+							   PointerExited="VideoViewOnPointerExited"
+							   Margin="5,5,5,5"
+							   Name="MusicPlayerVideoView"
+							   >
+
+				</vlc:VideoView>
+
+				<StackPanel Orientation="Vertical">
+					<Grid Height="{Binding ImageHeight}"
+						  Width="{Binding ImageWidth}"
+						  HorizontalAlignment="Left" >
+						<Image Source="{Binding ImageBMP}"
+							   HorizontalAlignment="Left"
+							   Width="{Binding ImageWidth}"
+							   Height="{Binding ImageHeight}"
+							   />
+						<Border
+						Height="{Binding ImageHeight}"
+						HorizontalAlignment="Left"
+						Width="2"
+						Background="Lime"
+						>
+							<Border.RenderTransform>
+								<TranslateTransform X="{Binding ProgressX}" />
+							</Border.RenderTransform>
+						</Border>
+					</Grid>
+					<StackPanel Orientation="Horizontal">
+						<DataGrid ItemsSource="{Binding CurrentAlbum.AlbumTracks}"
+								  SelectedItem="{Binding CurrentTrack}"
+								  Name="TrackGrid"
+								  IsVisible="{Binding !IsTrackOnly}"
+								  Height="400">
+							<DataGrid.Columns>
+								<DataGridTextColumn Header="Track No"
+													Binding="{Binding TrackNo}"/>
+								<DataGridTextColumn Header="Track Name"
+													Binding="{Binding TrackName}"/>
+								<DataGridTextColumn Header="Duration"
+													Binding="{Binding TrackDuration}"/>
+								<DataGridTextColumn Header="Track Path"
+													Binding="{Binding TrackPath}"
+													/>
+							</DataGrid.Columns>
+						</DataGrid>
+						<StackPanel Width="20" Background="DarkGray"/>
+						<Border BorderBrush="Black" BorderThickness="2" IsVisible="{Binding IsTrackOnly}">
+							<Image Source="{Binding CurrentAlbum.ImageBMP}"
+								   Width=" 400"/>
+						</Border>
+					</StackPanel>
+				</StackPanel>
+				<StackPanel IsVisible="{Binding IsTrackOnly}">
+					<Grid>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="30"/>
+						</Grid.RowDefinitions>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="70" />
+							<ColumnDefinition Width="70" />
+							<ColumnDefinition Width="70" />
+							<ColumnDefinition Width="250" />
+							<ColumnDefinition Width="70" />
+							<ColumnDefinition Width="70" />
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Text="Track No" Grid.Column="0"/>
+						<TextBox Text="{Binding CurrentTrack.TrackNo}" Grid.Column="1"/>
+						<TextBlock Text="Name" Grid.Column="2"/>
+						<TextBox Text="{Binding CurrentTrack.TrackName}" Grid.Column="3"/>
+						<TextBlock Text="Duration" Grid.Column="4"/>
+						<TextBox Text="{Binding CurrentTrack.Duration}" Grid.Column="5"/>
+					</Grid>
+				</StackPanel>
+
+				<Slider Minimum="0"
+						Maximum="100"
+						Value="{Binding Progress, Mode=TwoWay}"
+						Width="{Binding MusicPlayerWidth}"
+						Height="40"
+						Margin="2"
+
+						HorizontalAlignment="Center"
+						VerticalAlignment="Bottom"
+
+
+						/>
+				<StackPanel Orientation="Horizontal" Height="70">
+					<tcb:ImagedButtonNoText Command="{Binding Play}"
+											Margin="5,5,5,5"
+											ImageSource="avares://TaymadeControls/Assets/play.png"
+											/>
+					<tcb:ImagedButtonNoText Command="{Binding Pause}"
+											Margin="5,5,5,5"
+											ImageSource="avares://TaymadeControls/Assets/Pause.png"
+											/>
+					<tcb:ImagedButtonNoText Command="{Binding Stop}"
+											Margin="5,5,5,5"
+											ImageSource="avares://TaymadeControls/Assets/stop.png"
+											/>
+
+					<TextBox Text="{Binding Percent, Mode=OneWay}" Margin="5,5,5,5" Width="100"
+							 VerticalAlignment="Center"
+							 />
+					<tcb:ImagedButton Command="{Binding Plus20}"
+									  Margin="5,5,5,5"
+									  LabelText="+20"
+									  ImageSource="avares://TaymadeControls/Assets/move.png"
+									  />
+					<tcb:ImagedButton Command="{Binding Plus10}"
+									  Margin="5,5,5,5"
+									  LabelText="+10"
+									  ImageSource="avares://TaymadeControls/Assets/move.png"
+									  />
+					<tcb:ImagedButton Command="{Binding Plus5}"
+									  Margin="5,5,5,5"
+									  LabelText="+5"
+									  ImageSource="avares://TaymadeControls/Assets/move.png"
+									  />
+					<tcb:ImagedButton Command="{Binding Plus1}"
+									  Margin="5,5,5,5"
+									  LabelText="+1"
+									  ImageSource="avares://TaymadeControls/Assets/move.png"
+									  />
+					<tcb:ImagedButton Command="{Binding Minus1}"
+									  Margin="5,5,5,5"
+									  LabelText="-1"
+									  ImageSource="avares://TaymadeControls/Assets/moveleft.png"
+									  />
+					<tcb:ImagedButton Command="{Binding Minus5}"
+									  Margin="5,5,5,5"
+									  LabelText="-5"
+									  ImageSource="avares://TaymadeControls/Assets/moveleft.png"
+									  />
+					<tcb:ImagedButton Command="{Binding Minus10}"
+									  Margin="5,5,20,5"
+									  LabelText="-10"
+									  ImageSource="avares://TaymadeControls/Assets/moveleft.png"
+									  />
+					<tcb:ImagedButton Command="{Binding NextBookmark}"
+									  IsVisible="{Binding HasTracks}"
+									  Margin="20,5,5,5"
+									  LabelText="Next"
+									  ButtonToolTip="Next Track"
+									  ImageSource="avares://TaymadeControls/Assets/next.png"
+									  />
+					<tcb:ImagedButton Command="{Binding PrevBookmark}"
+									  IsVisible="{Binding HasTracks}"
+									  ButtonToolTip="Previous Track"
+									  Margin="5,5,20,5"
+									  LabelText="Prev"
+
+									  ImageSource="avares://TaymadeControls/Assets/prev.png"
+									  />
+					<Slider Name="volumeSetter"
+							Ticks="0,10,20,30,40,50,60,70,80,90,100"
+							TickFrequency="10"
+							TickPlacement="TopLeft"
+							Value="{Binding Volume}"
+							Maximum="100"
+							Minimum="0"
+							Width="190"/>
+
+
+
+				</StackPanel>
+			</StackPanel>
+
+		</Border>
+	</StackPanel>
+</UserControl>

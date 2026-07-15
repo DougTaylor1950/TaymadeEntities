@@ -1,0 +1,141 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:vlc="using:LibVLCSharp.Avalonia"
+			 xmlns:viewModels="using:TaymadeEntities.ViewModels"
+			 xmlns:tcb="using:TaymadeControls.Buttons"
+			 xmlns:views="using:TaymadeEntities.Views"
+			 xmlns:controls="using:TaymadeEntities.Controls"
+			 mc:Ignorable="d" d:DesignWidth="1800"
+			 d:DesignHeight="1250"
+			 x:Class="TaymadeEntities.Controls.VideoPlayerFull"
+			 x:DataType="viewModels:PlayerViewModel"
+			 >
+
+	<Design.DataContext>
+		<viewModels:PlayerViewModel />
+	</Design.DataContext>
+	<StackPanel>
+
+		<Border BorderBrush="Black"
+				BorderThickness="2"
+				CornerRadius="5">
+			<StackPanel Orientation="Vertical"   >
+
+				<vlc:VideoView MediaPlayer="{Binding MediaPlayerFull}"
+							   Width="{Binding ScreenWidth}"
+							   Height="{Binding ScreenHeight}"
+							   HorizontalAlignment="Stretch"
+							   VerticalAlignment="Stretch"
+							   PointerEntered="VideoViewOnPointerEntered"
+							   PointerExited="VideoViewOnPointerExited"
+							   Margin="5,5,5,5"
+							   >
+
+				</vlc:VideoView>
+				<Slider Minimum="0"
+							 Maximum="100"
+							 Value="{Binding Progress, Mode=TwoWay}"
+							 Width="1800"
+							 Height="40"
+							 Margin="2"
+							 
+							 HorizontalAlignment="Center"
+							 VerticalAlignment="Bottom"
+							 
+
+							 />
+				<StackPanel Orientation="Horizontal" Height="70">
+					<tcb:ImagedButtonNoText Command="{Binding Play}"
+											Margin="5,5,5,5"
+											ImageSource="avares://TaymadeControls/Assets/play.png"
+											/>
+					<tcb:ImagedButtonNoText Command="{Binding Pause}"
+											Margin="5,5,5,5"
+											ImageSource="avares://TaymadeControls/Assets/Pause.png"
+											/>
+					<tcb:ImagedButtonNoText Command="{Binding Stop}"
+											Margin="5,5,5,5"
+											ImageSource="avares://TaymadeControls/Assets/stop.png"
+											/>
+
+					<TextBox Text="{Binding Percent, Mode=OneWay}" Margin="5,5,5,5" Width="100"
+							 VerticalAlignment="Center"
+							 />
+					<tcb:ImagedButton Command="{Binding Plus20}"
+									  Margin="5,5,5,5"
+									  LabelText="+20"
+									  ImageSource="avares://TaymadeControls/Assets/move.png"
+									  />
+					<tcb:ImagedButton Command="{Binding Plus10}"
+									  Margin="5,5,5,5"
+									  LabelText="+10"
+									  ImageSource="avares://TaymadeControls/Assets/move.png"
+									  />
+					<tcb:ImagedButton Command="{Binding Plus5}"
+									  Margin="5,5,5,5"
+									  LabelText="+5"
+									  ImageSource="avares://TaymadeControls/Assets/move.png"
+									  />
+					<tcb:ImagedButton Command="{Binding Plus1}"
+									  Margin="5,5,5,5"
+									  LabelText="+1"
+									  ImageSource="avares://TaymadeControls/Assets/move.png"
+									  />
+					<tcb:ImagedButton Command="{Binding Minus1}"
+									  Margin="5,5,5,5"
+									  LabelText="-1"
+									  ImageSource="avares://TaymadeControls/Assets/moveleft.png"
+									  />
+					<tcb:ImagedButton Command="{Binding Minus5}"
+									  Margin="5,5,5,5"
+									  LabelText="-5"
+									  ImageSource="avares://TaymadeControls/Assets/moveleft.png"
+									  />
+					<tcb:ImagedButton Command="{Binding Minus10}"
+									  Margin="5,5,20,5"
+									  LabelText="-10"
+									  ImageSource="avares://TaymadeControls/Assets/moveleft.png"
+									  />
+					<tcb:ImagedButton Command="{Binding NextBookmark}"
+									  IsVisible="{Binding HasBookmarks}"
+									  Margin="20,5,5,5"
+									  LabelText="Next"
+									  ImageSource="avares://TaymadeControls/Assets/next.png"
+									  />
+					<tcb:ImagedButton Command="{Binding PrevBookmark}"
+									  IsVisible="{Binding HasBookmarks}"
+									  Margin="5,5,20,5"
+									  LabelText="Prev"
+
+									  ImageSource="avares://TaymadeControls/Assets/prev.png"
+									  />
+					<controls:SpeedPicker
+					Height="68"
+					Margin="1,1,20,2"
+					Background="Beige"
+					ButtonWidth="30"
+					BorderBrush="Gray"
+					BorderThickness="2"
+					SelectedSpeed ="{Binding CurrentSpeed, Mode=TwoWay}"
+					DoubleTapped="SpeedPicker_DoubleTapped"
+					
+
+					Grid.Column="8">
+
+					</controls:SpeedPicker>
+					<Slider Name="volumeSetter" 
+							Ticks="0,10,20,30,40,50,60,70,80,90,100"
+							TickFrequency="10"
+							TickPlacement="TopLeft"
+							Value="{Binding Volume}"
+							Maximum="100"
+							Minimum="0"
+							Width="190"/>
+				</StackPanel>
+			</StackPanel>
+
+		</Border>
+	</StackPanel>
+</UserControl>

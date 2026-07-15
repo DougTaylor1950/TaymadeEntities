@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="using:TaymadeEntities.ViewModels"
+             xmlns:cc="clr-namespace:TaymadeEntities.Controls"
+			 mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="60"
+             x:DataType="viewModels:PlayerViewModel"
+			 x:Class="TaymadeEntities.Controls.SpeedPicker">
+	<Design.DataContext>
+		<viewModels:PlayerViewModel />
+	</Design.DataContext>
+	<Panel Height="90" Width="300" VerticalAlignment="Top">
+		<StackPanel Orientation="Vertical"  >
+			<TextBox
+				Name="SpeedLabel" 
+				Background="Beige"
+				Text="{Binding LabelContent}" 
+				HorizontalAlignment="Center" />
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+				<Button Content=".1" Click="B01" Name="B0p1"  />
+				<Button Content=".2" Click="B02" Name="B0p2" />
+				<Button Content=".5" Click="B05" Name="B0p5" />
+				<Button Content="1" Click="B1" Name="B1p0" />
+				<Button Content="1.5" Click="B15" Name="B1p5"/>
+				<Button Content="2" Click="B2" Name="B2p0"  />
+				<Button Content="3" Click="B3" Name="B3p0"/>
+				<Button Content="4" Click="B4" Name="B4p0" />
+			</StackPanel>
+		</StackPanel>
+	</Panel>
+</UserControl>

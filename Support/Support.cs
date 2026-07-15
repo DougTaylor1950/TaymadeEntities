@@ -208,7 +208,7 @@ namespace TaymadeEntities.Support
                                 actor = DataController.ActorController.GetActorByName(item.Name);
                                 if (actor != null)
                                 {
-                                    DataController.ActorController.SetDetailsFromCastMember(actor,item);
+                                    DataController.ActorController.SetDetailsFromCastMember(actor, item);
                                     //actor.SetDetailsFromCastMember(item);
                                     // DataController.ActorController.Save(actor);
                                     //actor.Save();
@@ -1097,7 +1097,7 @@ namespace TaymadeEntities.Support
                 string machineName = GetComputerName();
                 List<MappedDrives> mappedDrives = DataController.MaintenaceController.GetDrivesByComputerName(machineName);
 
-              // List <MappedDrives> mappedDrives = DataController.SandboxEntities.MappedDrives.Where(s => s.Computer == machineName && s.LocationType == "PATH").ToList();
+                // List <MappedDrives> mappedDrives = DataController.SandboxEntities.MappedDrives.Where(s => s.Computer == machineName && s.LocationType == "PATH").ToList();
 
                 MappedDrives? mapped = mappedDrives.Where(d => filename.ToLower().Contains(d.SourceDrive)).FirstOrDefault();
 
@@ -1122,7 +1122,7 @@ namespace TaymadeEntities.Support
                         tPath = tPath.Replace(stub, @"W:\Drive-P\");
                     }
 
-                    if (mpath.Contains(@"j:\",StringComparison.OrdinalIgnoreCase))
+                    if (mpath.Contains(@"j:\", StringComparison.OrdinalIgnoreCase))
                     {
                         string stub = tPath.Substring(0, 3);
                         tPath = tPath.Replace(stub, @"W:\Drive-j\");
@@ -1533,6 +1533,35 @@ namespace TaymadeEntities.Support
             return retBMP;
         }
 
+
+        public static Avalonia.Media.Imaging.Bitmap? GetBMPFromBitmap(System.Drawing.Image sBitmap)
+        {
+            Avalonia.Media.Imaging.Bitmap? retBMP = null;
+            try
+            {
+                using (System.IO.MemoryStream memory = new System.IO.MemoryStream())
+                {
+                    sBitmap?.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                    memory.Position = 0;
+
+                    retBMP = new Avalonia.Media.Imaging.Bitmap(memory);
+                }
+                sBitmap?.Dispose();
+                sBitmap = null;
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+
+            }
+
+            return retBMP;
+        }
+
         public static Avalonia.Media.Imaging.Bitmap? AddRectangle(Avalonia.Media.Imaging.Bitmap source, Rectangle rect)
         {
             Avalonia.Media.Imaging.Bitmap? retBMP = null;
@@ -1859,7 +1888,7 @@ namespace TaymadeEntities.Support
             {
                 psi.Arguments = '"' + mPath + '"' + " --start-time=" + currentBookmark.Time.ToString();
             }
-            else psi.Arguments = '"' + mPath +'"' ;
+            else psi.Arguments = '"' + mPath + '"';
             VLCProcess = Process.Start(psi);
         }
 
@@ -1959,7 +1988,7 @@ namespace TaymadeEntities.Support
 
         }
 
-        internal static string FormatFileSize(long totalSize)
+        public static string FormatFileSize(long totalSize)
         {
             return totalSize
                 switch

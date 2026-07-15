@@ -23,7 +23,7 @@ namespace TaymadeEntities.Support
     /// <summary>
     /// Defines the <see cref="FFMpegSupport" />.
     /// </summary>
-    public class FFMpegSupport
+    public class FFMpegSupport :IDisposable
     {
         #region Constants
 
@@ -43,6 +43,8 @@ namespace TaymadeEntities.Support
         /// Defines the action.
         /// </summary>
         public string action = string.Empty;
+
+        public CancellationTokenSource cts = new CancellationTokenSource();
 
         /// <summary>
         /// Defines the Busy.
@@ -278,6 +280,17 @@ namespace TaymadeEntities.Support
         #endregion
 
         #region Methods
+
+        public void Cancel()
+        {
+            cts.Cancel();
+        }
+
+        public void Dispose()
+        {
+            cts.Cancel();
+            cts.Dispose();
+        }
 
         public  async Task<string> GrabImage(string? moviePath, string? bookmarkImagePath
             , double? seconds)
@@ -1763,7 +1776,7 @@ namespace TaymadeEntities.Support
         {
             int errorCode = 0;
 
-            var cts = new CancellationTokenSource();
+            
 
             // timeout extended as it was cancelling on setting chapters
             TimeSpan cancelDelay = TimeSpan.FromSeconds(400);
@@ -1780,11 +1793,9 @@ namespace TaymadeEntities.Support
 
             var cmd = Cli.Wrap(FFmpegFilePath)
                 .WithArguments(param);
-
+            
             try
             {
-
-
 
                 await foreach (var cmdEvent in cmd.ListenAsync(System.Text.Encoding.Default, cts.Token))
                 {

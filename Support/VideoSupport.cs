@@ -245,6 +245,11 @@ namespace TaymadeEntities.Support
             return XSPFilename;
         }
 
+        public static async Task<string> GetVideoFrameSize(string moviePath)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// The GetDuration.
         /// </summary>
@@ -372,7 +377,12 @@ namespace TaymadeEntities.Support
                 currentBookmark?.SetImageBMP();
                 imagePath = currentBookmark?.ImagePath;
                 // save changed bookmark
-                bool success = await currentBookmark?.SaveAsync();
+                if (currentBookmark != null && currentBookmark.MovieID > 0)
+                {
+                    // will cause a Foriegn Key violation if the bookmark has no Movie Id which for unbound bookmarks is the case,
+                    // so only save if the bookmark has a valid Movie Id
+                    bool success = await currentBookmark.SaveAsync();
+                }
                 fFMpegSupport = null;
             }
 

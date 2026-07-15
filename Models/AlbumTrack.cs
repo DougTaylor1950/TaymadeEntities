@@ -32,7 +32,21 @@ namespace TaymadeEntities.Models
         public new int Id { get; set; }
         public int AlbumID { get; set; }
         public string TrackName { get => trackName; set => this.RaiseAndSetIfChanged(ref trackName, value); }
-        public string TrackPath { get => trackPath; set => this.RaiseAndSetIfChanged(ref trackPath, value); }
+        public string TrackPath
+        {
+            get
+            {
+                if (trackPath.Contains("file://"))
+                {
+                    // is a uri
+                    Uri mrl = new Uri(trackPath);
+                    trackPath = mrl.LocalPath;
+                }
+                return trackPath;
+            }
+
+            set => this.RaiseAndSetIfChanged(ref trackPath, value);
+        }
         public int? TrackNo { get => trackNo; set => this.RaiseAndSetIfChanged(ref trackNo, value); }
         public int? Duration { get => duration; set => this.RaiseAndSetIfChanged(ref duration, value); }
         public string ImagePath { get => imagePath; set => this.RaiseAndSetIfChanged(ref imagePath, value); }
