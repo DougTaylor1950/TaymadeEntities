@@ -114,8 +114,8 @@ namespace TaymadeEntities.Models
         {
             get
             {
-                if (fileLength.Value == 0)
-                    Support.DownloadSupport.GetFileInfo(this);
+                //if (fileLength.Value == 0)
+                //    Support.DownloadSupport.GetFileInfo(this);
                 return fileLength.Value / 1024 / 1024;
             }
         }
@@ -124,8 +124,8 @@ namespace TaymadeEntities.Models
         {
             get
             {
-                if (fileLength == 0)
-                    Support.DownloadSupport.GetFileInfo(this);
+                //if (fileLength == 0)
+                //    Support.DownloadSupport.GetFileInfo(this);
                 return $"{FileLengthMB} MB";
             }
         }
@@ -140,8 +140,8 @@ namespace TaymadeEntities.Models
                 if (fileLength == null) fileLength = 0;
 
 
-                if (fileLength == 0)
-                    Support.DownloadSupport.GetFileInfo(this);
+               // if (fileLength == 0) 
+                    //Support.DownloadSupport.GetFileInfo(this);
                 return fileLength;
             }
 

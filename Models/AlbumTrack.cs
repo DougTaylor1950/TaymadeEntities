@@ -14,7 +14,7 @@ namespace TaymadeEntities.Models
     using System.ComponentModel.DataAnnotations.Schema;
     using System.ComponentModel.DataAnnotations;
     using ReactiveUI;
-
+    using NLog.Targets;
 
     [Table("AlbumTracks")]
     public partial class AlbumTrack : ModelBase
@@ -36,6 +36,7 @@ namespace TaymadeEntities.Models
         {
             get
             {
+                if (trackPath == null) trackPath = "";
                 if (trackPath.Contains("file://"))
                 {
                     // is a uri

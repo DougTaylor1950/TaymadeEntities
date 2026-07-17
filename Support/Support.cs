@@ -268,6 +268,8 @@ namespace TaymadeEntities.Support
             }
         }
 
+        
+
         private static void FindOrCreateDirector(Movies movie, iMovie iMovie)
         {
             // look the director up
@@ -1072,7 +1074,7 @@ namespace TaymadeEntities.Support
             return result;
         }
 
-
+        
         public static bool IsWindows()
         {
             string os = GetOS();

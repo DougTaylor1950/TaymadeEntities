@@ -2,17 +2,19 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using DocumentFormat.OpenXml.Bibliography;
 using ExCSS;
 using LibVLCSharp.Shared;
-using ReactiveUI;
 using NAudio.Wave;
 using NAudio.WaveFormRenderer;
+using ReactiveUI;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using TaymadeEntities.Models;
 using TaymadeEntities.Views;
-using System.Diagnostics;
 
 namespace TaymadeEntities.ViewModels
 {
@@ -452,6 +454,7 @@ namespace TaymadeEntities.ViewModels
             MediaPlayer?.Dispose();
             _libVlc?.Dispose();
             ImageBMP?.Dispose();
+            writer.Dispose();
             base.Dispose();
         }
 
@@ -674,6 +677,15 @@ namespace TaymadeEntities.ViewModels
                     {
                         media = new Media(_libVlc, new Uri(MoviePath));
 
+                        if (Recording )
+                        {
+                            string dest = @"K:\TD1\White\Download\" + RecordName + ".mp4" ;
+                            string option = ":sout=#std{access=file,mux=mp4,dst=" + dest + "}";
+                            media.AddOption(option);
+                            media.AddOption(":sout-keep");
+                           
+                        }
+
                         if (CurrentBookmark != null)
                         {
                             //CurrentBookmark = Bookmark;
@@ -683,8 +695,14 @@ namespace TaymadeEntities.ViewModels
 
                         MediaPlayer.Mute = false;
                         MediaPlayer.Volume = Volume;
-
+                        //if (!MediaPlayer.IsPlaying)
+                        //{
+                        //    Exception exception = new Exception("Cannot run file: " + MoviePath);
+                        //    throw exception;
+                        //}
+                        if (!Recording)
                         new DispatcherTimer(TimeSpan.FromMilliseconds(60), DispatcherPriority.Normal, TimerTick).Start();
+                        else Recording = false;
                     }
                     paused = false;
                     playing = true;
@@ -814,6 +832,9 @@ namespace TaymadeEntities.ViewModels
                 Console.Out.WriteLine("Percent=" + Percent);
             }
         }
+
+
+
 
         internal void MoveToStart()
         {
@@ -986,17 +1007,29 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        private TextWriter writer { get; set; } = null;
+        private bool initialised = false;
+
         private void InitialseViewModel()
         {
-            _libVlc = new LibVLC(new[]
-{
-    "--verbose=2"
-});
+            if (initialised) return;
+            Core.Initialize();
+            _libVlc = new LibVLC(new[] { "--verbose=2"});
 
-            //_libVlc.Log += (s, e) =>
-            //{
-            //    Debug.WriteLine($"{e.Level}: {e.Message}");
-            //};
+            writer = TextWriter.Synchronized(
+                new StreamWriter(
+                    new FileStream(@"C:\Nlog\vlc.log", FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+                { AutoFlush = true });
+
+            _libVlc.Log += (sender, e) =>
+            {
+                if (e.Level < LogLevel.Notice)
+                {
+                    writer.WriteLine(
+                        $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} " +
+                        $"[{e.Level}] {e.Module}: {e.Message}");
+                }
+            };
 
             MediaPlayer = new MediaPlayer(_libVlc);
 
@@ -1026,6 +1059,8 @@ namespace TaymadeEntities.ViewModels
             get => imageWidth;
             set => this.RaiseAndSetIfChanged(ref imageWidth, value);
         }
+        public bool Recording { get;  set; }
+        public string RecordName { get;  set; }
 
         public Bitmap? RenderBitMap(int width = 1800, int topHeight = 450, int bottomHeight = 450)
         {
