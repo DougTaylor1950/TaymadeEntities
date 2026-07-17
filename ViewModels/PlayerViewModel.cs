@@ -1059,7 +1059,7 @@ namespace TaymadeEntities.ViewModels
             get => imageWidth;
             set => this.RaiseAndSetIfChanged(ref imageWidth, value);
         }
-        public bool Recording { get;  set; }
+        public bool Recording { get; set; } = false;
         public string RecordName { get;  set; }
 
         public Bitmap? RenderBitMap(int width = 1800, int topHeight = 450, int bottomHeight = 450)

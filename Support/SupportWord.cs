@@ -1,6 +1,7 @@
 ﻿namespace TaymadeEntities.Support.Word
 {
     using TaymadeEntities.Support;
+    using TaymadeEntities.Support.Word;
     using DocumentFormat.OpenXml;
     using DocumentFormat.OpenXml.CustomProperties;
     using DocumentFormat.OpenXml.Packaging;
@@ -296,36 +297,36 @@
         {
             if (!string.IsNullOrEmpty(props.Codes))
             {
-                WDSetCustomProperty(fileName, "Codes", props.Codes, PropertyTypes.Text);
+                WordXML.WDSetCustomProperty(fileName, "Codes", props.Codes, WordXML.PropertyTypes.Text);
             }
             else if (props.Keywords != null)
             {
-                WDSetCustomProperty(fileName, "Codes", props.Keywords, PropertyTypes.Text);
+                WordXML.WDSetCustomProperty(fileName, "Codes", props.Keywords, WordXML.PropertyTypes.Text);
             }
 
             if (props.Age != null)
             {
-                WDSetCustomProperty(fileName, "Age", props.Age, PropertyTypes.Text);
+                WordXML.WDSetCustomProperty(fileName, "Age", props.Age, WordXML.PropertyTypes.Text);
             }
 
             if (props.LowestAge != null)
             {
-                WDSetCustomProperty(fileName, "LowestAge", props.LowestAge, PropertyTypes.Text);
+                WordXML.WDSetCustomProperty(fileName, "LowestAge", props.LowestAge, WordXML.PropertyTypes.Text);
             }
 
             if (props.Published != null)
             {
-                WDSetCustomProperty(fileName, "Published", props.Published, PropertyTypes.Text);
+                WordXML.WDSetCustomProperty(fileName, "Published", props.Published, WordXML.PropertyTypes.Text);
             }
 
             if (props.Percent != null)
             {
-                WDSetCustomProperty(fileName, "percent", props.Percent, PropertyTypes.Text);
+                WordXML.WDSetCustomProperty(fileName, "percent", props.Percent, WordXML.PropertyTypes.Text);
             }
 
             if (props.DocumentId > 0)
             {
-                WDSetCustomProperty(fileName, "DocumentId", props.DocumentId, PropertyTypes.NumberInteger);
+                WordXML.WDSetCustomProperty(fileName, "DocumentId", props.DocumentId, WordXML.PropertyTypes.NumberInteger);
             }
         }
         public static void SetStandardProperties(WordProperties props, string fileName)
