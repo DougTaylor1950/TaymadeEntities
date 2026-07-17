@@ -81,7 +81,7 @@ namespace TaymadeEntities.ViewModels
         public PlayerViewModel(string? currentMovie, bool autoPlay = false)
         {
             InitialseViewModel();
-            MoviePath = currentMovie;
+            MoviePath = Support.Support.FixImagePath(currentMovie);
             AutoPlay = autoPlay;
             MediaPlayerFull = MediaPlayer;
             IsMusic = false;
@@ -153,7 +153,7 @@ namespace TaymadeEntities.ViewModels
                 FullScreen = full;
             }
             CurrentMovie = currentMovie;
-            MoviePath = currentMovie.MoviePath;
+            MoviePath = Support.Support.FixImagePath(  currentMovie.MoviePath);
             AutoPlay = autoPlay;
 
             // build used bookmarks list
