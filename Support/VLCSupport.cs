@@ -1,7 +1,6 @@
 ﻿using CliWrap;
 using CliWrap.EventStream;
 using ShimSkiaSharp.Editing;
-using SupportCore;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

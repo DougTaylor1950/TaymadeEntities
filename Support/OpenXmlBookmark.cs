@@ -6,7 +6,7 @@
 // <author>Doug Taylor</author>
 //-----------------------------------------------------------------------
 
-namespace Support.Word
+namespace TaymadeEntities.Support.Word
 {
     using DocumentFormat.OpenXml.Wordprocessing;
     using System;

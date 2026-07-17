@@ -9,7 +9,7 @@
 using DocumentFormat.OpenXml.Wordprocessing;
 using System.IO;
 
-namespace Support.Word
+namespace TaymadeEntities.Support.Word
 {
     using DocumentFormat.OpenXml;
     using DocumentFormat.OpenXml.CustomProperties;
@@ -26,8 +26,8 @@ namespace Support.Word
     using System.Text.RegularExpressions;
     using System.Xml;
     using System.Xml.Linq;
-    using static Support.Word.OpenXML;
-    // using static global::Support.OpenXML;
+
+    
     using ParagraphProperties = DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties;
 
     /// <summary>
@@ -822,17 +822,17 @@ namespace Support.Word
                 {
                     foreach (var header in wordDocument.MainDocumentPart.HeaderParts)
                     {
-                        OpenXML.ProcessBookmarksPart(out values, DocumentSection.Header, header);
+                        OpenXML.ProcessBookmarksPart(out values, OpenXML.DocumentSection.Header, header);
                     }
                 }
 
-                ProcessBookmarksPart(out values, DocumentSection.Main, wordDocument.MainDocumentPart);
+                OpenXML.ProcessBookmarksPart(out values, OpenXML.DocumentSection.Main, wordDocument.MainDocumentPart);
 
                 if (wordDocument.MainDocumentPart.FooterParts != null)
                 {
                     foreach (var footer in wordDocument.MainDocumentPart.FooterParts)
                     {
-                        OpenXML.ProcessBookmarksPart(out values, DocumentSection.Footer, footer);
+                        OpenXML.ProcessBookmarksPart(out values, OpenXML.DocumentSection.Footer, footer);
                     }
                 }
             }
@@ -1370,7 +1370,7 @@ namespace Support.Word
                         XAttribute id = new XAttribute(w + "sectid", sectID);
                         newSBR.Add(id);
                         word_pPr.Element(w + "sectPr").ReplaceWith(newSBR);
-                        Support.Word.OpenXMLBreak openXMLBreak = new OpenXMLBreak
+                        OpenXMLBreak openXMLBreak = new OpenXMLBreak
                         {
                             BreakID = sectID,
                             StringId = "sect_" + sectID.ToString().Trim()
@@ -1390,7 +1390,7 @@ namespace Support.Word
                 XAttribute id = new XAttribute(w + "sectid", sectID);
                 finalBreak.Add(id);
                 body.Element(w + "sectPr").ReplaceWith(finalBreak);
-                Support.Word.OpenXMLBreak openXMLBreak = new OpenXMLBreak
+                OpenXMLBreak openXMLBreak = new OpenXMLBreak
                 {
                     BreakID = sectID,
                     StringId = "sect_" + sectID.ToString().Trim()

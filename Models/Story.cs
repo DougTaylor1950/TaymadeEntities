@@ -8,9 +8,8 @@
 
 namespace TaymadeEntities.Models
 {
-    // using TaymadeEntities.Support;
-    using SupportCore;
-    using SupportCore.Word;
+    using Support.Word;
+   
     using DocumentFormat.OpenXml;
     using DocumentFormat.OpenXml.Packaging;
     using DocumentFormat.OpenXml.Wordprocessing;
@@ -523,7 +522,7 @@ namespace TaymadeEntities.Models
             {
                 if (!string.IsNullOrEmpty(Path))
                 {
-                    string? temp = SupportCore.MiscSupport.FixImagePath(Path);
+                    string? temp = Support.Support.FixImagePath(Path);
                     return temp;
                 }
                 else return null;
@@ -648,7 +647,7 @@ namespace TaymadeEntities.Models
             set
             {
                 this.RaiseAndSetIfChanged(ref lowestAge, value);
-                if (!string.IsNullOrEmpty(value) && SupportCore.MiscSupport.IsNumeric(value)) LowestAgeInt = int.Parse(value);
+                if (!string.IsNullOrEmpty(value) && Support.Support.IsNumeric(value)) LowestAgeInt = int.Parse(value);
             }
         }
 
@@ -661,13 +660,13 @@ namespace TaymadeEntities.Models
         {
             get
             {
-                if (!string.IsNullOrEmpty(LowestAge) && SupportCore.MiscSupport.IsNumeric(LowestAge))
+                if (!string.IsNullOrEmpty(LowestAge) && Support.Support.IsNumeric(LowestAge))
                 {
                     lowestAgeInt = int.Parse(LowestAge);
                 }
                 else if (string.IsNullOrEmpty(LowestAge) && !string.IsNullOrEmpty(Age))
                 {
-                    List<int> intList = SupportCore.MiscSupport.StringIntListToIntList(age);
+                    List<int> intList = Support.Support.StringIntListToIntList(age);
 
                     if (intList.Count > 0) LowestAge = intList.FirstOrDefault().ToString();
                     Save();
@@ -994,7 +993,7 @@ namespace TaymadeEntities.Models
             Story newStory = Story.Create();
 
             // ensure we are storing the Windows path not the Linux virtual path
-            newStory.Path = SupportCore.MiscSupport.FixPathBack(path).ToLower();
+            newStory.Path = Support.Support.FixPathBack(path).ToLower();
 
             string extn = System.IO.Path.GetExtension(path);
 
@@ -1115,11 +1114,11 @@ namespace TaymadeEntities.Models
 
             if (!string.IsNullOrEmpty(Path))
             {
-                check = File.Exists(SupportCore.MiscSupport.FixImagePath(Path));
+                check = File.Exists(Support.Support.FixImagePath(Path));
 
                 if (!check)
                 {
-                    Path = SupportCore.MiscSupport.FixImagePath(Path);
+                    Path = Support.Support.FixImagePath(Path);
 
                     if (AuthorItem != null && !string.IsNullOrEmpty(AuthorItem.StoryPath))
                     {
@@ -1128,7 +1127,7 @@ namespace TaymadeEntities.Models
                         string filename = Path.Substring(Path.LastIndexOf("\\") + 1);
                         Path = AuthorItem.StoryPath + "\\" + filename;
 
-                        check = File.Exists(SupportCore.MiscSupport.FixImagePath(Path));
+                        check = File.Exists(Support.Support.FixImagePath(Path));
                     }
                 }
             }
@@ -1392,7 +1391,7 @@ namespace TaymadeEntities.Models
             WordProperties? properties = null;
             if (!string.IsNullOrEmpty(FixedPath) && File.Exists(FixedPath))
             {
-                properties = OpenXML.GetProperties(SupportCore.MiscSupport.FixImagePath(FixedPath));
+                properties = OpenXML.GetProperties(Support.Support.FixImagePath(FixedPath));
 
                 if (properties != null)
                 {
@@ -1434,7 +1433,7 @@ namespace TaymadeEntities.Models
 
             if (!string.IsNullOrEmpty(Path))
             {
-                string tempPath = SupportCore.MiscSupport.FixImagePath(Path);
+                string tempPath = Support.Support.FixImagePath(Path);
                 if (WmlDocument == null && File.Exists(tempPath))
                 {
                     OpenBookmarks = new BookmarkList();
@@ -1603,7 +1602,7 @@ namespace TaymadeEntities.Models
 
                 if (!string.IsNullOrEmpty(currentProperties.Title) && Title != currentProperties.Title)
                 {
-                    Title = SupportCore.MiscSupport.Capitalise(currentProperties.Title);
+                    Title = Support.Support.Capitalise(currentProperties.Title);
                     Dirty = true;
                 }
 
@@ -1744,7 +1743,7 @@ namespace TaymadeEntities.Models
             // create an instance of Word application
             Microsoft.Office.Interop.Word.Application wordApp = new Microsoft.Office.Interop.Word.Application();
             // open the document
-            Microsoft.Office.Interop.Word.Document doc = wordApp.Documents.Open(SupportCore.MiscSupport.FixImagePath(Path));
+            Microsoft.Office.Interop.Word.Document doc = wordApp.Documents.Open(Support.Support.FixImagePath(Path));
             // read built in properties
             object builtInProps = doc.BuiltInDocumentProperties;
             // get categories

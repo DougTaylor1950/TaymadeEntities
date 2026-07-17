@@ -1,10 +1,11 @@
-﻿namespace Support.Word
+﻿namespace TaymadeEntities.Support.Word
 {
     using TaymadeEntities.Support;
     using DocumentFormat.OpenXml;
     using DocumentFormat.OpenXml.CustomProperties;
     using DocumentFormat.OpenXml.Packaging;
     using DocumentFormat.OpenXml.Wordprocessing;
+    using OpenXmlPowerTools;
     using System.Collections;
     using System.Collections.Generic;
     using System.Drawing;
@@ -13,7 +14,7 @@
     using System.Text.RegularExpressions;
     using System.Xml;
     using System.Xml.Linq;
-    using static Support.Word.WordXML;
+    
     using Color = DocumentFormat.OpenXml.Wordprocessing.Color;
 
     /// <summary>
@@ -291,7 +292,7 @@
 
         #region Methods
 
-        public static void SetCustomProperties(SupportCore.Word.WordProperties props, string fileName)
+        public static void SetCustomProperties(WordProperties props, string fileName)
         {
             if (!string.IsNullOrEmpty(props.Codes))
             {

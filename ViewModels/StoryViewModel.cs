@@ -25,7 +25,7 @@ namespace TaymadeEntities.ViewModels
     using Microsoft.EntityFrameworkCore.Query.Internal;
     //using Microsoft.CodeAnalysis.CSharp.Syntax;
     using ReactiveUI;
-    using SupportCore.Word;
+    using Support.Word;
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
@@ -39,9 +39,9 @@ namespace TaymadeEntities.ViewModels
 
     using System.Windows.Input;
     using Border = Avalonia.Controls.Border;
-    using WordProperties = SupportCore.Word.WordProperties;
+    using WordProperties = Support.Word.WordProperties;
     using DocumentFormat.OpenXml.Wordprocessing;
-    using FileSupport.Core;
+    using FileSupport;
     using Avalonia;
     using TaymadeEntities.Models;
     // using Story = Models.Story;
@@ -851,7 +851,7 @@ namespace TaymadeEntities.ViewModels
         private void ReformatDocument(string newStoryPath)
         {
             // read entire text file into a string variable
-            string text = FileSupport.Core.FileSupportServices.ReadDataFromTxtFileFindEncoding(newStoryPath);
+            string text = FileSupport.ReadDataFromTxtFileFindEncoding(newStoryPath);
             // string text = ReadDataFromTxtFileWithUTF8Encoding(newStoryPath);
             // replace all instances of \r\n with \n    
             text = text.Replace("\r\n", "\n");
@@ -2345,7 +2345,7 @@ namespace TaymadeEntities.ViewModels
 
                                         // spilt codes into age properties
                                         WordProperties? returnProps = new WordProperties();
-                                        SupportCore.MiscSupport.FindAges(returnProps, properties);
+                                        Support.FindAges(returnProps, properties);
 
                                         if (returnProps != null)
                                         {
@@ -2627,7 +2627,7 @@ namespace TaymadeEntities.ViewModels
                     && CurrentStory.Path.Contains(".docx", StringComparison.OrdinalIgnoreCase))
                 {
                     CurrentStory.DocumentExtn = ".docx";
-                    SupportCore.Word.WordProperties properties = CurrentStory.GetPropertiesFromDocument();
+                    WordProperties properties = CurrentStory.GetPropertiesFromDocument();
 
                     if (created != null) properties.Created = created;
 
@@ -2751,7 +2751,7 @@ namespace TaymadeEntities.ViewModels
                 {
                     if (!string.IsNullOrEmpty(CurrentStory.Path) && CurrentStory.DocumentExtn == ".docx")
                     {
-                        SupportCore.Word.WordProperties properties = CurrentStory.GetPropertiesFromDocument();
+                        WordProperties properties = CurrentStory.GetPropertiesFromDocument();
 
                         properties.Title = CurrentStory.Title;
                         properties.Author = CurrentStory.Author;

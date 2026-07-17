@@ -11,8 +11,8 @@ using System.Collections.ObjectModel;
 
 namespace TaymadeEntities.Models
 {
-    //using TaymadeEntities.Support;
-    using SupportCore;
+    using TaymadeEntities.Support;
+    
     using Microsoft.EntityFrameworkCore;
     using ReactiveUI;
     using System;
@@ -22,7 +22,7 @@ namespace TaymadeEntities.Models
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
-    using SupportCore.Word;
+    using Support.Word;
 
 
     public class StoryHeadings

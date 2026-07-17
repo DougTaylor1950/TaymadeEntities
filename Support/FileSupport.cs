@@ -20,6 +20,49 @@ namespace FileSupport
                 }
             }
         }
+        public static Encoding GetEncodingFromFile(string filename)
+        {
+            Encoding returnval;
+            using (var reader = new StreamReader(filename, Encoding.Default, true))
+            {
+                reader.Peek(); // you need this!
+                var encoding = reader.CurrentEncoding;
+                returnval = encoding;
+            }
+            return returnval;
+        }
+
+        public static string ReadDataFromTxtFileWithEncoding(string txtFilePath, Encoding encoding)
+        {
+            string fileContent = string.Empty;
+            if (File.Exists(txtFilePath))
+            {
+                using (var reader = new StreamReader(File.OpenRead(txtFilePath), encoding))
+                {
+                    while (!reader.EndOfStream)
+                    {
+                        var line = reader.ReadToEnd();
+                        if (!String.IsNullOrEmpty(line))
+                        {
+                            fileContent += line;
+                        }
+                    }
+                }
+            }
+
+            return fileContent;
+        }
+
+        public static string ReadDataFromTxtFileFindEncoding(string txtFilePath)
+        {
+            string fileContent = string.Empty;
+            if (File.Exists(txtFilePath))
+            {
+                Encoding encoding = GetEncodingFromFile(txtFilePath);
+                fileContent = ReadDataFromTxtFileWithEncoding(txtFilePath, encoding);
+            }
+            return fileContent;
+        }
     }
     public class FileOperationAPIWrapper
     {

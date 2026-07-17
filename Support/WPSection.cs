@@ -6,7 +6,7 @@
 // <author>Doug Taylor</author>
 //-----------------------------------------------------------------------
 
-namespace Support
+namespace TaymadeEntities.Support
 {
     using OpenXmlPowerTools;
     using System.Xml.Linq;
@@ -21,17 +21,17 @@ namespace Support
         /// <summary>
         /// Defines the sectionHTML.
         /// </summary>
-        private string sectionHTML;
+        private string? sectionHTML;
 
         /// <summary>
         /// Defines the sectionHTMLX.
         /// </summary>
-        private XElement sectionHTMLX;
+        private XElement? sectionHTMLX;
 
         /// <summary>
         /// Defines the sectionName.
         /// </summary>
-        private string sectionName;
+        private string? sectionName;
 
         #endregion
 
@@ -55,7 +55,7 @@ namespace Support
         /// <summary>
         /// Gets or sets the SectionHTML.
         /// </summary>
-        public string SectionHTML
+        public string? SectionHTML
         {
             get
             {
@@ -72,7 +72,7 @@ namespace Support
         /// <summary>
         /// Gets or sets the SectionHTMLX.
         /// </summary>
-        public XElement SectionHTMLX
+        public XElement? SectionHTMLX
         {
             get
             {
@@ -88,7 +88,7 @@ namespace Support
         /// <summary>
         /// Gets the SectionName.
         /// </summary>
-        public string SectionName
+        public string? SectionName
         {
             get
             {
@@ -100,14 +100,14 @@ namespace Support
             }
         }
 
-        public string SectionNameID
+        public string? SectionNameID
         {
             get
             {
                 return SectionName.Replace(" ", "_");
             }
         }
-        public string SectionNameIDHash
+        public string? SectionNameIDHash
         {
             get
             {
@@ -123,7 +123,7 @@ namespace Support
         /// <summary>
         /// Gets or sets the WmlDocument.
         /// </summary>
-        public WmlDocument WmlDocument { get; set; }
+        public WmlDocument? WmlDocument { get; set; }
 
         #endregion
     }

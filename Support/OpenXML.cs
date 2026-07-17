@@ -6,7 +6,7 @@
 // <author>Doug Taylor</author>
 //-----------------------------------------------------------------------
 
-namespace Support.Word
+namespace TaymadeEntities.Support.Word
 {
     using DocumentFormat.OpenXml;
     using DocumentFormat.OpenXml.CustomProperties;
@@ -20,7 +20,7 @@ namespace Support.Word
     using System.Text.RegularExpressions;
     using System.Xml;
     using System.Xml.Linq;
-    using static SupportCore.Word.WordXML;
+    //using static SupportCore.Word.WordXML;
     using Color = DocumentFormat.OpenXml.Wordprocessing.Color;
 
     /// <summary>
@@ -298,40 +298,40 @@ namespace Support.Word
 
         #region Methods
 
-        public static void SetCustomProperties(SupportCore.Word.WordProperties props, string fileName)
+        public static void SetCustomProperties(WordProperties props, string fileName)
         {
             if (!string.IsNullOrEmpty(props.Codes))
             {
-                WDSetCustomProperty(fileName, "Codes", props.Codes, PropertyTypes.Text);
+                WordXML.WDSetCustomProperty(fileName, "Codes", props.Codes, WordXML.PropertyTypes.Text);
             }
             else if (props.Keywords != null)
             {
-                WDSetCustomProperty(fileName, "Codes", props.Keywords, PropertyTypes.Text);
+                WordXML.WDSetCustomProperty(fileName, "Codes", props.Keywords, WordXML.PropertyTypes.Text);
             }
 
             if (props.Age != null)
             {
-                WDSetCustomProperty(fileName, "Age", props.Age, PropertyTypes.Text);
+                WordXML.WDSetCustomProperty(fileName, "Age", props.Age, WordXML.PropertyTypes.Text);
             }
 
             if (props.LowestAge != null)
             {
-                WDSetCustomProperty(fileName, "LowestAge", props.LowestAge, PropertyTypes.Text);
+                WordXML.WDSetCustomProperty(fileName, "LowestAge", props.LowestAge, WordXML.PropertyTypes.Text);
             }
 
             if (props.Published != null)
             {
-                WDSetCustomProperty(fileName, "Published", props.Published, PropertyTypes.Text);
+                WordXML.WDSetCustomProperty(fileName, "Published", props.Published, WordXML.PropertyTypes.Text);
             }
 
             if (props.Percent != null)
             {
-                WDSetCustomProperty(fileName, "percent", props.Percent, PropertyTypes.Text);
+                WordXML.WDSetCustomProperty(fileName, "percent", props.Percent, WordXML.PropertyTypes.Text);
             }
 
             if (props.DocumentId > 0)
             {
-                WDSetCustomProperty(fileName, "DocumentId", props.DocumentId, PropertyTypes.NumberInteger);
+                WordXML.WDSetCustomProperty(fileName, "DocumentId", props.DocumentId, WordXML.PropertyTypes.NumberInteger);
             }
         }
         public static void SetStandardProperties(WordProperties props, string fileName)
@@ -682,7 +682,7 @@ namespace Support.Word
                     //agestring += tempAge;
 
 
-                    if (MiscSupport.IsNumeric(tempAge) && tempAge != "69")
+                    if (Support.IsNumeric(tempAge) && tempAge != "69")
                     {
                         int.TryParse(tempAge, out int n);
                         if (agestring != string.Empty)
@@ -729,7 +729,7 @@ namespace Support.Word
         public static string SortAgeList(string agestring, out List<int> intList)
         {
 
-            intList = MiscSupport.StringIntListToIntList(agestring);
+            intList = Support.StringIntListToIntList(agestring);
             return String.Join(",", intList);
         }
 
@@ -760,6 +760,184 @@ namespace Support.Word
         #endregion
     }
 
+    public class OpenXmlBookmark
+    {
+        #region Fields
+
+        /// <summary>
+        /// Defines the bookmarkIndex
+        /// </summary>
+        private int bookmarkIndex;
+
+        /// <summary>
+        /// Defines the myEnd
+        /// </summary>
+        private BookmarkEnd myEnd = null;
+
+        /// <summary>
+        /// Defines the mySectionType
+        /// </summary>
+        private OpenXML.DocumentSection mySectionType;
+
+        /// <summary>
+        /// Defines the myStart
+        /// </summary>
+        private BookmarkStart myStart = null;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets or sets the BookmarkIndex
+        /// </summary>
+        public int BookmarkIndex
+        {
+            get => bookmarkIndex;
+            set => bookmarkIndex = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the End
+        /// </summary>
+        public BookmarkEnd End
+        {
+            get => myEnd;
+            set => myEnd = value;
+        }
+
+        /// <summary>
+        /// Gets the Id
+        /// </summary>
+        public String Id => Start?.Id;
+
+        /// <summary>
+        /// Gets the Name
+        /// </summary>
+        public string Name => Start?.Name;
+
+        /// <summary>
+        /// Gets or sets the SectionType
+        /// </summary>
+        public OpenXML.DocumentSection SectionType
+        {
+            get => mySectionType;
+            set => mySectionType = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the Start
+        /// </summary>
+        public BookmarkStart Start
+        {
+            get => myStart;
+            set => myStart = value;
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// The AddTextAfter
+        /// </summary>
+        /// <param name="newText">The <see cref="string"/></param>
+        public void AddTextAfter(string newText)
+        {
+            if (End != null)
+            {
+                IEnumerable<Paragraph> paras = End.Ancestors<Paragraph>();
+
+                if (paras != null && paras.Count() > 0)
+                {
+                    Paragraph para = paras.First();
+                    if (para != null)
+                    {
+
+                        var runElement = new Run(new Text(newText));
+                        para.InsertAfter(runElement, End);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// The BookmarkText
+        /// </summary>
+        /// <returns>The <see cref="Text"/></returns>
+        public Text BookmarkText()
+        {
+            var run = Start.NextSibling<Run>();
+
+            if (run != null)
+                // I've found a run and suppose it has a Text
+                return run.GetFirstChild<Text>();
+            else
+            {
+                // I will go through all the siblings and try to find any Text
+                Text text = null;
+                var nextSibling = Start.NextSibling();
+                while (text == null && nextSibling != null)
+                {
+                    if (nextSibling.IsEndBookmark(Start))
+                        // I've reached the end of the bookmark and couldn't find any Text
+                        return null;
+
+                    text = nextSibling.GetFirstDescendant<Text>();
+                    nextSibling = nextSibling.NextSibling();
+                }
+
+                return text;
+            }
+        }
+
+        /// <summary>
+        /// The FindTextInColumn
+        /// </summary>
+        /// <returns>The <see cref="Text"/></returns>
+        public Text FindTextInColumn()
+        {
+            var cell = Start.GetParent<TableRow>().GetFirstChild<TableCell>();
+
+            for (int i = 0; i < Start.ColumnFirst; i++)
+            {
+                cell = cell.NextSibling<TableCell>();
+            }
+
+            return cell.GetFirstDescendant<Text>();
+        }
+
+        /// <summary>
+        /// The RemoveBookmark
+        /// </summary>
+        public void RemoveBookmark()
+        {
+            if (Start != null)
+            {
+                Start.Remove();
+            }
+
+            if (End != null)
+            {
+                End.Remove();
+            }
+        }
+
+        /// <summary>
+        /// The ReplaceText
+        /// </summary>
+        /// <param name="newText">The <see cref="string"/></param>
+        public void ReplaceText(string newText)
+        {
+            Run bookmarkText = Start.NextSibling<Run>();
+            if (bookmarkText != null)
+            {
+                bookmarkText.GetFirstChild<Text>().Text = newText;
+            }
+        }
+
+        #endregion
+    }
     /// <summary>
     /// Defines the <see cref="OpenXMLBreak" />
     /// </summary>
