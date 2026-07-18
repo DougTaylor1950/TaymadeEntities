@@ -1988,7 +1988,7 @@ namespace TaymadeEntities.ViewModels
         {
             try
             {
-                
+                if (CurrentStory == null) return;
                 // create the custom dictionary file
                 CurrentStory.StoryDictionary?.CreateCustomDictionary();
 
