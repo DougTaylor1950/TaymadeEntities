@@ -539,6 +539,209 @@ namespace TaymadeEntities.Support
             handler?.Invoke(this, e);
         }
 
+        private void FFMpeg_CliWrapCompleted(object sender, CliWrapCompletedEventArgs e)
+        {
+
+            ImageSetViewModel.MissingInfo = "Completed";
+            ImageSetViewModel.RootFolder.HasMP4 = true; // indicate temporary file 
+            ImageSetViewModel.PlayFromFile(ImageSetViewModel.OutputVideoPath);
+            // need to change button visibility
+        }
+
+        internal void FFMpeg_CliWrapProgress(object sender, CliWrapProgressEventArgs e)
+        {
+            //con.WriteLine(e.Progress);
+            ImageSetViewModel.MissingInfo = e.Progress;
+
+            if (e.ProgressPercentage > 0) ImageSetViewModel.ProgressPercent = e.ProgressPercentage;
+        }
+
+        private ImageSetViewModel? ImageSetViewModel { get; set; }
+
+        public async Task<int> MakeMovieFromImages(ImageSetViewModel? mainWindowViewModel)
+        {
+            FFMpegSupport fFMpeg = new FFMpegSupport();
+            fFMpeg.CliWrapCompleted += FFMpeg_CliWrapCompleted;
+            fFMpeg.CliWrapError += FFMpeg_CliWrapError;
+            fFMpeg.CliWrapProgress += FFMpeg_CliWrapProgress;
+            ImageSetViewModel = mainWindowViewModel;
+
+            int error = -1;
+            if (mainWindowViewModel != null
+               && mainWindowViewModel.RootFolder != null
+               && mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems != null
+               && mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems.Count > 0)
+            {
+
+                string outputDirectory = mainWindowViewModel.RootFolder.TempDirectory();
+                string imageFileStub = outputDirectory + @"\temp";
+                string outputFileName = outputDirectory + @"\" + System.IO.Path.GetFileNameWithoutExtension(mainWindowViewModel.RootFolder.CurrentSubFolder.Path) + ".mp4";
+
+                Directory.CreateDirectory(outputDirectory);
+                // clear all files in temp folder
+                var filelist = Directory.GetFiles(outputDirectory, "*.*");
+                foreach (var tempFile in filelist)
+                {
+                    File.Delete(tempFile);
+                }
+
+                mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems.ReloadImageItems
+                    (
+                    mainWindowViewModel.RootFolder.CurrentSubFolder.Path
+                    );
+                //this.RaisePropertyChanged(nameof(RootFolder.CurrentSubFolder.ImageItems.Count));
+                // go through all the images and find maxsizes
+                double absMaxWidth = 0;
+                double absMaxHeight = 0;
+
+                MovieProgressEventargs progressChangedEventArgs = null;
+
+                mainWindowViewModel.MissingInfo = "Building List";
+                int indx = 1;
+                int cnt = mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems.Count;
+                foreach (ImageItem item in mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems)
+                {
+                    progressChangedEventArgs = new MovieProgressEventargs(0, null);
+                    progressChangedEventArgs.ProgressPercentage = (indx * 100) / cnt;
+                    progressChangedEventArgs.Info = "building bitmaps";
+                    progressChangedEventArgs.Bitmap = item.ImageBMP;
+
+                    OnProgress(progressChangedEventArgs);
+                    await Task.Delay(200);
+                    //Support_ProgressInformation(null, progressChangedEventArgs);
+                    if (item.ImageBMP != null && item.ImageBMP.Size.Height > absMaxHeight) absMaxHeight = item.ImageBMP.Size.Height;
+                    if (item.ImageBMP != null && item.ImageBMP.Size.Width > absMaxWidth) absMaxWidth = item.ImageBMP.Size.Width;
+                }
+
+                // convert to integer
+                int maxWidth = (int)absMaxWidth;
+                int maxHeight = (int)absMaxHeight;
+
+                // we will have a maximum size of 1024  x 1024
+
+                double aspectRatio = absMaxWidth / absMaxHeight;
+                if (maxWidth > 1200 || maxHeight > 1024)
+                {
+                    if (maxWidth - 1200 > maxHeight - 1024)
+                    {
+                        maxWidth = 1200;
+                        maxHeight = (int)(absMaxHeight / aspectRatio);
+                    }
+                }
+
+                progressChangedEventArgs = new MovieProgressEventargs(0, null);
+                progressChangedEventArgs.Info = "Creating Images";
+                //Support_ProgressInformation(null, progressChangedEventArgs);
+                OnProgress(progressChangedEventArgs);
+                int index = 1;
+                // need to ensure the values are even 
+                if (maxHeight % 2 != 0) maxHeight += 1;
+                if (maxWidth % 2 != 0) maxWidth += 1;
+
+                // then we go through all images and save them to a created temp directory 
+                // resizing the images to fit 
+
+
+
+
+                SolidBrush solidBrush = new SolidBrush(System.Drawing.Color.WhiteSmoke);
+
+                int count = mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems.Count * 2;
+
+                foreach (ImageItem item in mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems)
+                {
+                    // get existing image
+                    System.Drawing.Bitmap image = new System.Drawing.Bitmap(item.ImagePath);
+                    // resize to new consistent size
+                    System.Drawing.Image reSizedImage = image;
+
+                    // find the average colour of image for the borders
+                    System.Drawing.Color averageColour = Support.GetAverageColorFast(image);
+
+                    // create a brush
+                    solidBrush = new SolidBrush(averageColour);
+
+                    // ensure we keep aspect ratio of original image
+                    aspectRatio = (double)image.Width / (double)image.Height;
+
+                    int newHeight = image.Height;
+                    int newWidth = image.Width;
+                    // check size the new image will have borders added depending on
+                    // whether it is portrait or landscape
+                    if (absMaxWidth - image.Width >= absMaxHeight - image.Height)
+                    {
+                        newHeight = maxHeight;
+                        newWidth = (int)(maxHeight * aspectRatio);
+                    }
+                    else
+                    {
+                        newWidth = maxWidth;
+                        newHeight = (int)((double)maxWidth / aspectRatio);
+                    }
+                    // create the resized image
+                    reSizedImage = Support.ResizeImage(image, newWidth, newHeight);
+
+                    // find which dimension is furthest away from target
+                    int xdif = (maxWidth - reSizedImage.Width) / 2;
+                    int ydif = (maxHeight - reSizedImage.Height) / 2;
+                    // create new bitmap of max sizes
+                    System.Drawing.Bitmap newBitmap = new System.Drawing.Bitmap(maxWidth, maxHeight);
+
+                    // create a new image with just the background colour
+                    // then draw the image over it.
+                    using (Graphics g = Graphics.FromImage(newBitmap))
+                    {
+                        g.FillRectangle(solidBrush, 0, 0, maxWidth, maxHeight);
+                        g.DrawImage(reSizedImage, xdif, ydif, reSizedImage.Width, reSizedImage.Height);
+                    }
+
+                    // save image twice
+                    string tempImageFileName = imageFileStub + index.ToString("0000") + ".jpg";
+                    newBitmap.Save(tempImageFileName, ImageFormat.Jpeg);
+                    index += 1;
+                    newBitmap.Save(imageFileStub + index.ToString("0000") + ".jpg", ImageFormat.Jpeg);
+                    index += 1;
+                    // dispose of temporary bitmap
+                    newBitmap.Dispose();
+
+                    // update progress
+                    progressChangedEventArgs = new MovieProgressEventargs(0, null);
+                    progressChangedEventArgs.ProgressPercentage = (index * 100) / count;
+                    progressChangedEventArgs.Info = "building bitmaps";
+                    progressChangedEventArgs.BitmapPath = tempImageFileName;
+                    OnProgress(progressChangedEventArgs);
+                    await Task.Delay(50);
+                    solidBrush.Dispose();
+                }
+                // use ffmpeg to build an MP4 file
+                string ffMpegCommand = " -framerate 1 -i " + '"' + imageFileStub + "%04d.jpg" + '"' + " -c:v libx264 -r 25 " + '"' + outputFileName + '"';
+                
+
+                mainWindowViewModel.OutputVideoPath = outputFileName;
+                progressChangedEventArgs.Info = "Creating temp MP4";
+                OnProgress( progressChangedEventArgs);
+
+                mainWindowViewModel.MissingInfo = "Creating temp MP4";
+
+                //Views.MainWindow? main = GetMainWindow();
+
+                fFMpeg.action = "CreateMovie";
+                fFMpeg.FrameCount = index * 25;
+
+
+
+                await fFMpeg.DoCliWrapCreateMovie(ffMpegCommand);
+
+                // now display created image file
+
+            }
+
+            return error;
+        }
+
+
+
+
         public static System.Drawing.Color GetAverageColorFast(Bitmap bmp)
         {
             Bitmap singlePixel = new Bitmap(1, 1);

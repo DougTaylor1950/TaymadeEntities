@@ -84,6 +84,9 @@ namespace TaymadeEntities.ViewModels
             MoviePath = Support.Support.FixImagePath(currentMovie);
             AutoPlay = autoPlay;
             MediaPlayerFull = MediaPlayer;
+            FullScreen = true;
+            ScreenHeight = 800;
+            ScreenWidth = 1200;
             IsMusic = false;
 
             // build used bookmarks list
@@ -663,6 +666,8 @@ namespace TaymadeEntities.ViewModels
             }
 
             Media? media = null;
+
+            if (FullScreen) MediaPlayerFull = MediaPlayer;
 
             if (!string.IsNullOrEmpty(MoviePath) && _libVlc != null && MediaPlayer != null)
             {

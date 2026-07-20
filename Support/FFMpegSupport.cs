@@ -8,7 +8,7 @@
 
 namespace TaymadeEntities.Support
 {
-    using TaymadeEntities.Models;
+    using Avalonia.Controls;
     using CliWrap;
     using CliWrap.EventStream;
    // using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -19,6 +19,8 @@ namespace TaymadeEntities.Support
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using TaymadeEntities.Models;
+    using TaymadeEntities.ViewModels;
 
     /// <summary>
     /// Defines the <see cref="FFMpegSupport" />.
@@ -1936,6 +1938,138 @@ namespace TaymadeEntities.Support
                 //throw;
             }
             return errorCode;
+        }
+
+        internal async Task<int> DoCliWrapCreateMovie(string param)
+        {
+            int errorCode = 0;
+
+            // timeout extended as it was cancelling on setting chapters
+            TimeSpan cancelDelay = TimeSpan.FromSeconds(400);
+
+            cancelDelay = TimeSpan.FromSeconds(15000);
+            cts.CancelAfter(cancelDelay);
+            var cmd = Cli.Wrap(FFmpegFilePath)
+                .WithArguments(param);
+
+            try
+            {
+                await foreach (var cmdEvent in cmd.ListenAsync(System.Text.Encoding.Default, cts.Token))
+                {
+                    switch (cmdEvent)
+                    {
+                        case StartedCommandEvent started:
+                            Console.WriteLine($"Process started; ID: {started.ProcessId}");
+                            // start viewer
+                           // PlayFromFile(OutputVideoPath);
+                            break;
+                        case StandardOutputCommandEvent stdOut:
+                            //_output.WriteLine($"Out> {stdOut.Text}");
+                            // process received data 
+                            string output = stdOut.Text;
+
+                            if (output.Contains("Percent="))
+                            {
+                                ProcessOutput = output;
+                            }
+                            else if (output.Contains("Frame="))
+                            {
+                                ProcessOutput = output;
+                            }
+                            else
+                                ProcessOutput = output;
+
+                            break;
+                        case StandardErrorCommandEvent stdErr:
+                            int PercentProgress = 0;
+                            if (action == "CreateMovie")
+                            {
+                                int? frame = ExtractFrame(stdErr.Text);
+                                if (frame != null && FrameCount > 0)
+                                {
+                                    PercentProgress = (frame.Value * 100) / FrameCount;
+                                }
+                            }
+                            //else
+                            //{
+                            //    int? seconds = ExtractTime(stdErr.Text);
+                            //    if (seconds != null && Movies != null && Movies.DurationSeconds != null)
+                            //    {
+                            //        PercentProgress = (seconds.Value * 100) / Movies.DurationSeconds.Value;
+                            //    }
+                            //    else if (seconds != null && TotalDuration > 0)
+                            //    {
+                            //        PercentProgress = (seconds.Value * 100) / TotalDuration;
+                            //    }
+                            //}
+
+                            ProcessOutput = $"Err> {stdErr.Text}";
+
+                            if (ProcessOutput.Contains("Error")) ErrorString = ProcessOutput;
+                            Debug.WriteLine(stdErr.Text);
+                            CliWrapProgressEventArgs cliWrapProgress = new CliWrapProgressEventArgs(PercentProgress, null)
+                            {
+                                Progress = ProcessOutput,
+                                TaskName = action
+                            };
+                            OnCliWrapProgress(cliWrapProgress);
+                            break;
+                        // cancellation token triggered
+                        case ExitedCommandEvent exited:
+                            
+                            ExitCode = exited.ExitCode;
+                            errorCode = ExitCode;
+                            if (string.IsNullOrEmpty(MovieName) && action == "JOIN") MovieName = OutputVideoPath;
+                            if (string.IsNullOrEmpty(MovieName) && action == "JOINMOVIES") MovieName = OutputVideoPath;
+                            if (string.IsNullOrEmpty(MovieName) && action == "CONVERT") MovieName = OutputVideoPath;
+                            ProcessOutput = $"Process exited; Code: " + exited.ExitCode.ToString();
+                            CliWrapCompletedEventArgs eventArgs = new CliWrapCompletedEventArgs(null, false, null)
+                            {
+                                Result = ExitCode,
+                                TaskName = action,
+                                MovieName = MovieName
+                            };
+
+
+                            OnCliWrapComplete(eventArgs);
+                            
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Support.GenerateInfoAndLogMessage("FFMpeg", "Movie", 0, ex.ToString());
+                ProcessOutput = $"Process errored ; " + ex.Message + " see log file";
+                if (!string.IsNullOrEmpty(ErrorString)) ProcessOutput = "Process Errored  : " + ErrorString;
+                CliWrapErrorEventArgs cliWrapProgress = new CliWrapErrorEventArgs(ex, null, action);
+                cliWrapProgress.ErrorString = ErrorString;
+
+
+                OnCliWrapError(cliWrapProgress);
+                errorCode = -1;  // indicate there has been an error. 
+                //throw;
+            }
+            return errorCode;
+        }
+
+        private async Task PlayFromFile(string tempFileName)
+        {
+            if (!string.IsNullOrEmpty(tempFileName))
+            {
+                if (File.Exists(tempFileName))
+                {
+                    using PlayerViewModel playerViewModel = new PlayerViewModel(tempFileName, true);
+                    using TaymadeEntities.PlayerDialog playerDialog = new PlayerDialog(playerViewModel);
+
+                    Window? main = Support.GetWindow();
+                    if (main != null)
+                    {
+                        await playerDialog.ShowDialog(main);
+                    }
+                    
+                }
+            }
         }
 
         /// <summary>

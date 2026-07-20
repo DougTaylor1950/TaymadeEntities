@@ -25,17 +25,21 @@ namespace TaymadeEntities;
 /// </remarks>
 public partial class PlayerDialog : Window, IDisposable
 {
-    
 
+    private bool IsClosed = false;
     public PlayerDialog()
     {
         InitializeComponent();
         Opened += PlayerDialog_Opened;
         SizeChanged += PlayerDialog_SizeChanged;
         KeyDown += PlayerDialog_KeyDown;
+        Closed += PlayerDialog_Closed;
     }
 
-    
+    private void PlayerDialog_Closed(object? sender, EventArgs e)
+    {
+        IsClosed = true;
+    }
 
     public PlayerDialog(PlayerViewModel viewModel)
     {
@@ -74,7 +78,8 @@ public partial class PlayerDialog : Window, IDisposable
             else if (e.Key == Key.Escape)
             {
                 vm.Stop();
-                Avalonia.Threading.Dispatcher.UIThread.Post(() => Close());
+                if (!IsClosed)
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() => Close());
                 e.Handled = true;
             }
             else if (e.Key == Key.NumPad6 || e.Key == Key.Right)
@@ -91,7 +96,7 @@ public partial class PlayerDialog : Window, IDisposable
             else if (e.Key == Key.Up)
             {
                 vm.VolumeUp();
-                e.Handled = true;   
+                e.Handled = true;
             }
             else if (e.Key == Key.Down)
             {
@@ -114,13 +119,14 @@ public partial class PlayerDialog : Window, IDisposable
                 vm.MediaPlayer.Dispose();
             }
 
-            
-            Dispatcher.UIThread.Post(()=> { this.Close(); });
+
+            Dispatcher.UIThread.Post(() => { this.Close(); });
         }
     }
 
     private void PlayerDialog_Opened(object? sender, EventArgs e)
     {
+        IsClosed = false;
         if (this.DataContext != null && this.DataContext is PlayerViewModel vm)
         {
             vm.OnDialogOpened();
@@ -143,8 +149,8 @@ public partial class PlayerDialog : Window, IDisposable
             vm.ScreenHeight = 780;
         }
 
-        if (FullScreenPlayer != null && 
-            FullScreenPlayer.DataContext is PlayerViewModel vmFull 
+        if (FullScreenPlayer != null &&
+            FullScreenPlayer.DataContext is PlayerViewModel vmFull
             && this.IsInitialized && this.Width > 0)
         {
             if (vmFull.FullScreen)
