@@ -270,6 +270,51 @@ namespace TaymadeEntities.Controllers
 
         #region Protected Methods
 
+        public List<MovieIntResult> GetActorMovieIds(string actorName)
+        {
+            List<MovieIntResult> intResults = new List<MovieIntResult>();
+            if (!string.IsNullOrEmpty(actorName))
+            {
+                intResults = movieRepository.GetActorMovieIds(actorName);
+            }
+            return intResults;
+        }
+
+        public List<Movies>? GetMoviesbyBookmarkName(string bookmarkText)
+        {
+            if (!string.IsNullOrEmpty(bookmarkText))
+            {
+                IEnumerable<Movies>? tempList = movieRepository.GetMoviesbyBookmarkName(bookmarkText);
+                return tempList.ToList();
+            }
+            else return null;
+        }
+
+        internal bool AddMovieImage(MovieImage movieImage)
+        {
+            return movieRepository.AddMovieImage(movieImage);
+        }
+
+        internal bool DeleteMovieImage(MovieImage movieImage)
+        {
+            return movieRepository.DeleteMovieImage(movieImage);
+        }
+
+        internal List<MovieImage>? GetMovieImagesByFolder(string v)
+        {
+            return movieRepository.GetMovieImagesByFolder(v);
+        }
+
+        internal List<MovieImage>? GetMovieImagesById(int id)
+        {
+            return movieRepository.GetMovieImagesById(id).ToList();
+        }
+
+        internal bool SaveMovieImage(MovieImage movieImage)
+        {
+            return movieRepository.SaveMovieImage(movieImage);
+        }
+
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources.
         /// </summary>
@@ -289,26 +334,10 @@ namespace TaymadeEntities.Controllers
             }
         }
 
-        public List<MovieIntResult> GetActorMovieIds(string actorName)
+        internal MovieImage? GetMovieImageById(int? lastId)
         {
-            List<MovieIntResult> intResults = new List<MovieIntResult>();
-            if (!string.IsNullOrEmpty(actorName))
-            {
-                 intResults = movieRepository.GetActorMovieIds(actorName);
-            }
-            return intResults;
+            return movieRepository.GetMovieImageById(lastId);
         }
-
-        public List<Movies>? GetMoviesbyBookmarkName(string bookmarkText)
-        {
-            if (!string.IsNullOrEmpty(bookmarkText))
-            {
-                IEnumerable<Movies>? tempList = movieRepository.GetMoviesbyBookmarkName(bookmarkText);
-                return tempList.ToList();
-            }
-            else return null;
-        }
-
         #endregion Protected Methods
     }
 }

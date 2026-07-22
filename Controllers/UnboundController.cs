@@ -29,6 +29,11 @@ namespace TaymadeEntities.Controllers
             return unboundRepository.Save();
         }
 
+        public bool Insert(UnboundGridData unbound)
+        {
+            return unboundRepository.Insert(unbound);
+        }
+
         public bool Save(Models.UnboundGridData movie)
         {
             return unboundRepository.Save(movie);

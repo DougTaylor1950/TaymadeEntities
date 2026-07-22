@@ -543,7 +543,7 @@ namespace TaymadeEntities.Support
         {
 
             ImageSetViewModel.MissingInfo = "Completed";
-            ImageSetViewModel.RootFolder.HasMP4 = true; // indicate temporary file 
+            ImageSetViewModel.RootFolder.HasTempMP4 = true; // indicate temporary file 
             ImageSetViewModel.PlayFromFile(ImageSetViewModel.OutputVideoPath);
             // need to change button visibility
         }
@@ -919,7 +919,7 @@ namespace TaymadeEntities.Support
 
         //    if (imagesetViewModel != null)
 
-        //        imagesetViewModel.RootFolder.HasMP4 = true;
+        //        imagesetViewModel.RootFolder.HasTempMP4 = true;
         //}
 
         /// <summary>

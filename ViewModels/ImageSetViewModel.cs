@@ -57,7 +57,45 @@ namespace TaymadeEntities.ViewModels
 
             UsePicturesAsItems = true;
             CurrentIcon = PlayIcon;
-            CurrentImage = RootFolder?.CurrentImageFolder?.ImageItems?.FirstOrDefault()?.ImageBMP;
+            if (RootFolder.CurrentImageFolder == null)
+            {
+                if (RootFolder.SubDirectoryList == null || RootFolder.SubDirectoryList.Count == 0)
+                {
+                    List<MovieImage>? movieImages = DataController.movieController.GetMovieImagesById(RootFolder.Id);
+                    RootFolder.SubDirectoryList = new ObservableCollection<MovieImage>(movieImages);
+                }
+                MovieImage? lastIdMovieImage = DataController.MovieController.GetMovieImageById(RootFolder.LastId);
+                if (lastIdMovieImage != null && lastIdMovieImage.FolderType == "FolderList")
+                    RootFolder.CurrentImageFolder = lastIdMovieImage;
+                else
+                    RootFolder.CurrentImageFolder = DataController.MovieController.GetMovieImageById(lastIdMovieImage.ParentId);
+            }
+            if (RootFolder != null && RootFolder.CurrentImageFolder != null
+                && RootFolder.CurrentImageFolder.SubDirectoryList != null)
+
+                if (RootFolder.CurrentSubFolder == null || 
+                    RootFolder.CurrentSubFolder.Id != RootFolder.CurrentImageFolder.LastId)
+                {
+                    RootFolder.CurrentSubFolder = RootFolder.CurrentImageFolder.SubDirectoryList.Where(f => f.Id == RootFolder.CurrentImageFolder.LastId).FirstOrDefault();
+                }
+
+                if (RootFolder.CurrentSubFolder != null && RootFolder.CurrentSubFolder.ImageItems.Count == 0)
+                {
+                    RootFolder.CurrentSubFolder.ImageItems.ReloadImageItems(
+                        RootFolder.CurrentSubFolder.Path
+                        );
+                }
+
+                if (!string.IsNullOrEmpty(RootFolder.CurrentSubFolder.LastImageName))
+                {
+                    RootFolder.CurrentImageItem = RootFolder.CurrentSubFolder.ImageItems.Where(
+                        s => s.ImageName == RootFolder.CurrentSubFolder.LastImageName).FirstOrDefault();
+                }
+                else
+                {
+                    RootFolder.CurrentImageItem = RootFolder.CurrentImageFolder.ImageItems.FirstOrDefault();
+                }
+            CurrentImage = RootFolder?.CurrentImageItem?.ImageBMP;
 
             //MVVM = Support.Support.GetMainWindowViewModel();
         }
@@ -81,7 +119,13 @@ namespace TaymadeEntities.ViewModels
             {
                 //currentImage?.Dispose();
                 this.RaiseAndSetIfChanged(ref currentImage, value);
+                if (value != null && RootFolder != null)
+                {
+                    RootFolder?.LastId = RootFolder?.CurrentSubFolder.Id;
+                    RootFolder?.Save();
+                }
             }
+
         }
         public Avalonia.Media.Imaging.Bitmap? CurrentIcon
         {
@@ -372,11 +416,11 @@ namespace TaymadeEntities.ViewModels
 
                 if (File.Exists(destFile)) File.Delete(destFile);
                 //File.Move(imageSetViewModel.RootFolder.Movies.MoviePath, destFile);
-                RootFolder.HasMP4 = false;
+                RootFolder.HasTempMP4 = false;
             }
 
             // delete image files to tidy
-            string[] files = Directory.GetFiles(RootFolder.TempDirectory(), "*.jpg");
+            string[] files = Directory.GetFiles(RootFolder.TempDirectory(), "*.*");
             foreach (var item in files)
             {
                 File.Delete(item);
@@ -510,7 +554,7 @@ namespace TaymadeEntities.ViewModels
         {
 
             MissingInfo = "Completed";
-            RootFolder.HasMP4 = true; // indicate temporary file 
+            RootFolder.HasTempMP4 = true; // indicate temporary file 
             PlayFromFile(OutputVideoPath);
             // need to change button visibility
         }

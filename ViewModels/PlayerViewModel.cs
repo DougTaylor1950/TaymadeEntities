@@ -680,9 +680,18 @@ namespace TaymadeEntities.ViewModels
                     }
                     else
                     {
-                        media = new Media(_libVlc, new Uri(MoviePath));
+                        try
+                        {
+                            media = new Media(_libVlc, new Uri(MoviePath));
+                        }
+                        catch (Exception ex)
+                        {
 
-                        if (Recording )
+                            
+                        }
+                        
+
+                        if (Recording  && media != null )
                         {
                             string dest = @"K:\TD1\White\Download\" + RecordName + ".mp4" ;
                             string option = ":sout=#std{access=file,mux=mp4,dst=" + dest + "}";

@@ -29,5 +29,11 @@ namespace TaymadeEntities.DAL.Interfaces
         Task<IEnumerable<Movies>> GetMoviesByTitleAsync(string title);
         IEnumerable<Movies>? GetMoviesbyBookmarkName(string bookmarkText);
         List<MovieIntResult> GetActorMovieIds(string actorName);
+        bool SaveMovieImage(MovieImage movieImage);
+        IEnumerable<MovieImage>? GetMovieImagesById(int id);
+        bool AddMovieImage(MovieImage movieImage);
+        bool DeleteMovieImage(MovieImage movieImage);
+        List<MovieImage>? GetMovieImagesByFolder(string v);
+        MovieImage? GetMovieImageById(int? lastId);
     }
 }

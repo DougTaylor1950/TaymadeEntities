@@ -72,7 +72,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         private static List<Models.PhraseEntry> languages = new List<PhraseEntry>();
 
-        private static MovieImageEntity movieImageEntity = null;
+        
 
         /// <summary>
         /// Defines the movieList.
@@ -434,19 +434,7 @@ namespace TaymadeEntities.Models
         }
 
 
-        public static MovieImageEntity MovieImageEntity
-        {
-            get
-            {
-                if (movieImageEntity == null) movieImageEntity = new MovieImageEntity();
-                if (movieImageEntity != null)
-                {
-                    movieImageEntity.ChangeTracker.AutoDetectChangesEnabled = false;
-                }
-                return movieImageEntity;
-            }
-            set => movieImageEntity = value;
-        }
+        
 
         /// <summary>
         /// Gets or sets the MovieList.

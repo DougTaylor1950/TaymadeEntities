@@ -22,6 +22,17 @@ namespace TaymadeEntities.DAL.Classes
             return _context.SaveChanges() > 0;
         }
 
+        public bool SaveMovieImage(MovieImage movieImage)
+        {
+            MovieImage image = _context.MovieImage.Find(movieImage.Id);
+            if (image != null)
+            {
+                image.LastId = movieImage.LastId;
+                image.Name = movieImage.Name;
+            }
+            _context.MovieImage.Update(image);
+            return Save();
+        }
         public bool Save(Movies movie)
         {
             return UpdateMovie(movie);
@@ -88,9 +99,21 @@ namespace TaymadeEntities.DAL.Classes
             return success;
         }
 
+        public bool DeleteMovieImage(MovieImage movieImage)
+        {
+            _context.MovieImage.Remove(movieImage);
+            return Save();
+        }
+
         public Movies? GetMoviesById(int id)
         {
             return _context.Movies.Find(id);
+        }
+
+        public bool AddMovieImage(MovieImage movieImage)
+        {
+            _context.MovieImage.Add(movieImage);
+            return Save();
         }
 
         public bool Add(Movies movie)
@@ -137,6 +160,16 @@ namespace TaymadeEntities.DAL.Classes
             return tempList;
         }
 
+        public IEnumerable<MovieImage>? GetMovieImagesById(int id)
+        {
+            return _context.MovieImage.Where(i => i.ParentId == id).OrderBy(x => x.Name).ToList();
+        }
+
+        public List<MovieImage>? GetMovieImagesByFolder(string v)
+        {
+            return _context.MovieImage.Where(i => i.FolderType == v).ToList();
+        }
+
         public IEnumerable<Movies>? GetMoviesByInfo(string stub)
         {
             return _context.GetMoviesbyInfo(stub);
@@ -162,6 +195,13 @@ namespace TaymadeEntities.DAL.Classes
         public List<MovieIntResult> GetActorMovieIds(string actorName)
         {
             return _context.GetActorMovieIds(actorName);
+        }
+
+        public MovieImage? GetMovieImageById(int? lastId)
+        {
+            if (lastId != null)
+                return _context.MovieImage.Find(lastId);
+            else return null;
         }
     }
 }

@@ -122,7 +122,7 @@ namespace TaymadeEntities.DAL.Classes
 
         public IEnumerable<UnboundGridData> GetData()
         {
-            return _context.UnboundGridData.OrderByDescending(x => x.CreationTime).ToList();
+            return _context.UnboundGridData.Where(x=>x.CreationTime != default).OrderByDescending(x => x.CreationTime).ToList();
         }
 
         public bool UpdateDownloadProperties(DownloadProperties downloadProperties)
