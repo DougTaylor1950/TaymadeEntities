@@ -54,7 +54,7 @@ namespace TaymadeEntities.ViewModels
             ReloadPictures = ReactiveCommand.Create(DoReloadPictures);
             ReloadPicture = ReactiveCommand.Create(DoReloadPicture);
             DeletePicture = ReactiveCommand.Create(DoDeletePicture);
-
+            ZoomToFeature = ReactiveCommand.Create(DoZoomToFeature);
             UsePicturesAsItems = true;
             CurrentIcon = PlayIcon;
             if (RootFolder.CurrentImageFolder == null)
@@ -96,10 +96,30 @@ namespace TaymadeEntities.ViewModels
                     RootFolder.CurrentImageItem = RootFolder.CurrentImageFolder.ImageItems.FirstOrDefault();
                 }
             CurrentImage = RootFolder?.CurrentImageItem?.ImageBMP;
+            if (this.ImageSetControl != null && this.ImageSetControl.dgItemImages != null)
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    ImageSetControl.dgItemImages.ScrollIntoView(RootFolder.CurrentImageItem, null);
+                });
+                //this.ImageSetControl.SetCurrentRow(RootFolder.CurrentImageItem);
+            }
 
             //MVVM = Support.Support.GetMainWindowViewModel();
         }
 
+        public void SetImageRow()
+        {
+            
+            if (this.ImageSetControl != null && this.ImageSetControl.dgItemImages != null)
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    ImageSetControl.dgItemImages.ScrollIntoView(RootFolder.CurrentImageItem, null);
+                });
+                //this.ImageSetControl.SetCurrentRow(RootFolder.CurrentImageItem);
+            }
+        }
 
 
         #endregion Public Constructors
@@ -187,6 +207,8 @@ namespace TaymadeEntities.ViewModels
         public ReactiveCommand<Unit, Unit> EditPicture { get; private set; }
         public ReactiveCommand<Unit, Unit> ReloadPictures { get; private set; }
         public ReactiveCommand<Unit, Unit> ReloadPicture { get; private set; }
+
+        public ReactiveCommand<Unit,Unit> ZoomToFeature { get; private set; }
         public RootFolder? RootFolder
         {
             get
@@ -501,7 +523,7 @@ namespace TaymadeEntities.ViewModels
             get => progressPercent;
             set => this.RaiseAndSetIfChanged(ref progressPercent, value);
         }
-        public object ImageSetControl { get; set; }
+        public Controls.ImageSetControl ImageSetControl { get; set; }
         public Avalonia.Controls.Image CurrentImageControl { get; set; }
         public string OutputVideoPath { get; set; }
 
@@ -982,6 +1004,20 @@ namespace TaymadeEntities.ViewModels
         {
             RootFolder.CurrentImageItem.ReloadImage();
         }
+
+        private void DoZoomToFeature()
+        {
+            using ViewModels.ZoomPictureViewModel viewModel = new ZoomPictureViewModel(RootFolder.CurrentImageItem.ImagePath);
+            using Dialogs.ZoomPictureDialog pictureDialog = new Dialogs.ZoomPictureDialog(viewModel);
+
+            Window? main  = Support.Support.GetMainWindow() as Window;
+
+            if (main != null)
+            {
+                pictureDialog.ShowDialog(main);
+            }
+        }
+
         private void DoReloadPictures()
         {
             RootFolder.ReloadPictures();

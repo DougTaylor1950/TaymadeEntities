@@ -1,0 +1,54 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1800" d:DesignHeight="1200"
+        xmlns:vm="using:TaymadeEntities.ViewModels"
+        xmlns:tcb="using:TaymadeControls.Buttons"
+        x:Class="TaymadeEntities.Dialogs.ZoomPictureDialog"
+        x:DataType="vm:ZoomPictureViewModel"
+        WindowState="Maximized"
+        Title="Zoom Picture">
+    <StackPanel>
+        <Border  BorderBrush="Black"
+                 BorderThickness="3"
+                 CornerRadius="5"
+                 Width="1605"
+                 Height="1005"
+                 >
+            <StackPanel>
+                <Image Source="{Binding ImageBMP}"
+                       Width="1600"
+                       Height="800"
+                       PointerPressed="Image_PointerPressed"
+                       PointerReleased="Image_PointerReleased"
+                       >
+
+                </Image>
+                <StackPanel Height="50"/>
+                <Border HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        BorderBrush="Black"
+                        BorderThickness="3"
+                        CornerRadius="5"
+                        Height="70"
+                        Width="700"
+                        Background="LightGray"
+                        >
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" >
+                        <tcb:OkButton Click="OkButton_Click"/> 
+                        <tcb:CancelButton Click="CancelButton_Click"/>
+                        <TextBlock Text="Frames" Margin="10,5,5,5"  VerticalAlignment="Center"/>
+                        <TextBox Width="100" Height="40" Text="{Binding Frames}" />
+                        <tcb:ImagedButton LabelText="Clear"
+                                          ImageSource="avares://TaymadeControls/Assets/cleaning.png"/>
+                        <tcb:ImagedButton LabelText="Build" 
+                                          ImageSource="avares://TaymadeControls/Assets/build.png"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+        </Border>
+    </StackPanel>
+
+</Window>
