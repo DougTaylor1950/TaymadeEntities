@@ -15,10 +15,14 @@ namespace TaymadeEntities.ViewModels
         private Bitmap? imageBMP;
         private double imageWidth = 1600;
         private double imageHeight = 800;
-        private int frames;
+        private int frames = 10;
+
+        private string startingImagePath = @"K:\DriveF\Teen\Girls\GIN\gin080.jpg";
+        private int step = 5;
 
         public ZoomPictureViewModel()
         {
+            ImagePath = startingImagePath;
             SetupModel();
         }
 
@@ -58,10 +62,29 @@ namespace TaymadeEntities.ViewModels
             set => this.RaiseAndSetIfChanged(ref imageHeight , value); 
         }
 
+        public double AspectRatio { get; set; }
+
+        public double ImageBorderWidth
+        {
+            get => imageWidth+8;
+            
+        }
+
+        public double ImageBorderHeight
+        {
+            get => imageHeight +8;
+        }
+
         public int Frames 
         { 
             get => frames; 
             set => this.RaiseAndSetIfChanged(ref frames, value); 
+        }
+
+        public int Step 
+        {
+            get => step;
+            set => this.RaiseAndSetIfChanged(ref step, value);
         }
 
         internal void SetupModel()
@@ -75,7 +98,11 @@ namespace TaymadeEntities.ViewModels
                     ImageWidth = imageBMP.Size.Width;
                     ImageHeight = ImageBMP.Size.Height;
                 }
+
+                AspectRatio = ImageWidth / ImageHeight;
             }
+            this.RaisePropertyChanged(nameof(ImageWidth));
+            this.RaisePropertyChanged(nameof(ImageHeight));
         }
     }
 }

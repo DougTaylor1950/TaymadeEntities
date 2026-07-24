@@ -1018,9 +1018,12 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        private void DoReloadPictures()
+        public void DoReloadPictures()
         {
+            
             RootFolder.ReloadPictures();
+            //RootFolder.CurrentImageItem = temp;
+            
         }
 
         #endregion Private Methods

@@ -154,7 +154,7 @@
 										<MenuItem Header="Edit Image" Command="{Binding EditPicture}" />
 										<MenuItem Header="Delete Image" Command="{Binding DeletePicture}" />
 										<MenuItem Header="Reload Image" Command="{Binding ReloadPicture}" />
-										<MenuItem Header="Reload Images" Command="{Binding ReloadPictures}" />
+										<MenuItem Header="Reload Images" Click="Reloadpictures_Click" />
 										<MenuItem Header="Move Image to selected folder" Command="{Binding MoveToSelectedFolder}"  />
 										<MenuItem Header="Copy Image to selected folder" Command="{Binding CopyToSelectedFolder}"  />
 										<MenuItem Header="Rename File" Click="MenuItem_Click"  />

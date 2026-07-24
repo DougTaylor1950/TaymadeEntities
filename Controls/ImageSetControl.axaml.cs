@@ -2,6 +2,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using ReactiveUI;
+
 //using ImageViewer.ViewModels;
 using System;
 using System.IO;
@@ -108,7 +110,8 @@ public partial class ImageSetControl : UserControl
 
     private void dgItemImages_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
-        if (imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems.IsPlaying)
+        if (imageSetViewModel.RootFolder?.CurrentSubFolder?.ImageItems != null
+            || imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems.IsPlaying != null)
             return;
         // set CurrentSubFolder folder lastimagename to this item
         if (e.AddedItems.Count >= 1 && e.AddedItems[0] != null && e.AddedItems[0] is ImageItem)
@@ -147,6 +150,16 @@ public partial class ImageSetControl : UserControl
                 }
                 imageSetViewModel.RootFolder.Save();
             }
+        }
+    }
+
+    private void Reloadpictures_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext != null && DataContext is ImageSetViewModel vm)
+        {
+            vm.DoReloadPictures();
+            vm.ImageSetControl = this;
+            vm.SetImageRow();
         }
     }
 
