@@ -1,10 +1,13 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using DocumentFormat.OpenXml.Drawing.Charts;
+using DocumentFormat.OpenXml.Wordprocessing;
 using ReactiveUI;
+using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -15,6 +18,14 @@ namespace TaymadeEntities.Dialogs;
 
 public partial class ZoomPictureDialog : WindowBase
 {
+    #region Private Fields
+
+    private bool released = false;
+
+    #endregion Private Fields
+
+    #region Public Constructors
+
     public ZoomPictureDialog()
     {
         InitializeComponent();
@@ -27,101 +38,38 @@ public partial class ZoomPictureDialog : WindowBase
         this.DataContext = viewModel;
     }
 
-    private void OkButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        Dispatcher.UIThread.Post(() =>
-        {
-            this.Close(true);
-        }
-        );
-    }
+    #endregion Public Constructors
 
-    private void CancelButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
-    {
-        Dispatcher.UIThread.Post(() =>
-        {
-            this.Close(false);
-        }
-        );
-    }
+    #region Public Properties
 
-    private PointerPoint? start { get; set; }
-    public double startX { get; private set; }
-    public double startY { get; private set; }
-    private PointerPoint? end { get; set; }
     public double endX { get; private set; }
+
     public double endY { get; private set; }
+
+    public double startX { get; private set; }
+
+    public double startY { get; private set; }
+
+    #endregion Public Properties
+
+    #region Private Properties
+
+    private PointerPoint? end { get; set; }
+
     private Image pictureImage { get; set; }
 
-    private bool released = false;
+    private PointerPoint? start { get; set; }
 
-    private void Image_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
-    {
-        released = false;
-        Image pictureImage = sender as Image;
-        start = e.GetCurrentPoint(pictureImage);
-        startX = start.Value.Position.X;
-        startY = start.Value.Position.Y;
-    }
+    #endregion Private Properties
 
-    private void Image_PointerReleased(object? sender, PointerReleasedEventArgs e)
-    {
-        pictureImage = sender as Image;
-        end = e.GetCurrentPoint(pictureImage);
-        endX = end.Value.Position.X;
-        endY = end.Value.Position.Y;
-        DrawRectangle();
-        released = true;
-    }
-
-
-    private void DrawRectangle()
-    {
-        if (DataContext is ZoomPictureViewModel vm)
-        {
-            // create a system drawing bitmap 
-            System.Drawing.Bitmap temp = new System.Drawing.Bitmap(vm.ImagePath);
-
-            double imageWidth = pictureImage.Width;
-            double imageHeight = pictureImage.Height;
-
-
-
-            if (start != null && end != null)
-            {
-                double width = endX - startX;
-                double height = endY - startY;
-
-                height = width / vm.AspectRatio;
-                // must correct the end positions
-                endY = startY + height;
-                System.Drawing.Pen solidBrush =
-                    new System.Drawing.Pen(System.Drawing.Color.Black);
-                using (Graphics g = Graphics.FromImage(temp))
-                {
-                    g.DrawRectangle(solidBrush, (int)startX, (int)startY,
-                        (int)width, (int)height);
-                }
-            }
-            // recreate av bitmap
-            using (System.IO.MemoryStream memory = new System.IO.MemoryStream())
-            {
-                temp?.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
-                memory.Position = 0;
-
-                vm.ImageBMP = new Avalonia.Media.Imaging.Bitmap(memory);
-            }
-            temp?.Dispose();
-        }
-    }
-
+    #region Private Methods
 
     private void Build_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
         if (DataContext is ZoomPictureViewModel vm && start != null
             && end != null && vm.Frames > 0)
         {
-            // get new width and height 
+            // get new width and height
 
             double newWidth = endX - startX;
             double newHeight = endY - startY;
@@ -145,8 +93,8 @@ public partial class ZoomPictureDialog : WindowBase
             double yHeight = (vm.ImageHeight - heightStep);
 
             string orginalFilename = vm.ImagePath;
-            string imagePath = Support.Support.FixImagePath(Path.GetDirectoryName(orginalFilename));
-            string fileNameStub = Path.GetFileNameWithoutExtension(orginalFilename);
+            string imagePath = Support.Support.FixImagePath(System.IO.Path.GetDirectoryName(orginalFilename));
+            string fileNameStub = System.IO.Path.GetFileNameWithoutExtension(orginalFilename);
 
             //for (int i = 0; i < vm.Frames; i++)
             //{
@@ -172,7 +120,7 @@ public partial class ZoomPictureDialog : WindowBase
                     using (var newBitmap = temp.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
                     using (var reSizedImage = Support.Support.ResizeImage(newBitmap, (int)vm.ImageWidth, (int)vm.ImageHeight))
                     {
-                        string filename = Path.Combine(imagePath, $"{fileNameStub}-{(i + 1):000}.jpg");
+                        string filename = System.IO.Path.Combine(imagePath, $"{fileNameStub}-{(i + 1):000}.jpg");
                         reSizedImage.Save(filename, ImageFormat.Jpeg);
                     }
                     xStart += stepX;
@@ -186,20 +134,156 @@ public partial class ZoomPictureDialog : WindowBase
         }
     }
 
-    private void Clear_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void CancelButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
+        Dispatcher.UIThread.Post(() =>
+        {
+            this.Close(false);
+        }
+        );
+    }
+
+    private void Clear_Click(object? sender, RoutedEventArgs e)
+    {
+
         start = null;
         end = null;
+        if (DataContext is ZoomPictureViewModel vm)
+        {
+            vm.RaisePropertyChanged(nameof(vm.ImageBMP));
+        }
         DrawRectangle();
     }
 
-    private void MoveUp_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private void Clip_Click(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is ZoomPictureViewModel vm && start != null && end != null)
+        // clone image from the clipped rectangle 
+        if (DataContext is ZoomPictureViewModel vm)
         {
-            int step = vm.Step;
-            startY -= step;
-            endY -= step;
+            var rect = new Rectangle(0, 0, vm.SystemBitmap.Width, vm.SystemBitmap.Height);
+            using (var newBitmap = vm.SystemBitmap.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+            {
+                if (start != null && end != null)
+                {
+                    double width = endX - startX;
+                    double height = endY - startY;
+
+                    height = width / vm.AspectRatio;
+                    // must correct the end positions
+                    endY = startY + height;
+
+                    Rectangle rectClone = new Rectangle((int)startX, (int)startY,
+                            (int)width, (int)height);
+                    // now clone new bitmap
+                    using (var clonedBitmap = newBitmap.Clone(rectClone, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                    {
+                        using (var reSizedImage = Support.Support.ResizeImage(clonedBitmap, (int)vm.ImageWidth, (int)vm.ImageHeight))
+                        {
+
+
+                            string orginalFilename = vm.ImagePath;
+                            string imagePath = Support.Support.FixImagePath(System.IO.Path.GetDirectoryName(orginalFilename));
+                            string fileNameStub = System.IO.Path.GetFileNameWithoutExtension(orginalFilename);
+
+                            // save image using vm.ImagePath
+                            string filename = System.IO.Path.Combine(imagePath,  $"{fileNameStub}.jpg");
+                            reSizedImage.Save(filename, ImageFormat.Jpeg);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void DrawRectangle()
+    {
+        if (DataContext is ZoomPictureViewModel vm)
+        {
+            // create a system drawing bitmap
+
+
+            double imageWidth = pictureImage.Width;
+            double imageHeight = pictureImage.Height;
+            var rect = new Rectangle(0, 0, vm.SystemBitmap.Width, vm.SystemBitmap.Height);
+            using (var newBitmap = vm.SystemBitmap.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+            {
+                if (start != null && end != null)
+                {
+                    double width = endX - startX;
+                    double height = endY - startY;
+
+                    height = width / vm.AspectRatio;
+                    // must correct the end positions
+                    endY = startY + height;
+                    System.Drawing.Pen solidBrush =
+                        new System.Drawing.Pen(System.Drawing.Color.Black);
+                    using (Graphics g = Graphics.FromImage(newBitmap))
+                    {
+                        g.DrawRectangle(solidBrush, (int)startX, (int)startY,
+                            (int)width, (int)height);
+                    }
+                }
+                // recreate av bitmap
+                using (System.IO.MemoryStream memory = new System.IO.MemoryStream())
+                {
+                    newBitmap?.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                    memory.Position = 0;
+
+                    vm.ImageBMP = new Avalonia.Media.Imaging.Bitmap(memory);
+                }
+                //vm.SystemBitmap?.Dispose();
+            }
+        }
+    }
+
+    private void Image_PointerMoved(object? sender, PointerEventArgs e)
+    {
+        if (!released && sender != null)
+        {
+            pictureImage = sender as Image;
+            end = e.GetCurrentPoint(pictureImage);
+
+            //DrawRectangle();
+        }
+    }
+
+    private void Image_PointerPressed(object? sender, Avalonia.Input.PointerPressedEventArgs e)
+    {
+        released = false;
+        Image pictureImage = sender as Image;
+        start = e.GetCurrentPoint(pictureImage);
+        startX = start.Value.Position.X;
+        startY = start.Value.Position.Y;
+    }
+
+    private void Image_PointerReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        pictureImage = sender as Image;
+        end = e.GetCurrentPoint(pictureImage);
+        endX = end.Value.Position.X;
+        endY = end.Value.Position.Y;
+        DrawRectangle();
+        released = true;
+    }
+
+    private void Stretch_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (DataContext is ZoomPictureViewModel vm)
+        {
+            // increase the rectangle size by the step amount in both directions
+            endX += vm.Step;
+            endY += vm.Step;
+            DrawRectangle();
+        }
+    }
+
+    private void Shrink_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (DataContext is ZoomPictureViewModel vm)
+        {
+            // decrease the rectangle size by the step amount in both directions
+            endX -= vm.Step;
+            endY -= vm.Step;
             DrawRectangle();
         }
     }
@@ -237,14 +321,25 @@ public partial class ZoomPictureDialog : WindowBase
         }
     }
 
-    private void Image_PointerMoved(object? sender, PointerEventArgs e)
+    private void MoveUp_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (!released)
+        if (DataContext is ZoomPictureViewModel vm && start != null && end != null)
         {
-            pictureImage = sender as Image;
-            end = e.GetCurrentPoint(pictureImage);
-
+            int step = vm.Step;
+            startY -= step;
+            endY -= step;
             DrawRectangle();
         }
     }
+
+    private void OkButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            this.Close(true);
+        }
+        );
+    }
+
+    #endregion Private Methods
 }

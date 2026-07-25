@@ -372,7 +372,7 @@ namespace TaymadeEntities.Support
             }
         }
 
-        
+
 
         private static void FindOrCreateDirector(Movies movie, iMovie iMovie)
         {
@@ -715,11 +715,11 @@ namespace TaymadeEntities.Support
                 }
                 // use ffmpeg to build an MP4 file
                 string ffMpegCommand = " -framerate 1 -i " + '"' + imageFileStub + "%04d.jpg" + '"' + " -c:v libx264 -r 25 " + '"' + outputFileName + '"';
-                
+
 
                 mainWindowViewModel.OutputVideoPath = outputFileName;
                 progressChangedEventArgs.Info = "Creating temp MP4";
-                OnProgress( progressChangedEventArgs);
+                OnProgress(progressChangedEventArgs);
 
                 mainWindowViewModel.MissingInfo = "Creating temp MP4";
 
@@ -1381,7 +1381,7 @@ namespace TaymadeEntities.Support
             return result;
         }
 
-        
+
         public static bool IsWindows()
         {
             string os = GetOS();
@@ -1814,34 +1814,69 @@ namespace TaymadeEntities.Support
 
                 if (info.Length > 0)
                 {
-                    try
-                    {
-                        System.Drawing.Bitmap? sBitmap = new System.Drawing.Bitmap(System.Drawing.Image.FromFile(fileName));
-
-                        using (System.IO.MemoryStream memory = new System.IO.MemoryStream())
-                        {
-                            sBitmap?.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
-                            memory.Position = 0;
-
-                            retBMP = new Avalonia.Media.Imaging.Bitmap(memory);
-                        }
-                        sBitmap?.Dispose();
-                        sBitmap = null;
-
-                    }
-                    catch (Exception ex)
-                    {
-
-                    }
-                    finally
-                    {
-
-                    }
+                    retBMP = ConvertFileToAvaloniaBitmap(fileName, retBMP);
                 }
             }
             return retBMP;
         }
 
+        private static Avalonia.Media.Imaging.Bitmap? ConvertFileToAvaloniaBitmap(string? fileName, Avalonia.Media.Imaging.Bitmap? retBMP)
+        {
+            try
+            {
+                System.Drawing.Bitmap? sBitmap = new System.Drawing.Bitmap(System.Drawing.Image.FromFile(fileName));
+
+                using (System.IO.MemoryStream memory = new System.IO.MemoryStream())
+                {
+                    sBitmap?.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                    memory.Position = 0;
+
+                    retBMP = new Avalonia.Media.Imaging.Bitmap(memory);
+                }
+                sBitmap?.Dispose();
+                sBitmap = null;
+
+            }
+            catch (Exception ex)
+            {
+
+            }
+            finally
+            {
+
+            }
+
+            return retBMP;
+        }
+
+        public static Avalonia.Media.Imaging.Bitmap? ConvertFileToAvaloniaBitmap(Bitmap? sBitmap)
+        {
+            Avalonia.Media.Imaging.Bitmap? retBMP = null;
+
+            if (sBitmap != null)
+            {
+                try
+                {
+                    using (System.IO.MemoryStream memory = new System.IO.MemoryStream())
+                    {
+                        sBitmap?.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                        memory.Position = 0;
+                        retBMP = new Avalonia.Media.Imaging.Bitmap(memory);
+                    }
+                    sBitmap?.Dispose();
+                    sBitmap = null;
+                }
+                catch (Exception ex)
+                {
+
+                }
+                finally
+                {
+
+                }
+            }
+            return retBMP;
+        }
 
         public static Avalonia.Media.Imaging.Bitmap? GetBMPFromBitmap(System.Drawing.Image sBitmap)
         {

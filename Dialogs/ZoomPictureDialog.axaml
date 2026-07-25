@@ -10,95 +10,121 @@
         WindowState="Maximized"
         Title="Zoom Picture">
     <StackPanel>
-        <Border  BorderBrush="Black"
-                 BorderThickness="3"
-                 CornerRadius="5"
+        <TabControl>
+            <TabItem Header="Zoom/Clip">
+                <Border  BorderBrush="Black"
+                         BorderThickness="3"
+                         CornerRadius="5"
 
-                 >
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" >
-                <StackPanel Orientation="Horizontal">
-                    <Border HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            BorderBrush="Black"
-                            BorderThickness="3"
-                            CornerRadius="5"
-                            Width="{Binding ImageBorderWidth}"
-                            Height="{Binding ImageBorderHeight}"
-                            >
-                        <Image Source="{Binding ImageBMP}"
-                               Width="{Binding ImageWidth}"
-                               Height="{Binding ImageHeight}"
-                               PointerPressed="Image_PointerPressed"
-                               PointerReleased="Image_PointerReleased"
-                               PointerMoved="Image_PointerMoved"
-                               >
-                        </Image>
-                    </Border >
-                    <StackPanel Width="40" />
-                    <Border  BorderBrush="Black"
-                            BorderThickness="3"
-                            Background="LightGray"
-                            CornerRadius="5"
-                            >
-
-                        <StackPanel Orientation="Vertical" 
-                                    Width="150"  
-                                    Height="{Binding ImageHeight}"
-                                    HorizontalAlignment="Center"
+                         >
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" >
+                        <StackPanel Orientation="Horizontal">
+                            <Border HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
+                                    BorderBrush="Black"
+                                    BorderThickness="3"
+                                    CornerRadius="5"
+                                    Width="{Binding ImageBorderWidth}"
+                                    Height="{Binding ImageBorderHeight}"
                                     >
-                            <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/up_arrow.png"  
-                                                    HorizontalAlignment="Center"
-                                                    Height="50" 
-                                                    Click="MoveUp_Click"/>
-                            <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/DownArrow.png"  
-                                                    HorizontalAlignment="Center"
-                                                    Height="50" 
-                                                    Click="MoveDown_Click"/>
-                            <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/left_arrow.png"  
-                                                    HorizontalAlignment="Center"
-                                                    Height="50" 
-                                                    Click="MoveLeft_Click"/>
-                            <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/right_arrow.png"  
-                                                    HorizontalAlignment="Center"
-                                                    Height="50" 
-                                                    Click="MoveRight_Click"/>
-                            <NumericUpDown Minimum="0" 
-                                           Maximum="30"
-                                           Margin="5,5,5,5"
-                                           Value="{Binding Step}"
-                                           />
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
-                <StackPanel Height="50"/>
-                <Border HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        BorderBrush="Black"
-                        BorderThickness="3"
-                        CornerRadius="5"
-                        Height="70"
-                        Width="700"
-                        Background="LightGray"
-                        >
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" >
-                        <tcb:OkButton Click="OkButton_Click"/>
-                        <tcb:CancelButton Click="CancelButton_Click"/>
-                        <TextBlock Text="Frames" Margin="10,5,5,5"  VerticalAlignment="Center"/>
-                        <TextBox Width="100" Height="40" Text="{Binding Frames}" />
-                        <tcb:ImagedButton LabelText="Clear"
-                                          ImageSource="avares://TaymadeControls/Assets/cleaning.png"
-                                          Click="Clear_Click"
-                                          />
-                        <tcb:ImagedButton LabelText="Build"
-                                          ImageSource="avares://TaymadeControls/Assets/build.png"
-                                          Click="Build_Click"
-                                          />
-                    </StackPanel>
-                </Border>
-            </StackPanel>
+                                <Image Source="{Binding ImageBMP}"
+                                       Width="{Binding ImageWidth}"
+                                       Height="{Binding ImageHeight}"
+                                       PointerPressed="Image_PointerPressed"
+                                       PointerReleased="Image_PointerReleased"
+                                       PointerMoved="Image_PointerMoved"
+                                       >
+                                </Image>
+                            </Border >
+                            <StackPanel Width="40" />
+                            <Border  BorderBrush="Black"
+                                     BorderThickness="3"
+                                     Background="LightGray"
+                                     CornerRadius="5"
+                                     >
 
-        </Border>
+                                <StackPanel Orientation="Vertical"
+                                            Width="150"
+                                            Height="{Binding ImageHeight}"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            >
+                                    <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/up_arrow.png"
+                                                            HorizontalAlignment="Center"
+                                                            Height="50"
+                                                            Click="MoveUp_Click"/>
+                                    <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/DownArrow.png"
+                                                            HorizontalAlignment="Center"
+                                                            Height="50"
+                                                            Click="MoveDown_Click"/>
+                                    <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/left_arrow.png"
+                                                            HorizontalAlignment="Center"
+                                                            Height="50"
+                                                            Click="MoveLeft_Click"/>
+                                    <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/right_arrow.png"
+                                                            HorizontalAlignment="Center"
+                                                            Height="50"
+                                                            Click="MoveRight_Click"/>
+                                    <NumericUpDown Minimum="0"
+                                                   Maximum="30"
+                                                   Margin="5,5,5,5"
+                                                   Value="{Binding Step}"
+                                                   />
+                                    <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/stretch.png"
+                                                            HorizontalAlignment="Center"
+                                                            Height="50"
+                                                            Click="Stretch_Click"
+                                                            />
+                                    <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/shrink.png"
+                                                            HorizontalAlignment="Center"
+                                                            Height="50"
+                                                            Click="Shrink_Click"
+                                                            />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                        <StackPanel Height="50"/>
+                        <Border HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                BorderBrush="Black"
+                                BorderThickness="3"
+                                CornerRadius="5"
+                                Height="70"
+                                Width="800"
+                                Background="LightGray"
+                                >
+                            <StackPanel Orientation="Horizontal" 
+                                        HorizontalAlignment="Center" >
+                                <tcb:OkButton Click="OkButton_Click"/>
+                                <tcb:CancelButton Click="CancelButton_Click"/>
+                                <TextBlock Text="Frames" Margin="10,5,5,5"  VerticalAlignment="Center"/>
+                                <TextBox Width="100" Height="40" Text="{Binding Frames}" />
+                                <tcb:ImagedButton LabelText="Clear"
+                                                  ImageSource="avares://TaymadeControls/Assets/cleaning.png"
+                                                  Click="Clear_Click"
+                                                  />
+                                <tcb:ImagedButton LabelText="Build"
+                                                  ImageSource="avares://TaymadeControls/Assets/build.png"
+                                                  Click="Build_Click"
+                                                  />
+                                <tcb:ImagedButton LabelText="Clip"
+                                                  ImageSource="avares://TaymadeControls/Assets/scissor.png"
+                                                  Click="Clip_Click"
+                                                  />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                </Border>
+            </TabItem>
+        <TabItem Header="Photo Fix">
+            <Border BorderBrush="Black"
+                    BorderThickness="3"
+                    CornerRadius="5">
+                
+            </Border>
+        </TabItem>
+        </TabControl>
     </StackPanel>
 
 </Window>

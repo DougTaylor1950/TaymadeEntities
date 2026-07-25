@@ -33,9 +33,9 @@ namespace TaymadeEntities.ViewModels
             this.RaisePropertyChanged(nameof(ImageBMP));
         }
 
-        public string? ImagePath 
-        { 
-            get => imagePath; 
+        public string? ImagePath
+        {
+            get => imagePath;
             private set => this.RaiseAndSetIfChanged(ref imagePath, value);
         }
 
@@ -43,7 +43,7 @@ namespace TaymadeEntities.ViewModels
         {
             get
             {
-                
+
                 return imageBMP;
             }
 
@@ -53,35 +53,35 @@ namespace TaymadeEntities.ViewModels
         public double ImageWidth
         {
             get => imageWidth;
-            set => this.RaiseAndSetIfChanged(ref imageWidth, value); 
+            set => this.RaiseAndSetIfChanged(ref imageWidth, value);
         }
 
-        public double ImageHeight 
-        { 
+        public double ImageHeight
+        {
             get => imageHeight;
-            set => this.RaiseAndSetIfChanged(ref imageHeight , value); 
+            set => this.RaiseAndSetIfChanged(ref imageHeight, value);
         }
 
         public double AspectRatio { get; set; }
-
+        public System.Drawing.Bitmap SystemBitmap { get; set; }
         public double ImageBorderWidth
         {
-            get => imageWidth+8;
-            
+            get => imageWidth + 8;
+
         }
 
         public double ImageBorderHeight
         {
-            get => imageHeight +8;
+            get => imageHeight + 8;
         }
 
-        public int Frames 
-        { 
-            get => frames; 
-            set => this.RaiseAndSetIfChanged(ref frames, value); 
+        public int Frames
+        {
+            get => frames;
+            set => this.RaiseAndSetIfChanged(ref frames, value);
         }
 
-        public int Step 
+        public int Step
         {
             get => step;
             set => this.RaiseAndSetIfChanged(ref step, value);
@@ -100,6 +100,30 @@ namespace TaymadeEntities.ViewModels
                 }
 
                 AspectRatio = ImageWidth / ImageHeight;
+
+                SystemBitmap = new System.Drawing.Bitmap(ImagePath);
+
+                if (ImageHeight > 800)
+                {
+                    // we need to scale the image down 
+                    // new width will be 800 * aspect ratio
+                    //using (var newBitmap = new System.Drawing.Bitmap(ImagePath))
+                    using (var reSizedImage = Support.Support.ResizeImage(SystemBitmap, (int)(ImageWidth * AspectRatio), 800))
+                    {
+                        //SystemBitmap = reSizedImage;
+                        imageBMP = Support.Support.ConvertFileToAvaloniaBitmap(reSizedImage);
+                        // convert to Avalonia Image
+                    }
+
+                    if (imageBMP != null)
+                    {
+                        ImageWidth = imageBMP.Size.Width;
+                        ImageHeight = ImageBMP.Size.Height;
+                    }
+
+                    SystemBitmap = Support.Support.ResizeImage(SystemBitmap, (int)(ImageWidth) , 800);
+                }
+
             }
             this.RaisePropertyChanged(nameof(ImageWidth));
             this.RaisePropertyChanged(nameof(ImageHeight));
