@@ -1824,18 +1824,48 @@ namespace TaymadeEntities.Support
         {
             try
             {
-                System.Drawing.Bitmap? sBitmap = new System.Drawing.Bitmap(System.Drawing.Image.FromFile(fileName));
-
-                using (System.IO.MemoryStream memory = new System.IO.MemoryStream())
+               using System.Drawing.Bitmap? sBitmap = new System.Drawing.Bitmap(System.Drawing.Image.FromFile(fileName));
                 {
-                    sBitmap?.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
-                    memory.Position = 0;
+                    using (System.IO.MemoryStream memory = new System.IO.MemoryStream())
+                    {
+                        sBitmap?.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                        memory.Position = 0;
 
-                    retBMP = new Avalonia.Media.Imaging.Bitmap(memory);
+                        retBMP = new Avalonia.Media.Imaging.Bitmap(memory);
+                    }
+                    sBitmap?.Dispose();
+                    //sBitmap = null;
                 }
-                sBitmap?.Dispose();
-                sBitmap = null;
+            }
+            catch (Exception ex)
+            {
 
+            }
+            finally
+            {
+
+            }
+
+            return retBMP;
+        }
+
+        public static Avalonia.Media.Imaging.Bitmap? ConvertFileToAvaloniaBitmap(string? fileName)
+        {
+            Avalonia.Media.Imaging.Bitmap? retBMP = null;
+            try
+            {
+                using System.Drawing.Bitmap? sBitmap = new System.Drawing.Bitmap(System.Drawing.Image.FromFile(fileName));
+                {
+                    using (System.IO.MemoryStream memory = new System.IO.MemoryStream())
+                    {
+                        sBitmap?.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                        memory.Position = 0;
+
+                        retBMP = new Avalonia.Media.Imaging.Bitmap(memory);
+                    }
+                    sBitmap?.Dispose();
+                    //sBitmap = null;
+                }
             }
             catch (Exception ex)
             {

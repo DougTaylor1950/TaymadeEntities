@@ -118,7 +118,7 @@ namespace TaymadeEntities.Models
             {
                 this.Clear();
                 List<string> files = Directory
-                            .EnumerateFiles(folderPath, "*.*", SearchOption.AllDirectories)
+                            .EnumerateFiles(folderPath, "*.*", SearchOption.TopDirectoryOnly)
                             .Where(
                                 s =>
                                     s.EndsWith(".JPG", StringComparison.OrdinalIgnoreCase)

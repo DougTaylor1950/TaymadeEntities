@@ -165,6 +165,7 @@ namespace TaymadeEntities.Support
         [JsonProperty]
         public double Saturation { get => saturation; set => this.RaiseAndSetIfChanged(ref saturation, value); }
 
+        public bool IsVideo { get; set; } = true;
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="GammaCorrections"/> is scale..
         /// </summary>
@@ -290,23 +291,23 @@ namespace TaymadeEntities.Support
                     gammaCorrect += ",unsharp=5:5:" + sharpness.ToString().Trim() + ":5:5:0.0 ";
                 }
 
-                if (Crop)
+                if (Crop && IsVideo)
                 {
                     gammaCorrect = gammaCorrect.Trim() + ",crop=" + ClipRectangle.Width.ToString().Trim() + ":"
                         + ClipRectangle.Height.ToString().Trim() + ":"
                         + ClipRectangle.X.ToString().Trim() + ":"
                         + ClipRectangle.Y.ToString().Trim() + " ";
 
-                    if (Scale)
+                    if (Scale && IsVideo)
                     {
                         gammaCorrect = gammaCorrect.Trim() + ",scale=" + ScaleWidth.ToString().Trim() + ":" + ScaleHeight.ToString().Trim()
                         + " ";
                     }
-                } else if (Scale)
+                } else if (Scale && IsVideo)
                     gammaCorrect = gammaCorrect.Trim() + ",scale=" + ScaleWidth.ToString().Trim() + ":" + ScaleHeight.ToString().Trim()
                         + " ";
 
-                if (Clip)
+                if (Clip && IsVideo)
                 {
                     if (!ShowOrProcess)
                         gammaCorrect += " -ss " + Start.ToString() + " -t " + Until.ToString() + " ";
@@ -314,7 +315,7 @@ namespace TaymadeEntities.Support
                         gammaCorrect += " -ss " + Start.ToString() + " -to " + Until.ToString() + " ";
                 }
             }
-            else
+            else if (IsVideo)
             {
                 if (Clip)
                 {

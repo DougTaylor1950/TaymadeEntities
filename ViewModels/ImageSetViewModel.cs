@@ -73,28 +73,28 @@ namespace TaymadeEntities.ViewModels
             if (RootFolder != null && RootFolder.CurrentImageFolder != null
                 && RootFolder.CurrentImageFolder.SubDirectoryList != null)
 
-                if (RootFolder.CurrentSubFolder == null || 
+                if (RootFolder.CurrentSubFolder == null ||
                     RootFolder.CurrentSubFolder.Id != RootFolder.CurrentImageFolder.LastId)
                 {
                     RootFolder.CurrentSubFolder = RootFolder.CurrentImageFolder.SubDirectoryList.Where(f => f.Id == RootFolder.CurrentImageFolder.LastId).FirstOrDefault();
                 }
 
-                if (RootFolder.CurrentSubFolder != null && RootFolder.CurrentSubFolder.ImageItems.Count == 0)
-                {
-                    RootFolder.CurrentSubFolder.ImageItems.ReloadImageItems(
-                        RootFolder.CurrentSubFolder.Path
-                        );
-                }
+            if (RootFolder.CurrentSubFolder != null && RootFolder.CurrentSubFolder.ImageItems.Count == 0)
+            {
+                RootFolder.CurrentSubFolder.ImageItems.ReloadImageItems(
+                    RootFolder.CurrentSubFolder.Path
+                    );
+            }
 
-                if (!string.IsNullOrEmpty(RootFolder.CurrentSubFolder.LastImageName))
-                {
-                    RootFolder.CurrentImageItem = RootFolder.CurrentSubFolder.ImageItems.Where(
-                        s => s.ImageName == RootFolder.CurrentSubFolder.LastImageName).FirstOrDefault();
-                }
-                else
-                {
-                    RootFolder.CurrentImageItem = RootFolder.CurrentImageFolder.ImageItems.FirstOrDefault();
-                }
+            if (!string.IsNullOrEmpty(RootFolder.CurrentSubFolder.LastImageName))
+            {
+                RootFolder.CurrentImageItem = RootFolder.CurrentSubFolder.ImageItems.Where(
+                    s => s.ImageName == RootFolder.CurrentSubFolder.LastImageName).FirstOrDefault();
+            }
+            else
+            {
+                RootFolder.CurrentImageItem = RootFolder.CurrentImageFolder.ImageItems.FirstOrDefault();
+            }
             CurrentImage = RootFolder?.CurrentImageItem?.ImageBMP;
             if (this.ImageSetControl != null && this.ImageSetControl.dgItemImages != null)
             {
@@ -110,7 +110,7 @@ namespace TaymadeEntities.ViewModels
 
         public void SetImageRow()
         {
-            
+
             if (this.ImageSetControl != null && this.ImageSetControl.dgItemImages != null)
             {
                 Dispatcher.UIThread.Post(() =>
@@ -208,7 +208,7 @@ namespace TaymadeEntities.ViewModels
         public ReactiveCommand<Unit, Unit> ReloadPictures { get; private set; }
         public ReactiveCommand<Unit, Unit> ReloadPicture { get; private set; }
 
-        public ReactiveCommand<Unit,Unit> ZoomToFeature { get; private set; }
+        public ReactiveCommand<Unit, Unit> ZoomToFeature { get; private set; }
         public RootFolder? RootFolder
         {
             get
@@ -1005,25 +1005,46 @@ namespace TaymadeEntities.ViewModels
             RootFolder.CurrentImageItem.ReloadImage();
         }
 
-        private void DoZoomToFeature()
+        private async void DoZoomToFeature()
         {
+            string filename = string.Empty;
+            bool moveFile = false;
             using ViewModels.ZoomPictureViewModel viewModel = new ZoomPictureViewModel(RootFolder.CurrentImageItem.ImagePath);
-            using Dialogs.ZoomPictureDialog pictureDialog = new Dialogs.ZoomPictureDialog(viewModel);
-
-            Window? main  = Support.Support.GetMainWindow() as Window;
-
-            if (main != null)
             {
-                pictureDialog.ShowDialog(main);
+                using Dialogs.ZoomPictureDialog pictureDialog = new Dialogs.ZoomPictureDialog(viewModel);
+                {
+                    Window? main = Support.Support.GetMainWindow() as Window;
+                    
+                    if (main != null)
+                    {
+                        bool ok = await pictureDialog.ShowDialog<bool>(main);
+                        if (ok)
+                        {
+                            if (viewModel.SaveImageAfterClose)
+                            {
+                                // need to move viewmodel.output file to current file
+                                
+                            }
+                            DoReloadPicture();
+                        }
+                    }
+                }
+            }
+            // check wheter to move file
+            if (moveFile)
+            {
+                //File.Delete(RootFolder.CurrentImageItem.ImagePath);
+                //File.Move(filename, RootFolder.CurrentImageItem.ImagePath);
+
             }
         }
 
         public void DoReloadPictures()
         {
-            
+
             RootFolder.ReloadPictures();
             //RootFolder.CurrentImageItem = temp;
-            
+
         }
 
         #endregion Private Methods

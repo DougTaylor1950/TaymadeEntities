@@ -163,54 +163,49 @@ public partial class ImageSetControl : UserControl
         }
     }
 
-    private void MenuItem_Click(object? sender, RoutedEventArgs e)
+    private async void MenuItem_Click(object? sender, RoutedEventArgs e)
     {
         if (imageSetViewModel != null)
         {
             if (imageSetViewModel.RootFolder != null && imageSetViewModel.RootFolder.CurrentImageItem != null)
             {
-                EntryDialogModel dialogModel = new EntryDialogModel();
-                // get an entry dialog
-                //EntryDialogInfo info = new EntryDialogInfo()
-                //{
-                dialogModel.EntryTypeValue = EntryDialogModel.EntryType.Text;
-                dialogModel.EntryText = imageSetViewModel.RootFolder.CurrentImageItem.ImagePath;
-                dialogModel.MaxStringLength = 150;
-                //};
-                //dialogModel.Info = info;
-                // create dialog
-                EntryDialog entryDialog = new TaymadeEntities.Dialogs.EntryDialog(dialogModel);
-                //entryDialog.Info = dialogModel;
-                //dialogModel.Caller = entryDialog;
+                using EntryDialogModel dialogModel = new EntryDialogModel();
+                {
+                    // get an entry dialog
+                    //EntryDialogInfo info = new EntryDialogInfo()
+                    //{
+                    dialogModel.EntryTypeValue = EntryDialogModel.EntryType.Text;
+                    dialogModel.EntryText = imageSetViewModel.RootFolder.CurrentImageItem.ImagePath;
+                    dialogModel.MaxStringLength = 150;
 
-                //Visual? main = TaymadeEntities.Support.Support.GetMainWindow();
+                    using EntryDialog entryDialog = new TaymadeEntities.Dialogs.EntryDialog(dialogModel);
+                    {
+                        Window? main = Support.Support.GetMainWindow() as Window;
+                        DialogResultButton result = await entryDialog.ShowDialog<DialogResultButton>(main);
 
-                ShowEntryDialog(entryDialog, dialogModel);
+                        if (result != null)
+                        {
+                            string? oldname = imageSetViewModel.RootFolder.CurrentImageItem.ImagePath;
+                            string? newName = dialogModel.EntryText;
+                            if (!string.IsNullOrEmpty(newName) && !string.IsNullOrEmpty(oldname) && !File.Exists(newName))
+                            {
+                                File.Move(oldname, newName);
+                                imageSetViewModel.RootFolder.CurrentImageItem.ImagePath = newName;
+                                //RootFolder.CurrentImageItem.Save();
+                                imageSetViewModel.RootFolder.ReloadPictures();
+                                imageSetViewModel.ImageSetControl = this;
+                                imageSetViewModel.SetImageRow();
+                            }
+                        }
+                    }
+                }
             }
         }
 
 
     }
 
-    private async void ShowEntryDialog(EntryDialog entryDialog, EntryDialogModel dialogModel)
-    {
-        // show dialog and process if ok
-        Window? main = Support.Support.GetMainWindow() as Window;
-        bool result = await entryDialog.ShowDialog<bool>(main);
-
-        if (result != null)
-        {
-            string? oldname = imageSetViewModel.RootFolder.CurrentImageItem.ImagePath;
-            string? newName = dialogModel.EntryText;
-            if (!string.IsNullOrEmpty(newName) && !string.IsNullOrEmpty(oldname) && !File.Exists(newName))
-            {
-                File.Move(oldname, newName);
-                imageSetViewModel.RootFolder.CurrentImageItem.ImagePath = newName;
-                //RootFolder.CurrentImageItem.Save();
-                imageSetViewModel.RootFolder.ReloadPictures();
-            }
-        }
-    }
+    
     #endregion Private Methods
 
     /// <summary>

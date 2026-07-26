@@ -16,7 +16,7 @@ namespace TaymadeEntities.Dialogs
     /// <summary>
     /// Defines the <see cref="EntryDialog" />.
     /// </summary>
-    public partial class EntryDialog : Window
+    public partial class EntryDialog : Window, IDisposable
     {
         #region Fields
 
@@ -34,6 +34,7 @@ namespace TaymadeEntities.Dialogs
         /// Defines the EntryTime.
         /// </summary>
         private TextBox? EntryTime;
+        private bool disposedValue;
 
         #endregion
 
@@ -98,8 +99,10 @@ namespace TaymadeEntities.Dialogs
                 Result = DialogResultButton.ResultType.Ok,
                 Paramater = EntryText?.Text
             };
-
-            this.Close(result);
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                Close(result);
+            });
         }
 
         private void Cancel_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
@@ -109,6 +112,35 @@ namespace TaymadeEntities.Dialogs
                 Result = DialogResultButton.ResultType.Cancel
             };
             this.Close(result);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~EntryDialog()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         #endregion

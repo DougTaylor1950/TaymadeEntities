@@ -185,13 +185,74 @@ public partial class ZoomPictureDialog : WindowBase
                             string imagePath = Support.Support.FixImagePath(System.IO.Path.GetDirectoryName(orginalFilename));
                             string fileNameStub = System.IO.Path.GetFileNameWithoutExtension(orginalFilename);
 
-                            // save image using vm.ImagePath
-                            string filename = System.IO.Path.Combine(imagePath,  $"{fileNameStub}.jpg");
-                            reSizedImage.Save(filename, ImageFormat.Jpeg);
+                            // save image to a temporary file first, then replace the original.
+                            // This avoids GDI+ "generic error" when the original file is locked.
+                            string filename = System.IO.Path.Combine(imagePath, $"{fileNameStub}.jpg");
+                            string tempFilename = System.IO.Path.Combine(imagePath, $"{fileNameStub}.tmp.jpg");
+
+                            // Save to temporary file
+
+
+                            try
+                            {
+                                reSizedImage.Save(tempFilename, ImageFormat.Jpeg);
+                                // try to release the original image handle before replacing
+                                ReplaceFile(vm, filename, tempFilename);
+
+                                // rebild bitmaps
+                                vm.CreateInMemoryBitmaps();
+
+                            }
+                            catch
+                            {
+                                // fallback: attempt delete + move, otherwise leave temp file for inspection
+                                try
+                                {
+                                    if (System.IO.File.Exists(filename))
+                                        System.IO.File.Delete(filename);
+                                    System.IO.File.Move(tempFilename, filename);
+                                }
+                                catch
+                                {
+                                    vm.SaveImageAfterClose = true;
+                                    // swallow to avoid losing the new image; caller can inspect temp file
+                                    this.OkButton_Click(null, null);
+                                }
+                            }
                         }
                     }
                 }
             }
+        }
+    }
+
+    private static void ReplaceFile(ZoomPictureViewModel vm, string filename, string tempFilename)
+    {
+        try
+        {
+            // clear Avalonia UI references so controls don't hold native handles
+            vm.ImageBMP = null;
+            vm.ImageBMPConverted = null;
+
+            // dispose and clear the System.Drawing bitmap
+            vm.SystemBitmap?.Dispose();
+            vm.SystemBitmap = null;
+
+            // force finalizers to free native resources
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            System.Threading.Thread.Sleep(50);
+        }
+        catch { }
+
+        if (System.IO.File.Exists(filename))
+        {
+            // atomically replace the existing file
+            System.IO.File.Replace(tempFilename, filename, null);
+        }
+        else
+        {
+            System.IO.File.Move(tempFilename, filename);
         }
     }
 
@@ -204,6 +265,7 @@ public partial class ZoomPictureDialog : WindowBase
 
             double imageWidth = pictureImage.Width;
             double imageHeight = pictureImage.Height;
+
             var rect = new Rectangle(0, 0, vm.SystemBitmap.Width, vm.SystemBitmap.Height);
             using (var newBitmap = vm.SystemBitmap.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
             {
@@ -234,6 +296,27 @@ public partial class ZoomPictureDialog : WindowBase
                 //vm.SystemBitmap?.Dispose();
             }
         }
+    }
+
+    private void SaveImage(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext != null && DataContext is ZoomPictureViewModel vm)
+        {
+
+            string orginalFilename = vm.ImagePath;
+            string imagePath = Support.Support.FixImagePath(System.IO.Path.GetDirectoryName(orginalFilename));
+            string fileNameStub = System.IO.Path.GetFileNameWithoutExtension(orginalFilename);
+
+            // save image to a temporary file first, then replace the original.
+            // This avoids GDI+ "generic error" when the original file is locked.
+            string filename = System.IO.Path.Combine(imagePath, $"{fileNameStub}.jpg");
+            //string tempFilename = System.IO.Path.Combine(imagePath, $"{fileNameStub}.tmp.jpg");
+
+            ReplaceFile(vm, orginalFilename, vm.outputImagePath);
+            vm.SaveGamma();
+            vm.CreateInMemoryBitmaps();
+        }
+
     }
 
     private void Image_PointerMoved(object? sender, PointerEventArgs e)

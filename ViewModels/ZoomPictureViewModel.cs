@@ -5,6 +5,8 @@ using Avalonia.Media.Imaging;
 using System.Collections.Generic;
 using ReactiveUI;
 using TaymadeControls.Buttons;
+using TaymadeEntities.Support;
+using System.Reactive.Linq;
 
 
 namespace TaymadeEntities.ViewModels
@@ -12,14 +14,17 @@ namespace TaymadeEntities.ViewModels
     public class ZoomPictureViewModel : ViewModelBase
     {
         private string? imagePath;
+        private string? fixedImagePath;
         private Bitmap? imageBMP;
+        private Bitmap? imageBMPConverted;
         private double imageWidth = 1600;
         private double imageHeight = 800;
         private int frames = 10;
 
         private string startingImagePath = @"K:\DriveF\Teen\Girls\GIN\gin080.jpg";
         private int step = 5;
-
+        private GammaCorrections? gammaCorrections;
+        internal string? outputImagePath;
         public ZoomPictureViewModel()
         {
             ImagePath = startingImagePath;
@@ -31,6 +36,60 @@ namespace TaymadeEntities.ViewModels
             ImagePath = imagePath;
             SetupModel();
             this.RaisePropertyChanged(nameof(ImageBMP));
+        }
+
+        public new void Dispose()
+        {
+            //this.GammaCorrections?.Dispose();
+            this.ImageBMP?.Dispose();
+            this.SystemBitmap?.Dispose();
+            this.ImageBMPConverted?.Dispose();
+            base.Dispose();
+        }
+        public void SaveGamma()
+        {
+            // Save settings convert gammacorrection to json file save as movie name +config.json
+            if (GammaCorrections != null)
+            {
+                string folder = Path.GetDirectoryName(fixedImagePath);
+                folder = Path.Combine(folder, "temp");
+                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+                string configPath = Path.Combine(folder, "config.json");
+                GammaCorrections.Save(configPath);
+            }
+        }
+
+        private void LoadConfig()
+        {
+            if (GammaCorrections != null)
+            {
+                string folder = Path.GetDirectoryName(fixedImagePath);
+                folder = Path.Combine(folder, "temp");
+                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+                string configPath = Path.Combine(folder, "config.json");
+                if (File.Exists(configPath))
+                GammaCorrections.Load(configPath);
+            }
+        }
+
+        public void SaveImage()
+        {
+            // save corrected image 
+            //if (ImageBMPConverted != null)
+            //{
+            //    ImageBMP?.Dispose();
+            //    ImageBMP = null;
+
+            //    ImageBMPConverted?.Dispose();
+            //    ImageBMPConverted = null;
+
+            //    File.Delete(fixedImagePath);
+            //    File.Move(outputImagePath, fixedImagePath);
+
+            //    Support.Support.SetImageBMP(ImagePath, out imageBMP);
+            //    ImageBMPConverted = imageBMP;
+
+            //}
         }
 
         public string? ImagePath
@@ -50,6 +109,17 @@ namespace TaymadeEntities.ViewModels
             set => this.RaiseAndSetIfChanged(ref imageBMP, value);
         }
 
+        public Bitmap? ImageBMPConverted
+        {
+            get
+            {
+
+                return imageBMPConverted;
+            }
+
+            set => this.RaiseAndSetIfChanged(ref imageBMPConverted, value);
+        }
+
         public double ImageWidth
         {
             get => imageWidth;
@@ -63,7 +133,20 @@ namespace TaymadeEntities.ViewModels
         }
 
         public double AspectRatio { get; set; }
-        public System.Drawing.Bitmap SystemBitmap { get; set; }
+
+        public GammaCorrections? GammaCorrections
+        {
+            get => gammaCorrections;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref gammaCorrections, value);
+
+            }
+        }
+
+
+
+        public System.Drawing.Bitmap? SystemBitmap { get; set; }
         public double ImageBorderWidth
         {
             get => imageWidth + 8;
@@ -86,22 +169,23 @@ namespace TaymadeEntities.ViewModels
             get => step;
             set => this.RaiseAndSetIfChanged(ref step, value);
         }
+        public bool SaveImageAfterClose { get; set; } = false;
 
         internal void SetupModel()
         {
             if (imageBMP == null && !string.IsNullOrEmpty(ImagePath))
             {
-                Support.Support.SetImageBMP(ImagePath, out imageBMP);
+                CreateInMemoryBitmaps();
 
                 if (imageBMP != null)
                 {
                     ImageWidth = imageBMP.Size.Width;
-                    ImageHeight = ImageBMP.Size.Height;
+                    ImageHeight = imageBMP.Size.Height;
                 }
 
                 AspectRatio = ImageWidth / ImageHeight;
 
-                SystemBitmap = new System.Drawing.Bitmap(ImagePath);
+
 
                 if (ImageHeight > 800)
                 {
@@ -121,12 +205,81 @@ namespace TaymadeEntities.ViewModels
                         ImageHeight = ImageBMP.Size.Height;
                     }
 
-                    SystemBitmap = Support.Support.ResizeImage(SystemBitmap, (int)(ImageWidth) , 800);
+                    SystemBitmap = Support.Support.ResizeImage(SystemBitmap, (int)(ImageWidth), 800);
+                }
+
+
+                this.RaisePropertyChanged(nameof(ImageWidth));
+                this.RaisePropertyChanged(nameof(ImageHeight));
+
+                this.GammaCorrections = new GammaCorrections();
+                GammaCorrections.IsVideo = false;
+                GammaCorrections.Correct = true;
+
+                fixedImagePath = Support.Support.FixImagePath(ImagePath);
+                string folder = Path.GetDirectoryName(fixedImagePath);
+                folder = Path.Combine(folder, "temp");
+
+                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+                string filename = Path.GetFileName(fixedImagePath);
+                outputImagePath = Path.Combine(folder, filename);
+
+                LoadConfig();
+                UpdateImage();
+
+                this.GammaCorrections.PropertyChanged += (_, e) =>
+                {
+                    UpdateImage();
+                };
+            }
+        }
+
+        public void CreateInMemoryBitmaps()
+        {
+            // load the image bytes into memory so the on-disk file is not locked
+            var fileBytes = File.ReadAllBytes(ImagePath);
+
+            // create Avalonia Bitmaps from in-memory stream
+            using (var ms = new MemoryStream(fileBytes, writable: false))
+            {
+                imageBMP = new Avalonia.Media.Imaging.Bitmap(ms);
+            }
+
+            using (var ms2 = new MemoryStream(fileBytes, writable: false))
+            {
+                ImageBMPConverted = new Avalonia.Media.Imaging.Bitmap(ms2);
+            }
+
+            // create an in-memory System.Drawing.Bitmap copy so it does not lock the file
+            using (var ms3 = new MemoryStream(fileBytes, writable: false))
+            using (var img = System.Drawing.Image.FromStream(ms3))
+            {
+                SystemBitmap = new System.Drawing.Bitmap(img);
+            }
+
+            this.RaisePropertyChanged(nameof(ImageBMP));
+            this.RaisePropertyChanged(nameof(ImageBMPConverted));
+
+        }
+
+        private async void UpdateImage()
+        {
+            if (GammaCorrections == null) return;
+
+            string? corrections = GammaCorrections?.GammaCorrectionString();
+            string param = " -y -i " + '"' + fixedImagePath + '"' + " " + corrections + " -c:a copy " + outputImagePath;
+
+           using  FFMpegSupport mpegSupport = new FFMpegSupport();
+            {
+                int error = await mpegSupport.DoCliWrap(param);
+
+                if (File.Exists(outputImagePath))
+                {
+                    ImageBMPConverted = Support.Support.GetBMP(outputImagePath);
                 }
 
             }
-            this.RaisePropertyChanged(nameof(ImageWidth));
-            this.RaisePropertyChanged(nameof(ImageHeight));
+            
         }
     }
 }

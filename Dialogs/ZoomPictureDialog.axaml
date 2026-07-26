@@ -93,7 +93,7 @@
                                 Width="800"
                                 Background="LightGray"
                                 >
-                            <StackPanel Orientation="Horizontal" 
+                            <StackPanel Orientation="Horizontal"
                                         HorizontalAlignment="Center" >
                                 <tcb:OkButton Click="OkButton_Click"/>
                                 <tcb:CancelButton Click="CancelButton_Click"/>
@@ -117,13 +117,168 @@
 
                 </Border>
             </TabItem>
-        <TabItem Header="Photo Fix">
-            <Border BorderBrush="Black"
-                    BorderThickness="3"
-                    CornerRadius="5">
-                
-            </Border>
-        </TabItem>
+            <TabItem Header="Photo Fix">
+                <Border CornerRadius="6" BorderBrush="Gray"
+                        BorderThickness="2" >
+
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Vertical"  Height="600" Width="750">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="200"/>
+                                    <ColumnDefinition Width="10"/>
+
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="200"/>
+
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="40"></RowDefinition>
+                                    <RowDefinition Height="40"></RowDefinition>
+                                    <RowDefinition Height="40"></RowDefinition>
+                                    <RowDefinition Height="40"></RowDefinition>
+                                    <RowDefinition Height="40"></RowDefinition>
+                                    <RowDefinition Height="40"></RowDefinition>
+                                    <RowDefinition Height="30"></RowDefinition>
+                                    <RowDefinition Height="30"></RowDefinition>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Classes="h2" Text="Gamma"  Grid.Column="0" Grid.Row="0"/>
+                                <TextBox Classes="c1" Text="{Binding GammaCorrections.Gamma }"   Grid.Column="1" />
+                                <CheckBox Grid.Row="0" Grid.Column="3" Content="Correct" IsChecked="{Binding GammaCorrections.Correct}"/>
+                                <Slider Minimum="0.5" Maximum="2.0" Value="{Binding GammaCorrections.Gamma}"
+                                        TickFrequency="0.05" IsSnapToTickEnabled="True" Grid.Row="1" Grid.Column="1"/>
+
+                                <TextBlock Classes="h2" Text="Saturation"  Grid.Column="0" Grid.Row="2"/>
+                                <TextBox Classes="c1" Text="{Binding GammaCorrections.Saturation }"   Grid.Column="1" Grid.Row="2" />
+                                <Slider Minimum="0" Maximum="2.0" Value="{Binding GammaCorrections.Saturation}"
+                                        TickFrequency="0.05" IsSnapToTickEnabled="True" Grid.Row="3" Grid.Column="1"/>
+
+                                <TextBlock Classes="h2" Text="Brightness"  Grid.Column="3" Grid.Row="2"/>
+                                <TextBox Classes="c1" Text="{Binding GammaCorrections.Brightness }"   Grid.Column="4" Grid.Row="2" />
+                                <Slider Minimum="-1.0" Maximum="1.0" Value="{Binding GammaCorrections.Brightness}"
+                                        TickFrequency="0.05" IsSnapToTickEnabled="True"
+                                        Grid.Row="3" Grid.Column="4"/>
+
+                                <TextBlock Classes="h2" Text="Sharpness"  Grid.Column="0" Grid.Row="4"/>
+                                <TextBox Classes="c1" Text="{Binding GammaCorrections.Sharpness }"   Grid.Column="1" Grid.Row="4" />
+                                <Slider Minimum="-.5" Maximum=".5" Value="{Binding GammaCorrections.Sharpness}" 
+                                        TickFrequency="0.05" IsSnapToTickEnabled="True" 
+                                        Grid.Row="5" Grid.Column="1"/>
+                                
+                                <TextBlock Classes="h2" Text="Contrast"  Grid.Column="3" Grid.Row="4"/>
+                                <TextBox Classes="c1" Text="{Binding GammaCorrections.Contrast }"   Grid.Column="4" Grid.Row="4" />
+                                <Slider Minimum="-5.0" Maximum="5.0" Value="{Binding GammaCorrections.Contrast}" 
+                                        TickFrequency="0.05" IsSnapToTickEnabled="True" 
+                                        Grid.Row="5" 
+                                        Grid.Column="4"/>
+
+
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="80"/>
+
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="40"></RowDefinition>
+                                    <RowDefinition Height="40"></RowDefinition>
+                                    <RowDefinition Height="40"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <TextBlock Classes="h2" Text="Red"  Grid.Column="0" Grid.Row="0"/>
+                                <TextBox Classes="h2" Text="{Binding GammaCorrections.Red}"  Grid.Column="1" Grid.Row="0"/>
+                                <Slider Minimum="0.1" Maximum="2.0"
+                                        Value="{Binding GammaCorrections.Red}" TickFrequency="0.1"
+                                        IsSnapToTickEnabled="True"
+                                        Grid.Row="1" Grid.Column="1"/>
+
+                                <TextBlock Classes="h2" Text="Blue"  Grid.Column="2" />
+                                <TextBox Classes="h2" Text="{Binding GammaCorrections.Blue}"  Grid.Column="3" Grid.Row="0"/>
+                                <Slider Minimum="0.1" Maximum="2.0" Value="{Binding GammaCorrections.Blue}" 
+                                        TickFrequency="0.1" IsSnapToTickEnabled="True" Grid.Row="1" Grid.Column="3"/>
+
+                                <TextBlock Classes="h2" Text="Green"  Grid.Column="4" Grid.Row="0"/>
+                                <TextBox Classes="h2" Text="{Binding GammaCorrections.Green}"  Grid.Column="5" Grid.Row="0"/>
+                                <Slider Minimum="0.1" Maximum="2.0" 
+                                        Value="{Binding GammaCorrections.Green}" 
+                                        TickFrequency="0.1" IsSnapToTickEnabled="True" 
+                                        Grid.Row="1" Grid.Column="5"/>
+
+                                
+                                <TextBlock Classes="h2" Text="Weight"  Grid.Column="6" Grid.Row="0"/>
+                                <TextBox Classes="h2" Text="{Binding GammaCorrections.Weight}"  Grid.Column="7" Grid.Row="0"/>
+                                <Slider Minimum="0.1" Maximum="2.0" Value="{Binding GammaCorrections.Weight}"
+                                        TickFrequency="0.1" IsSnapToTickEnabled="True" Grid.Row="1" Grid.Column="7"/>
+
+                                <tcb:ImagedButton LabelText="Save Config" 
+                                                  Grid.Column="0" 
+                                                  Grid.ColumnSpan="2"
+                                                  Grid.Row="2"
+                                                  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+                                                  ButtonToolTip="Save Config"
+                                                  Command="{Binding SaveGamma}"
+                                                  />
+
+                                 <tcb:ImagedButton LabelText="Save Image" 
+                                                  Grid.Column="3" 
+                                                  Grid.ColumnSpan="2"
+                                                  Grid.Row="2"
+                                                  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+                                                  ButtonToolTip="Save Image"
+                                                  Click="SaveImage"
+                                                  />
+
+                                
+                                
+
+                            </Grid>
+                        </StackPanel>
+                        <StackPanel Width="20" Background="LightGray"/>
+
+                        <StackPanel Orientation="Horizontal">
+                            <Border HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    BorderBrush="Black"
+                                    BorderThickness="3"
+                                    CornerRadius="5"
+                                    Width="410"
+                                    Height="410"
+                                    >
+                                <Image Source="{Binding ImageBMP}"
+                                       Width="400"
+                                       Height="400"
+
+                                       >
+                                </Image>
+                            </Border >
+                            <Border HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    BorderBrush="Black"
+                                    BorderThickness="3"
+                                    CornerRadius="5"
+                                    Width="410"
+                                    Height="410"
+                                    >
+                                <Image Source="{Binding ImageBMPConverted}"
+                                       Width="400"
+                                       Height="400"
+
+                                       >
+                                </Image>
+                            </Border >
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </TabItem>
         </TabControl>
     </StackPanel>
 

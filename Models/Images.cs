@@ -173,9 +173,11 @@ namespace TaymadeEntities.Models
             }
         }
 
-        public string? FolderType { 
-            get => folderType; 
-            set => this.RaiseAndSetIfChanged(ref folderType, value); }
+        public string? FolderType
+        {
+            get => folderType;
+            set => this.RaiseAndSetIfChanged(ref folderType, value);
+        }
 
         /// <summary>
         /// Gets or sets the path.
@@ -325,7 +327,7 @@ namespace TaymadeEntities.Models
                 {
                     if (Id > 0)
                     {
-                        List<MovieImage>? tempList = DataController.MovieController.GetMovieImagesById(this.Id); 
+                        List<MovieImage>? tempList = DataController.MovieController.GetMovieImagesById(this.Id);
                         //.MovieImage.Where(i => i.ParentId == Id).OrderBy(x => x.Name).ToList();
                         if (tempList != null)
                         {
@@ -381,7 +383,7 @@ namespace TaymadeEntities.Models
         internal void Delete()
         {
             DataController.MovieController.DeleteMovieImage(this);
-            
+
 
         }
         #endregion
@@ -408,7 +410,7 @@ namespace TaymadeEntities.Models
         {
             MovieImage? images = DataController.MovieController.GetMovieImagesByFolder("Root")?.FirstOrDefault();
 
-                //.MovieImage.Where(i => i.FolderType == "Root").FirstOrDefault();
+            //.MovieImage.Where(i => i.FolderType == "Root").FirstOrDefault();
             // get subfolders
             if (images != null)
             {
@@ -419,8 +421,8 @@ namespace TaymadeEntities.Models
                 // get an ordered list of sub folders
                 List<MovieImage>? movieImages = DataController.MovieController.GetMovieImagesById(Id);
                 if (movieImages != null)
-                { 
-                SubDirectoryList = new ObservableCollection<MovieImage>(movieImages);
+                {
+                    SubDirectoryList = new ObservableCollection<MovieImage>(movieImages);
                     //DataController.MovieImageEntity.MovieImage.Where(i => i.ParentId == Id).OrderBy(d => d.Name.ToLower()).ToList());
 
                     if (LastId != null)
@@ -615,20 +617,35 @@ namespace TaymadeEntities.Models
         {
             if (CurrentImageItem != null)
             {
-                File.Delete(CurrentImageItem.ImagePath);
-                int idx = CurrentSubFolder.ImageItems.IndexOf(CurrentImageItem);
-                CurrentSubFolder.ImageItems.Remove(CurrentImageItem);
+                try
+                {
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
 
-                if (idx > -1 && idx < CurrentSubFolder.ImageItems.Count)
-                {
-                    CurrentImageItem = CurrentSubFolder.ImageItems[idx];
-                    CurrentImageItem.Selected = true;
+
+
+                    File.Delete(CurrentImageItem.ImagePath);
+                    int idx = CurrentSubFolder.ImageItems.IndexOf(CurrentImageItem);
+                    CurrentSubFolder.ImageItems.Remove(CurrentImageItem);
+
+                    if (idx > -1 && idx < CurrentSubFolder.ImageItems.Count)
+                    {
+                        CurrentImageItem = CurrentSubFolder.ImageItems[idx];
+                        CurrentImageItem.Selected = true;
+                    }
+                    else
+                    {
+                        CurrentImageItem = CurrentSubFolder.ImageItems[idx - 1];
+                        CurrentImageItem.Selected = true;
+                    }
+                });
                 }
-                else
+                catch (Exception ex)
                 {
-                    CurrentImageItem = CurrentSubFolder.ImageItems[idx - 1];
-                    CurrentImageItem.Selected = true;
+
+                    // throw;
                 }
+
             }
         }
 
