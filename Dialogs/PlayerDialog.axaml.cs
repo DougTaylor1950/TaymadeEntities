@@ -23,7 +23,7 @@ namespace TaymadeEntities;
 /// <remarks>
 ///   <created> 10/07/2026 23:20 </created>
 /// </remarks>
-public partial class PlayerDialog : Window, IDisposable
+public partial class PlayerDialog : Avalonia.Controls.Window, IDisposable
 {
 
     private bool IsClosed = false;

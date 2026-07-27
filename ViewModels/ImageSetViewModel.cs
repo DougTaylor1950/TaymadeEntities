@@ -1025,7 +1025,9 @@ namespace TaymadeEntities.ViewModels
                                 // need to move viewmodel.output file to current file
                                 
                             }
+                            DoReloadPictures();
                             DoReloadPicture();
+
                         }
                     }
                 }
