@@ -398,6 +398,11 @@ namespace TaymadeEntities.Support
             }
         }
 
+        internal void ResetToDefaults()
+        {
+            Reset();
+        }
+
         #endregion
     }
 }

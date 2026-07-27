@@ -278,7 +278,7 @@ public partial class ZoomPictureDialog : WindowBase
                     // must correct the end positions
                     endY = startY + height;
                     System.Drawing.Pen solidBrush =
-                        new System.Drawing.Pen(System.Drawing.Color.Black);
+                        new System.Drawing.Pen(System.Drawing.Color.Yellow);
                     using (Graphics g = Graphics.FromImage(newBitmap))
                     {
                         g.DrawRectangle(solidBrush, (int)startX, (int)startY,
@@ -337,6 +337,8 @@ public partial class ZoomPictureDialog : WindowBase
         start = e.GetCurrentPoint(pictureImage);
         startX = start.Value.Position.X;
         startY = start.Value.Position.Y;
+        Dispatcher.UIThread.Post(() => { DrawRectangle(); });
+        System.Threading.Thread.Sleep(50);
     }
 
     private void Image_PointerReleased(object? sender, PointerReleasedEventArgs e)
@@ -422,6 +424,22 @@ public partial class ZoomPictureDialog : WindowBase
             this.Close(true);
         }
         );
+    }
+
+    private void ApplyConfig_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is ZoomPictureViewModel vm )
+        {
+            vm.UpdateImage();
+        }
+    }
+
+    private void ResetToDefault_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is ZoomPictureViewModel vm )
+        {
+            vm.GammaCorrections?.ResetToDefaults();
+        }
     }
 
     #endregion Private Methods

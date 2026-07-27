@@ -75,21 +75,7 @@ namespace TaymadeEntities.ViewModels
         public void SaveImage()
         {
             // save corrected image 
-            //if (ImageBMPConverted != null)
-            //{
-            //    ImageBMP?.Dispose();
-            //    ImageBMP = null;
-
-            //    ImageBMPConverted?.Dispose();
-            //    ImageBMPConverted = null;
-
-            //    File.Delete(fixedImagePath);
-            //    File.Move(outputImagePath, fixedImagePath);
-
-            //    Support.Support.SetImageBMP(ImagePath, out imageBMP);
-            //    ImageBMPConverted = imageBMP;
-
-            //}
+            
         }
 
         public string? ImagePath
@@ -262,7 +248,7 @@ namespace TaymadeEntities.ViewModels
 
         }
 
-        private async void UpdateImage()
+        internal async void UpdateImage()
         {
             if (GammaCorrections == null) return;
 

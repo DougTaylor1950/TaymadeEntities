@@ -1810,11 +1810,13 @@ namespace TaymadeEntities.Support
 
             if (System.IO.File.Exists(fileName))// && GetOS() == "WinNT")
             {
-                System.IO.FileInfo info = new System.IO.FileInfo(fileName);
+                // load the image bytes into memory so the on-disk file is not locked
+                var fileBytes = File.ReadAllBytes(fileName);
 
-                if (info.Length > 0)
+                // create Avalonia Bitmaps from in-memory stream
+                using (var ms = new MemoryStream(fileBytes, writable: false))
                 {
-                    retBMP = ConvertFileToAvaloniaBitmap(fileName, retBMP);
+                    retBMP = new Avalonia.Media.Imaging.Bitmap(ms);
                 }
             }
             return retBMP;
@@ -1824,18 +1826,7 @@ namespace TaymadeEntities.Support
         {
             try
             {
-               using System.Drawing.Bitmap? sBitmap = new System.Drawing.Bitmap(System.Drawing.Image.FromFile(fileName));
-                {
-                    using (System.IO.MemoryStream memory = new System.IO.MemoryStream())
-                    {
-                        sBitmap?.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
-                        memory.Position = 0;
-
-                        retBMP = new Avalonia.Media.Imaging.Bitmap(memory);
-                    }
-                    sBitmap?.Dispose();
-                    //sBitmap = null;
-                }
+                retBMP = ConvertFileToAvaloniaBitmap(fileName);
             }
             catch (Exception ex)
             {
@@ -1854,18 +1845,7 @@ namespace TaymadeEntities.Support
             Avalonia.Media.Imaging.Bitmap? retBMP = null;
             try
             {
-                using System.Drawing.Bitmap? sBitmap = new System.Drawing.Bitmap(System.Drawing.Image.FromFile(fileName));
-                {
-                    using (System.IO.MemoryStream memory = new System.IO.MemoryStream())
-                    {
-                        sBitmap?.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
-                        memory.Position = 0;
-
-                        retBMP = new Avalonia.Media.Imaging.Bitmap(memory);
-                    }
-                    sBitmap?.Dispose();
-                    //sBitmap = null;
-                }
+                retBMP = GetBMP(fileName);
             }
             catch (Exception ex)
             {

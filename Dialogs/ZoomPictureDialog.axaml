@@ -15,6 +15,8 @@
                 <Border  BorderBrush="Black"
                          BorderThickness="3"
                          CornerRadius="5"
+                         BoxShadow="5 5 10 0 #80000000"
+                         Background="White"
 
                          >
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center" >
@@ -22,6 +24,7 @@
                             <Border HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     BorderBrush="Black"
+                                    BoxShadow="5 5 10 0 #C0000000"
                                     BorderThickness="3"
                                     CornerRadius="5"
                                     Width="{Binding ImageBorderWidth}"
@@ -41,6 +44,7 @@
                                      BorderThickness="3"
                                      Background="LightGray"
                                      CornerRadius="5"
+                                     BoxShadow="5 5 10 0 #C0000000"
                                      >
 
                                 <StackPanel Orientation="Vertical"
@@ -52,32 +56,41 @@
                                     <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/up_arrow.png"
                                                             HorizontalAlignment="Center"
                                                             Height="50"
+                                                            ButtonToolTip="Move Rectangle Up by amount in box"
                                                             Click="MoveUp_Click"/>
                                     <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/DownArrow.png"
                                                             HorizontalAlignment="Center"
                                                             Height="50"
+                                                            ButtonToolTip="Move Rectangle Down "
                                                             Click="MoveDown_Click"/>
                                     <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/left_arrow.png"
                                                             HorizontalAlignment="Center"
                                                             Height="50"
+                                                            ButtonToolTip="Move Rectangle Left "
                                                             Click="MoveLeft_Click"/>
                                     <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/right_arrow.png"
                                                             HorizontalAlignment="Center"
                                                             Height="50"
+                                                            ButtonToolTip="Move Rectangle Right "
                                                             Click="MoveRight_Click"/>
                                     <NumericUpDown Minimum="0"
                                                    Maximum="30"
                                                    Margin="5,5,5,5"
                                                    Value="{Binding Step}"
-                                                   />
+                                                   ToolTip.Tip="Step for move and size commands"
+                                                   >
+                                       
+                                    </NumericUpDown>
                                     <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/stretch.png"
                                                             HorizontalAlignment="Center"
                                                             Height="50"
+                                                            ButtonToolTip="Resize rectangle larger"
                                                             Click="Stretch_Click"
                                                             />
                                     <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/shrink.png"
                                                             HorizontalAlignment="Center"
                                                             Height="50"
+                                                            ButtonToolTip="Resize rectangle smaller"
                                                             Click="Shrink_Click"
                                                             />
                                 </StackPanel>
@@ -89,6 +102,7 @@
                                 BorderBrush="Black"
                                 BorderThickness="3"
                                 CornerRadius="5"
+                                BoxShadow="5 5 10 0 #C0000000"
                                 Height="70"
                                 Width="800"
                                 Background="LightGray"
@@ -119,11 +133,13 @@
             </TabItem>
             <TabItem Header="Photo Fix">
                 <Border CornerRadius="6" BorderBrush="Gray"
-                        BorderThickness="2" >
+                        BorderThickness="2"
+                        BoxShadow="5 5 10 0 #C0000000"
+                        >
 
                     <StackPanel Orientation="Horizontal">
                         <StackPanel Orientation="Vertical"  Height="600" Width="750">
-                            <Grid>
+                            <Grid ShowGridLines="False">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="100"/>
                                     <ColumnDefinition Width="200"/>
@@ -163,22 +179,21 @@
 
                                 <TextBlock Classes="h2" Text="Sharpness"  Grid.Column="0" Grid.Row="4"/>
                                 <TextBox Classes="c1" Text="{Binding GammaCorrections.Sharpness }"   Grid.Column="1" Grid.Row="4" />
-                                <Slider Minimum="-.5" Maximum=".5" Value="{Binding GammaCorrections.Sharpness}" 
-                                        TickFrequency="0.05" IsSnapToTickEnabled="True" 
+                                <Slider Minimum="-.5" Maximum=".5" Value="{Binding GammaCorrections.Sharpness}"
+                                        TickFrequency="0.05" IsSnapToTickEnabled="True"
                                         Grid.Row="5" Grid.Column="1"/>
-                                
+
                                 <TextBlock Classes="h2" Text="Contrast"  Grid.Column="3" Grid.Row="4"/>
                                 <TextBox Classes="c1" Text="{Binding GammaCorrections.Contrast }"   Grid.Column="4" Grid.Row="4" />
-                                <Slider Minimum="-5.0" Maximum="5.0" Value="{Binding GammaCorrections.Contrast}" 
-                                        TickFrequency="0.05" IsSnapToTickEnabled="True" 
-                                        Grid.Row="5" 
+                                <Slider Minimum="-5.0" Maximum="5.0" Value="{Binding GammaCorrections.Contrast}"
+                                        TickFrequency="0.05" IsSnapToTickEnabled="True"
+                                        Grid.Row="5"
                                         Grid.Column="4"/>
 
 
                             </Grid>
-                            <Grid>
+                            <Grid ShowGridLines="False">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="80"/>
@@ -193,6 +208,7 @@
                                     <RowDefinition Height="40"></RowDefinition>
                                     <RowDefinition Height="40"></RowDefinition>
                                     <RowDefinition Height="40"></RowDefinition>
+                                    <RowDefinition Height="40"></RowDefinition>
                                 </Grid.RowDefinitions>
                                 <TextBlock Classes="h2" Text="Red"  Grid.Column="0" Grid.Row="0"/>
                                 <TextBox Classes="h2" Text="{Binding GammaCorrections.Red}"  Grid.Column="1" Grid.Row="0"/>
@@ -203,24 +219,24 @@
 
                                 <TextBlock Classes="h2" Text="Blue"  Grid.Column="2" />
                                 <TextBox Classes="h2" Text="{Binding GammaCorrections.Blue}"  Grid.Column="3" Grid.Row="0"/>
-                                <Slider Minimum="0.1" Maximum="2.0" Value="{Binding GammaCorrections.Blue}" 
+                                <Slider Minimum="0.1" Maximum="2.0" Value="{Binding GammaCorrections.Blue}"
                                         TickFrequency="0.1" IsSnapToTickEnabled="True" Grid.Row="1" Grid.Column="3"/>
 
                                 <TextBlock Classes="h2" Text="Green"  Grid.Column="4" Grid.Row="0"/>
                                 <TextBox Classes="h2" Text="{Binding GammaCorrections.Green}"  Grid.Column="5" Grid.Row="0"/>
-                                <Slider Minimum="0.1" Maximum="2.0" 
-                                        Value="{Binding GammaCorrections.Green}" 
-                                        TickFrequency="0.1" IsSnapToTickEnabled="True" 
+                                <Slider Minimum="0.1" Maximum="2.0"
+                                        Value="{Binding GammaCorrections.Green}"
+                                        TickFrequency="0.1" IsSnapToTickEnabled="True"
                                         Grid.Row="1" Grid.Column="5"/>
 
-                                
+
                                 <TextBlock Classes="h2" Text="Weight"  Grid.Column="6" Grid.Row="0"/>
                                 <TextBox Classes="h2" Text="{Binding GammaCorrections.Weight}"  Grid.Column="7" Grid.Row="0"/>
                                 <Slider Minimum="0.1" Maximum="2.0" Value="{Binding GammaCorrections.Weight}"
                                         TickFrequency="0.1" IsSnapToTickEnabled="True" Grid.Row="1" Grid.Column="7"/>
 
-                                <tcb:ImagedButton LabelText="Save Config" 
-                                                  Grid.Column="0" 
+                                <tcb:ImagedButton LabelText="Save Config"
+                                                  Grid.Column="0"
                                                   Grid.ColumnSpan="2"
                                                   Grid.Row="2"
                                                   ImageSource="avares://TaymadeControls/Assets/save_icon.png"
@@ -228,8 +244,8 @@
                                                   Command="{Binding SaveGamma}"
                                                   />
 
-                                 <tcb:ImagedButton LabelText="Save Image" 
-                                                  Grid.Column="3" 
+                                <tcb:ImagedButton LabelText="Save Image"
+                                                  Grid.Column="3"
                                                   Grid.ColumnSpan="2"
                                                   Grid.Row="2"
                                                   ImageSource="avares://TaymadeControls/Assets/save_icon.png"
@@ -237,9 +253,23 @@
                                                   Click="SaveImage"
                                                   />
 
-                                
-                                
+                                <tcb:ImagedButton LabelText="Apply Config"
+                                                  Grid.Column="0"
+                                                  Grid.ColumnSpan="2"
+                                                  Grid.Row="3"
+                                                  ImageSource="avares://TaymadeControls/Assets/build.png"
+                                                  ButtonToolTip="Apply Config"
+                                                  Click="ApplyConfig_Click"
+                                                  />
 
+                                <tcb:ImagedButton LabelText="Reset To Default"
+                                                  Grid.Column="3"
+                                                  Grid.ColumnSpan="2"
+                                                  Grid.Row="3"
+                                                  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+                                                  ButtonToolTip="Reset To Default Config"
+                                                  Click="ResetToDefault_Click"
+                                                  />
                             </Grid>
                         </StackPanel>
                         <StackPanel Width="20" Background="LightGray"/>
@@ -250,27 +280,27 @@
                                     BorderBrush="Black"
                                     BorderThickness="3"
                                     CornerRadius="5"
-                                    Width="410"
-                                    Height="410"
+                                    BoxShadow="5 5 10 0 #C0000000"
+                                    Width="500"
+                                    Height="500"
                                     >
                                 <Image Source="{Binding ImageBMP}"
-                                       Width="400"
-                                       Height="400"
 
                                        >
                                 </Image>
                             </Border >
+                            <StackPanel Width="20"  Background="LightGray"/>
                             <Border HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     BorderBrush="Black"
                                     BorderThickness="3"
                                     CornerRadius="5"
-                                    Width="410"
-                                    Height="410"
+                                    BoxShadow="5 5 10 0 #C0000000"
+                                    Width="500"
+                                    Height="500"
                                     >
                                 <Image Source="{Binding ImageBMPConverted}"
-                                       Width="400"
-                                       Height="400"
+
 
                                        >
                                 </Image>
