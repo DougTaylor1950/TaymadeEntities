@@ -11,6 +11,7 @@ namespace TaymadeEntities.Support
     using Avalonia;
     using Avalonia.Controls;
     using Avalonia.Controls.ApplicationLifetimes;
+    using Avalonia.Media.Imaging;
     using Avalonia.Platform;
     using CliWrap;
     using DocumentFormat.OpenXml.Office2010.Excel;
@@ -34,6 +35,7 @@ namespace TaymadeEntities.Support
     using TaymadeEntities.Dialogs;
     using TaymadeEntities.Models;
     using TaymadeEntities.ViewModels;
+    using Bitmap = System.Drawing.Bitmap;
 
 
 
@@ -558,24 +560,25 @@ namespace TaymadeEntities.Support
 
         private ImageSetViewModel? ImageSetViewModel { get; set; }
 
-        public async Task<int> MakeMovieFromImages(ImageSetViewModel? mainWindowViewModel)
+        public async Task<int> MakeMovieFromImages(ImageSetViewModel? imageSetViewModel)
         {
             FFMpegSupport fFMpeg = new FFMpegSupport();
             fFMpeg.CliWrapCompleted += FFMpeg_CliWrapCompleted;
             fFMpeg.CliWrapError += FFMpeg_CliWrapError;
             fFMpeg.CliWrapProgress += FFMpeg_CliWrapProgress;
-            ImageSetViewModel = mainWindowViewModel;
+            ImageSetViewModel = imageSetViewModel;
 
             int error = -1;
-            if (mainWindowViewModel != null
-               && mainWindowViewModel.RootFolder != null
-               && mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems != null
-               && mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems.Count > 0)
+            if (imageSetViewModel != null
+               && imageSetViewModel.RootFolder != null
+               && imageSetViewModel.RootFolder.CurrentSubFolder != null
+               && imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems != null
+               && imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems.Count > 0)
             {
 
-                string outputDirectory = mainWindowViewModel.RootFolder.TempDirectory();
+                string outputDirectory = imageSetViewModel.RootFolder.TempDirectory();
                 string imageFileStub = outputDirectory + @"\temp";
-                string outputFileName = outputDirectory + @"\" + System.IO.Path.GetFileNameWithoutExtension(mainWindowViewModel.RootFolder.CurrentSubFolder.Path) + ".mp4";
+                string outputFileName = outputDirectory + @"\" + System.IO.Path.GetFileNameWithoutExtension(imageSetViewModel.RootFolder.CurrentSubFolder.Path) + ".mp4";
 
                 Directory.CreateDirectory(outputDirectory);
                 // clear all files in temp folder
@@ -585,9 +588,9 @@ namespace TaymadeEntities.Support
                     File.Delete(tempFile);
                 }
 
-                mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems.ReloadImageItems
+                imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems.ReloadImageItems
                     (
-                    mainWindowViewModel.RootFolder.CurrentSubFolder.Path
+                    imageSetViewModel.RootFolder.CurrentSubFolder.Path
                     );
                 //this.RaisePropertyChanged(nameof(RootFolder.CurrentSubFolder.ImageItems.Count));
                 // go through all the images and find maxsizes
@@ -596,16 +599,18 @@ namespace TaymadeEntities.Support
 
                 MovieProgressEventargs progressChangedEventArgs = null;
 
-                mainWindowViewModel.MissingInfo = "Building List";
+                imageSetViewModel.MissingInfo = "Building List";
+
+                List<FrameSet>? frameSets = imageSetViewModel.RootFolder.CurrentSubFolder.FrameSetlist;
                 int indx = 1;
-                int cnt = mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems.Count;
-                foreach (ImageItem item in mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems)
+                int cnt = imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems.Count;
+                foreach (ImageItem item in imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems)
                 {
                     progressChangedEventArgs = new MovieProgressEventargs(0, null);
                     progressChangedEventArgs.ProgressPercentage = (indx * 100) / cnt;
                     progressChangedEventArgs.Info = "building bitmaps";
                     progressChangedEventArgs.Bitmap = item.ImageBMP;
-
+                    indx += 1;
                     OnProgress(progressChangedEventArgs);
                     await Task.Delay(200);
                     //Support_ProgressInformation(null, progressChangedEventArgs);
@@ -646,9 +651,20 @@ namespace TaymadeEntities.Support
 
                 SolidBrush solidBrush = new SolidBrush(System.Drawing.Color.WhiteSmoke);
 
-                int count = mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems.Count * 2;
+                int count = 0;
+                if (frameSets == null)
+                {
+                   count =  imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems.Count * 2;
+                }
+                else
+                {
+                    foreach (var frameset in frameSets)
+                    {
+                        count += (frameset.EndImage + 1 - frameset.StartImage) * (int)frameset.FrameRate;
+                    }
+                }
 
-                foreach (ImageItem item in mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems)
+                foreach (ImageItem item in imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems)
                 {
                     // get existing image
                     System.Drawing.Bitmap image = new System.Drawing.Bitmap(item.ImagePath);
@@ -695,12 +711,28 @@ namespace TaymadeEntities.Support
                         g.DrawImage(reSizedImage, xdif, ydif, reSizedImage.Width, reSizedImage.Height);
                     }
 
+
                     // save image twice
-                    string tempImageFileName = imageFileStub + index.ToString("0000") + ".jpg";
-                    newBitmap.Save(tempImageFileName, ImageFormat.Jpeg);
-                    index += 1;
-                    newBitmap.Save(imageFileStub + index.ToString("0000") + ".jpg", ImageFormat.Jpeg);
-                    index += 1;
+                    
+                    // use current image item to determine the number of replicates for the image
+                    int saveCount = 1;
+                    if (frameSets != null)
+                    {
+                        FrameSet? frameSet = frameSets.Where(f => f.Index == item.FrameSetIndex).FirstOrDefault();
+                        if (frameSet != null) saveCount = (int)frameSet.FrameRate;
+                    }
+                    string tempImageFileName = "";
+                    for (int i = 0; i < saveCount; i++)
+                    {
+                        tempImageFileName = imageFileStub + index.ToString("0000") + ".jpg"; 
+                        newBitmap.Save(tempImageFileName, ImageFormat.Jpeg);
+                        index += 1;
+                        
+                    }
+
+                    // stop double saving 
+                    //newBitmap.Save(imageFileStub + index.ToString("0000") + ".jpg", ImageFormat.Jpeg);
+                    //index += 1;
                     // dispose of temporary bitmap
                     newBitmap.Dispose();
 
@@ -708,36 +740,40 @@ namespace TaymadeEntities.Support
                     progressChangedEventArgs = new MovieProgressEventargs(0, null);
                     progressChangedEventArgs.ProgressPercentage = (index * 100) / count;
                     progressChangedEventArgs.Info = "building bitmaps";
-                    progressChangedEventArgs.BitmapPath = tempImageFileName;
+                    progressChangedEventArgs.Bitmap = ConvertFileToAvaloniaBitmap(tempImageFileName);
                     OnProgress(progressChangedEventArgs);
+                    
                     await Task.Delay(50);
                     solidBrush.Dispose();
                 }
+
                 // use ffmpeg to build an MP4 file
-                string ffMpegCommand = " -framerate 1 -i " + '"' + imageFileStub + "%04d.jpg" + '"' + " -c:v libx264 -r 25 " + '"' + outputFileName + '"';
+                string ffMpegCommand = " -framerate 1 -i " + '"' + imageFileStub + "%04d.jpg" + '"' + " -c:v libx264 -r 20 " + '"' + outputFileName + '"';
 
 
-                mainWindowViewModel.OutputVideoPath = outputFileName;
+                imageSetViewModel.OutputVideoPath = outputFileName;
                 progressChangedEventArgs.Info = "Creating temp MP4";
                 OnProgress(progressChangedEventArgs);
 
-                mainWindowViewModel.MissingInfo = "Creating temp MP4";
+                imageSetViewModel.MissingInfo = "Creating temp MP4";
 
                 //Views.MainWindow? main = GetMainWindow();
 
                 fFMpeg.action = "CreateMovie";
-                fFMpeg.FrameCount = index * 25;
-
-
+                fFMpeg.FrameCount = index * 20;
 
                 await fFMpeg.DoCliWrapCreateMovie(ffMpegCommand);
+
+
 
                 // now display created image file
 
             }
 
+
             return error;
         }
+
 
 
 
@@ -754,21 +790,21 @@ namespace TaymadeEntities.Support
             return singlePixel.GetPixel(0, 0);
         }
 
-        //public async Task<int> MakeMovieFromImages(ImageSetViewModel? mainWindowViewModel)
+        //public async Task<int> MakeMovieFromImages(ImageSetViewModel? imageSetViewModel)
         //{
         //    int error = -1;
-        //    if (mainWindowViewModel != null
-        //       && mainWindowViewModel.RootFolder != null
-        //       && mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems != null
-        //       && mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems.Count > 0)
+        //    if (imageSetViewModel != null
+        //       && imageSetViewModel.RootFolder != null
+        //       && imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems != null
+        //       && imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems.Count > 0)
         //    {
 
         //        // go through all the images and find maxsizes
         //        double absMaxWidth = 0;
         //        double absMaxHeight = 0;
 
-        //        mainWindowViewModel.MissingInfo = "Building List";
-        //        foreach (ImageItem item in mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems)
+        //        imageSetViewModel.MissingInfo = "Building List";
+        //        foreach (ImageItem item in imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems)
         //        {
         //            if (item.ImageBMP != null && item.ImageBMP.Size.Height > absMaxHeight) absMaxHeight = item.ImageBMP.Size.Height;
         //            if (item.ImageBMP != null && item.ImageBMP.Size.Width > absMaxWidth) absMaxWidth = item.ImageBMP.Size.Width;
@@ -802,18 +838,18 @@ namespace TaymadeEntities.Support
         //        // then we go through all images and save them to a created temp directory 
         //        // resizing the images to fit 
 
-        //        string outputDirectory = mainWindowViewModel.RootFolder.TempDirectory();
+        //        string outputDirectory = imageSetViewModel.RootFolder.TempDirectory();
         //        string imageFileStub = outputDirectory + @"\temp";
-        //        string outputFileName = outputDirectory + @"\" + System.IO.Path.GetFileNameWithoutExtension(mainWindowViewModel.RootFolder.CurrentSubFolder.Path) + ".mp4";
+        //        string outputFileName = outputDirectory + @"\" + System.IO.Path.GetFileNameWithoutExtension(imageSetViewModel.RootFolder.CurrentSubFolder.Path) + ".mp4";
 
         //        Directory.CreateDirectory(outputDirectory);
 
 
         //        SolidBrush solidBrush = new SolidBrush(System.Drawing.Color.WhiteSmoke);
 
-        //        int count = mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems.Count * 2;
+        //        int count = imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems.Count * 2;
 
-        //        foreach (ImageItem item in mainWindowViewModel.RootFolder.CurrentSubFolder.ImageItems)
+        //        foreach (ImageItem item in imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems)
         //        {
         //            System.Drawing.Bitmap image = new System.Drawing.Bitmap(item.ImagePath);
         //            System.Drawing.Image reSizedImage = image;
@@ -876,7 +912,7 @@ namespace TaymadeEntities.Support
         //        progressChangedEventArgs.Info = "Creating temp MP4";
         //        this.OnProgress(progressChangedEventArgs);
 
-        //        mainWindowViewModel.MissingInfo = "Creating temp MP4";
+        //        imageSetViewModel.MissingInfo = "Creating temp MP4";
 
         //        Views.MainWindow? main = GetMainWindow();
 
@@ -897,10 +933,10 @@ namespace TaymadeEntities.Support
         //private void FFMpeg_CliWrapProgress(object sender, CliWrapProgressEventArgs e)
         //{
         //    Debug.WriteLine(e.Progress);
-        //    ViewModels.MainWindowViewModel mainWindowViewModel = GetMainWindowViewModel();
-        //    mainWindowViewModel.MissingInfo = e.Progress;
+        //    ViewModels.MainWindowViewModel imageSetViewModel = GetMainWindowViewModel();
+        //    imageSetViewModel.MissingInfo = e.Progress;
 
-        //    if (e.ProgressPercentage > 0) mainWindowViewModel.MovieProgress = e.ProgressPercentage;
+        //    if (e.ProgressPercentage > 0) imageSetViewModel.MovieProgress = e.ProgressPercentage;
         //}
 
         private void FFMpeg_CliWrapError(object sender, CliWrapErrorEventArgs e)
@@ -910,9 +946,9 @@ namespace TaymadeEntities.Support
 
         //private void FFMpeg_CliWrapCompleted(object sender, CliWrapCompletedEventArgs e)
         //{
-        //    ViewModels.MainWindowViewModel mainWindowViewModel = GetMainWindowViewModel();
+        //    ViewModels.MainWindowViewModel imageSetViewModel = GetMainWindowViewModel();
 
-        //    mainWindowViewModel.MissingInfo = "Completed";
+        //    imageSetViewModel.MissingInfo = "Completed";
 
         //    MainWindow main = GetMainWindow();
         //    ImageSetViewModel? imagesetViewModel = main.ImageSetControl.DataContext as ImageSetViewModel;
@@ -964,13 +1000,14 @@ namespace TaymadeEntities.Support
                 {
 
                     string filmName = System.IO.Path.GetFileNameWithoutExtension(movieFilename).Replace("&", "and").Replace(",", " ");
-                    newMovie = DataController.SandboxEntities.CreateMovie(filmName);
+                    newMovie = DataController.MovieController.CreateMovie(filmName, 0, movieFilename, phrase.Id);
+                    // newMovie = DataController.SandboxEntities.CreateMovie(filmName);
                     if (newMovie == null)
                     {
                         throw new Exception("Failed to create movie entity");
                     }
                     int Id = newMovie.Id;
-                    newMovie = DataController.SandboxEntities.Movies.Find(Id);
+                    newMovie = DataController.MovieController.GetMoviesById(Id);
 
                     progressArgs.Info = "Movie entity created " + movieFilename;
                     OnProgress(progressArgs);
@@ -1106,9 +1143,9 @@ namespace TaymadeEntities.Support
 
                 {
 
-                    error = "Movie creation cancelled";
-                    exception = new Exception(error);
-                    success = false;
+                    // error = "Movie creation cancelled";
+                    // exception = new Exception(error);
+                    //success = false;
                 }
 
 
@@ -1148,7 +1185,7 @@ namespace TaymadeEntities.Support
         {
             PhraseEntry SubPhrase = subPhrase;
             string? subGenre = SubPhrase != null ? SubPhrase.COMPKEY : null;
-            //      MovieGenre movieGenre = new MovieGenre() { MovieId = Id, Genre = viewModel.CurrentPhrase.COMPKEY, SubGenre = subGenre };
+
             //    movieGenre.Insert();
             if (subPhrase != null)
             {
@@ -1165,7 +1202,9 @@ namespace TaymadeEntities.Support
             newMovie.HasChapters = false;
             newMovie.HasEpisodes = false;
             newMovie.Save();
-            SetSeriesDetails(newMovie, null);
+            MovieGenre movieGenre = DataController.MovieController.CreateMovieGenre(newMovie.Id, phrase?.COMPKEY, subPhrase?.COMPKEY);
+            newMovie.MovieGenres.Add(movieGenre);
+            SetSeriesDetails(newMovie, movieGenre);
         }
 
         private static void SetSeriesDetails(Movies newMovie, MovieGenre? movieGenre)
@@ -1180,14 +1219,9 @@ namespace TaymadeEntities.Support
                     //if (movieGenre.SubGenre == "SER.NEWS-9") newMovie.Series = 4;
                 }
             }
-            EntityState state = DataController.SandboxEntities.Entry(newMovie).State;
+            //EntityState state = DataController.SandboxEntities.Entry(newMovie).State;
 
-            //movieGenre.Insert();
-            if (movieGenre != null)
-            {
-                newMovie.MovieGenres.Add(movieGenre);
-                //movieGenre.Save();
-            }
+
         }
 
         /// <summary>
@@ -1240,12 +1274,12 @@ namespace TaymadeEntities.Support
             // add new file to database
             if (newMovie.Id == 0)
             {
-                DataController.SandboxEntities.Movies.Add(newMovie);
-                DataController.SandboxEntities.SaveChanges();
+                DataController.MovieController.Add(newMovie);// SandboxEntities.Movies.Add(newMovie);
+                //DataController.SandboxEntities.SaveChanges();
             }
             else
             {
-                DataController.SandboxEntities.UpdateMovie(newMovie);
+                DataController.MovieController.UpdateMovie(newMovie);
             }
 
             // success log it. 
@@ -1677,6 +1711,52 @@ namespace TaymadeEntities.Support
             return destImage;
         }
 
+        public static Bitmap? ConvertAvaloniaBMPToSystem(Avalonia.Media.Imaging.Bitmap sourceBMP)
+        {
+            Bitmap destImage = null;
+            using (MemoryStream imageStream = new MemoryStream())
+            {
+                sourceBMP.Save(imageStream);
+                imageStream.Seek(0, SeekOrigin.Begin);
+                destImage = new System.Drawing.Bitmap(imageStream);
+
+            }
+            return destImage;
+        }
+
+        public static Avalonia.Media.Imaging.Bitmap ResizeImage(Avalonia.Media.Imaging.Bitmap sourceBMP, int width, int height)
+        {
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new System.Drawing.Bitmap(width, height);
+            System.Drawing.Bitmap sourceImage = null;
+            using (MemoryStream imageStream = new MemoryStream())
+            {
+                sourceBMP.Save(imageStream);
+                imageStream.Seek(0, SeekOrigin.Begin);
+                sourceImage = new System.Drawing.Bitmap(imageStream);
+
+            }
+
+            destImage.SetResolution(sourceImage.HorizontalResolution, sourceImage.VerticalResolution);
+
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = CompositingMode.SourceCopy;
+                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
+                    graphics.DrawImage(sourceImage, destRect, 0, 0, sourceImage.Width, sourceImage.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+
+            return Support.ConvertFileToAvaloniaBitmap(destImage);
+        }
+
         //internal static System.Drawing.Color CalculateAverageColor(Bitmap bm)
         //{
         //    int width = bm.Width;
@@ -1859,7 +1939,7 @@ namespace TaymadeEntities.Support
             return retBMP;
         }
 
-        public static Avalonia.Media.Imaging.Bitmap? ConvertFileToAvaloniaBitmap(Bitmap? sBitmap)
+        public static Avalonia.Media.Imaging.Bitmap? ConvertFileToAvaloniaBitmap(System.Drawing.Bitmap? sBitmap)
         {
             Avalonia.Media.Imaging.Bitmap? retBMP = null;
 
@@ -2014,9 +2094,9 @@ namespace TaymadeEntities.Support
         //public static int? GetScreenId()
         //{
 
-        //    MainWindowViewModel mainWindowViewModel = GetMainWindowViewModel();
+        //    MainWindowViewModel imageSetViewModel = GetMainWindowViewModel();
 
-        //    if (mainWindowViewModel != null && int.TryParse(mainWindowViewModel.CurrentScreen.Id, out int screenid))
+        //    if (imageSetViewModel != null && int.TryParse(imageSetViewModel.CurrentScreen.Id, out int screenid))
         //    {
         //        screenId = screenid;
         //    }

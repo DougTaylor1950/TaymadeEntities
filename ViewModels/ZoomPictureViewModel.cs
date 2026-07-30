@@ -21,7 +21,7 @@ namespace TaymadeEntities.ViewModels
         private double imageHeight = 800;
         private int frames = 10;
 
-        private string startingImagePath = @"K:\DriveF\Teen\Girls\GIN\gin080.jpg";
+        private string startingImagePath = "K:\\DriveF\\Teen\\Girls\\img\\IMG_01817_71.jpg";
         private int step = 5;
         private GammaCorrections? gammaCorrections;
         internal string? outputImagePath;
@@ -178,7 +178,7 @@ namespace TaymadeEntities.ViewModels
                     // we need to scale the image down 
                     // new width will be 800 * aspect ratio
                     //using (var newBitmap = new System.Drawing.Bitmap(ImagePath))
-                    using (var reSizedImage = Support.Support.ResizeImage(SystemBitmap, (int)(ImageWidth * AspectRatio), 800))
+                  using (var reSizedImage = Support.Support.ResizeImage(SystemBitmap, (int)(800 * AspectRatio), 800))
                     {
                         //SystemBitmap = reSizedImage;
                         imageBMP = Support.Support.ConvertFileToAvaloniaBitmap(reSizedImage);
@@ -188,15 +188,17 @@ namespace TaymadeEntities.ViewModels
                     if (imageBMP != null)
                     {
                         ImageWidth = imageBMP.Size.Width;
-                        ImageHeight = ImageBMP.Size.Height;
+                        ImageHeight = imageBMP.Size.Height;
                     }
 
-                    SystemBitmap = Support.Support.ResizeImage(SystemBitmap, (int)(ImageWidth), 800);
+                    SystemBitmap = Support.Support.ResizeImage(SystemBitmap, (int)(800 * AspectRatio), 800);
                 }
 
 
                 this.RaisePropertyChanged(nameof(ImageWidth));
                 this.RaisePropertyChanged(nameof(ImageHeight));
+                this.RaisePropertyChanged(nameof(ImageBorderWidth));
+                this.RaisePropertyChanged(nameof(ImageBorderHeight));
 
                 this.GammaCorrections = new GammaCorrections();
                 GammaCorrections.IsVideo = false;

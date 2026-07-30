@@ -100,37 +100,37 @@ public partial class ZoomPictureDialog : WindowBase
             //{
             //Rectangle rectangle = new Rectangle(xStart, yStart, xWidth, yHeight);
             //System.Drawing.Size size = new System.Drawing.Size(xWidth, yHeight);
-            //System.Drawing.Bitmap temp = new System.Drawing.Bitmap(vm.ImagePath);
-
-            using (var temp = new Bitmap(vm.ImagePath))
+            //System.Drawing.Bitmap temp = null;
+            Clear_Click(null, null);
+            for (int i = 0; i < vm.Frames; i++)
             {
-                for (int i = 0; i < vm.Frames; i++)
+                var temp = Support.Support.ConvertAvaloniaBMPToSystem(vm.ImageBMP);
+                var rect = new Rectangle((int)xStart, (int)yStart, (int)xWidth, (int)yHeight);
+
+                // Clip to bitmap bounds
+                if (rect.X < 0) { rect.Width += rect.X; rect.X = 0; }
+                if (rect.Y < 0) { rect.Height += rect.Y; rect.Y = 0; }
+                if (rect.X + rect.Width > temp.Width) rect.Width = temp.Width - rect.X;
+                if (rect.Y + rect.Height > temp.Height) rect.Height = temp.Height - rect.Y;
+
+                if (rect.Width <= 0 || rect.Height <= 0)
+                    continue; // skip invalid crop
+
+                using (var newBitmap = temp.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                using (var reSizedImage = Support.Support.ResizeImage(newBitmap, (int)temp.Width, (int)temp.Height))
                 {
-                    var rect = new Rectangle((int)xStart, (int)yStart, (int)xWidth, (int)yHeight);
-
-                    // Clip to bitmap bounds
-                    if (rect.X < 0) { rect.Width += rect.X; rect.X = 0; }
-                    if (rect.Y < 0) { rect.Height += rect.Y; rect.Y = 0; }
-                    if (rect.X + rect.Width > temp.Width) rect.Width = temp.Width - rect.X;
-                    if (rect.Y + rect.Height > temp.Height) rect.Height = temp.Height - rect.Y;
-
-                    if (rect.Width <= 0 || rect.Height <= 0)
-                        continue; // skip invalid crop
-
-                    using (var newBitmap = temp.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
-                    using (var reSizedImage = Support.Support.ResizeImage(newBitmap, (int)vm.ImageWidth, (int)vm.ImageHeight))
-                    {
-                        string filename = System.IO.Path.Combine(imagePath, $"{fileNameStub}-{(i + 1):000}.jpg");
-                        reSizedImage.Save(filename, ImageFormat.Jpeg);
-                    }
-                    xStart += stepX;
-                    yStart += stepY;
-                    yHeight -= heightStep;
-                    xWidth -= widthStep;
-                    // update xStart, yStart, xWidth, yHeight as before
+                    string filename = System.IO.Path.Combine(imagePath, $"{fileNameStub}-{(i + 1):000}.jpg");
+                    reSizedImage.Save(filename, ImageFormat.Jpeg);
                 }
-                Clear_Click(null, null);
+                xStart += stepX;
+                yStart += stepY;
+                yHeight -= heightStep;
+                xWidth -= widthStep;
+                // update xStart, yStart, xWidth, yHeight as before
+                temp?.Dispose();
             }
+               
+            
         }
     }
 
@@ -168,7 +168,7 @@ public partial class ZoomPictureDialog : WindowBase
                     double width = endX - startX;
                     double height = endY - startY;
 
-                    height = width / vm.AspectRatio;
+                    width = height * vm.AspectRatio;
                     // must correct the end positions
                     endY = startY + height;
 
@@ -274,9 +274,11 @@ public partial class ZoomPictureDialog : WindowBase
                     double width = endX - startX;
                     double height = endY - startY;
 
-                    height = width / vm.AspectRatio;
+                    width = height * vm.AspectRatio;
                     // must correct the end positions
                     endY = startY + height;
+                    endX = startX + width;
+
                     System.Drawing.Pen solidBrush =
                         new System.Drawing.Pen(System.Drawing.Color.Yellow);
                     using (Graphics g = Graphics.FromImage(newBitmap))
@@ -351,13 +353,25 @@ public partial class ZoomPictureDialog : WindowBase
         released = true;
     }
 
+    private bool downright = true;
     private void Stretch_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
+        
         if (DataContext is ZoomPictureViewModel vm)
         {
-            // increase the rectangle size by the step amount in both directions
-            endX += vm.Step;
-            endY += vm.Step;
+            if (downright)
+            {
+                // increase the rectangle size by the step amount in both directions
+                endX += vm.Step;
+                endY += vm.Step;
+            }
+            else
+            {
+                // increase the rectangle size by the step amount in both directions
+                startX -= vm.Step;
+                startY -= vm.Step;
+            }
+            downright = !downright;
             DrawRectangle();
         }
     }
@@ -428,7 +442,7 @@ public partial class ZoomPictureDialog : WindowBase
 
     private void ApplyConfig_Click(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is ZoomPictureViewModel vm )
+        if (DataContext is ZoomPictureViewModel vm)
         {
             vm.UpdateImage();
         }
@@ -436,7 +450,7 @@ public partial class ZoomPictureDialog : WindowBase
 
     private void ResetToDefault_Click(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is ZoomPictureViewModel vm )
+        if (DataContext is ZoomPictureViewModel vm)
         {
             vm.GammaCorrections?.ResetToDefaults();
         }

@@ -3,7 +3,7 @@
 			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:vm="using:TaymadeEntities.ViewModels"
-			 
+
 			 xmlns:tc="using:TaymadeControls"
 			 xmlns:tcb="using:TaymadeControls.Buttons"
 			 mc:Ignorable="d" d:DesignWidth="1900" d:DesignHeight="1600"
@@ -21,7 +21,7 @@
 		</StackPanel>
 		<TabControl SelectionChanged="TabControl_SelectionChanged">
 			<TabItem Header="Images and Folders"
-
+					 Name="Images"
 					 >
 
 				<StackPanel Orientation="Vertical" >
@@ -57,7 +57,7 @@
 									  Name="dgSubFolders"
 									  ItemsSource="{Binding RootFolder.CurrentImageFolder.SubDirectoryList}"
 									  SelectedItem="{Binding RootFolder.CurrentSubFolder}"
-									  
+
 									  Height="400" VerticalScrollBarVisibility="Visible">
 								<DataGrid.Columns>
 									<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
@@ -68,7 +68,8 @@
 									<ContextMenu Name="SubImgFolderMnu">
 										<MenuItem Header="Refresh" Command="{Binding RefreshSubFolder}" />
 										<MenuItem Header="Delete Sub Folder" Command="{Binding DeleteSubFolder}" />
-
+										<MenuItem Header="Save Sub Folder" Click="SaveSubFolder_Click" />
+										<MenuItem Header="Load Sub Folder" Click="LoadSubFolder_Click" />
 									</ContextMenu>
 								</DataGrid.ContextMenu>
 							</DataGrid>
@@ -84,7 +85,7 @@
 						<!-- Image Items-->
 						<StackPanel Width="20" Background="DarkGray"/>
 
-						<StackPanel Orientation="Vertical" Width="300">
+						<StackPanel Orientation="Vertical" Width="400">
 							<StackPanel Orientation="Vertical">
 								<StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
 									<tcb:ImagedButton Command="{Binding AddPictures}"
@@ -142,12 +143,13 @@
 							<DataGrid ItemsSource="{Binding RootFolder.CurrentSubFolder.ImageItems}"
 									  Name="dgItemImages"
 									  SelectedItem="{Binding RootFolder.CurrentImageItem}"
-									  SelectionChanged="dgItemImages_SelectionChanged"
+
 									  Height="600" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible">
 								<DataGrid.Columns>
 									<DataGridTextColumn Header="Id" Binding="{Binding Id}" />
 									<DataGridTextColumn Header="Name" Binding="{Binding ImageName}" />
 									<DataGridCheckBoxColumn Header="Selected" Binding="{Binding Selected}" />
+									<DataGridTextColumn Header="Frame Set" Binding="{Binding FrameSetIndex}"/>
 								</DataGrid.Columns>
 								<DataGrid.ContextMenu>
 									<ContextMenu  Name="PicMenu">
@@ -155,10 +157,13 @@
 										<MenuItem Header="Delete Image" Command="{Binding DeletePicture}" />
 										<MenuItem Header="Reload Image" Command="{Binding ReloadPicture}" />
 										<MenuItem Header="Reload Images" Click="Reloadpictures_Click" />
+										<MenuItem Header="Save Sub Folder" Click="SaveSubFolder_Click" />
 										<MenuItem Header="Move Image to selected folder" Command="{Binding MoveToSelectedFolder}"  />
 										<MenuItem Header="Copy Image to selected folder" Command="{Binding CopyToSelectedFolder}"  />
+										<MenuItem Header="Split Here" Click="SplitFolder_Click" />
 										<MenuItem Header="Rename File" Click="MenuItem_Click"  />
-										<MenuItem Header="Zoom to feature" Command="{Binding ZoomToFeature}" />
+										<MenuItem Header="Zoom to feature" Click="Zoom_Click" />
+										<MenuItem Header="Add new frameset" Click="AddFrameSet_Click"/>
 									</ContextMenu>
 								</DataGrid.ContextMenu>
 							</DataGrid>
@@ -175,11 +180,38 @@
 										 Maximum="100"
 										 Name="ShowProgress"
 										 Value="{Binding ProgressPercentShow}"/>
+							<Grid ShowGridLines="False">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="100" />
+									<ColumnDefinition Width="100" />
+									<ColumnDefinition Width="100" />
+									<ColumnDefinition Width="100" />
+									<ColumnDefinition Width="100" />
+									<ColumnDefinition Width="100" />
+									<ColumnDefinition Width="100" />
+									<ColumnDefinition Width="100" />
+								</Grid.ColumnDefinitions>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="40"/>
+									<RowDefinition Height="40"/>
+								</Grid.RowDefinitions>
+								<TextBlock Text="Index" Grid.Row="0" Grid.Column="0" Margin="2,2,1,1"/>
+								<TextBox Text="{Binding CurrentSubFolder.CurrentFrameSet.Index}" Grid.Row="0" Grid.Column="1" Margin="2,2,1,1"/>
+								<TextBlock Text="Frame Rate" Grid.Row="0" Grid.Column="2" Margin="2,2,1,1"/>
+								<TextBox Text="{Binding CurrentSubFolder.CurrentFrameSet.FrameRate}" Grid.Row="0" Grid.Column="3" Margin="2,2,1,1"/>
+								<TextBlock Text="Start" Grid.Row="0" Grid.Column="4" Margin="2,2,1,1"/>
+								<TextBox Text="{Binding CurrentSubFolder.CurrentFrameSet.StartImage}" Grid.Row="0" Grid.Column="5" Margin="2,2,1,1"/>
+								<TextBlock Text="End" Grid.Row="0" Grid.Column="6" Margin="2,2,1,1"/>
+								<TextBox Text="{Binding CurrentSubFolder.CurrentFrameSet.EndImage}" Grid.Row="0" Grid.Column="7" Margin="2,2,1,1"/>
+								<ComboBox ItemsSource="{Binding CurrentSubFolder.FrameSetlist}"
+										  DisplayMemberBinding="{Binding Index}"
+										  Grid.Row="1" SelectedItem="{Binding CurrentSubFolder.CurrentFrameSet }"/>
+							</Grid>
 						</StackPanel>
 					</StackPanel>
 				</StackPanel>
 			</TabItem>
-			<TabItem Header="Movies" >
+			<TabItem Header="Movies" Name="Movies" >
 				<StackPanel Orientation="Vertical">
 					<TextBlock Text="{Binding RootFolder.MovieInfo}" />
 					<StackPanel Orientation="Horizontal" >
@@ -189,19 +221,19 @@
 										  />
 
 
-						<tcb:ImagedButton Command="{Binding PlayMovie_Click}" 
+						<tcb:ImagedButton Command="{Binding PlayMovie_Click}"
 										  IsVisible="{Binding RootFolder.HasTempMP4}"
 										  ImageSource="avares://TaymadeControls/Assets/play.png"
 										  LabelText="Play Temp Movie"
 										  />
 
-						<tcb:ImagedButton Command="{Binding PlayMP4_Click}" 
+						<tcb:ImagedButton Command="{Binding PlayMP4_Click}"
 										  IsVisible="{Binding RootFolder.HasMovieEntity}"
 										  ImageSource="avares://TaymadeControls/Assets/play.png"
 										  LabelText="Play Movie"
 										  />
 
-						<tcb:ImagedButton  Command="{Binding CreateMP4_Click}" 
+						<tcb:ImagedButton  Command="{Binding CreateMP4_Click}"
 										   IsVisible="{Binding RootFolder.HasTempMP4}"
 										   ImageSource="avares://TaymadeControls/Assets/Pharmacy.jpeg"
 										   LabelText="Create Movie"
@@ -217,6 +249,10 @@
 								<ColumnDefinition Width="300"/>
 								<ColumnDefinition Width="100"/>
 								<ColumnDefinition Width="300"/>
+								<ColumnDefinition Width="100"/>
+								<ColumnDefinition Width="300"/>
+								<ColumnDefinition Width="100"/>
+								<ColumnDefinition Width="300"/>
 							</Grid.ColumnDefinitions>
 							<Grid.RowDefinitions>
 								<RowDefinition Height="40" />
@@ -227,27 +263,27 @@
 
 							<TextBlock Text="Folder Name" Grid.Row="0" Grid.Column="0"/>
 							<TextBlock Text="{Binding RootFolder.CurrentSubFolder.Name}" Grid.Row="0" Grid.Column="1"/>
+
 							<TextBlock Text="Image Count" Grid.Row="1" Grid.Column="0"/>
 							<TextBlock Text="{Binding RootFolder.CurrentSubFolder.ImageItems.Count}" Grid.Row="1" Grid.Column="1"/>
 
 							<TextBlock Text="Movie Name" Grid.Row="2" Grid.Column="0" />
 							<TextBlock Text="{Binding RootFolder.CurrentMovie.MovieName}" Grid.Row="2" Grid.Column="1"/>
-							<TextBlock Text="Duration" Grid.Row="2" Grid.Column="2" />
-							<TextBlock Text="{Binding RootFolder.CurrentMovie.DurationSeconds}" Grid.Row="2" Grid.Column="3"/>
+
 							<TextBlock Text="Bookmarks" Grid.Row="3" Grid.Column="0" />
 							<TextBlock Text="{Binding RootFolder.CurrentMovie.Bookmarks.Count}" Grid.Row="3" Grid.Column="1"/>
 							<TextBlock Text="Duration" Grid.Row="2" Grid.Column="2" />
 							<TextBlock Text="{Binding RootFolder.CurrentMovie.MovieDuration}" Grid.Row="2" Grid.Column="3"/>
 						</Grid>
-						<Border BorderBrush="Black" 
-								BorderThickness="3" 
+						<Border BorderBrush="Black"
+								BorderThickness="3"
 								Height="605"
 								Width="605"
 								CornerRadius="5">
-							<Image Name="CurrentImageControl" Width="600" 
-								   Height="600" 
+							<Image Name="CurrentImageControl" Width="600"
+								   Height="600"
 								   Source="{Binding CurrentImage}" />
-							
+
 						</Border>
 					</StackPanel>
 				</StackPanel>

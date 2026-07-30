@@ -14,6 +14,7 @@ using System.Linq;
 using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
+using TaymadeEntities.Controls;
 using TaymadeEntities.Dialogs;
 using TaymadeEntities.Models;
 //using TaymadeEntities.Models;
@@ -39,6 +40,7 @@ namespace TaymadeEntities.ViewModels
         private int? progressPercentShow;
         private FileMonitor _monitor;
         private Avalonia.Media.Imaging.Bitmap? currentImage;
+        
 
         internal Avalonia.Media.IBrush backgroundColor { get; set; }
 
@@ -54,7 +56,7 @@ namespace TaymadeEntities.ViewModels
             ReloadPictures = ReactiveCommand.Create(DoReloadPictures);
             ReloadPicture = ReactiveCommand.Create(DoReloadPicture);
             DeletePicture = ReactiveCommand.Create(DoDeletePicture);
-            ZoomToFeature = ReactiveCommand.Create(DoZoomToFeature);
+            //ZoomToFeature = ReactiveCommand.Create(DoZoomToFeature);
             UsePicturesAsItems = true;
             CurrentIcon = PlayIcon;
             if (RootFolder.CurrentImageFolder == null)
@@ -183,6 +185,9 @@ namespace TaymadeEntities.ViewModels
                     return null;
                 }
             }
+
+            
+
         }
 
         public string? CurrentSubFolderName
@@ -416,33 +421,38 @@ namespace TaymadeEntities.ViewModels
             bool success = false;
             string destFile = RootFolder.OutputMoviePath();
             RootFolder.HasMovieEntity = false;
-            if (RootFolder.Movies != null)
+            if (RootFolder.CurrentSubFolder.Movies != null)
             {
                 // entity exists just add new file
-                File.Delete(RootFolder.Movies.MoviePath);
-                File.Move(destFile, RootFolder.Movies.MoviePath);
+                File.Delete(RootFolder.CurrentSubFolder.Movies.MoviePath);
+                File.Move(destFile, RootFolder.CurrentSubFolder.Movies.MoviePath);
                 success = true;
                 RootFolder.HasMovieEntity = true;
             }
             else
             {
-                RootFolder.Movies = null;
+                RootFolder.CurrentSubFolder.Movies = null;
                 RootFolder.HasMovieEntity = false;
-                success = await CreateActualMovieFromPath(destFile, null, null);
+                PhraseEntry? phrase = DataController.PhraseEntries.Where(p => p.Id == "IMAGES" && p.PhraseID==1).FirstOrDefault();
+                success = await CreateActualMovieFromPath(destFile, phrase, null);
             }
-            if (success)
+            if (success )
             {
                 RootFolder.HasMovieEntity = true;
-
-                RootFolder.Movies = CurrentMovie;
-
-                if (File.Exists(destFile)) File.Delete(destFile);
-                //File.Move(imageSetViewModel.RootFolder.Movies.MoviePath, destFile);
-                RootFolder.HasTempMP4 = false;
+                CurrentMovie = Support.Support.CreatedMovie;
+                if (CurrentMovie != null)
+                {
+                    RootFolder.CurrentSubFolder.Movies = CurrentMovie;
+                    RootFolder.CurrentSubFolder.MovieId = CurrentMovie.Id;
+                    if (File.Exists(destFile)) File.Delete(destFile);
+                    //File.Move(imageSetViewModel.RootFolder.Movies.MoviePath, destFile);
+                    RootFolder.HasTempMP4 = false;
+                    RootFolder.CurrentSubFolder.Save();
+                }
             }
 
             // delete image files to tidy
-            string[] files = Directory.GetFiles(RootFolder.TempDirectory(), "*.*");
+            string[] files = Directory.GetFiles(RootFolder.TempDirectory(), "*.jpg");
             foreach (var item in files)
             {
                 File.Delete(item);
@@ -526,6 +536,9 @@ namespace TaymadeEntities.ViewModels
         public Controls.ImageSetControl ImageSetControl { get; set; }
         public Avalonia.Controls.Image CurrentImageControl { get; set; }
         public string OutputVideoPath { get; set; }
+        public double Framerate { get; internal set; } = 1.0;
+
+       
 
         internal new void Support_ActionCompleted(object sender, MovieCompletedEventArgs e)
         {
@@ -1005,7 +1018,7 @@ namespace TaymadeEntities.ViewModels
             RootFolder.CurrentImageItem.ReloadImage();
         }
 
-        private async void DoZoomToFeature()
+        public  async void DoZoomToFeature(ImageSetControl imageSetControl)
         {
             string filename = string.Empty;
             bool moveFile = false;
@@ -1027,6 +1040,8 @@ namespace TaymadeEntities.ViewModels
                             }
                             DoReloadPictures();
                             DoReloadPicture();
+                            ImageSetControl = imageSetControl;
+                            SetImageRow();
 
                         }
                     }

@@ -338,6 +338,16 @@ namespace TaymadeEntities.Controllers
         {
             return movieRepository.GetMovieImageById(lastId);
         }
+
+        internal Movies? CreateMovie(string filmName, int year = 0, string path = "", string filmGroup = "")
+        {
+            return movieRepository.CreateMovie(filmName, year, path, filmGroup);
+        }
+
+        public MovieGenre? CreateMovieGenre(int movieId, string? genreCompKey, string? subGenreCompKey)
+        {
+            return movieRepository.CreateMovieGenre(movieId, genreCompKey, subGenreCompKey);
+        }
         #endregion Protected Methods
     }
 }

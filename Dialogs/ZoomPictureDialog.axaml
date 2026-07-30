@@ -9,7 +9,7 @@
         x:DataType="vm:ZoomPictureViewModel"
         WindowState="Maximized"
         Title="Zoom Picture">
-    <StackPanel>
+    <StackPanel >
         <TabControl>
             <TabItem Header="Zoom/Clip">
                 <Border  BorderBrush="Black"
@@ -17,10 +17,13 @@
                          CornerRadius="5"
                          BoxShadow="5 5 10 0 #80000000"
                          Background="White"
-
+                         VerticalAlignment="Top"
+                         
                          >
-                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" >
-                        <StackPanel Orientation="Horizontal">
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" 
+                                VerticalAlignment="Top">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" 
+                                VerticalAlignment="Top">
                             <Border HorizontalAlignment="Center"
                                     VerticalAlignment="Center"
                                     BorderBrush="Black"
@@ -131,15 +134,17 @@
 
                 </Border>
             </TabItem>
-            <TabItem Header="Photo Fix">
+            <TabItem Header="Photo Fix" >
                 <Border CornerRadius="6" BorderBrush="Gray"
                         BorderThickness="2"
                         BoxShadow="5 5 10 0 #C0000000"
+                        VerticalAlignment="Top"
+                         Height="800"
                         >
 
-                    <StackPanel Orientation="Horizontal">
-                        <StackPanel Orientation="Vertical"  Height="600" Width="750">
-                            <Grid ShowGridLines="False">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Height="800">
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Top" Height="600" Width="750">
+                            <Grid ShowGridLines="False" VerticalAlignment="Top">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="100"/>
                                     <ColumnDefinition Width="200"/>
