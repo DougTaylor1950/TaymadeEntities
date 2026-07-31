@@ -1,0 +1,26 @@
+﻿Split video into frames 
+
+To split a video into image frames while skipping or keeping only specific intervals 
+using FFmpeg, use the select video filter.
+The core command to drop frames during frame extraction is:
+
+ffmpeg -i input.mp4 -vf "select='not(mod(n,N))'" -vsync 0 frame_%04d.png
+
+(Replace N with your interval number—for example, n,10 keeps 
+only every 10th frame and drops the intermediate frames.)
+
+Disable timestamp sync: 
+Always include -vsync 0 (or -fps_mode 0 in newer builds) 
+when exporting sparse frames to image sequences 
+so FFmpeg does not try to fill in the gaps with duplicate images
+
+Extract all frames: 
+Use a straightforward output pattern without filters if you need every single frame:
+
+ffmpeg -i input.mp4 frame_%06d.png
+
+Extract at a set frame rate: 
+
+Reduce the sampling rate prior to splitting by adding an fps filter:
+
+ffmpeg -i input.mp4 -vf fps=3 frame_%04d.png

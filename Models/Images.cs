@@ -25,6 +25,7 @@ using Avalonia.Controls;
 using TaymadeEntities.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using DocumentFormat.OpenXml.Vml.Spreadsheet;
 
 namespace TaymadeEntities.Models
 {
@@ -607,6 +608,7 @@ namespace TaymadeEntities.Models
         private bool hasMp4;
 
         private string movieInfo = string.Empty;
+        private bool multiSelect = false;
 
         #endregion Private Fields
 
@@ -662,7 +664,7 @@ namespace TaymadeEntities.Models
             get => currentImageItem1;
             set
             {
-                if (currentImageItem1 != null) currentImageItem1.Selected = false;
+                if (currentImageItem1 != null && MultiSelect == false ) currentImageItem1.Selected = false;
                 this.RaiseAndSetIfChanged(ref currentImageItem1, value);
                 if (value != null)
                 {
@@ -803,6 +805,11 @@ namespace TaymadeEntities.Models
         }
 
         public MovieViewModelBase MVVM { get; set; }
+        public bool MultiSelect 
+        { 
+            get => multiSelect;
+            set => this.RaiseAndSetIfChanged(ref multiSelect, value);
+        }
 
         #endregion Public Properties
 

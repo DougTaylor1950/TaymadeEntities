@@ -448,6 +448,14 @@ public partial class ZoomPictureDialog : WindowBase
         }
     }
 
+    private void LoadConfig_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is ZoomPictureViewModel vm)
+        {
+            vm.LoadConfig();
+        }
+    }
+
     private void ResetToDefault_Click(object? sender, RoutedEventArgs e)
     {
         if (DataContext is ZoomPictureViewModel vm)

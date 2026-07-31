@@ -748,11 +748,15 @@ namespace TaymadeEntities.Support
                 }
 
                 // use ffmpeg to build an MP4 file
-                string ffMpegCommand = " -framerate 1 -i " + '"' + imageFileStub + "%04d.jpg" + '"' + " -c:v libx264 -r 20 " + '"' + outputFileName + '"';
+                string ffMpegCommand = " -framerate 1 -i " + '"' + imageFileStub + "%04d.jpg" + '"' + " -c:v libx264 -r 10 " + '"' + outputFileName + '"';
 
 
                 imageSetViewModel.OutputVideoPath = outputFileName;
+                progressChangedEventArgs = new MovieProgressEventargs(0, null);
+                progressChangedEventArgs.ProgressPercentage = 0;
                 progressChangedEventArgs.Info = "Creating temp MP4";
+                progressChangedEventArgs.Bitmap = null;
+                progressChangedEventArgs.BitmapPath = "";
                 OnProgress(progressChangedEventArgs);
 
                 imageSetViewModel.MissingInfo = "Creating temp MP4";
@@ -760,7 +764,7 @@ namespace TaymadeEntities.Support
                 //Views.MainWindow? main = GetMainWindow();
 
                 fFMpeg.action = "CreateMovie";
-                fFMpeg.FrameCount = index * 20;
+                fFMpeg.FrameCount = index * 10;
 
                 await fFMpeg.DoCliWrapCreateMovie(ffMpegCommand);
 
@@ -973,6 +977,53 @@ namespace TaymadeEntities.Support
                 return TimeSpan.FromSeconds((Double)value);
             else
                 return TimeSpan.Zero;
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="movieFilename">The movie filename.</param>
+        /// <param name="everyNframes">The every nframes.</param>
+        /// <returns></returns>
+        /// <author>
+        /// Doug Taylor - Taymade Software Services
+        /// </author>
+        /// <remarks>
+        ///   <created> 31/07/2026 31/07/2026 </created>
+        ///   needs testing
+        /// </remarks>
+        public static async Task<bool> SplitMovieIntoFrames(string? movieFilename,int? everyNframes)
+        {
+            bool success = false;
+            string command = "";
+            if (!string.IsNullOrEmpty(movieFilename) && File.Exists(movieFilename))
+            {
+                string framePattern = "frame_%04d.jpg";
+                string folder = Path.GetDirectoryName(movieFilename);
+                string destFolder = Path.Combine(folder, "temp");
+                if (!Directory.Exists(destFolder))
+                {
+                    Directory.CreateDirectory(destFolder);
+                }
+                framePattern = '"' + Path.Combine(destFolder, framePattern) + '"';
+
+                if (everyNframes != null)
+                {
+                    command = "ffmpeg -i " + '"' + movieFilename + '"' + " -vf \"select='not(mod(n,N))'\" -vsync 0 " + framePattern;
+                }
+                else
+                {
+                    command = "ffmpeg -i " + '"' + movieFilename + '"'+ " " + framePattern;
+                }
+
+                FFMpegSupport fFMpeg = new FFMpegSupport();
+                //fFMpeg.CliWrapCompleted += FFMpeg_CliWrapCompleted;
+                //fFMpeg.CliWrapError += FFMpeg_CliWrapError;
+                //fFMpeg.CliWrapProgress += FFMpeg_CliWrapProgress;
+                
+                await fFMpeg.DoCliWrapCreateMovie(command);
+            }
+
+            return success;
         }
 
         /// <summary>

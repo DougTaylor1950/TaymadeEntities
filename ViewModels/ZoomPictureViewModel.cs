@@ -59,7 +59,7 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        private void LoadConfig()
+        internal void LoadConfig()
         {
             if (GammaCorrections != null)
             {

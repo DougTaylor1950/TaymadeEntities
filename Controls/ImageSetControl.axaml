@@ -140,6 +140,7 @@
 												  />
 
 							</StackPanel>
+							<CheckBox Content="Multi Select" IsChecked="{Binding RootFolder.MultiSelect}" />
 							<DataGrid ItemsSource="{Binding RootFolder.CurrentSubFolder.ImageItems}"
 									  Name="dgItemImages"
 									  SelectedItem="{Binding RootFolder.CurrentImageItem}"
@@ -153,17 +154,23 @@
 								</DataGrid.Columns>
 								<DataGrid.ContextMenu>
 									<ContextMenu  Name="PicMenu">
-										<MenuItem Header="Edit Image" Command="{Binding EditPicture}" />
-										<MenuItem Header="Delete Image" Command="{Binding DeletePicture}" />
+										<MenuItem Header="Image Management">
+											<MenuItem Header="Edit Image" Command="{Binding EditPicture}" />
+											<MenuItem Header="Delete Image" Command="{Binding DeletePicture}" />
+											<MenuItem Header="Delete Selected Images" Click="DeleteSelectedImages_Click" />
+											<MenuItem Header="Move Image to selected folder" Command="{Binding MoveToSelectedFolder}"  />
+											<MenuItem Header="Copy Image to selected folder" Command="{Binding CopyToSelectedFolder}"  />
+											<MenuItem Header="Duplicate Image" Click="DuplicateImage_Click" />
+										</MenuItem>
 										<MenuItem Header="Reload Image" Command="{Binding ReloadPicture}" />
 										<MenuItem Header="Reload Images" Click="Reloadpictures_Click" />
 										<MenuItem Header="Save Sub Folder" Click="SaveSubFolder_Click" />
-										<MenuItem Header="Move Image to selected folder" Command="{Binding MoveToSelectedFolder}"  />
-										<MenuItem Header="Copy Image to selected folder" Command="{Binding CopyToSelectedFolder}"  />
+
 										<MenuItem Header="Split Here" Click="SplitFolder_Click" />
 										<MenuItem Header="Rename File" Click="MenuItem_Click"  />
 										<MenuItem Header="Zoom to feature" Click="Zoom_Click" />
 										<MenuItem Header="Add new frameset" Click="AddFrameSet_Click"/>
+										<MenuItem Header="Clear Selections" Click="ClearSelection_Click" />
 									</ContextMenu>
 								</DataGrid.ContextMenu>
 							</DataGrid>
