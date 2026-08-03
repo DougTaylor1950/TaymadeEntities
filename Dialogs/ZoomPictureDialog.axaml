@@ -124,6 +124,10 @@
                                                   ImageSource="avares://TaymadeControls/Assets/build.png"
                                                   Click="Build_Click"
                                                   />
+                                <tcb:ImagedButton LabelText="Zoom"
+                                                  ImageSource="avares://TaymadeControls/Assets/maximize_icon.png"
+                                                  Click="Zoom_Click"
+                                                  />
                                 <tcb:ImagedButton LabelText="Clip"
                                                   ImageSource="avares://TaymadeControls/Assets/scissor.png"
                                                   Click="Clip_Click"

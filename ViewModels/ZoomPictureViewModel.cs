@@ -156,6 +156,7 @@ namespace TaymadeEntities.ViewModels
             set => this.RaiseAndSetIfChanged(ref step, value);
         }
         public bool SaveImageAfterClose { get; set; } = false;
+        public Models.MovieImage CurrentSubFolder { get; internal set; }
 
         internal void SetupModel()
         {

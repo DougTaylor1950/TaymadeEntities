@@ -267,6 +267,8 @@ namespace TaymadeEntities.ViewModels
                         RootFolder.CurrentImageFolder.CommandIsVisible = true;
                         RootFolder.CurrentImageFolder.Info = (e.ImagePosition + 1).ToString() + " of " + RootFolder.CurrentImageFolder.ImageItems.Count;
                     }
+
+                    Dispatcher.UIThread.Post(() => this.RaisePropertyChanged(nameof(RootFolder.CurrentImageItem)));
                 }
                 else
                 {
@@ -350,8 +352,56 @@ namespace TaymadeEntities.ViewModels
                 && RootFolder.CurrentSubFolder.ImageItems.Count > 0)
             {
                 RootFolder.CurrentSubFolder.ImageItems.ISVM = this;
-                Task.Run(RootFolder.CurrentSubFolder.ImageItems.Play);
+                RootFolder.CurrentSubFolder.ImageItems.ImageChanged += ImageItems_ImageChanged;
+                //RootFolder.CurrentSubFolder.ImageItems.Play();
 
+
+                if (ImageDispatcherTimer == null)
+                {
+                    ImageDispatcherTimer = new DispatcherTimer();
+                    ImageDispatcherTimer.Interval = TimeSpan.FromSeconds(1.0);
+                    ImageDispatcherTimer.Tick += (s, e) =>
+                    {
+                        if (RootFolder.CurrentSubFolder.ImageItems != null)
+                        {
+                            if (RootFolder.CurrentImageItem.Id >= RootFolder.CurrentSubFolder.ImageItems.Count - 1)
+                            {
+                                ImageDispatcherTimer.Stop();
+                                CurrentIcon = StopIcon;
+                                RootFolder.CurrentSubFolder.ImageItems.IsPlaying = false;
+                            }
+                            else
+                            {
+                                RootFolder.CurrentSubFolder.ImageItems.MoveNext();
+                            }
+                        }
+                    };
+                    RootFolder.CurrentSubFolder.ImageItems.IsPlaying = true;
+                    ImageDispatcherTimer.Stop();
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        CurrentIcon = PauseIcon;
+                        this.RaisePropertyChanged(nameof(CurrentIcon));
+                    });
+                    ImageDispatcherTimer.Start();
+                }
+                else
+                {
+                    if (ImageDispatcherTimer.IsEnabled)
+                    {
+                        ImageDispatcherTimer.Stop();
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            CurrentIcon = PlayIcon;
+                            this.RaisePropertyChanged(nameof(CurrentIcon));
+                        });
+                    }
+                    else
+                    {
+                        ImageDispatcherTimer.Start();
+                        CurrentIcon = PauseIcon;
+                    }
+                }
             }
         }
 
@@ -503,6 +553,48 @@ namespace TaymadeEntities.ViewModels
             await PlayFromFile(tempFileName);
         }
 
+        public async void PlayFrameMP4_Click()
+        {
+            if (RootFolder != null && RootFolder.CurrentSubFolder != null
+                && RootFolder.CurrentSubFolder.CurrentFrameSet != null &&
+                RootFolder.CurrentSubFolder.CurrentFrameSet.HasMovie)
+            {
+                string moviePath = GenerateMovieFrameSetName();
+
+                using PlayerViewModel playerViewModel = new PlayerViewModel(moviePath, true);
+                using PlayerDialog playerDialog = new PlayerDialog(playerViewModel);
+                Avalonia.Controls.Window? main = Support.Support.GetWindow();
+                if (main != null)
+                    await playerDialog.ShowDialog(main);
+                //PlayMP4File(RootFolder.CurrentSubFolder.Movies.MoviePath);
+            }
+        }
+
+        private string GenerateMovieFrameSetName()
+        {
+            MovieImage currentSubFolder = RootFolder.CurrentSubFolder;
+            FrameSet currentFrameSet = currentSubFolder.CurrentFrameSet;
+
+            string moviePath = "";
+            if (string.IsNullOrEmpty(currentFrameSet.MoviePath))
+            {
+                string frameSetName = "FrameSet" + currentFrameSet.Index.ToString("000").Trim();
+                string outputDirectory = Path.Combine(currentSubFolder.Path, frameSetName);
+                string movieName = CurrentSubFolder.Name + ".mp4";
+                moviePath = Path.Combine(outputDirectory, movieName);
+
+                if (File.Exists(moviePath))
+                {
+                    currentFrameSet.MoviePath = moviePath;
+                }
+            }
+            else
+            {
+                moviePath = currentFrameSet.MoviePath;
+            }
+            return moviePath;
+        }
+
         internal async Task PlayFromFile(string tempFileName)
         {
             if (!string.IsNullOrEmpty(tempFileName))
@@ -544,8 +636,7 @@ namespace TaymadeEntities.ViewModels
         public Avalonia.Controls.Image CurrentImageControl { get; set; }
         public string OutputVideoPath { get; set; }
         public double Framerate { get; internal set; } = 1.0;
-
-
+        public DispatcherTimer ImageDispatcherTimer { get; private set; }
 
         internal new void Support_ActionCompleted(object sender, MovieCompletedEventArgs e)
         {
@@ -1057,6 +1148,7 @@ namespace TaymadeEntities.ViewModels
             bool moveFile = false;
             using ViewModels.ZoomPictureViewModel viewModel = new ZoomPictureViewModel(RootFolder.CurrentImageItem.ImagePath);
             {
+                viewModel.CurrentSubFolder = RootFolder.CurrentSubFolder;
                 using Dialogs.ZoomPictureDialog pictureDialog = new Dialogs.ZoomPictureDialog(viewModel);
                 {
                     Window? main = Support.Support.GetMainWindow() as Window;

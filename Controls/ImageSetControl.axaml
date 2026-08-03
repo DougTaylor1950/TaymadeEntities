@@ -19,7 +19,7 @@
 	<StackPanel>
 		<StackPanel Orientation="Horizontal">
 		</StackPanel>
-		<TabControl SelectionChanged="TabControl_SelectionChanged">
+		<TabControl SelectionChanged="TabControl_SelectionChanged" Name="MainTabControl">
 			<TabItem Header="Images and Folders"
 					 Name="Images"
 					 >
@@ -169,7 +169,12 @@
 										<MenuItem Header="Split Here" Click="SplitFolder_Click" />
 										<MenuItem Header="Rename File" Click="MenuItem_Click"  />
 										<MenuItem Header="Zoom to feature" Click="Zoom_Click" />
-										<MenuItem Header="Add new frameset" Click="AddFrameSet_Click"/>
+										<MenuItem Header="FrameSets ">
+											<MenuItem Header="Add new frameset" Click="AddFrameSet_Click"/>
+											<MenuItem Header="Set as frameset" Click="SetFrameSet_Click"/>
+											<MenuItem Header="Set Next Set Start" Click="SetNextFrameSetStart_Click"/>
+											<MenuItem Header="Frameset to Video" Click="FrameSetToVideo_Click"/>
+										</MenuItem>
 										<MenuItem Header="Clear Selections" Click="ClearSelection_Click" />
 									</ContextMenu>
 								</DataGrid.ContextMenu>
@@ -282,16 +287,50 @@
 							<TextBlock Text="Duration" Grid.Row="2" Grid.Column="2" />
 							<TextBlock Text="{Binding RootFolder.CurrentMovie.MovieDuration}" Grid.Row="2" Grid.Column="3"/>
 						</Grid>
-						<Border BorderBrush="Black"
-								BorderThickness="3"
-								Height="605"
-								Width="605"
-								CornerRadius="5">
-							<Image Name="CurrentImageControl" Width="600"
-								   Height="600"
-								   Source="{Binding CurrentImage}" />
+						<StackPanel Orientation="Horizontal"
+									HorizontalAlignment="Left">
+							<Border BorderBrush="Black"
+									BorderThickness="3"
+									Height="605"
+									Width="605"
+									CornerRadius="5">
+								<Image Name="CurrentImageControl" Width="600"
+									   Height="600"
+									   Source="{Binding CurrentImage}" />
 
-						</Border>
+							</Border>
+							<StackPanel Width="10" Background="LightGray"/>
+							<StackPanel Orientation="Horizontal" >
+								<DataGrid Name="dgFrameSets" AutoGenerateColumns="False"
+										  ItemsSource="{Binding RootFolder.CurrentSubFolder.FrameSetlist}"
+										  SelectedItem="{Binding RootFolder.CurrentSubFolder.CurrentFrameSet}"
+										  VerticalScrollBarVisibility="Visible"
+										  HorizontalAlignment="Left"
+										  CanUserResizeColumns="True"
+										  >
+									<DataGrid.Columns>
+										<DataGridTextColumn Header="Index" Binding="{Binding Index}" />
+										<DataGridTextColumn Header="Start" Binding="{Binding StartImage}" />
+										<DataGridTextColumn Header="End" Binding="{Binding EndImage}" />
+										<DataGridTextColumn Header="Frame Rate" Binding="{Binding FrameRate}" />
+										<DataGridTextColumn Header="Movie Path" 
+															Binding="{Binding MoviePath}"  
+															Width="200"/>
+										<DataGridTextColumn Header="Has Movie" Binding="{Binding HasMovie}" />
+									</DataGrid.Columns>
+								</DataGrid>
+								<StackPanel	Width="10"
+											Background="LightGray"/>
+								<StackPanel Orientation="Horizontal">
+									
+									<tcb:ImagedButton Command="{Binding PlayFrameMP4_Click}"
+										  IsVisible="{Binding RootFolder.CurrentSubFolder.CurrentFrameSet.HasMovie}"
+										  ImageSource="avares://TaymadeControls/Assets/play.png"
+										  LabelText="Play Movie"
+										  />
+								</StackPanel>
+							</StackPanel>
+						</StackPanel>
 					</StackPanel>
 				</StackPanel>
 			</TabItem>

@@ -237,6 +237,21 @@ namespace TaymadeEntities.Controllers
             return movieRepository.UpdateMovie(movie);
         }
 
+        public FrameSetHeader? GetFrameSetHeaderByMovieImageId(int movieImageId)
+        {
+            return movieRepository.GetFrameSetHeaderByMovieImageId(movieImageId);
+        }
+
+        public bool UpdateFrameSetHeader(FrameSetHeader frameSetHeader)
+        {
+            return movieRepository.UpdateFrameSetHeader(frameSetHeader);
+        }
+
+        public bool InsertFrameSetHeader(FrameSetHeader frameSetHeader)
+        {
+            return movieRepository.InsertFrameSetHeader(frameSetHeader);
+        }
+
         /// <summary>
         /// </summary>
         /// <param name="movie">The movie.</param>

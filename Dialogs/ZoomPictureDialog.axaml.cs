@@ -9,8 +9,10 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using ReactiveUI;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
+using TaymadeEntities.Models;
 using TaymadeEntities.ViewModels;
 using Image = Avalonia.Controls.Image;
 
@@ -66,8 +68,13 @@ public partial class ZoomPictureDialog : WindowBase
 
     private void Build_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
+        BuildImagesInternal();
+    }
+
+    private void BuildImagesInternal(string? imagePathOveride = "")
+    {
         if (DataContext is ZoomPictureViewModel vm && start != null
-            && end != null && vm.Frames > 0)
+                    && end != null && vm.Frames > 0)
         {
             // get new width and height
 
@@ -82,9 +89,6 @@ public partial class ZoomPictureDialog : WindowBase
             double stepX = (startX / vm.Frames);
             double stepY = (startY / vm.Frames);
 
-            //stepX = stepX / vm.Frames;
-            //stepY = stepY / vm.Frames;
-
             double xWidth = (vm.ImageWidth - widthStep);
 
             double xStart = stepX;
@@ -93,14 +97,19 @@ public partial class ZoomPictureDialog : WindowBase
             double yHeight = (vm.ImageHeight - heightStep);
 
             string orginalFilename = vm.ImagePath;
-            string imagePath = Support.Support.FixImagePath(System.IO.Path.GetDirectoryName(orginalFilename));
+
+            string imagePath = "";
+            if (!string.IsNullOrEmpty(imagePathOveride))
+            {
+                imagePath = Support.Support.FixImagePath(imagePathOveride);
+            }
+            else
+            {
+                imagePath = Support.Support.FixImagePath(System.IO.Path.GetDirectoryName(orginalFilename));
+            }
             string fileNameStub = System.IO.Path.GetFileNameWithoutExtension(orginalFilename);
 
-            //for (int i = 0; i < vm.Frames; i++)
-            //{
-            //Rectangle rectangle = new Rectangle(xStart, yStart, xWidth, yHeight);
-            //System.Drawing.Size size = new System.Drawing.Size(xWidth, yHeight);
-            //System.Drawing.Bitmap temp = null;
+
             Clear_Click(null, null);
             for (int i = 0; i < vm.Frames; i++)
             {
@@ -129,8 +138,120 @@ public partial class ZoomPictureDialog : WindowBase
                 // update xStart, yStart, xWidth, yHeight as before
                 temp?.Dispose();
             }
-               
+
+
+        }
+    }
+
+    private async void Zoom_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        // similar to build click, but only create a single zoomed image based on the rectangle
+        if (DataContext is ZoomPictureViewModel vm && start != null
+                    && end != null && vm.Frames > 0)
+        {
+            string orginalFilename = vm.ImagePath;
+            string imagePath = Support.Support.FixImagePath(System.IO.Path.GetDirectoryName(orginalFilename));
+            imagePath = System.IO.Path.Combine(imagePath, "Zoomed");
+            if (!Directory.Exists(imagePath))
+            {
+                Directory.CreateDirectory(imagePath);
+            }
+
+            // clear out existing images in the zoomed folder
+            var files = Directory.GetFiles(imagePath, "*.jpg").ToList();
+            foreach (var file in files)
+            {
+                File.Delete(file);
+            }
+            BuildImagesInternal(imagePath);
+
+            vm.CurrentSubFolder.FrameSetHeader = DataController.MovieController.GetFrameSetHeaderByMovieImageId(vm.CurrentSubFolder.Id);
+            Support.MovieProgressEventargs progressChangedEventArgs = null;
+            Support.Support support = new Support.Support();
+
+            int maxWidth = vm.CurrentSubFolder.FrameSetHeader.MaxXSize;
+            int maxHeight = vm.CurrentSubFolder.FrameSetHeader.MaxYSize;
+            if (vm.CurrentSubFolder.FrameSetHeader.MaxXSize == 0 || vm.CurrentSubFolder.FrameSetHeader.MaxYSize == 0)
+            {
+                ImageItemsCollection? images = vm.CurrentSubFolder.ImageItems;
+
+
+                //(absMaxWidth, absMaxHeight, progressChangedEventArgs, indx,
+                (maxWidth, maxHeight) =
+                    await support.GetMaxSizes(progressChangedEventArgs, images);
+                vm.CurrentSubFolder.FrameSetHeader.MaxXSize = maxWidth;
+                vm.CurrentSubFolder.FrameSetHeader.MaxYSize = maxHeight;
+                //currentSubFolder.ToJson();
+                vm.CurrentSubFolder.Save();
+            }
+
+            // need to covert these images to a video, 
+            ImageItemsCollection? imageItems = new ImageItemsCollection();
+
+            files = Directory.GetFiles(imagePath, "*.jpg").ToList();
+            foreach (var file in files)
+            {
+                var imageItem = new ImageItem()
+                {
+                    ImagePath = file,
+                    ImageName = System.IO.Path.GetFileName(file),
+                    FrameSetIndex = 0,
+                    Selected = false
+                };
+                imageItems.Add(imageItem);
+            }
+
+            if (maxHeight % 2 != 0) maxHeight += 1;
+            if (maxWidth % 2 != 0) maxWidth += 1;
+
+            // then we go through all images and save them to a created temp directory 
+            // resizing the images to fit 
+            System.Drawing.SolidBrush solidBrush = new System.Drawing.SolidBrush(System.Drawing.Color.WhiteSmoke);
+
+            int count = imageItems.Count;
+            double absMaxWidth = 0;
+            double absMaxHeight = 0;
             
+            
+            string imageFileStub = imagePath;
+            bool success = await support.BuildImages(imageItems, imageFileStub, absMaxWidth, absMaxHeight, progressChangedEventArgs, null, maxWidth, maxHeight
+                    , count);
+
+            if (success)
+            {
+                // check to see if the Movies directory exists, if not create it
+                string imageFileDir = System.IO.Path.Combine(imageFileStub, "Movies");
+
+                if (!Directory.Exists(imageFileDir))
+                {
+                    Directory.CreateDirectory(imageFileDir);
+                }
+
+                string outputFileName = imageFileDir + "\\" + System.IO.Path.GetFileNameWithoutExtension(vm.CurrentSubFolder.Path) + ".mp4";
+
+                if (vm.CurrentSubFolder.CurrentFrameSet != null)
+                {
+                    outputFileName = imageFileDir + "\\FrameSet" + vm.CurrentSubFolder.CurrentFrameSet.Index.ToString("000") + ".mp4";
+                }
+
+                //FFMpegSupport fFMpeg = new FFMpegSupport();
+                string ffMpegCommand = " -framerate 1 -i " + '"' + imageFileStub + "\\" + "%04d.jpg" + '"' + " -c:v libx264 -r 10 " + '"' + outputFileName + '"' + " -y";
+
+                //Views.MainWindow? main = GetMainWindow();
+                Support.FFMpegSupport fFMpeg = new Support.FFMpegSupport();
+                fFMpeg.action = "CreateMovie";
+                fFMpeg.FrameCount = imageItems.Count * 10;
+
+                int result = await fFMpeg.DoCliWrapCreateMovie(ffMpegCommand);
+
+                if (result == 0 && vm.CurrentSubFolder.CurrentFrameSet != null)
+                {
+                    vm.CurrentSubFolder.CurrentFrameSet.MoviePath = outputFileName;
+                    vm.CurrentSubFolder.CurrentFrameSet.HasMovie = true;
+                    vm.CurrentSubFolder.Save();
+                }
+                // really need to reduce frameseet to just the start item and rejig all the following ones
+            }
         }
     }
 
@@ -356,7 +477,7 @@ public partial class ZoomPictureDialog : WindowBase
     private bool downright = true;
     private void Stretch_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        
+
         if (DataContext is ZoomPictureViewModel vm)
         {
             if (downright)

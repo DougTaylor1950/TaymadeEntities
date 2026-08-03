@@ -57,6 +57,10 @@ namespace TaymadeEntities.DAL.Interfaces
 
         Task<bool> UpdateMovieAsync(Movies movie);
 
+        FrameSetHeader? GetFrameSetHeaderByMovieImageId(int movieImageId);
+        bool UpdateFrameSetHeader(FrameSetHeader frameSetHeader);
+
+        bool InsertFrameSetHeader(FrameSetHeader frameSetHeader);
         #endregion Public Methods
     }
 }

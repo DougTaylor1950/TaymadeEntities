@@ -14,8 +14,10 @@ namespace TaymadeEntities.Support
     using Avalonia.Media.Imaging;
     using Avalonia.Platform;
     using CliWrap;
+    using DocumentFormat.OpenXml.Drawing.Charts;
     using DocumentFormat.OpenXml.Office2010.Excel;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.ChangeTracking;
     using NLog;
     using NLog.Common;
     using NLog.Config;
@@ -576,17 +578,13 @@ namespace TaymadeEntities.Support
                && imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems.Count > 0)
             {
 
-                string outputDirectory = imageSetViewModel.RootFolder.TempDirectory();
-                string imageFileStub = outputDirectory + @"\temp";
+                string outputDirectory = imageSetViewModel.RootFolder.TempDirectory("temp");
+                string imageFileStub = outputDirectory;
                 string outputFileName = outputDirectory + @"\" + System.IO.Path.GetFileNameWithoutExtension(imageSetViewModel.RootFolder.CurrentSubFolder.Path) + ".mp4";
 
                 Directory.CreateDirectory(outputDirectory);
                 // clear all files in temp folder
-                var filelist = Directory.GetFiles(outputDirectory, "*.*");
-                foreach (var tempFile in filelist)
-                {
-                    File.Delete(tempFile);
-                }
+                DeleteFilesInFolder(outputDirectory);
 
                 imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems.ReloadImageItems
                     (
@@ -604,35 +602,11 @@ namespace TaymadeEntities.Support
                 List<FrameSet>? frameSets = imageSetViewModel.RootFolder.CurrentSubFolder.FrameSetlist;
                 int indx = 1;
                 int cnt = imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems.Count;
-                foreach (ImageItem item in imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems)
-                {
-                    progressChangedEventArgs = new MovieProgressEventargs(0, null);
-                    progressChangedEventArgs.ProgressPercentage = (indx * 100) / cnt;
-                    progressChangedEventArgs.Info = "building bitmaps";
-                    progressChangedEventArgs.Bitmap = item.ImageBMP;
-                    indx += 1;
-                    OnProgress(progressChangedEventArgs);
-                    await Task.Delay(200);
-                    //Support_ProgressInformation(null, progressChangedEventArgs);
-                    if (item.ImageBMP != null && item.ImageBMP.Size.Height > absMaxHeight) absMaxHeight = item.ImageBMP.Size.Height;
-                    if (item.ImageBMP != null && item.ImageBMP.Size.Width > absMaxWidth) absMaxWidth = item.ImageBMP.Size.Width;
-                }
 
-                // convert to integer
-                int maxWidth = (int)absMaxWidth;
-                int maxHeight = (int)absMaxHeight;
-
-                // we will have a maximum size of 1024  x 1024
-
-                double aspectRatio = absMaxWidth / absMaxHeight;
-                if (maxWidth > 1200 || maxHeight > 1024)
-                {
-                    if (maxWidth - 1200 > maxHeight - 1024)
-                    {
-                        maxWidth = 1200;
-                        maxHeight = (int)(absMaxHeight / aspectRatio);
-                    }
-                }
+                ImageItemsCollection? images = imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems;
+                double aspectRatio;
+                // absMaxWidth, absMaxHeight, progressChangedEventArgs, indx,
+                (int maxWidth, int maxHeight) = await GetMaxSizes(progressChangedEventArgs, images);
 
                 progressChangedEventArgs = new MovieProgressEventargs(0, null);
                 progressChangedEventArgs.Info = "Creating Images";
@@ -646,15 +620,10 @@ namespace TaymadeEntities.Support
                 // then we go through all images and save them to a created temp directory 
                 // resizing the images to fit 
 
-
-
-
-                SolidBrush solidBrush = new SolidBrush(System.Drawing.Color.WhiteSmoke);
-
                 int count = 0;
                 if (frameSets == null)
                 {
-                   count =  imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems.Count * 2;
+                    count = imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems.Count * 2;
                 }
                 else
                 {
@@ -664,88 +633,8 @@ namespace TaymadeEntities.Support
                     }
                 }
 
-                foreach (ImageItem item in imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems)
-                {
-                    // get existing image
-                    System.Drawing.Bitmap image = new System.Drawing.Bitmap(item.ImagePath);
-                    // resize to new consistent size
-                    System.Drawing.Image reSizedImage = image;
-
-                    // find the average colour of image for the borders
-                    System.Drawing.Color averageColour = Support.GetAverageColorFast(image);
-
-                    // create a brush
-                    solidBrush = new SolidBrush(averageColour);
-
-                    // ensure we keep aspect ratio of original image
-                    aspectRatio = (double)image.Width / (double)image.Height;
-
-                    int newHeight = image.Height;
-                    int newWidth = image.Width;
-                    // check size the new image will have borders added depending on
-                    // whether it is portrait or landscape
-                    if (absMaxWidth - image.Width >= absMaxHeight - image.Height)
-                    {
-                        newHeight = maxHeight;
-                        newWidth = (int)(maxHeight * aspectRatio);
-                    }
-                    else
-                    {
-                        newWidth = maxWidth;
-                        newHeight = (int)((double)maxWidth / aspectRatio);
-                    }
-                    // create the resized image
-                    reSizedImage = Support.ResizeImage(image, newWidth, newHeight);
-
-                    // find which dimension is furthest away from target
-                    int xdif = (maxWidth - reSizedImage.Width) / 2;
-                    int ydif = (maxHeight - reSizedImage.Height) / 2;
-                    // create new bitmap of max sizes
-                    System.Drawing.Bitmap newBitmap = new System.Drawing.Bitmap(maxWidth, maxHeight);
-
-                    // create a new image with just the background colour
-                    // then draw the image over it.
-                    using (Graphics g = Graphics.FromImage(newBitmap))
-                    {
-                        g.FillRectangle(solidBrush, 0, 0, maxWidth, maxHeight);
-                        g.DrawImage(reSizedImage, xdif, ydif, reSizedImage.Width, reSizedImage.Height);
-                    }
-
-
-                    // save image twice
-                    
-                    // use current image item to determine the number of replicates for the image
-                    int saveCount = 1;
-                    if (frameSets != null)
-                    {
-                        FrameSet? frameSet = frameSets.Where(f => f.Index == item.FrameSetIndex).FirstOrDefault();
-                        if (frameSet != null) saveCount = (int)frameSet.FrameRate;
-                    }
-                    string tempImageFileName = "";
-                    for (int i = 0; i < saveCount; i++)
-                    {
-                        tempImageFileName = imageFileStub + index.ToString("0000") + ".jpg"; 
-                        newBitmap.Save(tempImageFileName, ImageFormat.Jpeg);
-                        index += 1;
-                        
-                    }
-
-                    // stop double saving 
-                    //newBitmap.Save(imageFileStub + index.ToString("0000") + ".jpg", ImageFormat.Jpeg);
-                    //index += 1;
-                    // dispose of temporary bitmap
-                    newBitmap.Dispose();
-
-                    // update progress
-                    progressChangedEventArgs = new MovieProgressEventargs(0, null);
-                    progressChangedEventArgs.ProgressPercentage = (index * 100) / count;
-                    progressChangedEventArgs.Info = "building bitmaps";
-                    progressChangedEventArgs.Bitmap = ConvertFileToAvaloniaBitmap(tempImageFileName);
-                    OnProgress(progressChangedEventArgs);
-                    
-                    await Task.Delay(50);
-                    solidBrush.Dispose();
-                }
+                bool success = await BuildImages(imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems, imageFileStub,
+                    absMaxWidth, absMaxHeight, progressChangedEventArgs, frameSets, maxWidth, maxHeight, count);
 
                 // use ffmpeg to build an MP4 file
                 string ffMpegCommand = " -framerate 1 -i " + '"' + imageFileStub + "%04d.jpg" + '"' + " -c:v libx264 -r 10 " + '"' + outputFileName + '"';
@@ -778,9 +667,156 @@ namespace TaymadeEntities.Support
             return error;
         }
 
+        public async Task<bool>
+            BuildImages(ImageItemsCollection imageItemsCollection, string imageFileStub,
+            double absMaxWidth, double absMaxHeight, MovieProgressEventargs progressChangedEventArgs,
+            List<FrameSet>? frameSets, int maxWidth, int maxHeight, int count)
+        {
+            bool success = true;
+            double aspectRatio = 1;
+            int index = 1;
+            SolidBrush solidBrush = new SolidBrush(System.Drawing.Color.WhiteSmoke);
+
+            foreach (ImageItem item in imageItemsCollection)
+            {
+                // get existing image
+                System.Drawing.Bitmap image = new System.Drawing.Bitmap(item.ImagePath);
+                // resize to new consistent size
+                System.Drawing.Image reSizedImage = image;
+
+                // find the average colour of image for the borders
+                System.Drawing.Color averageColour = Support.GetAverageColorFast(image);
+
+                // create a brush
+                solidBrush = new SolidBrush(averageColour);
+
+                // ensure we keep aspect ratio of original image
+                aspectRatio = (double)image.Width / (double)image.Height;
+
+                int newHeight = image.Height;
+                int newWidth = image.Width;
+                // check size the new image will have borders added depending on
+                // whether it is portrait or landscape
+                if (absMaxWidth - image.Width >= absMaxHeight - image.Height)
+                {
+                    newHeight = maxHeight;
+                    newWidth = (int)(maxHeight * aspectRatio);
+                }
+                else
+                {
+                    newWidth = maxWidth;
+                    newHeight = (int)((double)maxWidth / aspectRatio);
+                }
+                // create the resized image
+                reSizedImage = Support.ResizeImage(image, newWidth, newHeight);
+
+                // find which dimension is furthest away from target
+                int xdif = (maxWidth - reSizedImage.Width) / 2;
+                int ydif = (maxHeight - reSizedImage.Height) / 2;
+                // create new bitmap of max sizes
+                System.Drawing.Bitmap newBitmap = new System.Drawing.Bitmap(maxWidth, maxHeight);
+
+                // create a new image with just the background colour
+                // then draw the image over it.
+                using (Graphics g = Graphics.FromImage(newBitmap))
+                {
+                    g.FillRectangle(solidBrush, 0, 0, maxWidth, maxHeight);
+                    g.DrawImage(reSizedImage, xdif, ydif, reSizedImage.Width, reSizedImage.Height);
+                }
 
 
+                // save image twice
 
+                // use current image item to determine the number of replicates for the image
+                int saveCount = 1;
+                if (frameSets != null)
+                {
+                    FrameSet? frameSet = frameSets.Where(f => f.Index == item.FrameSetIndex).FirstOrDefault();
+                    if (frameSet != null) saveCount = (int)frameSet.FrameRate;
+                }
+                char slash = '\\';
+                char endChar = imageFileStub[imageFileStub.Length - 1];
+                if (endChar != '\\')
+                {
+                    imageFileStub += @"\";
+                }
+                string tempImageFileName = "";
+                for (int i = 0; i < saveCount; i++)
+                {
+                    tempImageFileName = imageFileStub + index.ToString("0000") + ".jpg";
+                    newBitmap.Save(tempImageFileName, ImageFormat.Jpeg);
+                    index += 1;
+
+                }
+
+                // stop double saving 
+                //newBitmap.Save(imageFileStub + index.ToString("0000") + ".jpg", ImageFormat.Jpeg);
+                //index += 1;
+                // dispose of temporary bitmap
+                newBitmap.Dispose();
+
+                // update progress
+                progressChangedEventArgs = new MovieProgressEventargs(0, null);
+                progressChangedEventArgs.ProgressPercentage = (index * 100) / count;
+                progressChangedEventArgs.Info = "building bitmaps";
+                progressChangedEventArgs.Bitmap = ConvertFileToAvaloniaBitmap(tempImageFileName);
+                OnProgress(progressChangedEventArgs);
+
+                await Task.Delay(50);
+                solidBrush.Dispose();
+            }
+            return success;
+        }
+
+        // double absMaxWidth, double absMaxHeight, MovieProgressEventargs progressChangedEventArgs, int indx,
+        internal async Task<(int maxWidth, int maxHeight)>
+            GetMaxSizes(MovieProgressEventargs progressChangedEventArgs, ImageItemsCollection images)
+        {
+            double absMaxWidth = 0;
+            double absMaxHeight = 0;
+            int indx = 1;
+            int cnt = 1;
+            foreach (ImageItem item in images)
+            {
+                progressChangedEventArgs = new MovieProgressEventargs(0, null);
+                progressChangedEventArgs.ProgressPercentage = (indx * 100) / cnt;
+                progressChangedEventArgs.Info = "building bitmaps";
+                progressChangedEventArgs.Bitmap = item.ImageBMP;
+                indx += 1;
+                OnProgress(progressChangedEventArgs);
+                await Task.Delay(200);
+                //Support_ProgressInformation(null, progressChangedEventArgs);
+                if (item.ImageBMP != null && item.ImageBMP.Size.Height > absMaxHeight) absMaxHeight = item.ImageBMP.Size.Height;
+                if (item.ImageBMP != null && item.ImageBMP.Size.Width > absMaxWidth) absMaxWidth = item.ImageBMP.Size.Width;
+            }
+
+            // convert to integer
+            int maxWidth = (int)absMaxWidth;
+            int maxHeight = (int)absMaxHeight;
+
+            // we will have a maximum size of 1024  x 1024
+
+            double aspectRatio = absMaxWidth / absMaxHeight;
+            if (maxWidth > 1200 || maxHeight > 1024)
+            {
+                if (maxWidth - 1200 > maxHeight - 1024)
+                {
+                    maxWidth = 1200;
+                    maxHeight = (int)(absMaxHeight / aspectRatio);
+                }
+            }
+            // absMaxWidth, absMaxHeight, progressChangedEventArgs, indx,
+            return (maxWidth, maxHeight);
+        }
+
+        private static void DeleteFilesInFolder(string outputDirectory)
+        {
+            var filelist = Directory.GetFiles(outputDirectory, "*.jpg");
+            foreach (var tempFile in filelist)
+            {
+                File.Delete(tempFile);
+            }
+        }
 
         public static System.Drawing.Color GetAverageColorFast(Bitmap bmp)
         {
@@ -991,7 +1027,7 @@ namespace TaymadeEntities.Support
         ///   <created> 31/07/2026 31/07/2026 </created>
         ///   needs testing
         /// </remarks>
-        public static async Task<bool> SplitMovieIntoFrames(string? movieFilename,int? everyNframes)
+        public static async Task<bool> SplitMovieIntoFrames(string? movieFilename, int? everyNframes)
         {
             bool success = false;
             string command = "";
@@ -1012,14 +1048,14 @@ namespace TaymadeEntities.Support
                 }
                 else
                 {
-                    command = "ffmpeg -i " + '"' + movieFilename + '"'+ " " + framePattern;
+                    command = "ffmpeg -i " + '"' + movieFilename + '"' + " " + framePattern;
                 }
 
                 FFMpegSupport fFMpeg = new FFMpegSupport();
                 //fFMpeg.CliWrapCompleted += FFMpeg_CliWrapCompleted;
                 //fFMpeg.CliWrapError += FFMpeg_CliWrapError;
                 //fFMpeg.CliWrapProgress += FFMpeg_CliWrapProgress;
-                
+
                 await fFMpeg.DoCliWrapCreateMovie(command);
             }
 
@@ -2137,6 +2173,7 @@ namespace TaymadeEntities.Support
         //}
 
         private static int? screenId = null;
+        private static object absMaxWidth;
 
         /// <summary>Gets the screen identifier.</summary>
         /// <returns>
@@ -2487,8 +2524,99 @@ namespace TaymadeEntities.Support
             };
         }
 
-        #endregion
+        internal async Task CreateVideoFromFrameSet(ImageSetViewModel imageSetviewModel, MovieImage currentSubFolder, FrameSet currentFrameSet)
+        {
+            string frameSetName = "FrameSet" + currentFrameSet.Index.ToString("000").Trim();
+            string outputDirectory = Path.Combine(currentSubFolder.Path, frameSetName);
+            string imageFileStub = outputDirectory;
+            double aspectRatio = 0;
+            double absMaxWidth = 0;
+            double absMaxHeight = 0;
+
+            ImageSetViewModel = imageSetviewModel;
+            FFMpegSupport fFMpeg = new FFMpegSupport();
+            fFMpeg.CliWrapCompleted += FFMpeg_CliWrapCompleted;
+            fFMpeg.CliWrapError += FFMpeg_CliWrapError;
+            fFMpeg.CliWrapProgress += FFMpeg_CliWrapProgress;
+
+            MovieProgressEventargs progressChangedEventArgs = null;
+
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+            }
+            DeleteFilesInFolder(outputDirectory);
+
+            if (currentSubFolder.FrameSetHeader == null)
+            {
+                currentSubFolder.FrameSetHeader = new FrameSetHeader()
+                {
+                    MovieImageId = currentSubFolder.Id,
+                    MaxXSize = 0,
+                    MaxYSize = 0
+                };
+            }
+
+            if (currentSubFolder.FrameSetHeader != null)
+            {
+                //currentSubFolder.jsonRead = false;
+                //currentSubFolder.FromJson();
+                int maxWidth = currentSubFolder.FrameSetHeader.MaxXSize;
+                int maxHeight = currentSubFolder.FrameSetHeader.MaxYSize;
+
+                if (currentSubFolder.FrameSetHeader.MaxXSize == 0 || currentSubFolder.FrameSetHeader.MaxYSize == 0)
+                {
+                    ImageItemsCollection? images = currentSubFolder.ImageItems;
+
+
+                    //(absMaxWidth, absMaxHeight, progressChangedEventArgs, indx,
+                    (maxWidth, maxHeight) =
+                        await GetMaxSizes(progressChangedEventArgs, images);
+                    currentSubFolder.FrameSetHeader.MaxXSize = maxWidth;
+                    currentSubFolder.FrameSetHeader.MaxYSize = maxHeight;
+                    //currentSubFolder.ToJson();
+                    currentSubFolder.Save();
+                }
+
+                ImageItemsCollection? imageItems = new ImageItemsCollection();
+                for (int i = currentFrameSet.StartImage - 1; i < currentFrameSet.EndImage; i++)
+                {
+                    imageItems.Add(currentSubFolder.ImageItems[i]);
+                }
+
+                if (maxHeight % 2 != 0) maxHeight += 1;
+                if (maxWidth % 2 != 0) maxWidth += 1;
+
+                // then we go through all images and save them to a created temp directory 
+                // resizing the images to fit 
+                SolidBrush solidBrush = new SolidBrush(System.Drawing.Color.WhiteSmoke);
+
+                int count = imageItems.Count;
+
+
+                // now process images for this video
+
+                bool success = await BuildImages(imageItems, imageFileStub, absMaxWidth, absMaxHeight, progressChangedEventArgs, null, maxWidth, maxHeight
+                     , count);
+                string outputFileName = imageFileStub + "\\" + System.IO.Path.GetFileNameWithoutExtension(currentSubFolder.Path) + ".mp4";
+
+                //FFMpegSupport fFMpeg = new FFMpegSupport();
+                string ffMpegCommand = " -framerate 0.5 -i " + '"' + imageFileStub + "\\" + "%04d.jpg" + '"' + " -c:v libx264 -r 20 " + '"' + outputFileName + '"';
+
+                //Views.MainWindow? main = GetMainWindow();
+
+                fFMpeg.action = "CreateMovie";
+                fFMpeg.FrameCount = imageItems.Count * 20;
+
+                int result = await fFMpeg.DoCliWrapCreateMovie(ffMpegCommand);
+                currentFrameSet.HasMovie = (result == 0);
+            }
+        }
     }
+
+
+        #endregion
+
 
     public static class PathExtensions
     {
@@ -2501,7 +2629,7 @@ namespace TaymadeEntities.Support
             return lastPathSegment;
         }
     }
-
-
 }
+
+
 

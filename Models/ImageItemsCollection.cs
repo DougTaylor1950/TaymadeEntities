@@ -32,7 +32,7 @@ namespace TaymadeEntities.Models
         {
             //Busy = false;
             ImageChangedEventHandler? handler = ImageChanged;
-            handler?.Invoke(this, e);
+            Dispatcher.UIThread.Post(()=> handler?.Invoke(this, e));
         }
 
         private ImageChangedEventArgs args = new ImageChangedEventArgs() { Action = "", ImagePosition = 0 };
@@ -214,7 +214,7 @@ namespace TaymadeEntities.Models
         }
 
         //private SolidColorBrush backgroundColor;
-        public async void Play()
+        public async Task<bool> Play()
         {
             IsPlaying = !IsPlaying;
             if (Index >= 0 && Index < this.Count)
@@ -253,8 +253,10 @@ namespace TaymadeEntities.Models
                     Index = 0;
                     OnImageChanged(args);
                     ISVM.backgroundColor = Avalonia.Media.Brushes.LightGray;
+                    return false;
                 }
             }
+            return true;
         }
 
         private void PostButtonChanges()
@@ -283,6 +285,10 @@ namespace TaymadeEntities.Models
                 args.Action = action;
                 //MVVM.RootFolder.CurrentImageItem = this[Index];
                 OnImageChanged(args);
+            }
+            else
+            {
+                Index = ISVM.RootFolder.CurrentImageItem.Id;
             }
 
         }

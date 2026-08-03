@@ -202,6 +202,23 @@ namespace TaymadeEntities.DAL.Classes
             return _context.SaveChanges() > 0;
         }
 
+        public FrameSetHeader? GetFrameSetHeaderByMovieImageId(int movieImageId)
+        {
+            return _context.FrameSetHeader.FirstOrDefault(f => f.MovieImageId == movieImageId);
+        }
+
+        public bool UpdateFrameSetHeader(FrameSetHeader frameSetHeader)
+        {
+            _context.FrameSetHeader.Update(frameSetHeader);
+            return _context.SaveChanges() > 0;
+        }
+
+        public bool InsertFrameSetHeader(FrameSetHeader frameSetHeader)
+        {
+            _context.FrameSetHeader.Add(frameSetHeader);
+            return _context.SaveChanges() > 0;
+        }
+
         public async Task<bool> UpdateMovieAsync(Movies movie)
         {
             _context.Movies.Update(movie);

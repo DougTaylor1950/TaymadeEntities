@@ -120,6 +120,8 @@ namespace TaymadeEntities.DBContext
         /// <value>The filter.</value>
         public virtual DbSet<Models.Filter> Filter { get; set; }
 
+        public virtual DbSet<Models.FrameSetHeader> FrameSetHeader { get; set; }
+
         /// <summary>
         /// Gets or sets the MapDrive.
         /// </summary>
@@ -929,6 +931,8 @@ namespace TaymadeEntities.DBContext
 
             modelBuilder.Entity<Director>().HasKey(d => d.Id);
             modelBuilder.Entity<Director>().HasMany(d => d.Movies).WithOne(m => m.Director).HasForeignKey(d => d.DirectorID);
+
+            modelBuilder.Entity<FrameSetHeader>().HasKey(f => f.Id);
 
             modelBuilder.Entity<Story>().HasKey(s => s.Id);
             modelBuilder.Entity<Story>().HasMany(s => s.WordHeadingList).WithOne(w => w.Story).HasForeignKey(s => s.StoryId);
