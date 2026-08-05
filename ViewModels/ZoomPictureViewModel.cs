@@ -25,6 +25,8 @@ namespace TaymadeEntities.ViewModels
         private int step = 5;
         private GammaCorrections? gammaCorrections;
         internal string? outputImagePath;
+        private int progress;
+
         public ZoomPictureViewModel()
         {
             ImagePath = startingImagePath;
@@ -131,7 +133,11 @@ namespace TaymadeEntities.ViewModels
         }
 
 
-
+        public int Progress 
+        { 
+            get => progress;
+            set => this.RaiseAndSetIfChanged(ref progress, value); 
+        }
         public System.Drawing.Bitmap? SystemBitmap { get; set; }
         public double ImageBorderWidth
         {

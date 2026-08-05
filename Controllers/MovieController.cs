@@ -1,4 +1,5 @@
-﻿using ShimSkiaSharp;
+﻿using DocumentFormat.OpenXml.Office.CoverPageProps;
+using ShimSkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -78,6 +79,26 @@ namespace TaymadeEntities.Controllers
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+
+        public List<FrameSet>? GetFrameSetsByHeaderId(int frameSetHeaderId)
+        {
+            return movieRepository.GetFrameSetsByHeaderId(frameSetHeaderId)?.ToList();
+        }
+
+        public FrameSet? GetFrameSetById(int Id)
+        {
+            return movieRepository.GetFrameSetById(Id);
+        }
+
+        public bool UpdateFrameSet(FrameSet frameSet)
+        {
+            if (frameSet.Id ==0)
+            {
+                return movieRepository.AddFrameSet(frameSet);
+            }
+            else
+            return movieRepository.UpdateFrameSet(frameSet);
         }
 
         /// <summary>
@@ -363,6 +384,12 @@ namespace TaymadeEntities.Controllers
         {
             return movieRepository.CreateMovieGenre(movieId, genreCompKey, subGenreCompKey);
         }
+
+        internal bool DeleteFrameSet(FrameSet frameSet)
+        {
+            return movieRepository.DeleteFrameSet(frameSet);
+        }
+            
         #endregion Protected Methods
     }
 }

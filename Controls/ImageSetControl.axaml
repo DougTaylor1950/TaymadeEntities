@@ -6,8 +6,8 @@
 
 			 xmlns:tc="using:TaymadeControls"
 			 xmlns:tcb="using:TaymadeControls.Buttons"
-			 mc:Ignorable="d" d:DesignWidth="1900" d:DesignHeight="1600"
-			 Height="1600"
+			 mc:Ignorable="d" d:DesignWidth="1900" d:DesignHeight="1100"
+			 Height="1100"
 			 x:DataType="vm:ImageSetViewModel"
 			 x:Class="TaymadeEntities.Controls.ImageSetControl">
 
@@ -19,7 +19,9 @@
 	<StackPanel>
 		<StackPanel Orientation="Horizontal">
 		</StackPanel>
-		<TabControl SelectionChanged="TabControl_SelectionChanged" Name="MainTabControl">
+		<TabControl SelectionChanged="TabControl_SelectionChanged" 
+					
+					Name="MainTabControl">
 			<TabItem Header="Images and Folders"
 					 Name="Images"
 					 >
@@ -101,7 +103,21 @@
 									Height="40"
 									Width="40"
 									Margin="10"/> -->
-									<tcb:ImagedButton Command="{Binding PlayButton_Click}"
+									
+
+
+									<Grid>
+										<Grid.RowDefinitions>
+											<RowDefinition Height="60"/>
+											<RowDefinition Height="60"/>
+										</Grid.RowDefinitions>
+										<Grid.ColumnDefinitions>
+											<ColumnDefinition Width="150"/>
+											<ColumnDefinition Width="150"/>
+										</Grid.ColumnDefinitions>
+
+
+										<tcb:ImagedButton Command="{Binding PlayButton_Click}"
 													  Margin="10"
 													  HotKey="Space"
 													  ImageSource="avares://TaymadeControls/Assets/play.png"
@@ -110,35 +126,41 @@
 													  ImageHeight="32"
 													  ImageWidth="32"
 													  IsImageVisible="True"
+													  Grid.Row="0"
+													  Grid.Column="0"
 													  />
+										<tcb:ImagedButton Command="{Binding NextButton_Click}"
+														  Margin="10"
+														  ImageSource="avares://TaymadeControls/Assets/next.png"
+														  ImageHeight="32"
+														  ImageWidth="32"
+														  LabelText="Next Image"
+														  Grid.Row="1"
+														  Grid.Column="0"
+														  HotKeyText=""/>
 
+
+										<tcb:ImagedButton Command="{Binding PrevButton_Click}" Margin="10"
+														  ImageSource="avares://TaymadeControls/Assets/prev.png"
+														  ImageHeight="32"
+														  ImageWidth="32"
+														  LabelText="Prev Image"
+														  Grid.Row="1"
+														  Grid.Column="1"
+														  HotKeyText=""/>
+
+										<tcb:ImagedButton Command="{Binding StopButton_Click}" Margin="10"
+														  HotKey="Ctrl+S"
+														  ImageSource="avares://TaymadeControls/Assets/stop.png"
+														  LabelText="Stop"
+														  ImageHeight="32"
+														  ImageWidth="32"
+														  Grid.Row="0"
+														  Grid.Column="1"
+														  HotKeyText=""
+														  />
+									</Grid>
 								</StackPanel>
-
-								<tcb:ImagedButton Command="{Binding NextButton_Click}"
-												  Margin="10"
-												  ImageSource="avares://TaymadeControls/Assets/next.png"
-												  ImageHeight="32"
-												  ImageWidth="32"
-												  LabelText="Next Image"
-												  HotKeyText=""/>
-
-
-								<tcb:ImagedButton Command="{Binding PrevButton_Click}" Margin="10"
-												  ImageSource="avares://TaymadeControls/Assets/prev.png"
-												  ImageHeight="32"
-												  ImageWidth="32"
-												  LabelText="Prev Image"
-												  HotKeyText=""/>
-
-								<tcb:ImagedButton Command="{Binding StopButton_Click}" Margin="10"
-												  HotKey="Ctrl+S"
-												  ImageSource="avares://TaymadeControls/Assets/stop.png"
-												  LabelText="Stop"
-												  ImageHeight="32"
-												  ImageWidth="32"
-												  HotKeyText=""
-												  />
-
 							</StackPanel>
 							<CheckBox Content="Multi Select" IsChecked="{Binding RootFolder.MultiSelect}" />
 							<DataGrid ItemsSource="{Binding RootFolder.CurrentSubFolder.ImageItems}"
@@ -170,7 +192,8 @@
 										<MenuItem Header="Rename File" Click="MenuItem_Click"  />
 										<MenuItem Header="Zoom to feature" Click="Zoom_Click" />
 										<MenuItem Header="FrameSets ">
-											<MenuItem Header="Add new frameset" Click="AddFrameSet_Click"/>
+											<MenuItem Header="Add new frameset at end" Click="AddFrameSet_Click"/>
+											<MenuItem Header="Add new frameset here" Click="AddFrameSetHere_Click"/>
 											<MenuItem Header="Set as frameset" Click="SetFrameSet_Click"/>
 											<MenuItem Header="Set Next Set Start" Click="SetNextFrameSetStart_Click"/>
 											<MenuItem Header="Frameset to Video" Click="FrameSetToVideo_Click"/>
@@ -215,7 +238,7 @@
 								<TextBox Text="{Binding CurrentSubFolder.CurrentFrameSet.StartImage}" Grid.Row="0" Grid.Column="5" Margin="2,2,1,1"/>
 								<TextBlock Text="End" Grid.Row="0" Grid.Column="6" Margin="2,2,1,1"/>
 								<TextBox Text="{Binding CurrentSubFolder.CurrentFrameSet.EndImage}" Grid.Row="0" Grid.Column="7" Margin="2,2,1,1"/>
-								<ComboBox ItemsSource="{Binding CurrentSubFolder.FrameSetlist}"
+								<ComboBox ItemsSource="{Binding CurrentSubFolder.FrameSetHeader.FrameSetList}"
 										  DisplayMemberBinding="{Binding Index}"
 										  Grid.Row="1" SelectedItem="{Binding CurrentSubFolder.CurrentFrameSet }"/>
 							</Grid>
@@ -223,8 +246,8 @@
 					</StackPanel>
 				</StackPanel>
 			</TabItem>
-			<TabItem Header="Movies" Name="Movies" >
-				<StackPanel Orientation="Vertical">
+			<TabItem Header="Movies" Name="Movies">
+				<StackPanel Orientation="Vertical" Height="900" VerticalAlignment="Top">
 					<TextBlock Text="{Binding RootFolder.MovieInfo}" />
 					<StackPanel Orientation="Horizontal" >
 						<tcb:ImagedButton Command="{ Binding MakeMovie_Click}"
@@ -254,7 +277,7 @@
 					</StackPanel>
 					<TextBox Text="{Binding MissingInfo}" />
 					<ProgressBar  ShowProgressText="true" Value="{Binding ProgressPercent}"/>
-					<StackPanel Orientation="Vertical">
+					<StackPanel Orientation="Vertical" VerticalAlignment="Top">
 						<Grid>
 							<Grid.ColumnDefinitions>
 								<ColumnDefinition Width="100"/>
@@ -287,7 +310,7 @@
 							<TextBlock Text="Duration" Grid.Row="2" Grid.Column="2" />
 							<TextBlock Text="{Binding RootFolder.CurrentMovie.MovieDuration}" Grid.Row="2" Grid.Column="3"/>
 						</Grid>
-						<StackPanel Orientation="Horizontal"
+						<StackPanel Orientation="Horizontal" VerticalAlignment="Top"
 									HorizontalAlignment="Left">
 							<Border BorderBrush="Black"
 									BorderThickness="3"
@@ -299,35 +322,50 @@
 									   Source="{Binding CurrentImage}" />
 
 							</Border>
-							<StackPanel Width="10" Background="LightGray"/>
-							<StackPanel Orientation="Horizontal" >
+							<StackPanel Width="10" Background="LightGray" VerticalAlignment="Top"/>
+							<StackPanel Orientation="Horizontal" VerticalAlignment="Top">
 								<DataGrid Name="dgFrameSets" AutoGenerateColumns="False"
-										  ItemsSource="{Binding RootFolder.CurrentSubFolder.FrameSetlist}"
+										  ItemsSource="{Binding RootFolder.CurrentSubFolder.FrameSetHeader.FrameSetList}"
 										  SelectedItem="{Binding RootFolder.CurrentSubFolder.CurrentFrameSet}"
 										  VerticalScrollBarVisibility="Visible"
 										  HorizontalAlignment="Left"
+										  VerticalAlignment="Top"
+										  
 										  CanUserResizeColumns="True"
+										  Height="600"
 										  >
 									<DataGrid.Columns>
 										<DataGridTextColumn Header="Index" Binding="{Binding Index}" />
 										<DataGridTextColumn Header="Start" Binding="{Binding StartImage}" />
 										<DataGridTextColumn Header="End" Binding="{Binding EndImage}" />
 										<DataGridTextColumn Header="Frame Rate" Binding="{Binding FrameRate}" />
-										<DataGridTextColumn Header="Movie Path" 
-															Binding="{Binding MoviePath}"  
+										<DataGridTextColumn Header="Movie Path"
+															Binding="{Binding MoviePath}"
 															Width="200"/>
-										<DataGridTextColumn Header="Has Movie" Binding="{Binding HasMovie}" />
+										<DataGridCheckBoxColumn Header="Has Movie" Binding="{Binding HasMovie}" />
 									</DataGrid.Columns>
+									<DataGrid.ContextMenu>
+										<ContextMenu Name="FrameSetMenu">
+											<MenuItem Header="Delete frameset" Click="DeleteFrameSet_Click"/>
+											<MenuItem Header="Save frameset" Click="SaveFrameSet_Click"/>
+											<MenuItem Header="Frameset to Video" Click="FrameSetToVideo_Click"/>
+											<MenuItem Header="Check Movie Path" Click="CheckMoviePath_Click"/>
+										</ContextMenu>
+									</DataGrid.ContextMenu>
 								</DataGrid>
 								<StackPanel	Width="10"
 											Background="LightGray"/>
 								<StackPanel Orientation="Horizontal">
-									
+
 									<tcb:ImagedButton Command="{Binding PlayFrameMP4_Click}"
-										  IsVisible="{Binding RootFolder.CurrentSubFolder.CurrentFrameSet.HasMovie}"
-										  ImageSource="avares://TaymadeControls/Assets/play.png"
-										  LabelText="Play Movie"
-										  />
+													  IsVisible="{Binding RootFolder.CurrentSubFolder.CurrentFrameSet.HasMovie}"
+													  ImageSource="avares://TaymadeControls/Assets/play.png"
+													  LabelText="Play Movie"
+													  />
+									<tcb:ImagedButton Click="SaveSubFolder_Click"
+													  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+													  LabelText="Save"
+													  />
 								</StackPanel>
 							</StackPanel>
 						</StackPanel>

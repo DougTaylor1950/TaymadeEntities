@@ -120,6 +120,7 @@ namespace TaymadeEntities.DBContext
         /// <value>The filter.</value>
         public virtual DbSet<Models.Filter> Filter { get; set; }
 
+        public virtual DbSet<Models.FrameSet> FrameSet { get; set; }
         public virtual DbSet<Models.FrameSetHeader> FrameSetHeader { get; set; }
 
         /// <summary>
@@ -932,7 +933,10 @@ namespace TaymadeEntities.DBContext
             modelBuilder.Entity<Director>().HasKey(d => d.Id);
             modelBuilder.Entity<Director>().HasMany(d => d.Movies).WithOne(m => m.Director).HasForeignKey(d => d.DirectorID);
 
+            modelBuilder.Entity<FrameSet>().HasKey(f => f.Id);
+
             modelBuilder.Entity<FrameSetHeader>().HasKey(f => f.Id);
+            modelBuilder.Entity<FrameSetHeader>().HasMany(f => f.FrameSetList).WithOne(f => f.FrameSetHeader).HasForeignKey(f => f.FrameSetHeaderId);
 
             modelBuilder.Entity<Story>().HasKey(s => s.Id);
             modelBuilder.Entity<Story>().HasMany(s => s.WordHeadingList).WithOne(w => w.Story).HasForeignKey(s => s.StoryId);

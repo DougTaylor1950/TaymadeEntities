@@ -14,6 +14,8 @@ namespace TaymadeEntities.DAL.Interfaces
 
         bool AddMovieImage(MovieImage movieImage);
 
+        bool AddFrameSet(FrameSet frameSet);
+
         Movies? CreateMovie(string filmName, int year = 0, string path = "", string filmGroup = "");
 
         MovieGenre? CreateMovieGenre(int movieId, string? genreCompKey, string? subGenreCompKey);
@@ -23,6 +25,12 @@ namespace TaymadeEntities.DAL.Interfaces
         bool DeleteMovieImage(MovieImage movieImage);
 
         List<MovieIntResult> GetActorMovieIds(string actorName);
+
+        IEnumerable<FrameSet>? GetFrameSetsByHeaderId(int frameSetHeaderId);
+
+        FrameSet? GetFrameSetById(int Id);
+
+        FrameSetHeader? GetFrameSetHeaderByMovieImageId(int movieImageId);
 
         MovieImage? GetMovieImageById(int? lastId);
 
@@ -47,20 +55,23 @@ namespace TaymadeEntities.DAL.Interfaces
 
         Task<IEnumerable<Movies>> GetMoviesByTitleAsync(string title);
 
+        bool InsertFrameSetHeader(FrameSetHeader frameSetHeader);
+
         bool Save();
 
         bool Save(Movies movie);
 
         bool SaveMovieImage(MovieImage movieImage);
 
+        bool UpdateFrameSet(FrameSet frameSet);
+
+        bool UpdateFrameSetHeader(FrameSetHeader frameSetHeader);
+
         bool UpdateMovie(Movies movie);
 
         Task<bool> UpdateMovieAsync(Movies movie);
+        bool DeleteFrameSet(FrameSet frameSet);
 
-        FrameSetHeader? GetFrameSetHeaderByMovieImageId(int movieImageId);
-        bool UpdateFrameSetHeader(FrameSetHeader frameSetHeader);
-
-        bool InsertFrameSetHeader(FrameSetHeader frameSetHeader);
         #endregion Public Methods
     }
 }

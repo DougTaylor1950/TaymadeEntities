@@ -574,6 +574,7 @@ namespace TaymadeEntities.Support
             if (imageSetViewModel != null
                && imageSetViewModel.RootFolder != null
                && imageSetViewModel.RootFolder.CurrentSubFolder != null
+               && imageSetViewModel.RootFolder.CurrentSubFolder.FrameSetHeader != null
                && imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems != null
                && imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems.Count > 0)
             {
@@ -599,7 +600,7 @@ namespace TaymadeEntities.Support
 
                 imageSetViewModel.MissingInfo = "Building List";
 
-                List<FrameSet>? frameSets = imageSetViewModel.RootFolder.CurrentSubFolder.FrameSetlist;
+                List<FrameSet>? frameSets = imageSetViewModel.RootFolder.CurrentSubFolder.FrameSetHeader.FrameSetList;
                 int indx = 1;
                 int cnt = imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems.Count;
 

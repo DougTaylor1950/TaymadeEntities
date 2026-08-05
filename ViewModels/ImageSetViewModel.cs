@@ -123,7 +123,7 @@ namespace TaymadeEntities.ViewModels
             if (this.ImageSetControl != null && this.ImageSetControl.dgItemImages != null)
             {
                 Dispatcher.UIThread.Post(() =>
-                {
+                {   
                     ImageSetControl.dgItemImages.ScrollIntoView(RootFolder.CurrentImageItem, null);
                 });
                 //this.ImageSetControl.SetCurrentRow(RootFolder.CurrentImageItem);
@@ -364,7 +364,7 @@ namespace TaymadeEntities.ViewModels
                     {
                         if (RootFolder.CurrentSubFolder.ImageItems != null)
                         {
-                            if (RootFolder.CurrentImageItem.Id >= RootFolder.CurrentSubFolder.ImageItems.Count - 1)
+                            if (RootFolder.CurrentImageItem?.Id >= RootFolder.CurrentSubFolder.ImageItems.Count - 1)
                             {
                                 ImageDispatcherTimer.Stop();
                                 CurrentIcon = StopIcon;
@@ -390,21 +390,50 @@ namespace TaymadeEntities.ViewModels
                     if (ImageDispatcherTimer.IsEnabled)
                     {
                         ImageDispatcherTimer.Stop();
-                        Dispatcher.UIThread.Post(() =>
-                        {
-                            CurrentIcon = PlayIcon;
-                            this.RaisePropertyChanged(nameof(CurrentIcon));
-                        });
+                        SetAsButton("Pause");
                     }
                     else
                     {
                         ImageDispatcherTimer.Start();
-                        CurrentIcon = PauseIcon;
+                        SetAsButton("Play");
                     }
                 }
             }
         }
 
+        private void SetAsButton(string type)
+        {
+            if (type == "Pause")
+            {
+                CurrentIcon = PlayIcon;
+                PlayPauseLabel = "Play";
+                PlayButton.ImageSource = PlayIcon;
+                PlayButton.LabelText = "Play";
+                backgroundColor = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.LightGray);
+            }
+            else if (type == "Play")
+            {
+                CurrentIcon = PauseIcon;
+                PlayPauseLabel = "Pause";
+                PlayButton.ImageSource = PauseIcon;
+                PlayButton.LabelText = "Pause";
+                backgroundColor = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.LightGreen);
+            }
+            else if (type == "Stop")
+            {
+                CurrentIcon = PauseIcon;
+                PlayPauseLabel = "Play";
+                PlayButton.ImageSource = PauseIcon;
+                PlayButton.LabelText = "Play";
+                backgroundColor = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Red);
+            }
+            Dispatcher.UIThread.Post(() =>
+            {
+                PlayButton.ImageSource = CurrentIcon;
+                PlayButton.LabelText = PlayPauseLabel;
+                PlayButton.Background = backgroundColor;
+            });
+        }
         public void PlayMP4File(string moviePath)
         {
             TaymadeEntities.Support.Support.PlayMovie(moviePath, null);
@@ -570,7 +599,7 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        private string GenerateMovieFrameSetName()
+        internal string GenerateMovieFrameSetName()
         {
             MovieImage currentSubFolder = RootFolder.CurrentSubFolder;
             FrameSet currentFrameSet = currentSubFolder.CurrentFrameSet;

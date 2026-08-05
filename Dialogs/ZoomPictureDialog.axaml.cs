@@ -145,6 +145,7 @@ public partial class ZoomPictureDialog : WindowBase
 
     private async void Zoom_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
+        
         // similar to build click, but only create a single zoomed image based on the rectangle
         if (DataContext is ZoomPictureViewModel vm && start != null
                     && end != null && vm.Frames > 0)
@@ -168,6 +169,7 @@ public partial class ZoomPictureDialog : WindowBase
             vm.CurrentSubFolder.FrameSetHeader = DataController.MovieController.GetFrameSetHeaderByMovieImageId(vm.CurrentSubFolder.Id);
             Support.MovieProgressEventargs progressChangedEventArgs = null;
             Support.Support support = new Support.Support();
+            support.ProgressInformation += Support_ProgressInformation;
 
             int maxWidth = vm.CurrentSubFolder.FrameSetHeader.MaxXSize;
             int maxHeight = vm.CurrentSubFolder.FrameSetHeader.MaxYSize;
@@ -235,12 +237,12 @@ public partial class ZoomPictureDialog : WindowBase
                 }
 
                 //FFMpegSupport fFMpeg = new FFMpegSupport();
-                string ffMpegCommand = " -framerate 1 -i " + '"' + imageFileStub + "\\" + "%04d.jpg" + '"' + " -c:v libx264 -r 10 " + '"' + outputFileName + '"' + " -y";
+                string ffMpegCommand = " -framerate 1 -i " + '"' + imageFileStub + "\\" + "%04d.jpg" + '"' + " -c:v libx264 -r 5 " + '"' + outputFileName + '"' + " -y";
 
                 //Views.MainWindow? main = GetMainWindow();
                 Support.FFMpegSupport fFMpeg = new Support.FFMpegSupport();
                 fFMpeg.action = "CreateMovie";
-                fFMpeg.FrameCount = imageItems.Count * 10;
+                fFMpeg.FrameCount = imageItems.Count * 5;
 
                 int result = await fFMpeg.DoCliWrapCreateMovie(ffMpegCommand);
 
@@ -249,8 +251,22 @@ public partial class ZoomPictureDialog : WindowBase
                     vm.CurrentSubFolder.CurrentFrameSet.MoviePath = outputFileName;
                     vm.CurrentSubFolder.CurrentFrameSet.HasMovie = true;
                     vm.CurrentSubFolder.Save();
+                    
                 }
+                // should close this now
+                this.OkButton_Click(null, null);
                 // really need to reduce frameseet to just the start item and rejig all the following ones
+            }
+        }
+    }
+
+    private void Support_ProgressInformation(object sender, Support.MovieProgressEventargs e)
+    {
+        if (this.DataContext != null && this.DataContext is ZoomPictureViewModel zoomPictureView)
+        {
+            if (e != null)
+            {
+                zoomPictureView.Progress = e.ProgressPercentage;
             }
         }
     }

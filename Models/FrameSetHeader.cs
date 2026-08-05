@@ -1,5 +1,6 @@
 ﻿//using static TaymadeEntities.Support.MissingFileFinder;
 
+using ReactiveUI;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
@@ -13,103 +14,60 @@ namespace TaymadeEntities.Models
     /// <remarks>
     ///   <created> 01/08/2026 10:30 </created>
     /// </remarks>
-    public class FrameSetHeader
+    public class FrameSetHeader:ModelBase
     {
         private List<FrameSet>? frameSetList;
+        private int movieImageId = 0;
 
         public int Id { get; set; }
 
         [NotMapped]
         public List<FrameSet>? FrameSetList
         {
-            get => frameSetList;
-            set => frameSetList = value;
+            get
+            {
+                if (frameSetList == null || frameSetList.Count == 0)
+                {
+                    frameSetList = DataController.MovieController.GetFrameSetsByHeaderId(Id);
+                    if (frameSetList == null) frameSetList = new List<FrameSet>();
+                }
+                return frameSetList;
+            }
+
+            set => this.RaiseAndSetIfChanged(ref  frameSetList, value);
         }
 
-        public int MovieImageId { get; set; } = 0;
-
-        [JsonPropertyName("SplitIntoMovies")]
+        public int MovieImageId 
+        {
+            get => movieImageId; 
+            set => this.RaiseAndSetIfChanged(ref movieImageId, value); 
+        }
         public bool SplitIntoMovies { get; set; } = false;
-        [JsonPropertyName("MaxXSize")]
+
         public int MaxXSize { get; internal set; }
-        [JsonPropertyName("MaxYSize")]
         public int MaxYSize { get; internal set; }
+
+        internal FrameSet CreateFrameSet(int count)
+        {
+            if (this.FrameSetList == null)
+            {
+                this.FrameSetList = DataController.MovieController.GetFrameSetsByHeaderId(Id);
+                if (this.FrameSetList == null)
+                {
+                    this.FrameSetList = new List<FrameSet>();
+                }
+            }
+
+            FrameSet newFrameset = new FrameSet
+            {
+                Index = this.FrameSetList.Count +1,
+                FrameSetHeaderId = Id,
+                FrameSetHeader = this,
+                EndImage = count
+            };
+            newFrameset.Save();
+            return newFrameset;
+        }
     }
-    //public class FolderProperties
-    //{
-    //    public FolderProperties(string? path)
-    //    {
-    //        if (!string.IsNullOrEmpty(path))
-    //        {
-    //            Path = path;
-    //            Load();
-    //        }
-    //        else Save();
-    //    }
-
-    //    public FolderProperties()
-    //    {
-    //    }
-
-    //    public void Load(string path = "")
-    //    {
-    //        if (string.IsNullOrEmpty(path)) path = PropertiesFileName();
-    //        string json = string.Empty;
-
-    //        if (File.Exists(path))
-    //        {
-    //            using StreamReader reader = new StreamReader(path);
-    //            json = reader.ReadToEnd();
-
-    //            FolderProperties? props = JsonConvert.DeserializeObject<FolderProperties>(json);
-
-    //            if (props != null)
-    //            {
-    //                Speed = props.Speed;
-    //                Path = props.Path;
-    //                Comments = props.Comments;
-    //                MovieId = props.MovieId;
-    //            }
-    //        }
-    //    }
-
-    //    public FolderProperties(double speed, string path)
-    //    {
-    //        Speed = speed;
-    //        Path = path;
-
-    //        if (!File.Exists(PropertiesFileName()))
-    //        {
-    //            this.Save();
-    //        }
-    //    }
-
-    //    public string? Comments { get; set; } = "<comment>";
-
-    //    public double? Speed { get; set; } = 5;
-
-    //    public string? Path { get; set; }
-
-    //    public int? MovieId { get; set; }
-
-    //    #region Methods
-
-    //    public string PropertiesFileName()
-    //    {
-    //        string returnVal = "";
-    //        returnVal = Path + @"\Properties.json";
-
-    //        return returnVal;
-    //    }
-    //    public void Save()
-    //    {
-    //        string json = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-
-    //        using System.IO.StreamWriter writer = new StreamWriter(PropertiesFileName(), false);
-    //        writer.WriteLine(json);
-    //        writer.Flush();
-    //        writer.Close();
-    //    }
-    //    #endregion
-    //}
+    
 }

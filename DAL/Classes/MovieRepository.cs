@@ -68,6 +68,12 @@ namespace TaymadeEntities.DAL.Classes
             return Save();
         }
 
+        public bool DeleteFrameSet(FrameSet frameSet)
+        {
+            _context.FrameSet.Remove(frameSet);
+            return Save();
+        }
+
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
@@ -242,6 +248,28 @@ namespace TaymadeEntities.DAL.Classes
                 // TODO: set large fields to null
                 disposedValue = true;
             }
+        }
+
+        public bool AddFrameSet(FrameSet frameSet)
+        {
+            _context.FrameSet.Add(frameSet);
+            return Save();
+        }
+
+        public IEnumerable<FrameSet>? GetFrameSetsByHeaderId(int frameSetHeaderId)
+        {
+            return _context.FrameSet.Where(f => f.FrameSetHeaderId == frameSetHeaderId).ToList();
+        }
+
+        public FrameSet? GetFrameSetById(int Id)
+        {
+            return _context.FrameSet.Find(Id);
+        }
+
+        public bool UpdateFrameSet(FrameSet frameSet)
+        {
+            _context.FrameSet.Update(frameSet);
+            return _context.SaveChanges() > 0;
         }
 
         #endregion Protected Methods
