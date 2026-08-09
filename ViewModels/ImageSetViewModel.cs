@@ -3,6 +3,10 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Microsoft.Office.Interop.Word;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
+
+
 
 //using Microsoft.AspNetCore.Razor.TagHelpers;
 using ReactiveUI;
@@ -40,10 +44,13 @@ namespace TaymadeEntities.ViewModels
         private Avalonia.Media.Imaging.Bitmap currentIcon = null;
         private string playPauseLabel = "Play";
         private int? progressPercent;
+        public string? fixedImagePath;
+        private Avalonia.Media.Imaging.Bitmap? imageBMPConverted;
         private string? missingInfo;
         private int? progressPercentShow;
         private FileMonitor _monitor;
         private Avalonia.Media.Imaging.Bitmap? currentImage;
+        private GammaCorrections? gammaCorrections;
 
 
         internal Avalonia.Media.IBrush backgroundColor { get; set; }
@@ -123,7 +130,7 @@ namespace TaymadeEntities.ViewModels
             if (this.ImageSetControl != null && this.ImageSetControl.dgItemImages != null)
             {
                 Dispatcher.UIThread.Post(() =>
-                {   
+                {
                     ImageSetControl.dgItemImages.ScrollIntoView(RootFolder.CurrentImageItem, null);
                 });
                 //this.ImageSetControl.SetCurrentRow(RootFolder.CurrentImageItem);
@@ -136,6 +143,31 @@ namespace TaymadeEntities.ViewModels
         #region Public Properties
 
         public MovieViewModelBase MVVM { get; set; }
+
+        //public Avalonia.Media.Imaging.Bitmap? ImageBMP
+        //{
+        //    get
+        //    {
+
+        //        return imageBMP;
+        //    }
+
+        //    set => this.RaiseAndSetIfChanged(ref imageBMP, value);
+        //}
+
+        public Avalonia.Media.Imaging.Bitmap? ImageBMPConverted
+        {
+            get
+            {
+
+                return imageBMPConverted;
+            }
+
+            set => this.RaiseAndSetIfChanged(ref imageBMPConverted, value);
+        }
+
+        public System.Drawing.Bitmap? SystemBitmap { get; set; }
+
 
         public TaymadeControls.Buttons.ImagedButton PlayButton
         { get; set; }
@@ -665,7 +697,19 @@ namespace TaymadeEntities.ViewModels
         public Avalonia.Controls.Image CurrentImageControl { get; set; }
         public string OutputVideoPath { get; set; }
         public double Framerate { get; internal set; } = 1.0;
+
+        public GammaCorrections? GammaCorrections
+        {
+            get => gammaCorrections;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref gammaCorrections, value);
+
+            }
+        }
         public DispatcherTimer ImageDispatcherTimer { get; private set; }
+        public string ImagePath { get; internal set; }
+        public string outputImagePath { get; internal set; }
 
         internal new void Support_ActionCompleted(object sender, MovieCompletedEventArgs e)
         {
@@ -742,6 +786,139 @@ namespace TaymadeEntities.ViewModels
         //    handler?.Invoke(this, e);
         //}
 
+        public void SaveGamma()
+        {
+            // Save settings convert gammacorrection to json file save as movie name +config.json
+            if (GammaCorrections != null)
+            {
+                string folder = Path.GetDirectoryName(fixedImagePath);
+                folder = Path.Combine(folder, "temp");
+                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+                string configPath = Path.Combine(folder, "config.json");
+                GammaCorrections.Save(configPath);
+            }
+        }
+
+        public void CreateInMemoryBitmaps()
+        {
+            // load the image bytes into memory so the on-disk file is not locked
+            var fileBytes = File.ReadAllBytes(ImagePath);
+
+            // create Avalonia Bitmaps from in-memory stream
+            if (RootFolder?.CurrentImageItem != null && RootFolder?.CurrentImageItem.ImagePath == ImagePath)
+            {
+                using (var ms = new MemoryStream(fileBytes, writable: false))
+                {
+                    RootFolder?.CurrentImageItem.ImageBMP = new Avalonia.Media.Imaging.Bitmap(ms);
+                }
+            }
+            using (var ms2 = new MemoryStream(fileBytes, writable: false))
+            {
+                ImageBMPConverted = new Avalonia.Media.Imaging.Bitmap(ms2);
+            }
+
+            // create an in-memory System.Drawing.Bitmap copy so it does not lock the file
+            using (var ms3 = new MemoryStream(fileBytes, writable: false))
+            using (var img = System.Drawing.Image.FromStream(ms3))
+            {
+                SystemBitmap = new System.Drawing.Bitmap(img);
+            }
+
+            this.RaisePropertyChanged(nameof(RootFolder.CurrentImageItem.ImageBMP));
+            this.RaisePropertyChanged(nameof(ImageBMPConverted));
+
+        }
+
+        internal void LoadConfig()
+        {
+            if (GammaCorrections != null)
+            {
+                if (string.IsNullOrEmpty(fixedImagePath))
+                {
+                    fixedImagePath = ImagePath;
+                }
+                string folder = Path.GetDirectoryName(fixedImagePath);
+                folder = Path.Combine(folder, "temp");
+                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+                string configPath = Path.Combine(folder, "config.json");
+                if (File.Exists(configPath))
+                    GammaCorrections.Load(configPath);
+            }
+        }
+
+        private bool modelSetup = false;
+
+        internal void SetupModel()
+        {
+            if (modelSetup) return;
+            if (RootFolder == null) return;
+            if (RootFolder.CurrentImageItem == null) return;
+
+            modelSetup = true;
+            ImagePath = RootFolder.CurrentImageItem.ImagePath;
+            if (!string.IsNullOrEmpty(ImagePath))
+            {
+                CreateInMemoryBitmaps();
+
+                //if (imageBMP != null)
+                //{
+                //    ImageWidth = imageBMP.Size.Width;
+                //    ImageHeight = imageBMP.Size.Height;
+                //}
+
+                //AspectRatio = ImageWidth / ImageHeight;
+
+
+
+                //if (ImageHeight > 800)
+                //{
+                //    // we need to scale the image down 
+                //    // new width will be 800 * aspect ratio
+                //    //using (var newBitmap = new System.Drawing.Bitmap(ImagePath))
+                //    using (var reSizedImage = Support.Support.ResizeImage(SystemBitmap, (int)(800 * AspectRatio), 800))
+                //    {
+                //        //SystemBitmap = reSizedImage;
+                //        imageBMP = Support.Support.ConvertFileToAvaloniaBitmap(reSizedImage);
+                //        // convert to Avalonia Image
+                //    }
+
+                //    if (imageBMP != null)
+                //    {
+                //        ImageWidth = imageBMP.Size.Width;
+                //        ImageHeight = imageBMP.Size.Height;
+                //    }
+
+                //    SystemBitmap = Support.Support.ResizeImage(SystemBitmap, (int)(800 * AspectRatio), 800);
+                //}
+
+
+                //this.RaisePropertyChanged(nameof(ImageWidth));
+                //this.RaisePropertyChanged(nameof(ImageHeight));
+                //this.RaisePropertyChanged(nameof(ImageBorderWidth));
+                //this.RaisePropertyChanged(nameof(ImageBorderHeight));
+
+                this.GammaCorrections = new GammaCorrections();
+                GammaCorrections.IsVideo = false;
+                GammaCorrections.Correct = true;
+
+                fixedImagePath = Support.Support.FixImagePath(ImagePath);
+                string folder = Path.GetDirectoryName(fixedImagePath);
+                folder = Path.Combine(folder, "temp");
+
+                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+                string filename = Path.GetFileName(fixedImagePath);
+                outputImagePath = Path.Combine(folder, filename);
+
+                LoadConfig();
+                UpdateImage();
+
+                this.GammaCorrections.PropertyChanged += (_, e) =>
+                {
+                    UpdateImage();
+                };
+            }
+        }
+
         /// <summary>
         /// Makes the movie click.
         /// </summary>
@@ -750,6 +927,12 @@ namespace TaymadeEntities.ViewModels
         /// <autogeneratedoc />
         public async void MakeMovie_Click()
         {
+            var box = MessageBoxManager
+    .GetMessageBoxStandard("Movie Creation Check", "Create Movie", ButtonEnum.YesNo);
+
+            var result = await box.ShowAsync();
+            if (result == ButtonResult.No) return;
+
             TaymadeEntities.Support.Support support = new TaymadeEntities.Support.Support();
             support.ActionCompleted += Support_ActionCompleted;
             //support.ProgressInformation += Support_ProgressInformation;
@@ -1216,6 +1399,24 @@ namespace TaymadeEntities.ViewModels
             RootFolder.ReloadPictures();
             //RootFolder.CurrentImageItem = temp;
 
+        }
+
+        internal async void UpdateImage()
+        {
+            if (GammaCorrections == null) return;
+
+            string? corrections = GammaCorrections?.GammaCorrectionString();
+            string param = " -y -i " + '"' + fixedImagePath + '"' + " " + corrections + " -c:a copy " + outputImagePath;
+
+            using FFMpegSupport mpegSupport = new FFMpegSupport();
+            {
+                int error = await mpegSupport.DoCliWrap(param);
+
+                if (File.Exists(outputImagePath))
+                {
+                    ImageBMPConverted = Support.Support.GetBMP(outputImagePath);
+                }
+            }
         }
 
         #endregion Private Methods

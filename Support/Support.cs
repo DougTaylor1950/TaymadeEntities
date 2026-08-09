@@ -18,6 +18,7 @@ namespace TaymadeEntities.Support
     using DocumentFormat.OpenXml.Office2010.Excel;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.ChangeTracking;
+    // using Microsoft.Office.Interop.Word;
     using NLog;
     using NLog.Common;
     using NLog.Config;
@@ -37,9 +38,9 @@ namespace TaymadeEntities.Support
     using TaymadeEntities.Dialogs;
     using TaymadeEntities.Models;
     using TaymadeEntities.ViewModels;
+    using Application = Avalonia.Application;
     using Bitmap = System.Drawing.Bitmap;
-
-
+    using Window = Avalonia.Controls.Window;
 
     /// <summary>
     /// Defines the <see cref="Support" />.
@@ -50,6 +51,12 @@ namespace TaymadeEntities.Support
         private static Logger? logger;
 
         #region Properties
+
+        public FrameSetHeader? FrameSetHeader
+        {
+            get => frameSetHeader;
+            set => frameSetHeader = value;
+        }
 
         public static Movies? CreatedMovie { get; set; }
 
@@ -558,6 +565,15 @@ namespace TaymadeEntities.Support
             ImageSetViewModel.MissingInfo = e.Progress;
 
             if (e.ProgressPercentage > 0) ImageSetViewModel.ProgressPercent = e.ProgressPercentage;
+            if (ProgressInformation != null)
+            {
+                MovieProgressEventargs args = new MovieProgressEventargs(e.ProgressPercentage, null)
+                {
+                    Info = e.Progress
+                };
+                OnProgress(args);
+            }
+
         }
 
         private ImageSetViewModel? ImageSetViewModel { get; set; }
@@ -638,7 +654,15 @@ namespace TaymadeEntities.Support
                     absMaxWidth, absMaxHeight, progressChangedEventArgs, frameSets, maxWidth, maxHeight, count);
 
                 // use ffmpeg to build an MP4 file
-                string ffMpegCommand = " -framerate 1 -i " + '"' + imageFileStub + "%04d.jpg" + '"' + " -c:v libx264 -r 10 " + '"' + outputFileName + '"';
+                string ffMpegCommand = "";
+                if (FrameSetHeader == null && FrameSetHeader.FPS != null)
+                {
+                    ffMpegCommand = " -framerate 1 -i " + '"' + imageFileStub + "%04d.jpg" + '"' + " -c:v libx264 -r 30 " + '"' + outputFileName + '"';
+                }
+                else
+                {
+                    ffMpegCommand = " -framerate " + FrameSetHeader.FPS.Value.ToString("0.00") + " -i " + '"' + imageFileStub + "%04d.jpg" + '"' + " -c:v libx264 -r 30 " + '"' + outputFileName + '"';
+                }
 
 
                 imageSetViewModel.OutputVideoPath = outputFileName;
@@ -2175,6 +2199,7 @@ namespace TaymadeEntities.Support
 
         private static int? screenId = null;
         private static object absMaxWidth;
+        private FrameSetHeader? frameSetHeader;
 
         /// <summary>Gets the screen identifier.</summary>
         /// <returns>
@@ -2525,7 +2550,8 @@ namespace TaymadeEntities.Support
             };
         }
 
-        internal async Task CreateVideoFromFrameSet(ImageSetViewModel imageSetviewModel, MovieImage currentSubFolder, FrameSet currentFrameSet)
+        internal async Task<int> CreateVideoFromFrameSet(ImageSetViewModel imageSetviewModel, MovieImage currentSubFolder,
+            FrameSet currentFrameSet)
         {
             string frameSetName = "FrameSet" + currentFrameSet.Index.ToString("000").Trim();
             string outputDirectory = Path.Combine(currentSubFolder.Path, frameSetName);
@@ -2533,6 +2559,7 @@ namespace TaymadeEntities.Support
             double aspectRatio = 0;
             double absMaxWidth = 0;
             double absMaxHeight = 0;
+            int result = -1;
 
             ImageSetViewModel = imageSetviewModel;
             FFMpegSupport fFMpeg = new FFMpegSupport();
@@ -2601,23 +2628,28 @@ namespace TaymadeEntities.Support
                      , count);
                 string outputFileName = imageFileStub + "\\" + System.IO.Path.GetFileNameWithoutExtension(currentSubFolder.Path) + ".mp4";
 
+                string ffMpegCommand = "";
                 //FFMpegSupport fFMpeg = new FFMpegSupport();
-                string ffMpegCommand = " -framerate 0.5 -i " + '"' + imageFileStub + "\\" + "%04d.jpg" + '"' + " -c:v libx264 -r 20 " + '"' + outputFileName + '"';
+                if (FrameSetHeader == null || FrameSetHeader.FPS == null)
+                    ffMpegCommand = " -framerate 3 -i " + '"' + imageFileStub + "\\" + "%04d.jpg" + '"' + " -c:v libx264 -r 20 " + '"' + outputFileName + '"';
+                else
+                    ffMpegCommand = " -framerate " + FrameSetHeader.FPS.Value.ToString("0.00") + " -i " + '"' + imageFileStub + "\\" + "%04d.jpg" + '"' + " -c:v libx264 -pix_fmt yuv420p " + '"' + outputFileName + '"';
 
-                //Views.MainWindow? main = GetMainWindow();
+                // if outputfile exists delete it
+                if (File.Exists(outputFileName)) File.Delete(outputFileName);
+
 
                 fFMpeg.action = "CreateMovie";
-                fFMpeg.FrameCount = imageItems.Count * 20;
+                fFMpeg.FrameCount = imageItems.Count;
 
-                int result = await fFMpeg.DoCliWrapCreateMovie(ffMpegCommand);
+                result = await fFMpeg.DoCliWrapCreateMovie(ffMpegCommand);
                 currentFrameSet.HasMovie = (result == 0);
             }
+            return result;
         }
-    }
-
-
         #endregion
 
+    }
 
     public static class PathExtensions
     {

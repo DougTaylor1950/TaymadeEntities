@@ -19,8 +19,8 @@
 	<StackPanel>
 		<StackPanel Orientation="Horizontal">
 		</StackPanel>
-		<TabControl SelectionChanged="TabControl_SelectionChanged" 
-					
+		<TabControl SelectionChanged="TabControl_SelectionChanged"
+
 					Name="MainTabControl">
 			<TabItem Header="Images and Folders"
 					 Name="Images"
@@ -103,7 +103,7 @@
 									Height="40"
 									Width="40"
 									Margin="10"/> -->
-									
+
 
 
 									<Grid>
@@ -118,17 +118,17 @@
 
 
 										<tcb:ImagedButton Command="{Binding PlayButton_Click}"
-													  Margin="10"
-													  HotKey="Space"
-													  ImageSource="avares://TaymadeControls/Assets/play.png"
-													  Name="btnPlayContent"
-													  LabelText="Play"
-													  ImageHeight="32"
-													  ImageWidth="32"
-													  IsImageVisible="True"
-													  Grid.Row="0"
-													  Grid.Column="0"
-													  />
+														  Margin="10"
+														  HotKey="Space"
+														  ImageSource="avares://TaymadeControls/Assets/play.png"
+														  Name="btnPlayContent"
+														  LabelText="Play"
+														  ImageHeight="32"
+														  ImageWidth="32"
+														  IsImageVisible="True"
+														  Grid.Row="0"
+														  Grid.Column="0"
+														  />
 										<tcb:ImagedButton Command="{Binding NextButton_Click}"
 														  Margin="10"
 														  ImageSource="avares://TaymadeControls/Assets/next.png"
@@ -191,6 +191,10 @@
 										<MenuItem Header="Split Here" Click="SplitFolder_Click" />
 										<MenuItem Header="Rename File" Click="MenuItem_Click"  />
 										<MenuItem Header="Zoom to feature" Click="Zoom_Click" />
+										<MenuItem Header="Fix Image"
+												  Click="FixImage_Click"
+												  HotKey="Alt+F"
+												  />
 										<MenuItem Header="FrameSets ">
 											<MenuItem Header="Add new frameset at end" Click="AddFrameSet_Click"/>
 											<MenuItem Header="Add new frameset here" Click="AddFrameSetHere_Click"/>
@@ -246,8 +250,11 @@
 					</StackPanel>
 				</StackPanel>
 			</TabItem>
+
+			<!-- Movies tab-->
+
 			<TabItem Header="Movies" Name="Movies">
-				<StackPanel Orientation="Vertical" Height="900" VerticalAlignment="Top">
+				<StackPanel Orientation="Vertical" Height="1000" VerticalAlignment="Top">
 					<TextBlock Text="{Binding RootFolder.MovieInfo}" />
 					<StackPanel Orientation="Horizontal" >
 						<tcb:ImagedButton Command="{ Binding MakeMovie_Click}"
@@ -277,6 +284,41 @@
 					</StackPanel>
 					<TextBox Text="{Binding MissingInfo}" />
 					<ProgressBar  ShowProgressText="true" Value="{Binding ProgressPercent}"/>
+
+					<Grid ShowGridLines="False">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="50"/>
+						</Grid.RowDefinitions>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="100" />
+							<ColumnDefinition Width="100" />
+							<ColumnDefinition Width="100" />
+							<ColumnDefinition Width="100" />
+							<ColumnDefinition Width="100" />
+							<ColumnDefinition Width="100" />
+							<ColumnDefinition Width="100" />
+							<ColumnDefinition Width="100" />
+							<ColumnDefinition Width="100" />
+						</Grid.ColumnDefinitions>
+
+						<TextBlock Text="FPS" Grid.Row="0" Grid.Column="0" Margin="5,5,5,5"/>
+						<TextBox Text="{Binding RootFolder.CurrentSubFolder.FrameSetHeader.FPS }"
+								 Grid.Row="0" Grid.Column="1" Margin="5,5,5,5"/>
+						<CheckBox IsChecked="{Binding RootFolder.CurrentSubFolder.FrameSetHeader.SplitIntoMovies}"
+								  Grid.Row="0" Grid.Column="2" Content="Movie Split" Margin="5,5,5,5"/>
+						<TextBlock Text="Max X" Grid.Row="0" Grid.Column="3" Margin="5,5,5,5"/>
+						<TextBox Text="{Binding RootFolder.CurrentSubFolder.FrameSetHeader.MaxXSize }"
+								 Grid.Row="0" Grid.Column="4" Margin="5,5,5,5"/>
+						<TextBlock Text="Max Y" Grid.Row="0" Grid.Column="5" Margin="5,5,5,5"/>
+						<TextBox Text="{Binding RootFolder.CurrentSubFolder.FrameSetHeader.MaxYSize }"
+								 Grid.Row="0" Grid.Column="6" Margin="5,5,5,5"/>
+
+						<tcb:ImagedButton LabelText="Save Header"
+										  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+										  Click="SaveHeaderButton_Click"
+										  />
+					</Grid>
+
 					<StackPanel Orientation="Vertical" VerticalAlignment="Top">
 						<Grid>
 							<Grid.ColumnDefinitions>
@@ -330,7 +372,7 @@
 										  VerticalScrollBarVisibility="Visible"
 										  HorizontalAlignment="Left"
 										  VerticalAlignment="Top"
-										  
+
 										  CanUserResizeColumns="True"
 										  Height="600"
 										  >
@@ -355,17 +397,25 @@
 								</DataGrid>
 								<StackPanel	Width="10"
 											Background="LightGray"/>
-								<StackPanel Orientation="Horizontal">
+								<StackPanel Orientation="Vertical">
+									<StackPanel Orientation="Horizontal">
 
-									<tcb:ImagedButton Command="{Binding PlayFrameMP4_Click}"
-													  IsVisible="{Binding RootFolder.CurrentSubFolder.CurrentFrameSet.HasMovie}"
-													  ImageSource="avares://TaymadeControls/Assets/play.png"
-													  LabelText="Play Movie"
-													  />
-									<tcb:ImagedButton Click="SaveSubFolder_Click"
-													  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
-													  LabelText="Save"
-													  />
+										<tcb:ImagedButton Command="{Binding PlayFrameMP4_Click}"
+														  IsVisible="{Binding RootFolder.CurrentSubFolder.CurrentFrameSet.HasMovie}"
+														  ImageSource="avares://TaymadeControls/Assets/play.png"
+														  LabelText="Play Movie"
+														  />
+										<tcb:ImagedButton Click="SaveSubFolder_Click"
+														  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+														  LabelText="Save"
+														  />
+									</StackPanel>
+									<StackPanel>
+										<tcb:ImagedButton Click="JoinFrameSetMovies_Click"
+														  ImageSource="avares://TaymadeControls/Assets/build.png"
+														  LabelText="Build Movie"
+														  />
+									</StackPanel>
 								</StackPanel>
 							</StackPanel>
 						</StackPanel>
@@ -374,8 +424,195 @@
 			</TabItem>
 
 
-			<!-- Commands set-->
+			<!-- Fix up images tab-->
+			<TabItem Header="Photo Fix" Name="PhotoFix" >
+				<Border CornerRadius="6" BorderBrush="Gray"
+						BorderThickness="2"
+						BoxShadow="5 5 10 0 #C0000000"
+						VerticalAlignment="Top"
+						Height="800"
+						>
 
+					<StackPanel Orientation="Horizontal" VerticalAlignment="Top" Height="800">
+						<StackPanel Orientation="Vertical" VerticalAlignment="Top" Height="600" Width="750">
+							<Grid ShowGridLines="False" VerticalAlignment="Top">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="100"/>
+									<ColumnDefinition Width="200"/>
+									<ColumnDefinition Width="10"/>
+
+									<ColumnDefinition Width="100"/>
+									<ColumnDefinition Width="200"/>
+
+								</Grid.ColumnDefinitions>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="30"></RowDefinition>
+									<RowDefinition Height="30"></RowDefinition>
+								</Grid.RowDefinitions>
+
+								<TextBlock Classes="h2" Text="Gamma"  Grid.Column="0" Grid.Row="0"/>
+								<TextBox Classes="c1" Text="{Binding GammaCorrections.Gamma }"   Grid.Column="1" />
+								<CheckBox Grid.Row="0" Grid.Column="3" Content="Correct" IsChecked="{Binding GammaCorrections.Correct}"/>
+								<Slider Minimum="0.5" Maximum="2.0" Value="{Binding GammaCorrections.Gamma}"
+										TickFrequency="0.05" IsSnapToTickEnabled="True" Grid.Row="1" Grid.Column="1"/>
+
+								<TextBlock Classes="h2" Text="Saturation"  Grid.Column="0" Grid.Row="2"/>
+								<TextBox Classes="c1" Text="{Binding GammaCorrections.Saturation }"   Grid.Column="1" Grid.Row="2" />
+								<Slider Minimum="0" Maximum="2.0" Value="{Binding GammaCorrections.Saturation}"
+										TickFrequency="0.05" IsSnapToTickEnabled="True" Grid.Row="3" Grid.Column="1"/>
+
+								<TextBlock Classes="h2" Text="Brightness"  Grid.Column="3" Grid.Row="2"/>
+								<TextBox Classes="c1" Text="{Binding GammaCorrections.Brightness }"   Grid.Column="4" Grid.Row="2" />
+								<Slider Minimum="-1.0" Maximum="1.0" Value="{Binding GammaCorrections.Brightness}"
+										TickFrequency="0.05" IsSnapToTickEnabled="True"
+										Grid.Row="3" Grid.Column="4"/>
+
+								<TextBlock Classes="h2" Text="Sharpness"  Grid.Column="0" Grid.Row="4"/>
+								<TextBox Classes="c1" Text="{Binding GammaCorrections.Sharpness }"   Grid.Column="1" Grid.Row="4" />
+								<Slider Minimum="-.5" Maximum=".5" Value="{Binding GammaCorrections.Sharpness}"
+										TickFrequency="0.05" IsSnapToTickEnabled="True"
+										Grid.Row="5" Grid.Column="1"/>
+
+								<TextBlock Classes="h2" Text="Contrast"  Grid.Column="3" Grid.Row="4"/>
+								<TextBox Classes="c1" Text="{Binding GammaCorrections.Contrast }"   Grid.Column="4" Grid.Row="4" />
+								<Slider Minimum="-5.0" Maximum="5.0" Value="{Binding GammaCorrections.Contrast}"
+										TickFrequency="0.05" IsSnapToTickEnabled="True"
+										Grid.Row="5"
+										Grid.Column="4"/>
+
+
+							</Grid>
+							<Grid ShowGridLines="False">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="80"/>
+									<ColumnDefinition Width="80"/>
+
+								</Grid.ColumnDefinitions>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+									<RowDefinition Height="40"></RowDefinition>
+								</Grid.RowDefinitions>
+								<TextBlock Classes="h2" Text="Red"  Grid.Column="0" Grid.Row="0"/>
+								<TextBox Classes="h2" Text="{Binding GammaCorrections.Red}"  Grid.Column="1" Grid.Row="0"/>
+								<Slider Minimum="0.1" Maximum="2.0"
+										Value="{Binding GammaCorrections.Red}" TickFrequency="0.1"
+										IsSnapToTickEnabled="True"
+										Grid.Row="1" Grid.Column="1"/>
+
+								<TextBlock Classes="h2" Text="Blue"  Grid.Column="2" />
+								<TextBox Classes="h2" Text="{Binding GammaCorrections.Blue}"  Grid.Column="3" Grid.Row="0"/>
+								<Slider Minimum="0.1" Maximum="2.0" Value="{Binding GammaCorrections.Blue}"
+										TickFrequency="0.1" IsSnapToTickEnabled="True" Grid.Row="1" Grid.Column="3"/>
+
+								<TextBlock Classes="h2" Text="Green"  Grid.Column="4" Grid.Row="0"/>
+								<TextBox Classes="h2" Text="{Binding GammaCorrections.Green}"  Grid.Column="5" Grid.Row="0"/>
+								<Slider Minimum="0.1" Maximum="2.0"
+										Value="{Binding GammaCorrections.Green}"
+										TickFrequency="0.1" IsSnapToTickEnabled="True"
+										Grid.Row="1" Grid.Column="5"/>
+
+
+								<TextBlock Classes="h2" Text="Weight"  Grid.Column="6" Grid.Row="0"/>
+								<TextBox Classes="h2" Text="{Binding GammaCorrections.Weight}"  Grid.Column="7" Grid.Row="0"/>
+								<Slider Minimum="0.1" Maximum="2.0" Value="{Binding GammaCorrections.Weight}"
+										TickFrequency="0.1" IsSnapToTickEnabled="True" Grid.Row="1" Grid.Column="7"/>
+
+								<tcb:ImagedButton LabelText="Save Config"
+												  Grid.Column="0"
+												  Grid.ColumnSpan="2"
+												  Grid.Row="2"
+												  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+												  ButtonToolTip="Save Config"
+												  Command="{Binding SaveGamma}"
+												  />
+
+								<tcb:ImagedButton LabelText="Save Image"
+												  Grid.Column="3"
+												  Grid.ColumnSpan="2"
+												  Grid.Row="2"
+												  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+												  ButtonToolTip="Save Image"
+												  Click="SaveImage"
+												  />
+
+								<tcb:ImagedButton LabelText="Apply Config"
+												  Grid.Column="0"
+												  Grid.ColumnSpan="2"
+												  Grid.Row="3"
+												  ImageSource="avares://TaymadeControls/Assets/build.png"
+												  ButtonToolTip="Apply Config"
+												  Click="ApplyConfig_Click"
+												  />
+
+								<tcb:ImagedButton LabelText="Reset To Default"
+												  Grid.Column="3"
+												  Grid.ColumnSpan="2"
+												  Grid.Row="3"
+												  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+												  ButtonToolTip="Reset To Default Config"
+												  Click="ResetToDefault_Click"
+												  />
+								<tcb:ImagedButton LabelText="Load Config"
+												  Grid.Column="5"
+												  Grid.ColumnSpan="2"
+												  Grid.Row="3"
+												  ImageSource="avares://TaymadeControls/Assets/Refresh.png"
+												  ButtonToolTip="Load Config"
+												  Click="LoadConfig_Click"
+												  />
+							</Grid>
+						</StackPanel>
+						<StackPanel Width="20" Background="LightGray"/>
+
+						<StackPanel Orientation="Horizontal">
+							<Border HorizontalAlignment="Center"
+									VerticalAlignment="Center"
+									BorderBrush="Black"
+									BorderThickness="3"
+									CornerRadius="5"
+									BoxShadow="5 5 10 0 #C0000000"
+									Width="500"
+									Height="500"
+									>
+								<Image Source="{Binding RootFolder.CurrentImageItem.ImageBMP}"
+
+									   >
+								</Image>
+							</Border >
+							<StackPanel Width="20"  Background="LightGray"/>
+							<Border HorizontalAlignment="Center"
+									VerticalAlignment="Center"
+									BorderBrush="Black"
+									BorderThickness="3"
+									CornerRadius="5"
+									BoxShadow="5 5 10 0 #C0000000"
+									Width="500"
+									Height="500"
+									>
+								<Image Source="{Binding ImageBMPConverted}"
+
+
+									   >
+								</Image>
+							</Border >
+						</StackPanel>
+					</StackPanel>
+				</Border>
+			</TabItem>
 		</TabControl>
 	</StackPanel>
 
