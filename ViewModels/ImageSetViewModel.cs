@@ -1361,6 +1361,12 @@ namespace TaymadeEntities.ViewModels
             using ViewModels.ZoomPictureViewModel viewModel = new ZoomPictureViewModel(RootFolder.CurrentImageItem.ImagePath);
             {
                 viewModel.CurrentSubFolder = RootFolder.CurrentSubFolder;
+                // use current image item to work out currentframeset
+
+                int id = RootFolder.CurrentImageItem.Id;
+                viewModel.CurrentSubFolder?.CurrentFrameSet = viewModel.CurrentSubFolder?.FrameSetHeader?.FrameSetList?
+                    .Where(f => f.StartImage >= id && f.EndImage <= id).FirstOrDefault();
+                
                 using Dialogs.ZoomPictureDialog pictureDialog = new Dialogs.ZoomPictureDialog(viewModel);
                 {
                     Window? main = Support.Support.GetMainWindow() as Window;

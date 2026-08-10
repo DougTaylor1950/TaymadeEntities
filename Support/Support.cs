@@ -657,11 +657,11 @@ namespace TaymadeEntities.Support
                 string ffMpegCommand = "";
                 if (FrameSetHeader == null && FrameSetHeader.FPS != null)
                 {
-                    ffMpegCommand = " -framerate 1 -i " + '"' + imageFileStub + "%04d.jpg" + '"' + " -c:v libx264 -r 30 " + '"' + outputFileName + '"';
+                    ffMpegCommand = " -framerate 1 -i " + '"' + imageFileStub + "%04d.jpg" + '"' + " -c:v libx264 -r 20 " + '"' + outputFileName + '"';
                 }
                 else
                 {
-                    ffMpegCommand = " -framerate " + FrameSetHeader.FPS.Value.ToString("0.00") + " -i " + '"' + imageFileStub + "%04d.jpg" + '"' + " -c:v libx264 -r 30 " + '"' + outputFileName + '"';
+                    ffMpegCommand = " -framerate " + FrameSetHeader.FPS.Value.ToString("0.00") + " -i " + '"' + imageFileStub + "%04d.jpg" + '"' + " -c:v libx264 -r 20 " + '"' + outputFileName + '"';
                 }
 
 
@@ -781,13 +781,18 @@ namespace TaymadeEntities.Support
                 newBitmap.Dispose();
 
                 // update progress
-                progressChangedEventArgs = new MovieProgressEventargs(0, null);
-                progressChangedEventArgs.ProgressPercentage = (index * 100) / count;
-                progressChangedEventArgs.Info = "building bitmaps";
-                progressChangedEventArgs.Bitmap = ConvertFileToAvaloniaBitmap(tempImageFileName);
+                progressChangedEventArgs = new MovieProgressEventargs((index * 100) / count, null)
+                { 
+                    Info = "building bitmaps",
+                    Bitmap = ConvertFileToAvaloniaBitmap(tempImageFileName),
+                    BitmapPath = tempImageFileName
+                };
+                //progressChangedEventArgs.ProgressPercentage = (index * 100) / count;
+                //progressChangedEventArgs.Info = "building bitmaps";
+                //progressChangedEventArgs.Bitmap = ConvertFileToAvaloniaBitmap(tempImageFileName);
+                //progressChangedEventArgs.BitmapPath = tempImageFileName;
                 OnProgress(progressChangedEventArgs);
-
-                await Task.Delay(50);
+                await Task.Delay(250);
                 solidBrush.Dispose();
             }
             return success;
@@ -2633,7 +2638,7 @@ namespace TaymadeEntities.Support
                 if (FrameSetHeader == null || FrameSetHeader.FPS == null)
                     ffMpegCommand = " -framerate 3 -i " + '"' + imageFileStub + "\\" + "%04d.jpg" + '"' + " -c:v libx264 -r 20 " + '"' + outputFileName + '"';
                 else
-                    ffMpegCommand = " -framerate " + FrameSetHeader.FPS.Value.ToString("0.00") + " -i " + '"' + imageFileStub + "\\" + "%04d.jpg" + '"' + " -c:v libx264 -pix_fmt yuv420p " + '"' + outputFileName + '"';
+                    ffMpegCommand = " -framerate " + FrameSetHeader.FPS.Value.ToString("0.00") + " -i " + '"' + imageFileStub + "\\" + "%04d.jpg" + '"' + " -c:v libx264 -pix_fmt yuv420p -r 20 " + '"' + outputFileName + '"';
 
                 // if outputfile exists delete it
                 if (File.Exists(outputFileName)) File.Delete(outputFileName);

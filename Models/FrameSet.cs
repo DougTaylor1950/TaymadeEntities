@@ -11,6 +11,7 @@ namespace TaymadeEntities.Models
 
         private bool hasMovie = false;
         private string? moviePath;
+        private int? zoomDuration;
 
         #endregion Private Fields
 
@@ -59,6 +60,12 @@ namespace TaymadeEntities.Models
         [JsonProperty(PropertyName = "StartImageName")]
         public string? StartImageName { get; set; }
 
+        public int? ZoomDuration 
+        { 
+            get => zoomDuration; 
+            set => this.RaiseAndSetIfChanged(ref zoomDuration, value); 
+        }
+
         #endregion Public Properties
 
         #region Internal Methods
@@ -74,7 +81,9 @@ namespace TaymadeEntities.Models
                 Index = this.Index,
                 FrameRate = this.FrameRate,
                 HasMovie = this.HasMovie,
-                MoviePath = this.MoviePath
+                MoviePath = this.MoviePath,
+                FrameSetHeaderId = this.FrameSetHeaderId,
+                ZoomDuration = this.ZoomDuration
             };
             return clone;
         }

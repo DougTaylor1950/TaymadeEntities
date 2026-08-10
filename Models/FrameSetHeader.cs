@@ -14,14 +14,31 @@ namespace TaymadeEntities.Models
     /// <remarks>
     ///   <created> 01/08/2026 10:30 </created>
     /// </remarks>
-    public class FrameSetHeader:ModelBase
+    public class FrameSetHeader : ModelBase
     {
+        #region Private Fields
+
+        private int? defaultZoomFrames = 50;
+        private int? frameRate = 20;
         private List<FrameSet>? frameSetList;
         private int movieImageId = 0;
 
-        public new int Id { get; set; }
+        #endregion Private Fields
+
+        #region Public Properties
+
+        public int? DefaultZoomFrames
+        {
+            get => defaultZoomFrames;
+            set => this.RaiseAndSetIfChanged(ref defaultZoomFrames, value);
+        }
 
         public double? FPS { get; set; }
+        public int? FrameRate
+        {
+            get => frameRate;
+            set => this.RaiseAndSetIfChanged(ref frameRate, value);
+        }
 
         [NotMapped]
         public List<FrameSet>? FrameSetList
@@ -36,18 +53,25 @@ namespace TaymadeEntities.Models
                 return frameSetList;
             }
 
-            set => this.RaiseAndSetIfChanged(ref  frameSetList, value);
+            set => this.RaiseAndSetIfChanged(ref frameSetList, value);
         }
 
-        public int MovieImageId 
+        public new int Id { get; set; }
+        public int MaxXSize { get; internal set; }
+
+        public int MaxYSize { get; internal set; }
+
+        public int MovieImageId
         {
-            get => movieImageId; 
-            set => this.RaiseAndSetIfChanged(ref movieImageId, value); 
+            get => movieImageId;
+            set => this.RaiseAndSetIfChanged(ref movieImageId, value);
         }
+
         public bool SplitIntoMovies { get; set; } = false;
 
-        public int MaxXSize { get; internal set; }
-        public int MaxYSize { get; internal set; }
+        #endregion Public Properties
+
+        #region Public Methods
 
         /// <summary>
         /// </summary>
@@ -83,6 +107,10 @@ namespace TaymadeEntities.Models
             }
         }
 
+        #endregion Public Methods
+
+        #region Internal Methods
+
         /// <summary>
         /// </summary>
         /// <param name="count">The count.</param>
@@ -106,10 +134,12 @@ namespace TaymadeEntities.Models
 
             FrameSet newFrameset = new FrameSet
             {
-                Index = this.FrameSetList.Count +1,
+                Index = this.FrameSetList.Count + 1,
                 FrameSetHeaderId = Id,
                 FrameSetHeader = this,
-                EndImage = count
+                EndImage = count,
+                ZoomDuration = 5,
+                FrameRate = 0.2
             };
             newFrameset.Save();
             return newFrameset;
@@ -119,6 +149,7 @@ namespace TaymadeEntities.Models
         {
             DataController.MovieController.UpdateFrameSetHeader(this);
         }
+
+        #endregion Internal Methods
     }
-    
 }

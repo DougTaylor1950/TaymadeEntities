@@ -342,15 +342,15 @@ namespace TaymadeEntities.Support
         /// </summary>
         public void Reset()
         {
-            gamma = 1.0;
-            brightness = 0.0;
-            saturation = 1.0;
-            sharpness = 0.0;
-            contrast = 1.0;
-            red = 1.0;
-            blue = 1.0;
-            green = 1.0;
-            weight = 1.0;
+            Gamma = 1.0;
+            Brightness = 0.0;
+            Saturation = 1.0;
+            Sharpness = 0.0;
+            Contrast = 1.0;
+            Red = 1.0;
+            Blue = 1.0;
+            Green = 1.0;
+            Weight = 1.0;
             ClipRectangle = new Rectangle();
         }
 

@@ -184,7 +184,7 @@ namespace TaymadeEntities.Models
         private double? speed;
         private ObservableCollection<MovieImage> subDirectoryList;
         //private List<FrameSet>? frameSetList;
-        private FrameSet currentFrameSet;
+        private FrameSet? currentFrameSet;
 
         #endregion Private Fields
 
@@ -498,7 +498,7 @@ namespace TaymadeEntities.Models
         }
 
         [NotMapped]
-        public FrameSet CurrentFrameSet
+        public FrameSet? CurrentFrameSet
         {
             get
             {

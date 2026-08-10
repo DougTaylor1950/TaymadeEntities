@@ -7,25 +7,38 @@ using ReactiveUI;
 using TaymadeControls.Buttons;
 using TaymadeEntities.Support;
 using System.Reactive.Linq;
-
+using Avalonia.Layout;
 
 namespace TaymadeEntities.ViewModels
 {
     public class ZoomPictureViewModel : ViewModelBase
     {
-        private string? imagePath;
+        #region Internal Fields
+
+        internal string? outputImagePath;
+
+        #endregion Internal Fields
+
+        #region Private Fields
+
         private string? fixedImagePath;
+        private int frames = 10;
+        private int zoomFrames = 50;
+        private GammaCorrections? gammaCorrections;
         private Bitmap? imageBMP;
         private Bitmap? imageBMPConverted;
-        private double imageWidth = 1600;
         private double imageHeight = 800;
-        private int frames = 10;
-
+        private string? imagePath;
+        private double imageWidth = 1600;
+        private int progress;
         private string startingImagePath = "K:\\DriveF\\Teen\\Girls\\img\\IMG_01817_71.jpg";
         private int step = 5;
-        private GammaCorrections? gammaCorrections;
-        internal string? outputImagePath;
-        private int progress;
+        private HorizontalAlignment? mainImageAlignment = HorizontalAlignment.Center;
+        private bool isConvertedImageVisible = false;
+
+        #endregion Private Fields
+
+        #region Public Constructors
 
         public ZoomPictureViewModel()
         {
@@ -40,6 +53,142 @@ namespace TaymadeEntities.ViewModels
             this.RaisePropertyChanged(nameof(ImageBMP));
         }
 
+        #endregion Public Constructors
+
+        #region Public Properties
+
+        public double AspectRatio { get; set; }
+
+        public bool IsConvertedImageVisible 
+        { 
+            get => isConvertedImageVisible; 
+            set => this.RaiseAndSetIfChanged(ref isConvertedImageVisible, value);
+        }
+
+        public Avalonia.Layout.HorizontalAlignment? MainImageAlignment 
+        { 
+            get => mainImageAlignment; 
+            set => this.RaiseAndSetIfChanged(ref mainImageAlignment, value); 
+        }
+
+        public Models.MovieImage CurrentSubFolder { get; internal set; }
+
+        public int Frames
+        {
+            get => frames;
+            set => this.RaiseAndSetIfChanged(ref frames, value);
+        }
+
+        public int ZoomFrames
+        {
+            get => zoomFrames;
+            set => this.RaiseAndSetIfChanged(ref zoomFrames, value);
+        }
+
+        public GammaCorrections? GammaCorrections
+        {
+            get => gammaCorrections;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref gammaCorrections, value);
+            }
+        }
+
+        public Bitmap? ImageBMP
+        {
+            get
+            {
+                return imageBMP;
+            }
+
+            set => this.RaiseAndSetIfChanged(ref imageBMP, value);
+        }
+
+        public Bitmap? ImageBMPConverted
+        {
+            get
+            {
+                return imageBMPConverted;
+            }
+
+            set => this.RaiseAndSetIfChanged(ref imageBMPConverted, value);
+        }
+
+        public double ImageBorderHeight
+        {
+            get => imageHeight + 8;
+        }
+
+        public double ImageBorderWidth
+        {
+            get => imageWidth + 8;
+        }
+
+        public double ImageHeight
+        {
+            get => imageHeight;
+            set => this.RaiseAndSetIfChanged(ref imageHeight, value);
+        }
+
+        public string? ImagePath
+        {
+            get => imagePath;
+            private set => this.RaiseAndSetIfChanged(ref imagePath, value);
+        }
+
+        public double ImageWidth
+        {
+            get => imageWidth;
+            set => this.RaiseAndSetIfChanged(ref imageWidth, value);
+        }
+
+        public int Progress
+        {
+            get => progress;
+            set => this.RaiseAndSetIfChanged(ref progress, value);
+        }
+
+        public bool SaveImageAfterClose { get; set; } = false;
+
+        public int Step
+        {
+            get => step;
+            set => this.RaiseAndSetIfChanged(ref step, value);
+        }
+
+        public System.Drawing.Bitmap? SystemBitmap { get; set; }
+
+        #endregion Public Properties
+
+        #region Public Methods
+
+        public void CreateInMemoryBitmaps()
+        {
+            // load the image bytes into memory so the on-disk file is not locked
+            var fileBytes = File.ReadAllBytes(ImagePath);
+
+            // create Avalonia Bitmaps from in-memory stream
+            using (var ms = new MemoryStream(fileBytes, writable: false))
+            {
+                imageBMP = new Avalonia.Media.Imaging.Bitmap(ms);
+            }
+
+            using (var ms2 = new MemoryStream(fileBytes, writable: false))
+            {
+                ImageBMPConverted = new Avalonia.Media.Imaging.Bitmap(ms2);
+            }
+
+            // create an in-memory System.Drawing.Bitmap copy so it does not lock the file
+            using (var ms3 = new MemoryStream(fileBytes, writable: false))
+            using (var img = System.Drawing.Image.FromStream(ms3))
+            {
+                SystemBitmap = new System.Drawing.Bitmap(img);
+            }
+
+            this.RaisePropertyChanged(nameof(ImageBMP));
+            this.RaisePropertyChanged(nameof(ImageBMPConverted));
+        }
+
         public new void Dispose()
         {
             //this.GammaCorrections?.Dispose();
@@ -48,6 +197,7 @@ namespace TaymadeEntities.ViewModels
             this.ImageBMPConverted?.Dispose();
             base.Dispose();
         }
+
         public void SaveGamma()
         {
             // Save settings convert gammacorrection to json file save as movie name +config.json
@@ -61,6 +211,15 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        public void SaveImage()
+        {
+            // save corrected image
+        }
+
+        #endregion Public Methods
+
+        #region Internal Methods
+
         internal void LoadConfig()
         {
             if (GammaCorrections != null)
@@ -70,100 +229,9 @@ namespace TaymadeEntities.ViewModels
                 if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
                 string configPath = Path.Combine(folder, "config.json");
                 if (File.Exists(configPath))
-                GammaCorrections.Load(configPath);
+                    GammaCorrections.Load(configPath);
             }
         }
-
-        public void SaveImage()
-        {
-            // save corrected image 
-            
-        }
-
-        public string? ImagePath
-        {
-            get => imagePath;
-            private set => this.RaiseAndSetIfChanged(ref imagePath, value);
-        }
-
-        public Bitmap? ImageBMP
-        {
-            get
-            {
-
-                return imageBMP;
-            }
-
-            set => this.RaiseAndSetIfChanged(ref imageBMP, value);
-        }
-
-        public Bitmap? ImageBMPConverted
-        {
-            get
-            {
-
-                return imageBMPConverted;
-            }
-
-            set => this.RaiseAndSetIfChanged(ref imageBMPConverted, value);
-        }
-
-        public double ImageWidth
-        {
-            get => imageWidth;
-            set => this.RaiseAndSetIfChanged(ref imageWidth, value);
-        }
-
-        public double ImageHeight
-        {
-            get => imageHeight;
-            set => this.RaiseAndSetIfChanged(ref imageHeight, value);
-        }
-
-        public double AspectRatio { get; set; }
-
-        public GammaCorrections? GammaCorrections
-        {
-            get => gammaCorrections;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref gammaCorrections, value);
-
-            }
-        }
-
-
-        public int Progress 
-        { 
-            get => progress;
-            set => this.RaiseAndSetIfChanged(ref progress, value); 
-        }
-        public System.Drawing.Bitmap? SystemBitmap { get; set; }
-        public double ImageBorderWidth
-        {
-            get => imageWidth + 8;
-
-        }
-
-        public double ImageBorderHeight
-        {
-            get => imageHeight + 8;
-        }
-
-        public int Frames
-        {
-            get => frames;
-            set => this.RaiseAndSetIfChanged(ref frames, value);
-        }
-
-        public int Step
-        {
-            get => step;
-            set => this.RaiseAndSetIfChanged(ref step, value);
-        }
-        public bool SaveImageAfterClose { get; set; } = false;
-        public Models.MovieImage CurrentSubFolder { get; internal set; }
-
         internal void SetupModel()
         {
             if (imageBMP == null && !string.IsNullOrEmpty(ImagePath))
@@ -178,14 +246,12 @@ namespace TaymadeEntities.ViewModels
 
                 AspectRatio = ImageWidth / ImageHeight;
 
-
-
                 if (ImageHeight > 800)
                 {
-                    // we need to scale the image down 
+                    // we need to scale the image down
                     // new width will be 800 * aspect ratio
                     //using (var newBitmap = new System.Drawing.Bitmap(ImagePath))
-                  using (var reSizedImage = Support.Support.ResizeImage(SystemBitmap, (int)(800 * AspectRatio), 800))
+                    using (var reSizedImage = Support.Support.ResizeImage(SystemBitmap, (int)(800 * AspectRatio), 800))
                     {
                         //SystemBitmap = reSizedImage;
                         imageBMP = Support.Support.ConvertFileToAvaloniaBitmap(reSizedImage);
@@ -200,7 +266,6 @@ namespace TaymadeEntities.ViewModels
 
                     SystemBitmap = Support.Support.ResizeImage(SystemBitmap, (int)(800 * AspectRatio), 800);
                 }
-
 
                 this.RaisePropertyChanged(nameof(ImageWidth));
                 this.RaisePropertyChanged(nameof(ImageHeight));
@@ -228,35 +293,6 @@ namespace TaymadeEntities.ViewModels
                 };
             }
         }
-
-        public void CreateInMemoryBitmaps()
-        {
-            // load the image bytes into memory so the on-disk file is not locked
-            var fileBytes = File.ReadAllBytes(ImagePath);
-
-            // create Avalonia Bitmaps from in-memory stream
-            using (var ms = new MemoryStream(fileBytes, writable: false))
-            {
-                imageBMP = new Avalonia.Media.Imaging.Bitmap(ms);
-            }
-
-            using (var ms2 = new MemoryStream(fileBytes, writable: false))
-            {
-                ImageBMPConverted = new Avalonia.Media.Imaging.Bitmap(ms2);
-            }
-
-            // create an in-memory System.Drawing.Bitmap copy so it does not lock the file
-            using (var ms3 = new MemoryStream(fileBytes, writable: false))
-            using (var img = System.Drawing.Image.FromStream(ms3))
-            {
-                SystemBitmap = new System.Drawing.Bitmap(img);
-            }
-
-            this.RaisePropertyChanged(nameof(ImageBMP));
-            this.RaisePropertyChanged(nameof(ImageBMPConverted));
-
-        }
-
         internal async void UpdateImage()
         {
             if (GammaCorrections == null) return;
@@ -264,7 +300,7 @@ namespace TaymadeEntities.ViewModels
             string? corrections = GammaCorrections?.GammaCorrectionString();
             string param = " -y -i " + '"' + fixedImagePath + '"' + " " + corrections + " -c:a copy " + outputImagePath;
 
-           using  FFMpegSupport mpegSupport = new FFMpegSupport();
+            using FFMpegSupport mpegSupport = new FFMpegSupport();
             {
                 int error = await mpegSupport.DoCliWrap(param);
 
@@ -272,9 +308,9 @@ namespace TaymadeEntities.ViewModels
                 {
                     ImageBMPConverted = Support.Support.GetBMP(outputImagePath);
                 }
-
             }
-            
         }
+
+        #endregion Internal Methods
     }
 }

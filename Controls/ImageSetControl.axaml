@@ -242,9 +242,9 @@
 								<TextBox Text="{Binding CurrentSubFolder.CurrentFrameSet.StartImage}" Grid.Row="0" Grid.Column="5" Margin="2,2,1,1"/>
 								<TextBlock Text="End" Grid.Row="0" Grid.Column="6" Margin="2,2,1,1"/>
 								<TextBox Text="{Binding CurrentSubFolder.CurrentFrameSet.EndImage}" Grid.Row="0" Grid.Column="7" Margin="2,2,1,1"/>
-								<ComboBox ItemsSource="{Binding CurrentSubFolder.FrameSetHeader.FrameSetList}"
-										  DisplayMemberBinding="{Binding Index}"
-										  Grid.Row="1" SelectedItem="{Binding CurrentSubFolder.CurrentFrameSet }"/>
+								
+								<TextBlock Text="Zoom Duration" Grid.Row="1" Grid.Column="2" Margin="2,2,1,1"/>
+								<TextBox Text="{Binding CurrentSubFolder.CurrentFrameSet.ZoomDuration}" Grid.Row="1" Grid.Column="3" Margin="2,2,1,1"/>
 							</Grid>
 						</StackPanel>
 					</StackPanel>
@@ -299,6 +299,10 @@
 							<ColumnDefinition Width="100" />
 							<ColumnDefinition Width="100" />
 							<ColumnDefinition Width="100" />
+							<ColumnDefinition Width="100" />	
+							<ColumnDefinition Width="100" />
+							<ColumnDefinition Width="100" />
+							<ColumnDefinition Width="100" />
 						</Grid.ColumnDefinitions>
 
 						<TextBlock Text="FPS" Grid.Row="0" Grid.Column="0" Margin="5,5,5,5"/>
@@ -312,6 +316,13 @@
 						<TextBlock Text="Max Y" Grid.Row="0" Grid.Column="5" Margin="5,5,5,5"/>
 						<TextBox Text="{Binding RootFolder.CurrentSubFolder.FrameSetHeader.MaxYSize }"
 								 Grid.Row="0" Grid.Column="6" Margin="5,5,5,5"/>
+						<TextBlock Text="Zoom Count" Grid.Row="0" Grid.Column="7" Margin="5,5,5,5"/>
+						<TextBox Text="{Binding RootFolder.CurrentSubFolder.FrameSetHeader.DefaultZoomFrames }"
+								 Grid.Row="0" Grid.Column="8" Margin="5,5,5,5"/>
+						<TextBlock Text="Frame Rate" Grid.Row="0" Grid.Column="9" Margin="5,5,5,5"/>
+						<TextBox Text="{Binding RootFolder.CurrentSubFolder.FrameSetHeader.FrameRate }"
+								 Grid.Row="0" Grid.Column="10" Margin="5,5,5,5"/>
+
 
 						<tcb:ImagedButton LabelText="Save Header"
 										  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
@@ -381,6 +392,7 @@
 										<DataGridTextColumn Header="Start" Binding="{Binding StartImage}" />
 										<DataGridTextColumn Header="End" Binding="{Binding EndImage}" />
 										<DataGridTextColumn Header="Frame Rate" Binding="{Binding FrameRate}" />
+										<DataGridTextColumn Header="Zoom Duration" Binding="{Binding ZoomDuration}" />
 										<DataGridTextColumn Header="Movie Path"
 															Binding="{Binding MoviePath}"
 															Width="200"/>
