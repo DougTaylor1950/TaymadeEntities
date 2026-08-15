@@ -140,6 +140,7 @@
 														  HotKeyText=""/>
 
 
+
 										<tcb:ImagedButton Command="{Binding PrevButton_Click}" Margin="10"
 														  ImageSource="avares://TaymadeControls/Assets/prev.png"
 														  ImageHeight="32"
@@ -242,7 +243,7 @@
 								<TextBox Text="{Binding CurrentSubFolder.CurrentFrameSet.StartImage}" Grid.Row="0" Grid.Column="5" Margin="2,2,1,1"/>
 								<TextBlock Text="End" Grid.Row="0" Grid.Column="6" Margin="2,2,1,1"/>
 								<TextBox Text="{Binding CurrentSubFolder.CurrentFrameSet.EndImage}" Grid.Row="0" Grid.Column="7" Margin="2,2,1,1"/>
-								
+
 								<TextBlock Text="Zoom Duration" Grid.Row="1" Grid.Column="2" Margin="2,2,1,1"/>
 								<TextBox Text="{Binding CurrentSubFolder.CurrentFrameSet.ZoomDuration}" Grid.Row="1" Grid.Column="3" Margin="2,2,1,1"/>
 							</Grid>
@@ -299,7 +300,7 @@
 							<ColumnDefinition Width="100" />
 							<ColumnDefinition Width="100" />
 							<ColumnDefinition Width="100" />
-							<ColumnDefinition Width="100" />	
+							<ColumnDefinition Width="100" />
 							<ColumnDefinition Width="100" />
 							<ColumnDefinition Width="100" />
 							<ColumnDefinition Width="100" />
@@ -403,7 +404,9 @@
 											<MenuItem Header="Delete frameset" Click="DeleteFrameSet_Click"/>
 											<MenuItem Header="Save frameset" Click="SaveFrameSet_Click"/>
 											<MenuItem Header="Frameset to Video" Click="FrameSetToVideo_Click"/>
+											<MenuItem Header="Duplicate FrameSet" Click="DuplicateFrameSet_Click"/>
 											<MenuItem Header="Check Movie Path" Click="CheckMoviePath_Click"/>
+											<MenuItem Header="Move Movie Down" Click="MovieDown_Click" />
 										</ContextMenu>
 									</DataGrid.ContextMenu>
 								</DataGrid>
@@ -427,6 +430,22 @@
 														  ImageSource="avares://TaymadeControls/Assets/build.png"
 														  LabelText="Build Movie"
 														  />
+									</StackPanel>
+									<tcb:ImagedButton LabelText="Previous"
+													  ImageSource="avares://TaymadeControls/Assets/up_arrow.png"
+													  Margin="5,30,5,5"
+													  Click="PrevFrameSet_Click"
+													  />
+									<tcb:ImagedButton LabelText="Next"
+													  ImageSource="avares://TaymadeControls/Assets/down_arrow.png"
+													  Click="NextFrameSet_Click"
+													  />
+
+									<StackPanel Orientation="Horizontal">
+										<TextBlock Text="Image Id" Margin="5,5,5,5" />
+										<TextBox  Text="{Binding RootFolder.CurrentImageItem.Id}"
+												  Margin="5,5,5,5" />
+
 									</StackPanel>
 								</StackPanel>
 							</StackPanel>

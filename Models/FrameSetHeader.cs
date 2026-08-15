@@ -16,12 +16,14 @@ namespace TaymadeEntities.Models
     /// </remarks>
     public class FrameSetHeader : ModelBase
     {
+
         #region Private Fields
 
         private int? defaultZoomFrames = 50;
         private int? frameRate = 20;
-        private List<FrameSet>? frameSetList;
-        private int movieImageId = 0;
+        private FrameSetCollection? frameSetList;
+        private int? movieImageId = 0;
+        private int? lastFrameSetIndex;
 
         #endregion Private Fields
 
@@ -34,6 +36,7 @@ namespace TaymadeEntities.Models
         }
 
         public double? FPS { get; set; }
+
         public int? FrameRate
         {
             get => frameRate;
@@ -41,14 +44,18 @@ namespace TaymadeEntities.Models
         }
 
         [NotMapped]
-        public List<FrameSet>? FrameSetList
+        public FrameSetCollection? FrameSetList
         {
             get
             {
                 if (frameSetList == null || frameSetList.Count == 0)
                 {
                     frameSetList = DataController.MovieController.GetFrameSetsByHeaderId(Id);
-                    if (frameSetList == null) frameSetList = new List<FrameSet>();
+                    if (frameSetList == null)
+                    {
+                        frameSetList = new FrameSetCollection();
+                        frameSetList.Parent = this;
+                    }
                 }
                 return frameSetList;
             }
@@ -57,11 +64,17 @@ namespace TaymadeEntities.Models
         }
 
         public new int Id { get; set; }
+
+        public int? LastFrameSetIndex 
+        { 
+            get => lastFrameSetIndex; 
+            set => this.RaiseAndSetIfChanged(ref lastFrameSetIndex, value); 
+        }
         public int MaxXSize { get; internal set; }
 
         public int MaxYSize { get; internal set; }
 
-        public int MovieImageId
+        public int? MovieImageId
         {
             get => movieImageId;
             set => this.RaiseAndSetIfChanged(ref movieImageId, value);
@@ -90,10 +103,19 @@ namespace TaymadeEntities.Models
             // go through each frameset
             foreach (FrameSet frameSet in FrameSetList)
             {
+                if (frameSet.StartImage < 1) frameSet.StartImage = 1;
                 // and set the image items for that frame set
+
+                bool first = true; // set startimage name
                 for (int i = frameSet.StartImage - 1; i < imageItems.Count; i++)
                 {
                     var item = imageItems[i];
+                    if (first)
+                    {
+                        frameSet.StartImageName = item.ImageName;
+                        frameSet.Save();
+                        first = false; 
+                    }
                     item.FrameSetIndex = frameSet.Index;
                 }
             }
@@ -121,28 +143,77 @@ namespace TaymadeEntities.Models
         /// <remarks>
         ///   <created> 06/08/2026 06/08/2026 </created>
         /// </remarks>
-        internal FrameSet CreateFrameSet(int count)
+        internal FrameSet CreateFrameSet(int count = 0)
         {
-            if (this.FrameSetList == null)
+            CheckFrameSetList();
+            FrameSet newFrameset = MakeFrameSet();
+            newFrameset.EndImage = count;
+            return newFrameset;
+        }
+
+        internal FrameSet CreateFrameSetBefore(FrameSet? frameSet)
+        {
+            CheckFrameSetList();
+            FrameSet newFrameset = MakeFrameSet();
+
+            if (frameSet != null)
             {
-                this.FrameSetList = DataController.MovieController.GetFrameSetsByHeaderId(Id);
-                if (this.FrameSetList == null)
+                int indx = this.FrameSetList.IndexOf(frameSet);
+                if (indx != -1)
                 {
-                    this.FrameSetList = new List<FrameSet>();
+                    // this should insert before the supplied item
+                    if (indx > 0)
+                        this.FrameSetList.Insert(indx - 1, newFrameset);
+                    else
+                        this.FrameSetList.Insert(indx, newFrameset);
+                    newFrameset.StartImage = frameSet.StartImage;
+                    newFrameset.EndImage = frameSet.EndImage;
+                    frameSet.StartImage += 1;
                 }
+
+                // if we have only one item exit
+                if (this.FrameSetList.Count <= 1) return newFrameset;
+
+
+
+                FrameSet? last = this.FrameSetList.LastOrDefault();
+                for (int i = FrameSetList.Count - 2; i >= indx; i--)
+                {
+                    FrameSet? currentFrameSet = this.FrameSetList[i];
+                    // move current to last
+                    last.StartImage = currentFrameSet.StartImage;
+                    last.EndImage = currentFrameSet.EndImage;
+                    last.MoviePath = currentFrameSet.MoviePath;
+                    last.StartImageName = currentFrameSet.StartImageName;
+                    if (!string.IsNullOrEmpty(currentFrameSet.MoviePath))
+                    {
+                        FrameSet.RenameMovieFile(currentFrameSet, last);
+                    }
+                    last.Save();
+                    last = currentFrameSet;
+                }
+
+                Reindex();
             }
 
-            FrameSet newFrameset = new FrameSet
-            {
-                Index = this.FrameSetList.Count + 1,
-                FrameSetHeaderId = Id,
-                FrameSetHeader = this,
-                EndImage = count,
-                ZoomDuration = 5,
-                FrameRate = 0.2
-            };
-            newFrameset.Save();
             return newFrameset;
+        }
+
+        public void Refresh()
+        {
+            this.FrameSetList = DataController.MovieController.GetFrameSetsByHeaderId(this.Id);
+        }
+
+        internal void Reindex()
+        {
+            int indexer = 1;
+            // go through list and reindex
+            foreach (var item in this.frameSetList)
+            {
+                item.Index = indexer;
+                item.Save();
+                indexer += 1;
+            }
         }
 
         internal void Save()
@@ -151,5 +222,36 @@ namespace TaymadeEntities.Models
         }
 
         #endregion Internal Methods
+
+        #region Private Methods
+
+        private void CheckFrameSetList()
+        {
+            if (this.FrameSetList == null)
+            {
+                this.FrameSetList = DataController.MovieController.GetFrameSetsByHeaderId(Id);
+                if (this.FrameSetList == null)
+                {
+                    this.FrameSetList = new FrameSetCollection();
+                }
+                this.FrameSetList.Parent = this;
+            }
+        }
+
+        private FrameSet MakeFrameSet()
+        {
+            FrameSet newFrameset = new FrameSet
+            {
+                Index = this.FrameSetList.Count + 1,
+                FrameSetHeaderId = Id,
+                FrameSetHeader = this,
+                ZoomDuration = 5,
+                FrameRate = 0.2
+            };
+            newFrameset.Save(); // adds to framesetlist
+            return newFrameset;
+        }
+
+        #endregion Private Methods
     }
 }

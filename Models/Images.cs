@@ -242,7 +242,8 @@ namespace TaymadeEntities.Models
                 if (frameSetHeader == null)
                 {
                     frameSetHeader = new FrameSetHeader();
-                    frameSetHeader.FrameSetList = new List<FrameSet>();
+                    frameSetHeader.FrameSetList = new FrameSetCollection();
+                    frameSetHeader.FrameSetList.Parent = FrameSetHeader;
                 }
                 return frameSetHeader;
             }
@@ -502,23 +503,38 @@ namespace TaymadeEntities.Models
         {
             get
             {
-                if (currentFrameSet != null)
-                {
-                    //string? moviePath = GenerateMovieFrameSetName();
-                    //currentFrameSet.HasMovie = File.Exists(moviePath);
-                    //this.RaisePropertyChanged(nameof(currentFrameSet.HasMovie));
-                }
+                //if (currentFrameSet != null)
+                //{
+                //    //string? moviePath = GenerateMovieFrameSetName();
+                //    //currentFrameSet.HasMovie = File.Exists(moviePath);
+                //    //this.RaisePropertyChanged(nameof(currentFrameSet.HasMovie));
+                //}
+               // currentFrameSet = FrameSetHeader.FrameSetList.CurrentFrameSet;
                 return currentFrameSet;
             }
 
             set
             {
                 this.RaiseAndSetIfChanged(ref currentFrameSet, value);
+                // setup frameset header
+                if (this.FrameSetHeader != null && value != null)
+                {
+                    this.FrameSetHeader.LastFrameSetIndex = value.Index;
+                    this.FrameSetHeader.Save();
+                }
+
+                //FrameSetHeader.FrameSetList.CurrentFrameSet = value;
                 if (value != null)
                 {
+                    
                     string? moviePath = GenerateMovieFrameSetName();
                     value.HasMovie = File.Exists(moviePath);
+                    if (value.HasMovie)
+                    {
+                        value.MoviePath = moviePath;
+                    }
                     this.RaisePropertyChanged(nameof(value.HasMovie));
+                    
                 }
             }
         }
@@ -535,9 +551,9 @@ namespace TaymadeEntities.Models
             if (currentFrameSet != null)
             {
                 string frameSetName = "FrameSet" + currentFrameSet.Index.ToString("000").Trim();
-                string outputDirectory = System.IO.Path.Combine(currentSubFolder.Path, frameSetName);
-                string movieName = this.Name + ".mp4";
-                moviePath = System.IO.Path.Combine(outputDirectory, movieName);
+                string outputDirectory = System.IO.Path.Combine(currentSubFolder.Path, @"Zoomed\Movies", frameSetName);
+                string movieName = outputDirectory + ".mp4";
+                moviePath = movieName;
             }
             return moviePath;
         }
@@ -572,7 +588,8 @@ namespace TaymadeEntities.Models
                     if (tempList != null)
                     {
                         if (FrameSetHeader == null) FrameSetHeader = DataController.MovieController.GetFrameSetHeaderByMovieImageId(this.Id);
-                        FrameSetHeader.FrameSetList = new List<FrameSet>(tempList);
+                        FrameSetHeader.FrameSetList = new FrameSetCollection(tempList);
+                        FrameSetHeader.FrameSetList.Parent = FrameSetHeader;
                     }
                     jsonRead = true;
                 }
@@ -624,12 +641,14 @@ namespace TaymadeEntities.Models
                 else
                 {
                     FrameSetHeader = DataController.MovieController.GetFrameSetHeaderByMovieImageId(this.Id);
+                    
                 }
 
                 if (FrameSetHeader.Id == 0)
                 {
                     DataController.MovieController.InsertFrameSetHeader(FrameSetHeader);
-                    FrameSetHeader.FrameSetList = new List<FrameSet>();
+                    FrameSetHeader.FrameSetList = new FrameSetCollection();
+                    FrameSetHeader.FrameSetList.Parent = FrameSetHeader;
                     FrameSet frameSet = FrameSetHeader.CreateFrameSet(this.ImageItems.Count);
                     FrameSetHeader.FrameSetList.Add(frameSet);
                 }
@@ -637,6 +656,7 @@ namespace TaymadeEntities.Models
                 {
                     DataController.MovieController.UpdateFrameSetHeader(FrameSetHeader);
                     FrameSetHeader.FrameSetList = DataController.movieController.GetFrameSetsByHeaderId(FrameSetHeader.Id);
+                    FrameSetHeader.FrameSetList.Parent = FrameSetHeader;
                 }
                 //json = JsonConvert.SerializeObject(FrameSetHeader);
             }
@@ -1047,6 +1067,8 @@ namespace TaymadeEntities.Models
                     item.Id = index;
                     index += 1;
                 }
+                SetImagesFrameSetIndex();
+
                 ImageItem? imageItem = CurrentSubFolder.ImageItems.Find(i => i.ImageName == currentSubFolder.LastImageName);
                 if (imageItem != null)
                 {
@@ -1054,7 +1076,6 @@ namespace TaymadeEntities.Models
                     //   MainSupport.ScrollItemImagesIntoView(imageItem);
                 }
 
-                SetImagesFrameSetIndex();
             }
         }
 

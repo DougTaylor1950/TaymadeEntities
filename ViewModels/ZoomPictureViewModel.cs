@@ -1,13 +1,17 @@
-using System;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Media.Imaging;
-using System.Collections.Generic;
-using ReactiveUI;
-using TaymadeControls.Buttons;
-using TaymadeEntities.Support;
-using System.Reactive.Linq;
 using Avalonia.Layout;
+using Avalonia.Media.Imaging;
+using Avalonia.Threading;
+using ReactiveUI;
+using SixLabors.ImageSharp.Drawing;
+using System;
+using System.Collections.Generic;
+using System.Reactive.Linq;
+using TaymadeControls.Buttons;
+using TaymadeEntities.Models;
+using TaymadeEntities.Support;
+using Path = System.IO.Path;
 
 namespace TaymadeEntities.ViewModels
 {
@@ -38,6 +42,18 @@ namespace TaymadeEntities.ViewModels
 
         #endregion Private Fields
 
+        public delegate void ProgressEventHandler(object sender, MovieProgressEventargs e);
+
+        public event ProgressEventHandler ProgressInformation;
+
+        protected virtual void OnProgress(MovieProgressEventargs e)
+        {
+           
+                ProgressEventHandler handler = ProgressInformation;
+                handler?.Invoke(this, e);
+            
+        }
+
         #region Public Constructors
 
         public ZoomPictureViewModel()
@@ -59,16 +75,16 @@ namespace TaymadeEntities.ViewModels
 
         public double AspectRatio { get; set; }
 
-        public bool IsConvertedImageVisible 
-        { 
-            get => isConvertedImageVisible; 
+        public bool IsConvertedImageVisible
+        {
+            get => isConvertedImageVisible;
             set => this.RaiseAndSetIfChanged(ref isConvertedImageVisible, value);
         }
 
-        public Avalonia.Layout.HorizontalAlignment? MainImageAlignment 
-        { 
-            get => mainImageAlignment; 
-            set => this.RaiseAndSetIfChanged(ref mainImageAlignment, value); 
+        public Avalonia.Layout.HorizontalAlignment? MainImageAlignment
+        {
+            get => mainImageAlignment;
+            set => this.RaiseAndSetIfChanged(ref mainImageAlignment, value);
         }
 
         public Models.MovieImage CurrentSubFolder { get; internal set; }
@@ -84,6 +100,8 @@ namespace TaymadeEntities.ViewModels
             get => zoomFrames;
             set => this.RaiseAndSetIfChanged(ref zoomFrames, value);
         }
+
+        public ZoomInfo ZoomInfo { get; set; }
 
         public GammaCorrections? GammaCorrections
         {
@@ -310,6 +328,240 @@ namespace TaymadeEntities.ViewModels
                 }
             }
         }
+
+        public async void ZoomClick()
+        {
+            if (ZoomInfo != null && ZoomInfo.Start != null
+                 && ZoomInfo.End != null && ZoomFrames > 0)
+            {
+                string orginalFilename = ImagePath;
+                string imagePath = Support.Support.FixImagePath(System.IO.Path.GetDirectoryName(orginalFilename));
+                imagePath = System.IO.Path.Combine(imagePath, "Zoomed");
+                if (!Directory.Exists(imagePath))
+                {
+                    Directory.CreateDirectory(imagePath);
+                }
+
+                //ImageBMP?.Dispose();
+                //ImageBMP = null;
+                //var fileBytes = File.ReadAllBytes(imagePath);
+
+                //// create Avalonia Bitmaps from in-memory stream
+                //using (var ms = new MemoryStream(fileBytes, writable: false))
+                //{
+                //    ImageBMP = new Avalonia.Media.Imaging.Bitmap(ms);
+                //}
+
+                //if (ZoomInfo != null && ZoomInfo.ZoomPictureDialog != null)
+                //    this.ProgressInformation += ZoomInfo.ZoomPictureDialog.Support_ProgressInformation;
+                //else
+                this.ProgressInformation += Support_ProgressInformation;
+
+                Support.MovieProgressEventargs progressChangedEventArgs = null;
+                Support.Support support = new Support.Support();
+                support.ZoomPictureViewModel = this;
+                support.ProgressInformation += Support_ProgressInformation;
+                // ZoomInfo?.ZoomPictureDialog?.Clear_Click(null, null);
+
+                Support.FFMpegSupport fFMpeg = new Support.FFMpegSupport();
+
+                ImageBMPConverted.Dispose();
+
+                // clear out existing images in the zoomed folder
+                var files = Directory.GetFiles(imagePath, "*.jpg").ToList();
+                foreach (var file in files)
+                {
+                    File.Delete(file);
+                }
+
+                // now rebuild images
+                IsConvertedImageVisible = true;
+                support.ProgressInformation += Support_ProgressInformation;
+
+
+
+
+                ZoomInfo.ImagePath = imagePath;
+                ZoomInfo.ImageWidth = imageWidth;
+                ZoomInfo.ImageHeight = imageHeight;
+
+                ZoomInfo.ImageBMP = ImageBMP;
+                ZoomInfo.ZoomFrames = ZoomFrames;
+                ZoomInfo.ZoomPictureDialog.Clear_Click(this, null);
+                ZoomInfo.ImageBMP = ImageBMP;
+
+                bool done = await support.BuildImagesInternal(ZoomInfo, this, imagePath);
+
+
+                //ZoomInfo.ImageBMP = ImageBMP;
+
+                CurrentSubFolder.FrameSetHeader = DataController.MovieController.GetFrameSetHeaderByMovieImageId(CurrentSubFolder.Id);
+                IsConvertedImageVisible = false;
+
+                int maxWidth = CurrentSubFolder.FrameSetHeader.MaxXSize;
+                int maxHeight = CurrentSubFolder.FrameSetHeader.MaxYSize;
+                if (CurrentSubFolder.FrameSetHeader.MaxXSize == 0 || CurrentSubFolder.FrameSetHeader.MaxYSize == 0)
+                {
+                    ImageItemsCollection? images = CurrentSubFolder.ImageItems;
+
+
+                    //(absMaxWidth, absMaxHeight, progressChangedEventArgs, indx,
+                    (maxWidth, maxHeight) =
+                        await support.GetMaxSizes(progressChangedEventArgs, images);
+                    CurrentSubFolder.FrameSetHeader.MaxXSize = maxWidth;
+                    CurrentSubFolder.FrameSetHeader.MaxYSize = maxHeight;
+                    //currentSubFolder.ToJson();
+                    CurrentSubFolder.Save();
+                }
+
+                // need to covert these images to a video, 
+                ImageItemsCollection? imageItems = new ImageItemsCollection();
+
+                files = Directory.GetFiles(imagePath, "*.jpg").ToList();
+                int indx = 1;
+                foreach (var file in files)
+                {
+                    var imageItem = new ImageItem()
+                    {
+                        ImagePath = file,
+                        ImageName = System.IO.Path.GetFileName(file),
+                        FrameSetIndex = 0,
+                        Selected = false
+                    };
+                    imageItems.Add(imageItem);
+                    progressChangedEventArgs = new Support.MovieProgressEventargs(0, null);
+                    progressChangedEventArgs.ProgressPercentage = (indx * 100) / files.Count;
+                    progressChangedEventArgs.Info = "building bitmaps";
+                    progressChangedEventArgs.Bitmap = imageItem.ImageBMP;
+                    System.Threading.Thread.Sleep(50);
+                    Progress = (indx * 100) / files.Count;
+                    indx += 1;
+                }
+
+                if (maxHeight % 2 != 0) maxHeight += 1;
+                if (maxWidth % 2 != 0) maxWidth += 1;
+
+                // then we go through all images and save them to a created temp directory 
+                // resizing the images to fit 
+                System.Drawing.SolidBrush solidBrush = new System.Drawing.SolidBrush(System.Drawing.Color.WhiteSmoke);
+
+                int count = imageItems.Count;
+                double absMaxWidth = 0;
+                double absMaxHeight = 0;
+
+
+                string imageFileStub = imagePath;
+                bool success = await support.BuildImages(imageItems, imageFileStub, absMaxWidth,
+                    absMaxHeight, null, maxWidth, maxHeight
+                        , count);
+
+                if (success)
+                {
+                    // check to see if the Movies directory exists, if not create it
+                    string imageFileDir = System.IO.Path.Combine(imageFileStub, "Movies");
+
+                    if (!Directory.Exists(imageFileDir))
+                    {
+                        Directory.CreateDirectory(imageFileDir);
+                    }
+
+                    string outputFileName = imageFileDir + "\\" + System.IO.Path.GetFileNameWithoutExtension(CurrentSubFolder.Path) + ".mp4";
+
+                    int duration = 5; // default duration (to calculate frame rate)
+                    duration = (duration > 0) ? duration : 5;
+
+                    if (CurrentSubFolder.CurrentFrameSet != null)
+                    {
+                        outputFileName = imageFileDir + "\\FrameSet" + CurrentSubFolder.CurrentFrameSet.Index.ToString("000") + ".mp4";
+                        if (CurrentSubFolder.CurrentFrameSet.ZoomDuration != null)
+                        {
+                            duration = CurrentSubFolder.CurrentFrameSet.ZoomDuration.Value;
+                            duration = (duration > 0) ? duration : 5;
+                            CurrentSubFolder.CurrentFrameSet.ZoomDuration = duration;
+                            CurrentSubFolder.CurrentFrameSet.Save();
+                        }
+
+                    }
+                    double framerate = imageItems.Count / duration;  // should produce a sub movie lasting 5 seconds
+
+                    //FFMpegSupport fFMpeg = new FFMpegSupport();
+                    string ffMpegCommand = " -framerate " + framerate.ToString("0.00") + " -i " + '"' + imageFileStub + "\\" + "%04d.jpg" + '"' + " -c:v libx264 -pix_fmt yuv420p -r 20 " + '"' + outputFileName + '"' + " -y";
+
+                    //Views.MainWindow? main = GetMainWindow();
+
+                    fFMpeg.action = "CreateMovie";
+                    fFMpeg.FrameCount = imageItems.Count;
+
+                    int result = await fFMpeg.DoCliWrapCreateMovie(ffMpegCommand);
+
+                    if (result == 0 && CurrentSubFolder.CurrentFrameSet != null)
+                    {
+                        CurrentSubFolder.CurrentFrameSet.MoviePath = outputFileName;
+                        CurrentSubFolder.CurrentFrameSet.HasMovie = true;
+                        CurrentSubFolder.Save();
+
+                    }
+                    ImageBMPConverted?.Dispose();
+                    ImageBMP?.Dispose();
+                    // clear out existing images in the zoomed folder
+                    files = Directory.GetFiles(imagePath, "*.jpg").ToList();
+                    System.Threading.Thread.Sleep(100);
+                    foreach (var file in files)
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                        }
+                        catch { }
+                    }
+
+                    // should close this now
+                    ZoomInfo?.ZoomPictureDialog?.OkButton_Click(null, null);
+                    // really need to reduce frameseet to just the start item and rejig all the following ones
+                }
+            }
+        }
+
+
+
+
+
+        private void Support_ProgressInformation(object sender, MovieProgressEventargs e)
+        {
+
+            if (e != null)
+            {
+                Progress = e.ProgressPercentage;
+                if (e.Bitmap != null)
+                {
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        ImageBMPConverted = e.Bitmap;
+                        this.RaisePropertyChanged(nameof(Progress));
+                        this.RaisePropertyChanged(nameof(ImageBMPConverted));
+                    });
+                }
+                else if (!string.IsNullOrEmpty(e.BitmapPath))
+                {
+                    ImageBMPConverted = Support.Support.GetBMP(e.BitmapPath);
+                    Dispatcher.UIThread.Post(() =>
+                    {
+
+                        this.RaisePropertyChanged(nameof(Progress));
+                        this.RaisePropertyChanged(nameof(ImageBMPConverted));
+                    });
+
+                    System.Threading.Thread.Sleep(50);
+                }
+
+
+
+
+            }
+
+        }
+
+
 
         #endregion Internal Methods
     }

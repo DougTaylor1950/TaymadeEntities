@@ -81,9 +81,15 @@ namespace TaymadeEntities.Controllers
             GC.SuppressFinalize(this);
         }
 
-        public List<FrameSet>? GetFrameSetsByHeaderId(int frameSetHeaderId)
+        public FrameSetCollection? GetFrameSetsByHeaderId(int frameSetHeaderId)
         {
-            return movieRepository.GetFrameSetsByHeaderId(frameSetHeaderId)?.ToList();
+            FrameSetCollection? returnedSet = null;
+            List<FrameSet>? temp = movieRepository.GetFrameSetsByHeaderId(frameSetHeaderId)?.ToList();
+            if (temp != null)
+            {
+                returnedSet = new FrameSetCollection(temp);
+            }
+            return returnedSet;
         }
 
         public FrameSet? GetFrameSetById(int Id)

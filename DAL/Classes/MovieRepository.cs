@@ -258,7 +258,10 @@ namespace TaymadeEntities.DAL.Classes
 
         public IEnumerable<FrameSet>? GetFrameSetsByHeaderId(int frameSetHeaderId)
         {
-            return _context.FrameSet.Where(f => f.FrameSetHeaderId == frameSetHeaderId).ToList();
+            return _context.FrameSet.
+                Where(f => f.FrameSetHeaderId == frameSetHeaderId).
+                OrderBy(f=>f.StartImage).
+                ToList();
         }
 
         public FrameSet? GetFrameSetById(int Id)

@@ -132,6 +132,7 @@ namespace TaymadeEntities.ViewModels
                 Dispatcher.UIThread.Post(() =>
                 {
                     ImageSetControl.dgItemImages.ScrollIntoView(RootFolder.CurrentImageItem, null);
+                    this.RaisePropertyChanged(nameof(RootFolder.CurrentImageItem));
                 });
                 //this.ImageSetControl.SetCurrentRow(RootFolder.CurrentImageItem);
             }
@@ -636,23 +637,30 @@ namespace TaymadeEntities.ViewModels
             MovieImage currentSubFolder = RootFolder.CurrentSubFolder;
             FrameSet currentFrameSet = currentSubFolder.CurrentFrameSet;
 
-            string moviePath = "";
+            string moviePath = currentFrameSet.MoviePath;
             if (string.IsNullOrEmpty(currentFrameSet.MoviePath))
             {
-                string frameSetName = "FrameSet" + currentFrameSet.Index.ToString("000").Trim();
-                string outputDirectory = Path.Combine(currentSubFolder.Path, frameSetName);
-                string movieName = CurrentSubFolder.Name + ".mp4";
-                moviePath = Path.Combine(outputDirectory, movieName);
-
-                if (File.Exists(moviePath))
+                moviePath = "";
+                string frameSetName = "FrameSet" + currentFrameSet.Index.ToString("000").Trim() + ".mp4";
+                string outputDirectory = Path.Combine(currentSubFolder.Path, @"Zoomed\Movies", frameSetName);
+                //
+                if (File.Exists(outputDirectory))
                 {
-                    currentFrameSet.MoviePath = moviePath;
+                    currentFrameSet.MoviePath = outputDirectory;
+                    currentFrameSet.HasMovie = true;
+                    moviePath = outputDirectory;
                 }
+                else
+                {
+                    moviePath = "";
+                    currentFrameSet.MoviePath = moviePath;
+                    currentFrameSet.HasMovie = false;
+                }
+
+                currentFrameSet.Save();
             }
-            else
-            {
-                moviePath = currentFrameSet.MoviePath;
-            }
+            
+            
             return moviePath;
         }
 
@@ -1366,7 +1374,7 @@ namespace TaymadeEntities.ViewModels
                 int id = RootFolder.CurrentImageItem.Id;
                 viewModel.CurrentSubFolder?.CurrentFrameSet = viewModel.CurrentSubFolder?.FrameSetHeader?.FrameSetList?
                     .Where(f => f.StartImage >= id && f.EndImage <= id).FirstOrDefault();
-                
+
                 using Dialogs.ZoomPictureDialog pictureDialog = new Dialogs.ZoomPictureDialog(viewModel);
                 {
                     Window? main = Support.Support.GetMainWindow() as Window;

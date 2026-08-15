@@ -60,10 +60,10 @@ namespace TaymadeEntities.Models
         [JsonProperty(PropertyName = "StartImageName")]
         public string? StartImageName { get; set; }
 
-        public int? ZoomDuration 
-        { 
-            get => zoomDuration; 
-            set => this.RaiseAndSetIfChanged(ref zoomDuration, value); 
+        public int? ZoomDuration
+        {
+            get => zoomDuration;
+            set => this.RaiseAndSetIfChanged(ref zoomDuration, value);
         }
 
         #endregion Public Properties
@@ -86,6 +86,24 @@ namespace TaymadeEntities.Models
                 ZoomDuration = this.ZoomDuration
             };
             return clone;
+        }
+
+        internal static void RenameMovieFile(FrameSet currentFrameSet, FrameSet last)
+        {
+            string frameSetName = "FrameSet" + currentFrameSet.Index.ToString("000").Trim() + ".mp4";
+            string newFramesetName = "FrameSet" + last.Index.ToString("000").Trim() + ".mp4";
+
+            string oldPath = currentFrameSet.MoviePath;
+            string newPath = currentFrameSet.MoviePath.Replace(frameSetName, newFramesetName);
+
+            if (File.Exists(oldPath) && !File.Exists(newPath))
+            {
+                // move old to new
+                File.Move(oldPath, newPath);
+                last.MoviePath = newPath;
+                last.HasMovie = true;
+                last.Save();
+            }
         }
 
         internal void Delete()

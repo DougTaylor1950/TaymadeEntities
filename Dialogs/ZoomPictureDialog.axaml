@@ -155,6 +155,7 @@
                                 <tcb:ImagedButton LabelText="Zoom"
                                                   ImageSource="avares://TaymadeControls/Assets/maximize_icon.png"
                                                   Click="Zoom_Click"
+
                                                   />
                                 <tcb:ImagedButton LabelText="Clip"
                                                   ImageSource="avares://TaymadeControls/Assets/scissor.png"

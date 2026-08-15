@@ -13,6 +13,7 @@ namespace TaymadeEntities.Support
     using Avalonia.Controls.ApplicationLifetimes;
     using Avalonia.Media.Imaging;
     using Avalonia.Platform;
+    using Avalonia.Threading;
     using CliWrap;
     using DocumentFormat.OpenXml.Drawing.Charts;
     using DocumentFormat.OpenXml.Office2010.Excel;
@@ -150,6 +151,11 @@ namespace TaymadeEntities.Support
             }
         }
 
+        public FFMpegSupport? FFMpegSupport
+        {
+            get => fFMpegSupport;
+            set => fFMpegSupport = value;
+        }
 
         /// <summary>
         /// Gets or sets the FfMpegProc
@@ -564,7 +570,11 @@ namespace TaymadeEntities.Support
             //con.WriteLine(e.Progress);
             ImageSetViewModel.MissingInfo = e.Progress;
 
-            if (e.ProgressPercentage > 0) ImageSetViewModel.ProgressPercent = e.ProgressPercentage;
+            if (e.ProgressPercentage > 0)
+            {
+                ImageSetViewModel.ProgressPercent = e.ProgressPercentage;
+                ZoomPictureViewModel?.Progress = e.ProgressPercentage;
+            }
             if (ProgressInformation != null)
             {
                 MovieProgressEventargs args = new MovieProgressEventargs(e.ProgressPercentage, null)
@@ -576,14 +586,13 @@ namespace TaymadeEntities.Support
 
         }
 
-        private ImageSetViewModel? ImageSetViewModel { get; set; }
+        public ImageSetViewModel? ImageSetViewModel { get; set; }
+
+        public ZoomPictureViewModel? ZoomPictureViewModel { get; set; }
 
         public async Task<int> MakeMovieFromImages(ImageSetViewModel? imageSetViewModel)
         {
-            FFMpegSupport fFMpeg = new FFMpegSupport();
-            fFMpeg.CliWrapCompleted += FFMpeg_CliWrapCompleted;
-            fFMpeg.CliWrapError += FFMpeg_CliWrapError;
-            fFMpeg.CliWrapProgress += FFMpeg_CliWrapProgress;
+
             ImageSetViewModel = imageSetViewModel;
 
             int error = -1;
@@ -651,7 +660,7 @@ namespace TaymadeEntities.Support
                 }
 
                 bool success = await BuildImages(imageSetViewModel.RootFolder.CurrentSubFolder.ImageItems, imageFileStub,
-                    absMaxWidth, absMaxHeight, progressChangedEventArgs, frameSets, maxWidth, maxHeight, count);
+                    absMaxWidth, absMaxHeight, frameSets, maxWidth, maxHeight, count);
 
                 // use ffmpeg to build an MP4 file
                 string ffMpegCommand = "";
@@ -677,10 +686,10 @@ namespace TaymadeEntities.Support
 
                 //Views.MainWindow? main = GetMainWindow();
 
-                fFMpeg.action = "CreateMovie";
-                fFMpeg.FrameCount = index * 10;
+                FFMpegSupport.action = "CreateMovie";
+                FFMpegSupport.FrameCount = index * 10;
 
-                await fFMpeg.DoCliWrapCreateMovie(ffMpegCommand);
+                await FFMpegSupport.DoCliWrapCreateMovie(ffMpegCommand);
 
 
 
@@ -692,9 +701,163 @@ namespace TaymadeEntities.Support
             return error;
         }
 
+
+        public string BuildBitmap(ZoomPictureViewModel vm,
+            string imagePath,
+            string fileNameStub,
+            int i, Bitmap? temp,
+            Rectangle rect)
+        {
+            string filename = "";
+            using (var newBitmap = temp.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+            using (var reSizedImage = ResizeImage(newBitmap, (int)temp.Width, (int)temp.Height))
+            {
+                filename = System.IO.Path.Combine(imagePath, $"{fileNameStub}-{(i + 1):000}.jpg");
+                reSizedImage.Save(filename, ImageFormat.Jpeg);
+                // convert image back to avalonia and display
+                var fileBytes = File.ReadAllBytes(filename);
+                using (var ms2 = new MemoryStream(fileBytes, writable: false))
+                {
+                    vm.ImageBMPConverted = new Avalonia.Media.Imaging.Bitmap(ms2);
+                }
+            }
+
+            int progress = (i * 100 / vm.ZoomFrames);
+
+            MovieProgressEventargs movieProgressEventargs =
+                new MovieProgressEventargs(progress, null)
+                {
+                    //Bitmap = vm.ImageBMPConverted,
+                    BitmapPath = filename,
+                    ProgressPercentage = progress
+                };
+
+            OnProgress(movieProgressEventargs);
+            System.Threading.Thread.Sleep(150);
+
+
+            return filename;
+        }
+
+
+        public Avalonia.Media.Imaging.Bitmap? GetBuiltBitmap(ZoomPictureViewModel vm,
+            string imagePath,
+            string fileNameStub,
+            int i, Bitmap? temp,
+            Rectangle rect)
+        {
+            Avalonia.Media.Imaging.Bitmap? returnedBitmap = null;
+            string filename = "";
+            using (var newBitmap = temp.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+            using (var reSizedImage = ResizeImage(newBitmap, (int)temp.Width, (int)temp.Height))
+            {
+                filename = System.IO.Path.Combine(imagePath, $"{fileNameStub}-{(i + 1):000}.jpg");
+                reSizedImage.Save(filename, ImageFormat.Jpeg);
+                // convert image back to avalonia and display
+                var fileBytes = File.ReadAllBytes(filename);
+                using (var ms2 = new MemoryStream(fileBytes, writable: false))
+                {
+                    returnedBitmap = new Avalonia.Media.Imaging.Bitmap(ms2);
+                }
+            }
+
+
+            return returnedBitmap;
+        }
+
+        public async Task<bool> BuildImagesInternal(ZoomInfo zoomInfo, ZoomPictureViewModel vm, string? imagePathOveride = "")
+        {
+            bool success = true;
+            if (zoomInfo.Start != null
+                        && zoomInfo.End != null && zoomInfo.ZoomFrames > 0)
+            {
+                // get new width and height
+
+                double newWidth = zoomInfo.endX - zoomInfo.startX;
+                double newHeight = zoomInfo.endY - zoomInfo.startY;
+
+                double scalingX = zoomInfo.ImageWidth / newWidth;
+                double scalingY = zoomInfo.ImageHeight / newHeight;
+
+                double widthStep = (zoomInfo.ImageWidth - newWidth) / zoomInfo.ZoomFrames;
+                double heightStep = (zoomInfo.ImageHeight - newHeight) / zoomInfo.ZoomFrames;
+                double stepX = (zoomInfo.startX / zoomInfo.ZoomFrames);
+                double stepY = (zoomInfo.startY / zoomInfo.ZoomFrames);
+
+                double xWidth = (zoomInfo.ImageWidth - widthStep);
+
+                double xStart = stepX;
+                double yStart = stepY;
+
+                double yHeight = (zoomInfo.ImageHeight - heightStep);
+
+                string orginalFilename = zoomInfo.ImagePath;
+
+                string imagePath = "";
+                if (!string.IsNullOrEmpty(imagePathOveride))
+                {
+                    imagePath = FixImagePath(imagePathOveride);
+                }
+                else
+                {
+                    imagePath = FixImagePath(System.IO.Path.GetDirectoryName(orginalFilename));
+                }
+                string fileNameStub = System.IO.Path.GetFileNameWithoutExtension(orginalFilename);
+
+
+                var temp = ConvertAvaloniaBMPToSystem(zoomInfo.ImageBMP);
+                vm.ImageBMPConverted?.Dispose();
+                // build individual images
+                for (int i = 0; i < zoomInfo?.ZoomFrames; i++)
+                {
+                    (bool flowControl, System.Drawing.Rectangle rect) = CreateScalingRectangle(xWidth, xStart, yStart, yHeight, temp);
+                    if (!flowControl)
+                    {
+                        continue;
+                    }
+
+                    string? newFileName = BuildBitmap(vm, imagePath, fileNameStub, i, temp, rect);
+                    xStart += stepX;
+                    yStart += stepY;
+                    yHeight -= heightStep;
+                    xWidth -= widthStep;
+
+                    int progress = (i * 100 / zoomInfo?.ZoomFrames) ?? 0;
+
+                    MovieProgressEventargs movieProgressEventargs =
+                        new MovieProgressEventargs(progress, null)
+                        {
+                            //Bitmap = gotBitmap,
+                            BitmapPath = newFileName,
+                            ProgressPercentage = progress
+                        };
+
+                    OnProgress(movieProgressEventargs);
+                    
+                }
+                temp?.Dispose();
+            }
+            return success;
+        }
+
+        private static (bool flowControl, System.Drawing.Rectangle value) CreateScalingRectangle(double xWidth, double xStart, double yStart, double yHeight, System.Drawing.Bitmap? temp)
+        {
+            var rect = new System.Drawing.Rectangle((int)xStart, (int)yStart, (int)xWidth, (int)yHeight);
+
+            // Clip to bitmap bounds
+            if (rect.X < 0) { rect.Width += rect.X; rect.X = 0; }
+            if (rect.Y < 0) { rect.Height += rect.Y; rect.Y = 0; }
+            if (rect.X + rect.Width > temp.Width) rect.Width = temp.Width - rect.X;
+            if (rect.Y + rect.Height > temp.Height) rect.Height = temp.Height - rect.Y;
+
+            if (rect.Width <= 0 || rect.Height <= 0)
+                return (flowControl: false, value: default); // skip invalid crop
+            return (flowControl: true, value: rect);
+        }
+
         public async Task<bool>
             BuildImages(ImageItemsCollection imageItemsCollection, string imageFileStub,
-            double absMaxWidth, double absMaxHeight, MovieProgressEventargs progressChangedEventArgs,
+            double absMaxWidth, double absMaxHeight,
             List<FrameSet>? frameSets, int maxWidth, int maxHeight, int count)
         {
             bool success = true;
@@ -771,7 +934,6 @@ namespace TaymadeEntities.Support
                     tempImageFileName = imageFileStub + index.ToString("0000") + ".jpg";
                     newBitmap.Save(tempImageFileName, ImageFormat.Jpeg);
                     index += 1;
-
                 }
 
                 // stop double saving 
@@ -781,18 +943,16 @@ namespace TaymadeEntities.Support
                 newBitmap.Dispose();
 
                 // update progress
-                progressChangedEventArgs = new MovieProgressEventargs((index * 100) / count, null)
-                { 
+                MovieProgressEventargs progressChangedEventArgs = new MovieProgressEventargs((index * 100) / count, null)
+                {
+                    ProgressPercentage = (index * 100) / count,
                     Info = "building bitmaps",
                     Bitmap = ConvertFileToAvaloniaBitmap(tempImageFileName),
                     BitmapPath = tempImageFileName
                 };
-                //progressChangedEventArgs.ProgressPercentage = (index * 100) / count;
-                //progressChangedEventArgs.Info = "building bitmaps";
-                //progressChangedEventArgs.Bitmap = ConvertFileToAvaloniaBitmap(tempImageFileName);
-                //progressChangedEventArgs.BitmapPath = tempImageFileName;
+
                 OnProgress(progressChangedEventArgs);
-                await Task.Delay(250);
+                await Task.Delay(50);
                 solidBrush.Dispose();
             }
             return success;
@@ -1074,11 +1234,11 @@ namespace TaymadeEntities.Support
 
                 if (everyNframes != null)
                 {
-                    command = "ffmpeg -i " + '"' + movieFilename + '"' + " -vf \"select='not(mod(n,N))'\" -vsync 0 " + framePattern;
+                    command = " -i " + '"' + movieFilename + '"' + " -vf \"select='not(mod(n,N))'\" -vsync 0 " + framePattern;
                 }
                 else
                 {
-                    command = "ffmpeg -i " + '"' + movieFilename + '"' + " " + framePattern;
+                    command = " -i " + '"' + movieFilename + '"' + " " + framePattern;
                 }
 
                 FFMpegSupport fFMpeg = new FFMpegSupport();
@@ -2205,6 +2365,16 @@ namespace TaymadeEntities.Support
         private static int? screenId = null;
         private static object absMaxWidth;
         private FrameSetHeader? frameSetHeader;
+        private FFMpegSupport? fFMpegSupport;
+
+        public Support()
+        {
+
+            FFMpegSupport = new FFMpegSupport();
+            FFMpegSupport.CliWrapCompleted += FFMpeg_CliWrapCompleted;
+            FFMpegSupport.CliWrapError += FFMpeg_CliWrapError;
+            FFMpegSupport.CliWrapProgress += FFMpeg_CliWrapProgress;
+        }
 
         /// <summary>Gets the screen identifier.</summary>
         /// <returns>
@@ -2559,7 +2729,7 @@ namespace TaymadeEntities.Support
             FrameSet currentFrameSet)
         {
             string frameSetName = "FrameSet" + currentFrameSet.Index.ToString("000").Trim();
-            string outputDirectory = Path.Combine(currentSubFolder.Path, frameSetName);
+            string outputDirectory = Path.Combine(currentSubFolder.Path, @"Zoomed\Movies");
             string imageFileStub = outputDirectory;
             double aspectRatio = 0;
             double absMaxWidth = 0;
@@ -2567,10 +2737,6 @@ namespace TaymadeEntities.Support
             int result = -1;
 
             ImageSetViewModel = imageSetviewModel;
-            FFMpegSupport fFMpeg = new FFMpegSupport();
-            fFMpeg.CliWrapCompleted += FFMpeg_CliWrapCompleted;
-            fFMpeg.CliWrapError += FFMpeg_CliWrapError;
-            fFMpeg.CliWrapProgress += FFMpeg_CliWrapProgress;
 
             MovieProgressEventargs progressChangedEventArgs = null;
 
@@ -2629,9 +2795,10 @@ namespace TaymadeEntities.Support
 
                 // now process images for this video
 
-                bool success = await BuildImages(imageItems, imageFileStub, absMaxWidth, absMaxHeight, progressChangedEventArgs, null, maxWidth, maxHeight
-                     , count);
-                string outputFileName = imageFileStub + "\\" + System.IO.Path.GetFileNameWithoutExtension(currentSubFolder.Path) + ".mp4";
+                bool success = await BuildImages(imageItems, imageFileStub, absMaxWidth,
+                    absMaxHeight, currentSubFolder.FrameSetHeader.FrameSetList
+                    , maxWidth, maxHeight, count);
+                string outputFileName = imageFileStub + "\\" + frameSetName + ".mp4";
 
                 string ffMpegCommand = "";
                 //FFMpegSupport fFMpeg = new FFMpegSupport();
@@ -2644,11 +2811,13 @@ namespace TaymadeEntities.Support
                 if (File.Exists(outputFileName)) File.Delete(outputFileName);
 
 
-                fFMpeg.action = "CreateMovie";
-                fFMpeg.FrameCount = imageItems.Count;
+                FFMpegSupport.action = "CreateMovie";
+                FFMpegSupport.FrameCount = imageItems.Count;
 
-                result = await fFMpeg.DoCliWrapCreateMovie(ffMpegCommand);
+                result = await FFMpegSupport.DoCliWrapCreateMovie(ffMpegCommand);
                 currentFrameSet.HasMovie = (result == 0);
+                currentFrameSet.MoviePath = outputFileName;
+                currentFrameSet.Save();
             }
             return result;
         }
