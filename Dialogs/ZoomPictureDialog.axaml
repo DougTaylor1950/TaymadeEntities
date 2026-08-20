@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="1900" d:DesignHeight="1000"
+        mc:Ignorable="d" d:DesignWidth="1900" d:DesignHeight="1100"
         xmlns:vm="using:TaymadeEntities.ViewModels"
         xmlns:tcb="using:TaymadeControls.Buttons"
         x:Class="TaymadeEntities.Dialogs.ZoomPictureDialog"
@@ -33,13 +33,19 @@
                                     Width="{Binding ImageBorderWidth}"
                                     Height="{Binding ImageBorderHeight}"
                                     >
-                                <Image Source="{Binding ImageBMPConverted}"
-                                       Width="{Binding ImageWidth}"
-                                       Height="{Binding ImageHeight}"
-                                       Name="ConvertedImage"
-                                       LayoutUpdated="ConvertedImage_LayoutUpdated"
-                                       >
-                                </Image>
+                                <StackPanel>
+                                    <StackPanel >
+                                        <Image Source="{Binding ImageBMPConverted}"
+                                               Width="{Binding ImageWidth}"
+                                               Height="{Binding ImageHeight}"
+                                               Name="ConvertedImage"
+                                               
+                                               >
+                                        </Image>
+                                    </StackPanel>
+
+                                    
+                                </StackPanel>
                             </Border>
                             <StackPanel Width =" 20"/>
                             <Border HorizontalAlignment="{Binding MainImageAlignment}"
@@ -88,6 +94,7 @@
                                                             HorizontalAlignment="Center"
                                                             Height="50"
                                                             ButtonToolTip="Move Rectangle Left "
+                                                            HotKey="Left"
                                                             Click="MoveLeft_Click"/>
                                     <tcb:ImagedButtonNoText ImageSource="avares://TaymadeControls/Assets/right_arrow.png"
                                                             HorizontalAlignment="Center"
@@ -117,52 +124,118 @@
                                 </StackPanel>
                             </Border>
                         </StackPanel>
-                        <StackPanel Height="50"
-                                    VerticalAlignment="Center">
-                            <ProgressBar VerticalAlignment="Center"
-                                         Height="40"
-                                         ShowProgressText="true"
-                                         Minimum="0"
-                                         Maximum="100"
-                                         Value="{Binding Progress}"/>
-                        </StackPanel>
-                        <Border HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                BorderBrush="Black"
-                                BorderThickness="3"
-                                CornerRadius="5"
-                                BoxShadow="5 5 10 0 #C0000000"
-                                Height="70"
-                                Width="1400"
-                                Background="LightGray"
-                                >
-                            <StackPanel Orientation="Horizontal"
-                                        HorizontalAlignment="Center" >
-                                <tcb:OkButton Click="OkButton_Click"/>
-                                <tcb:CancelButton Click="CancelButton_Click"/>
-                                <TextBlock Text="Frames" Margin="10,5,5,5"  VerticalAlignment="Center"/>
-                                <TextBox Width="100" Height="40" Text="{Binding Frames}" />
-                                <tcb:ImagedButton LabelText="Clear"
-                                                  ImageSource="avares://TaymadeControls/Assets/cleaning.png"
-                                                  Click="Clear_Click"
-                                                  />
-                                <tcb:ImagedButton LabelText="Build"
-                                                  ImageSource="avares://TaymadeControls/Assets/build.png"
-                                                  Click="Build_Click"
-                                                  />
-                                <TextBlock Text="Frames" Margin="10,5,5,5"  VerticalAlignment="Center"/>
-                                <TextBox Width="100" Height="40" Text="{Binding ZoomFrames}" />
-                                <tcb:ImagedButton LabelText="Zoom"
-                                                  ImageSource="avares://TaymadeControls/Assets/maximize_icon.png"
-                                                  Click="Zoom_Click"
+                        <ProgressBar Height="50" Value="{Binding Progress}" Margin="5,5,5,5"/>
+                        <StackPanel Orientation="Vertical">
+                            <Border HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    BorderBrush="Black"
+                                    BorderThickness="3"
+                                    CornerRadius="5"
+                                    BoxShadow="5 5 10 0 #C0000000"
+                                    Height="70"
+                                    Width="1400"
+                                    Background="LightGray"
+                                    >
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Center" >
+                                    <tcb:OkButton Click="OkButton_Click"/>
+                                    <tcb:CancelButton Click="CancelButton_Click"/>
+                                    <TextBlock Text="Frames" Margin="10,5,5,5"  VerticalAlignment="Center"/>
+                                    <TextBox Width="100" Height="40" Text="{Binding Frames}" />
+                                    <tcb:ImagedButton LabelText="Clear"
+                                                      ImageSource="avares://TaymadeControls/Assets/cleaning.png"
+                                                      Click="Clear_Click"
+                                                      />
+                                    <tcb:ImagedButton LabelText="Build"
+                                                      ImageSource="avares://TaymadeControls/Assets/build.png"
+                                                      Click="Build_Click"
+                                                      />
+                                    <TextBlock Text="Frames" Margin="10,5,5,5"  VerticalAlignment="Center"/>
+                                    <TextBox Width="100" Height="40" Text="{Binding ZoomFrames}" />
+                                    <tcb:ImagedButton LabelText="Zoom"
+                                                      HotKey="Alt+Z"
+                                                      ImageSource="avares://TaymadeControls/Assets/maximize_icon.png"
+                                                      Click="Zoom_Click"
 
-                                                  />
-                                <tcb:ImagedButton LabelText="Clip"
-                                                  ImageSource="avares://TaymadeControls/Assets/scissor.png"
-                                                  Click="Clip_Click"
-                                                  />
-                            </StackPanel>
-                        </Border>
+                                                      />
+                                    <tcb:ImagedButton LabelText="Clip"
+                                                      ImageSource="avares://TaymadeControls/Assets/scissor.png"
+                                                      Click="Clip_Click"
+                                                      />
+                                </StackPanel>
+                            </Border >
+                            <Border  HorizontalAlignment="Center"
+                                     VerticalAlignment="Center"
+                                     BorderBrush="Black"
+                                     BorderThickness="3"
+                                     CornerRadius="5"
+                                     BoxShadow="5 5 10 0 #C0000000"
+                                     Height="70"
+                                     Width="1400"
+                                     Background="LightGray">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <tcb:ImagedButton ImageSource="avares://TaymadeControls/Assets/up_arrow.png"
+                                                            HorizontalAlignment="Center"
+                                                            Width="100"
+                                                            Height="40"
+                                                            HotKey="Up"
+                                                            LabelText="Up"
+                                                            ButtonToolTip="Move Rectangle Up by amount in box"
+                                                            Click="MoveUp_Click"/>
+                                    <tcb:ImagedButton ImageSource="avares://TaymadeControls/Assets/DownArrow.png"
+                                                            HorizontalAlignment="Center"
+                                                            Width="100"
+                                                            Height="40"
+                                                            LabelText="Down"
+                                                            HotKey="Down"
+                                                            ButtonToolTip="Move Rectangle Down "
+                                                            Click="MoveDown_Click"/>
+                                    <tcb:ImagedButton ImageSource="avares://TaymadeControls/Assets/left_arrow.png"
+                                                            HorizontalAlignment="Center"
+                                                            Width="100"
+                                                            Height="40"
+                                                            LabelText="Left"
+                                                            HotKey="Left"
+                                                            ButtonToolTip="Move Rectangle Left "
+                                                            Click="MoveLeft_Click"/>
+
+                                    <tcb:ImagedButton ImageSource="avares://TaymadeControls/Assets/right_arrow.png"
+                                                            HorizontalAlignment="Center"
+                                                            Width="100"
+                                                            Height="40"
+                                                            LabelText="Right"
+                                                            HotKey="Right"
+                                                            ButtonToolTip="Move Rectangle Right "
+                                                            Click="MoveRight_Click"/>
+                                    <NumericUpDown Minimum="0"
+                                                   Maximum="30"
+                                                   Margin="5,5,5,5"
+                                                   Value="{Binding Step}"
+                                                   ToolTip.Tip="Step for move and size commands"
+                                                   >
+
+                                    </NumericUpDown>
+                                    <tcb:ImagedButton ImageSource="avares://TaymadeControls/Assets/stretch.png"
+                                                            HorizontalAlignment="Center"
+                                                            Width="100"
+                                                            Height="40"
+                                                            LabelText="Grow"
+                                                            HotKey="G"
+                                                            ButtonToolTip="Resize rectangle larger"
+                                                            Click="Stretch_Click"
+                                                            />
+                                    <tcb:ImagedButton ImageSource="avares://TaymadeControls/Assets/shrink.png"
+                                                            HorizontalAlignment="Center"
+                                                            Width="100"
+                                                            Height="40"
+                                                            HotKey="S"
+                                                            LabelText="Shrink"
+                                                            ButtonToolTip="Resize rectangle smaller"
+                                                            Click="Shrink_Click"
+                                                            />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
                     </StackPanel>
 
                 </Border>

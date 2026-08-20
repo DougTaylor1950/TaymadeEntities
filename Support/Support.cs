@@ -719,21 +719,22 @@ namespace TaymadeEntities.Support
                 using (var ms2 = new MemoryStream(fileBytes, writable: false))
                 {
                     vm.ImageBMPConverted = new Avalonia.Media.Imaging.Bitmap(ms2);
+                    //vm.ZoomedImage = vm.ImageBMPConverted;
                 }
             }
 
             int progress = (i * 100 / vm.ZoomFrames);
 
-            MovieProgressEventargs movieProgressEventargs =
-                new MovieProgressEventargs(progress, null)
-                {
-                    //Bitmap = vm.ImageBMPConverted,
-                    BitmapPath = filename,
-                    ProgressPercentage = progress
-                };
+            //MovieProgressEventargs movieProgressEventargs =
+            //    new MovieProgressEventargs(progress, null)
+            //    {
+            //        //Bitmap = vm.ImageBMPConverted,
+            //        BitmapPath = filename,
+            //        ProgressPercentage = progress
+            //    };
 
-            OnProgress(movieProgressEventargs);
-            System.Threading.Thread.Sleep(150);
+            //OnProgress(movieProgressEventargs);
+            //System.Threading.Thread.Sleep(250);
 
 
             return filename;
@@ -773,16 +774,16 @@ namespace TaymadeEntities.Support
             {
                 // get new width and height
 
-                double newWidth = zoomInfo.endX - zoomInfo.startX;
-                double newHeight = zoomInfo.endY - zoomInfo.startY;
+                double newWidth = zoomInfo.EndX - zoomInfo.StartX;
+                double newHeight = zoomInfo.EndY - zoomInfo.StartY;
 
                 double scalingX = zoomInfo.ImageWidth / newWidth;
                 double scalingY = zoomInfo.ImageHeight / newHeight;
 
                 double widthStep = (zoomInfo.ImageWidth - newWidth) / zoomInfo.ZoomFrames;
                 double heightStep = (zoomInfo.ImageHeight - newHeight) / zoomInfo.ZoomFrames;
-                double stepX = (zoomInfo.startX / zoomInfo.ZoomFrames);
-                double stepY = (zoomInfo.startY / zoomInfo.ZoomFrames);
+                double stepX = (zoomInfo.StartX / zoomInfo.ZoomFrames);
+                double stepY = (zoomInfo.StartY / zoomInfo.ZoomFrames);
 
                 double xWidth = (zoomInfo.ImageWidth - widthStep);
 
@@ -840,7 +841,7 @@ namespace TaymadeEntities.Support
             return success;
         }
 
-        private static (bool flowControl, System.Drawing.Rectangle value) CreateScalingRectangle(double xWidth, double xStart, double yStart, double yHeight, System.Drawing.Bitmap? temp)
+        public static (bool flowControl, System.Drawing.Rectangle value) CreateScalingRectangle(double xWidth, double xStart, double yStart, double yHeight, System.Drawing.Bitmap? temp)
         {
             var rect = new System.Drawing.Rectangle((int)xStart, (int)yStart, (int)xWidth, (int)yHeight);
 
@@ -897,6 +898,9 @@ namespace TaymadeEntities.Support
                 }
                 // create the resized image
                 reSizedImage = Support.ResizeImage(image, newWidth, newHeight);
+                
+                // if we want to add text it needs to be on the resized image
+
 
                 // find which dimension is furthest away from target
                 int xdif = (maxWidth - reSizedImage.Width) / 2;
@@ -941,26 +945,29 @@ namespace TaymadeEntities.Support
                 //index += 1;
                 // dispose of temporary bitmap
                 newBitmap.Dispose();
-
+                newBitmap = null;
                 // update progress
-                MovieProgressEventargs progressChangedEventArgs = new MovieProgressEventargs((index * 100) / count, null)
-                {
-                    ProgressPercentage = (index * 100) / count,
-                    Info = "building bitmaps",
-                    Bitmap = ConvertFileToAvaloniaBitmap(tempImageFileName),
-                    BitmapPath = tempImageFileName
-                };
+                //MovieProgressEventargs progressChangedEventArgs = new MovieProgressEventargs((index * 100) / count, null)
+                //{
+                //    ProgressPercentage = (index * 100) / count,
+                //    Info = "building bitmaps",
+                //    Bitmap = ConvertFileToAvaloniaBitmap(tempImageFileName),
+                //    //BitmapPath = tempImageFileName
+                //};
 
-                OnProgress(progressChangedEventArgs);
-                await Task.Delay(50);
-                solidBrush.Dispose();
+                //OnProgress(progressChangedEventArgs);
+                
+                System.Threading.Thread.Sleep(50);
+                //await Task.Delay(50);
+                solidBrush?.Dispose();
+                solidBrush = null;
             }
             return success;
         }
 
         // double absMaxWidth, double absMaxHeight, MovieProgressEventargs progressChangedEventArgs, int indx,
         internal async Task<(int maxWidth, int maxHeight)>
-            GetMaxSizes(MovieProgressEventargs progressChangedEventArgs, ImageItemsCollection images)
+            GetMaxSizes(MovieProgressEventargs? progressChangedEventArgs, ImageItemsCollection images)
         {
             double absMaxWidth = 0;
             double absMaxHeight = 0;
@@ -968,13 +975,16 @@ namespace TaymadeEntities.Support
             int cnt = 1;
             foreach (ImageItem item in images)
             {
-                progressChangedEventArgs = new MovieProgressEventargs(0, null);
-                progressChangedEventArgs.ProgressPercentage = (indx * 100) / cnt;
-                progressChangedEventArgs.Info = "building bitmaps";
-                progressChangedEventArgs.Bitmap = item.ImageBMP;
-                indx += 1;
-                OnProgress(progressChangedEventArgs);
-                await Task.Delay(200);
+                if (progressChangedEventArgs != null)
+                {
+                    progressChangedEventArgs = new MovieProgressEventargs(0, null);
+                    progressChangedEventArgs.ProgressPercentage = (indx * 100) / cnt;
+                    progressChangedEventArgs.Info = "building bitmaps";
+                    progressChangedEventArgs.Bitmap = item.ImageBMP;
+                    indx += 1;
+                    OnProgress(progressChangedEventArgs);
+                    await Task.Delay(200);
+                }
                 //Support_ProgressInformation(null, progressChangedEventArgs);
                 if (item.ImageBMP != null && item.ImageBMP.Size.Height > absMaxHeight) absMaxHeight = item.ImageBMP.Size.Height;
                 if (item.ImageBMP != null && item.ImageBMP.Size.Width > absMaxWidth) absMaxWidth = item.ImageBMP.Size.Width;
@@ -1990,7 +2000,9 @@ namespace TaymadeEntities.Support
 
         public static Bitmap? ConvertAvaloniaBMPToSystem(Avalonia.Media.Imaging.Bitmap sourceBMP)
         {
+            
             Bitmap destImage = null;
+            if (sourceBMP == null) return destImage;
             using (MemoryStream imageStream = new MemoryStream())
             {
                 sourceBMP.Save(imageStream);
@@ -2789,9 +2801,7 @@ namespace TaymadeEntities.Support
                 // then we go through all images and save them to a created temp directory 
                 // resizing the images to fit 
                 SolidBrush solidBrush = new SolidBrush(System.Drawing.Color.WhiteSmoke);
-
                 int count = imageItems.Count;
-
 
                 // now process images for this video
 

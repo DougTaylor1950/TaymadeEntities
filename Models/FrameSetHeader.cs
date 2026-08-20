@@ -24,6 +24,7 @@ namespace TaymadeEntities.Models
         private FrameSetCollection? frameSetList;
         private int? movieImageId = 0;
         private int? lastFrameSetIndex;
+        private FrameSet? titleFrameSet;
 
         #endregion Private Fields
 
@@ -65,10 +66,10 @@ namespace TaymadeEntities.Models
 
         public new int Id { get; set; }
 
-        public int? LastFrameSetIndex 
-        { 
-            get => lastFrameSetIndex; 
-            set => this.RaiseAndSetIfChanged(ref lastFrameSetIndex, value); 
+        public int? LastFrameSetIndex
+        {
+            get => lastFrameSetIndex;
+            set => this.RaiseAndSetIfChanged(ref lastFrameSetIndex, value);
         }
         public int MaxXSize { get; internal set; }
 
@@ -81,6 +82,13 @@ namespace TaymadeEntities.Models
         }
 
         public bool SplitIntoMovies { get; set; } = false;
+
+        [NotMapped]
+        public FrameSet? TitleFrameSet
+        {
+            get => titleFrameSet;
+            set => this.RaiseAndSetIfChanged(ref titleFrameSet, value);
+        }
 
         #endregion Public Properties
 
@@ -103,20 +111,23 @@ namespace TaymadeEntities.Models
             // go through each frameset
             foreach (FrameSet frameSet in FrameSetList)
             {
-                if (frameSet.StartImage < 1) frameSet.StartImage = 1;
-                // and set the image items for that frame set
-
-                bool first = true; // set startimage name
-                for (int i = frameSet.StartImage - 1; i < imageItems.Count; i++)
+                if (frameSet.Index > 0)
                 {
-                    var item = imageItems[i];
-                    if (first)
+                    if (frameSet.StartImage < 1) frameSet.StartImage = 1;
+                    // and set the image items for that frame set
+
+                    bool first = true; // set startimage name
+                    for (int i = frameSet.StartImage - 1; i < imageItems.Count; i++)
                     {
-                        frameSet.StartImageName = item.ImageName;
-                        frameSet.Save();
-                        first = false; 
+                        var item = imageItems[i];
+                        if (first)
+                        {
+                            frameSet.StartImageName = item.ImageName;
+                            frameSet.Save();
+                            first = false;
+                        }
+                        item.FrameSetIndex = frameSet.Index;
                     }
-                    item.FrameSetIndex = frameSet.Index;
                 }
             }
 
@@ -218,7 +229,12 @@ namespace TaymadeEntities.Models
 
         internal void Save()
         {
-            DataController.MovieController.UpdateFrameSetHeader(this);
+            if (MovieImageId == 0) return; 
+            if (Id == 0)
+                DataController.MovieController.InsertFrameSetHeader(this);
+            else
+
+                DataController.MovieController.UpdateFrameSetHeader(this);
         }
 
         #endregion Internal Methods

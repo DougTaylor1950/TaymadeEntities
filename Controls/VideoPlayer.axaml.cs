@@ -95,16 +95,16 @@ namespace TaymadeEntities.Controls
             }
         }
 
-        private void VideoViewOnPointerEntered(object sender, PointerEventArgs e)
-        {
-            ControlsPanel.IsVisible = true;
-            System.Threading.Thread.Sleep(100);
-        }
+        //private void VideoViewOnPointerEntered(object sender, PointerEventArgs e)
+        //{
+        //    ControlsPanel.IsVisible = true;
+        //    System.Threading.Thread.Sleep(100);
+        //}
 
-        private void VideoViewOnPointerExited(object sender, PointerEventArgs e)
-        {
-            ControlsPanel.IsVisible = false;
-        }
+        //private void VideoViewOnPointerExited(object sender, PointerEventArgs e)
+        //{
+        //    ControlsPanel.IsVisible = false;
+        //}
 
         private void Button_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {

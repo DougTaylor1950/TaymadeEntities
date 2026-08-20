@@ -74,6 +74,8 @@ namespace TaymadeEntities.Support
         public new int ProgressPercentage { get; set; }
 
         public Avalonia.Media.Imaging.Bitmap? Bitmap { get; set; }
+
+        public System.Drawing.Bitmap? SystemBitmap { get; set; }
     }
 
     /// <summary>

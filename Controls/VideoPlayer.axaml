@@ -6,6 +6,7 @@
 			 xmlns:viewModels="using:TaymadeEntities.ViewModels"
 			 xmlns:views="using:TaymadeEntities.Views"
 			 xmlns:controls="using:TaymadeEntities.Controls"
+			 xmlns:tcb="using:TaymadeControls.Buttons"
 			 mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="1050"
 			 x:Class="TaymadeEntities.Controls.VideoPlayer"
 			 DataContextChanged="OnDataContextChanged"
@@ -18,74 +19,95 @@
 	<StackPanel>
 		<Grid RowDefinitions="Auto, *, Auto">
 			<StackPanel Grid.Row="0"  Orientation="Vertical">
-				<Grid  ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,100,40,40,300,100"
-					   RowDefinitions="Auto,Auto,Auto">
-					<TextBlock  HorizontalAlignment="Center" Grid.Column="6" Text="{Binding CurrentMovie.MovieName}" />
-				</Grid>
-				<Grid  ColumnDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,100,40,40,200,100"
-					   RowDefinitions="Auto,Auto,Auto">
-					<TextBlock Grid.Column="12" Grid.Row="0" Text="Volume"/>
+				
+					
+				<Grid  ColumnDefinitions="60,60,60,60,60,60,60,60,60,60,60,60,125,100,40,40,200,100"
+					   RowDefinitions="Auto,Auto"
+					   Margin="5,5,5,5"
+					   >
+					<TextBlock  HorizontalAlignment="Center"
+								Grid.Row="0"
+								Grid.Column="0"
+								Text="{Binding CurrentMovie.MovieName}" />
+				
+					<TextBlock Grid.Column="16" Grid.Row="0" Text="Volume"/>
 
-					<Button Command="{Binding Plus1}" Margin="5" Grid.Column="0" Grid.Row="1" Content="+1" Classes="pg" />
-					<Button Command="{Binding Plus5}" Margin="5" Grid.Column="1" Grid.Row="1" Content="+5" Classes="pg">
-					</Button>
+					<tcb:EnhancedButton Command="{Binding Plus1}" Margin="5,1,1,1"
+										Grid.Column="4"
+										HotKey="Alt+D0"
+										Grid.Row="1" LabelText="+1" Classes="pg" />
+					<tcb:EnhancedButton Command="{Binding Plus5}" Margin="5"
+										Grid.Column="5" Grid.Row="1" LabelText="+5" HotKey="Alt+D5" Classes="pg" />
 
-					<Button Command="{Binding Plus10}" Margin="5" Grid.Column="2" Grid.Row="1" Content="+10" Classes="pg">
-					</Button>
 
-					<Button Command="{Binding Plus20}" Margin="5" Grid.Column="3" Grid.Row="1" Content="+20" Classes="pg">
-					</Button>
+					<tcb:EnhancedButton Command="{Binding Plus10}" Margin="1,1,1,1"
+										Grid.Column="6" Grid.Row="1" LabelText="+10" HotKey="Alt+D1" Classes="pg" />
 
-					<Button Command="{Binding Minus1}" Margin="5" Grid.Column="4" Grid.Row="1" Content="-1" Classes="pink"/>
+					<tcb:EnhancedButton Command="{Binding Plus20}" Margin="1,1,1,1" HotKey="Alt+D2"
+										Grid.Column="7" Grid.Row="1" LabelText="+20" Classes="pg"/>
 
-					<Button Command="{Binding Minus5}" Margin="5" Grid.Column="5" Grid.Row="1" Content="-5" Classes="pink"/>
 
-					<Button Command="{Binding Minus10}" Margin="5" Grid.Column="6" Grid.Row="1" Content="-10" Classes="pink"/>
+					<tcb:EnhancedButton Command="{Binding Minus1}" Margin="5,1,1,1" HotKey="Ctrl+D1"
+										Grid.Column="8" Grid.Row="1" LabelText="-1" Classes="pink"/>
 
-					<Button Command="{Binding Minus0p5}" Margin="5" Grid.Column="7" Grid.Row="1" Content="-0.5" Classes="pink"/>
+					<tcb:EnhancedButton Command="{Binding Minus5}" Margin="1,1,1,1" HotKey="Ctrl+D5"
+										Grid.Column="9" Grid.Row="1" LabelText="-5" Classes="pink"/>
 
-					<NumericUpDown Name="moveTxt" Grid.Row="1" Grid.Column="8" Value="0.1" Increment="0.1" ></NumericUpDown>
+					<tcb:EnhancedButton Command="{Binding Minus10}" Margin="1,1,1,1" HotKey="Ctrl+D0"
+										Grid.Column="10" Grid.Row="1" LabelText="-10" Classes="pink"/>
 
-					<Button
+					<tcb:EnhancedButton Command="{Binding Minus0p5}" Margin="1,1,10,1" HotKey="Ctrl+Shift+D5"
+										Grid.Column="11" Grid.Row="1" LabelText="-0.5" Classes="pink"/>
+
+					<NumericUpDown Name="moveTxt"
+								   Grid.Row="1" Grid.Column="12"
+								   Height="40" Width="120"
+								   Value="{Binding MovementValue}" Increment="0.1" ></NumericUpDown>
+
+					<tcb:EnhancedButton
 					Command="{Binding MoveByValue}"
-					Margin="5"
-					Grid.Row="1"
-					Grid.Column="9"
-					Content="Move By"
-					Classes="yellow">
-
-					</Button>
-
-					<Button
-					Command="{Binding CloseApp}"
+					HotKey="Alt+M"
 					Margin="5"
 					Grid.Row="1"
 					Grid.Column="13"
-					Content="Exit"
-					Classes="gray" HorizontalAlignment="Right">
+					LabelText="Move By"
+					Classes="yellow"/>
 
-					</Button>
 
-					<Button
+
+					<tcb:EnhancedButton
+					Command="{Binding CloseApp}"
+					Margin="5"
+					Grid.Row="1"
+					Grid.Column="18"
+					LabelText="Exit"
+
+					Background="Red"
+					Foreground="Yellow"
+					HorizontalAlignment="Right" />
+
+
+
+					<tcb:ImagedButtonNoText
 					Command="{Binding PrevBookmark}"
 					Margin="5"
 					Grid.Row="1"
-					Grid.Column="10"
-					Content="Exit"
-					Classes="gray" HorizontalAlignment="Right">
-						<!--	<Image Source="/Assets/ARW02LT-2.png" Height="20" /> -->
-					</Button>
-					<Button
+					Grid.Column="14"
+					ImageSource ="avares://TaymadeControls/Assets/left_arrow.png"
+					Classes="gray" HorizontalAlignment="Right" />
+					<!--	<Image Source="/Assets/ARW02LT-2.png" Height="20" /> -->
+
+					<tcb:ImagedButtonNoText
 					Command="{Binding NextBookmark}"
 					Margin="5"
 					Grid.Row="1"
-					Grid.Column="11"
-					Content="Exit"
-					Classes="gray" HorizontalAlignment="Right">
-						<!--<Image Source="/Assets/ARW02RT-2.png" Height="20" />-->
-					</Button>
+					Grid.Column="15"
+					ImageSource="avares://TaymadeControls/Assets/right_arrow.png"
+					Classes="gray" HorizontalAlignment="Right"/>
+					<!--<Image Source="/Assets/ARW02RT-2.png" Height="20" />-->
+
 					<Slider Name="volumeSetter" Grid.Row="1"
-							Grid.Column="12"
+							Grid.Column="16"
 							Ticks="0,10,20,30,40,50,60,70,80,90,100"
 							TickFrequency="10"
 							TickPlacement="TopLeft"
@@ -93,17 +115,94 @@
 							Maximum="100"
 							Minimum="0"
 							Width="190"/>
+					<tcb:EnhancedButton Command="{Binding Play}" Margin="5,1,1,1"
+										Height="40"
+										Grid.Column="0"
+										Grid.Row="1"
+										LabelText="Play"
+										HotKey="Ctrl+P">
+						<Button.Styles>
+							<Style Selector="Button">
+								<Setter Property="Background" Value="Wheat" />
+							</Style>
+							<Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+								<Setter Property="Background" Value="Blue" />
+								<Setter Property="InputElement.Cursor" Value="Hand"/>
+								<Setter Property="TextBlock.Foreground" Value="Yellow"/>
+							</Style>
+						</Button.Styles>
 
+					</tcb:EnhancedButton>
+
+					<tcb:EnhancedButton Command="{Binding Pause}"
+										Margin="1,1,1,1"
+										HotKey="Ctrl+Space"
+										LabelText="Pause"
+										Grid.Column="1"
+										Grid.Row="1"
+										>
+						<Button.Styles>
+							<Style Selector="Button">
+								<Setter Property="Background" Value="Wheat" />
+							</Style>
+							<Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+								<Setter Property="Background" Value="Blue" />
+								<Setter Property="InputElement.Cursor" Value="Hand"/>
+								<Setter Property="TextBlock.Foreground" Value="Yellow"/>
+							</Style>
+						</Button.Styles>
+					</tcb:EnhancedButton>
+
+					<tcb:EnhancedButton Command="{Binding Stop}"
+										Background="Wheat"
+										Margin="1,1,1,1"
+										Grid.Column="2"
+										Grid.Row="1"
+										LabelText="Stop"
+										HotKey="Ctrl+S">
+						<Button.Styles>
+							<Style Selector="Button">
+								<Setter Property="Background" Value="Wheat" />
+							</Style>
+							<Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+								<Setter Property="Background" Value="Blue" />
+								<Setter Property="InputElement.Cursor" Value="Hand"/>
+								<Setter Property="TextBlock.Foreground" Value="Yellow"/>
+							</Style>
+						</Button.Styles>
+
+					</tcb:EnhancedButton>
+					<tcb:EnhancedButton LabelText="Grab Image"
+										HotKey="Alt+G"
+										Command="{Binding Grab}"
+										Margin="1,1,5,1"
+										Grid.Row="1"
+										Grid.Column="3">
+						<Button.Styles>
+							<Style Selector="Button">
+								<Setter Property="Background" Value="Wheat" />
+							</Style>
+							<Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+								<Setter Property="Background" Value="Blue" />
+								<Setter Property="InputElement.Cursor" Value="Hand"/>
+								<Setter Property="TextBlock.Foreground" Value="Yellow"/>
+							</Style>
+						</Button.Styles>
+					</tcb:EnhancedButton>
 				</Grid>
 				<Grid ColumnDefinitions="75,150,100,100,50,100,50,70,290,60,80"
-					  RowDefinitions="70">
+					  RowDefinitions="Auto"
+					  Margin="1,1,1,1">
 
-					<TextBlock Text="Position" Grid.Row="0" HorizontalAlignment="Left" Grid.Column="0"/>
+					<TextBlock Text="Position"
+							   Margin="5,5,5,5"
+							   Grid.Row="0" HorizontalAlignment="Left" Grid.Column="0"/>
 
-					<TextBlock Text="{Binding Percent}" Grid.Row="0"  Grid.Column="1"/>
-					<TextBlock Text ="BookMarks" Grid.Row="0" Grid.Column="2"/>
+					<TextBlock Text="{Binding Percent}" Margin="5,5,5,5" Grid.Row="0"  Grid.Column="1"/>
+					<TextBlock Text ="BookMarks" Grid.Row="0" Margin="5,5,5,5" Grid.Column="2"/>
 					<ComboBox ItemsSource ="{Binding CurrentMovie.Bookmarks}"
 							  Name="BookmarksCombo"
+							  Margin="5,5,1,5"
 							  Grid.Row="0"
 							  Grid.Column="3"
 							  SelectedItem="{Binding CurrentBookmark}"
@@ -116,23 +215,18 @@
 									 Grid.Column="5"
 									 Grid.Row="0"/>
 
-					<TextBlock Text ="Used" Grid.Row="0" Grid.Column="6"/>
+					<TextBlock Text ="Used"
+							   Margin="5,5,5,5"
+							   Grid.Row="0"
+							   Grid.Column="6" />
 					<ComboBox Name="UsedBooks"
 							  ItemsSource="{Binding UsedBookmarks}" Grid.Row="0" Grid.Column="7"
 							  SelectedItem="{Binding SelectedBookmark}"
 							  SelectionChanged="Used_SelectionChanged"	/>
 					<!--<TextBlock Text="Speed" Grid.Row="0"  Grid.Column="8"/> -->
 
-					<!--
-					<ComboBox  Grid.Row="0"
-					Grid.Column="9"
-					HorizontalAlignment="Left"
-					Name="SpeedControl"
-					ItemsSource="{Binding SpeedList}"
-					SelectedItem="{Binding CurrentSpeed}"
-					SelectionChanged="SpeedControl_SelectionChanged"
-					/> -->
-					<TextBlock Text="Screen" Grid.Row="0"  Grid.Column="9"/>
+
+					<TextBlock Text="Screen" Margin="5,5,5,5" Grid.Row="0"  Grid.Column="9"/>
 
 					<ComboBox
 					Grid.Row="0"
@@ -145,6 +239,7 @@
 
 					<controls:SpeedPicker
 					Height="68"
+					Margin="5,1,5,5"
 					Background="Beige"
 					ButtonWidth="30"
 					BorderBrush="Gray"
@@ -155,112 +250,50 @@
 					</controls:SpeedPicker>
 
 				</Grid>
+
 			</StackPanel>
 		</Grid>
 		<Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto"
 			  RowDefinitions="Auto">
 			<StackPanel Orientation="Horizontal"  >
-				<StackPanel Orientation="Vertical">
-					<vlc:VideoView Grid.Row="0" Grid.Column="0"  MediaPlayer="{Binding MediaPlayerPlus}"
-								   Width="{Binding ScreenWidth}"
-								   Height="{Binding ScreenHeight}"
-								   HorizontalAlignment="Stretch"
-								   VerticalAlignment="Stretch"
-								   PointerEntered="VideoViewOnPointerEntered"
-								   PointerExited="VideoViewOnPointerExited">
-						<Panel Name="ControlsPanel" >
-							<Grid  ColumnDefinitions="Auto,Auto,Auto,Auto,Auto"
-								   RowDefinitions="Auto,Auto">
-
-								<StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" Background="#900000FF" Spacing="20">
-									<Button Command="{Binding Play}" Margin="20"  Grid.Column="0">
-										<Button.Styles>
-											<Style Selector="Button">
-												<Setter Property="Background" Value="Wheat" />
-											</Style>
-											<Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-												<Setter Property="Background" Value="Blue" />
-												<Setter Property="InputElement.Cursor" Value="Hand"/>
-												<Setter Property="TextBlock.Foreground" Value="Yellow"/>
-											</Style>
-										</Button.Styles>
-										Play
-									</Button>
-									<Button Command="{Binding Pause}"
-											Margin="20"
-
-											Grid.Column="1">
-										<Button.Styles>
-											<Style Selector="Button">
-												<Setter Property="Background" Value="Wheat" />
-											</Style>
-											<Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-												<Setter Property="Background" Value="Blue" />
-												<Setter Property="InputElement.Cursor" Value="Hand"/>
-												<Setter Property="TextBlock.Foreground" Value="Yellow"/>
-											</Style>
-										</Button.Styles>
-
-										Pause
-									</Button>
-									<Button Command="{Binding Stop}" Margin="20" Background="Wheat" Grid.Column="2">
-										<Button.Styles>
-											<Style Selector="Button">
-												<Setter Property="Background" Value="Wheat" />
-											</Style>
-											<Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-												<Setter Property="Background" Value="Blue" />
-												<Setter Property="InputElement.Cursor" Value="Hand"/>
-												<Setter Property="TextBlock.Foreground" Value="Yellow"/>
-											</Style>
-										</Button.Styles>
-										Stop
-									</Button>
-									<Button Content="Grab Image" Command="{Binding Grab}" Margin="20"  Grid.Column="3">
-										<Button.Styles>
-											<Style Selector="Button">
-												<Setter Property="Background" Value="Wheat" />
-											</Style>
-											<Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-												<Setter Property="Background" Value="Blue" />
-												<Setter Property="InputElement.Cursor" Value="Hand"/>
-												<Setter Property="TextBlock.Foreground" Value="Yellow"/>
-											</Style>
-										</Button.Styles>
-									</Button>
+				<Border BorderBrush="Black"
+						BorderThickness="2"
+						CornerRadius="5">
+					<StackPanel Orientation="Vertical">
+						<vlc:VideoView Grid.Row="0" Grid.Column="0"  
+									   MediaPlayer="{Binding MediaPlayerPlus}"
+									   Width="{Binding ScreenWidth}"
+									   Height="{Binding ScreenHeight}"
+									   HorizontalAlignment="Stretch"
+									   VerticalAlignment="Stretch"
+									   />
 
 
+						<Border BorderBrush="Black"
+								BorderThickness="2"
+								CornerRadius="5">
+							<StackPanel Width="{Binding ScreenWidth}"
+										Background="LightGray"
+										Height="48">
+								<Slider Minimum="0"
+										Maximum="100"
+										Value="{Binding Progress, Mode=TwoWay}"
+										Width="{Binding ScreenWidth}"
+										TickFrequency="5"
+										TickPlacement="TopLeft"
+										Foreground="Black"
+										Height="45"
+										Margin="2"
+
+										HorizontalAlignment="Center"
+										VerticalAlignment="Bottom"
 
 
-
-								</StackPanel>
-							</Grid>
-						</Panel>
-					</vlc:VideoView>
-					<Border BorderBrush="Black" 
-							BorderThickness="2"
-							CornerRadius="5">
-						<StackPanel Width="{Binding ScreenWidth}"
-									Background="LightGray"
-									Height="48">
-							<Slider Minimum="0"
-									Maximum="100"
-									Value="{Binding Progress, Mode=TwoWay}"
-									Width="{Binding ScreenWidth}"
-									TickFrequency="5"
-									TickPlacement="TopLeft"
-									Foreground="Black"
-									Height="45"
-									Margin="2"
-
-									HorizontalAlignment="Center"
-									VerticalAlignment="Bottom"
-
-
-									/>
-						</StackPanel>
-					</Border>
-				</StackPanel>
+										/>
+							</StackPanel>
+						</Border>
+					</StackPanel>
+				</Border>
 				<Grid
 				ColumnDefinitions="Auto"
 				RowDefinitions="Auto,20,20,20,20">

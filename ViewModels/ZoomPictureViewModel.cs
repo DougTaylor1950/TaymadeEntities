@@ -39,6 +39,8 @@ namespace TaymadeEntities.ViewModels
         private int step = 5;
         private HorizontalAlignment? mainImageAlignment = HorizontalAlignment.Center;
         private bool isConvertedImageVisible = false;
+        private bool zooming = false;
+        private Bitmap? zoomedImage;
 
         #endregion Private Fields
 
@@ -122,6 +124,22 @@ namespace TaymadeEntities.ViewModels
             set => this.RaiseAndSetIfChanged(ref imageBMP, value);
         }
 
+        //public Bitmap? ZoomedImage
+        //{
+        //    get
+        //    {
+        //        return zoomedImage;
+        //    }
+
+        //    set => this.RaiseAndSetIfChanged(ref zoomedImage, value);
+        //}
+
+        //public bool Zooming 
+        //{
+        //    get => zooming; 
+        //    set => this.RaiseAndSetIfChanged(ref zooming, value);
+        //}
+
         public Bitmap? ImageBMPConverted
         {
             get
@@ -147,7 +165,7 @@ namespace TaymadeEntities.ViewModels
             get => imageHeight;
             set => this.RaiseAndSetIfChanged(ref imageHeight, value);
         }
-
+        public double OriginalImageHeight { get; private set; }
         public string? ImagePath
         {
             get => imagePath;
@@ -159,7 +177,7 @@ namespace TaymadeEntities.ViewModels
             get => imageWidth;
             set => this.RaiseAndSetIfChanged(ref imageWidth, value);
         }
-
+        public double OriginalImageWidth { get; private set; }
         public int Progress
         {
             get => progress;
@@ -259,7 +277,9 @@ namespace TaymadeEntities.ViewModels
                 if (imageBMP != null)
                 {
                     ImageWidth = imageBMP.Size.Width;
+                    OriginalImageWidth = imageBMP.Size.Width;
                     ImageHeight = imageBMP.Size.Height;
+                    OriginalImageHeight = imageBMP.Size.Height;
                 }
 
                 AspectRatio = ImageWidth / ImageHeight;
@@ -284,6 +304,28 @@ namespace TaymadeEntities.ViewModels
 
                     SystemBitmap = Support.Support.ResizeImage(SystemBitmap, (int)(800 * AspectRatio), 800);
                 }
+
+                //if (ImageWidth > 800)
+                //{
+                //    // we need to scale the image down
+                //    // new width will be 800 * aspect ratio
+                //    //using (var newBitmap = new System.Drawing.Bitmap(ImagePath))
+                //    using (var reSizedImage = Support.Support.ResizeImage(SystemBitmap, 800, (int)(800 / AspectRatio)))
+                //    {
+                //        //SystemBitmap = reSizedImage;
+                //        imageBMP = Support.Support.ConvertFileToAvaloniaBitmap(reSizedImage);
+                //        // convert to Avalonia Image
+                //    }
+
+                //    if (imageBMP != null)
+                //    {
+                //        ImageWidth = imageBMP.Size.Width;
+                //        ImageHeight = imageBMP.Size.Height;
+                //    }
+
+                //    SystemBitmap = Support.Support.ResizeImage(SystemBitmap, (int)(800 * AspectRatio), 800);
+                //}
+
 
                 this.RaisePropertyChanged(nameof(ImageWidth));
                 this.RaisePropertyChanged(nameof(ImageHeight));

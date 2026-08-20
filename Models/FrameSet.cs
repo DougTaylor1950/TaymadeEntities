@@ -113,7 +113,14 @@ namespace TaymadeEntities.Models
 
         internal void Save()
         {
-            DataController.MovieController.UpdateFrameSet(this);
+            try
+            {
+                DataController.MovieController.UpdateFrameSet(this);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         internal void SetStartAndEnd(int start, int end)

@@ -45,7 +45,7 @@ namespace TaymadeEntities.ViewModels
         private bool playing = false;
         private double progress = 0;
         private double progressBar = 1.0;
-        private int screenHeight = 800;
+        private int screenHeight = 750;
 
         /// <summary>
         /// The screen width
@@ -85,7 +85,7 @@ namespace TaymadeEntities.ViewModels
             AutoPlay = autoPlay;
             MediaPlayerFull = MediaPlayer;
             FullScreen = true;
-            ScreenHeight = 800;
+            ScreenHeight = 750;
             ScreenWidth = 1200;
             IsMusic = false;
 
@@ -146,8 +146,9 @@ namespace TaymadeEntities.ViewModels
             if (!full)
             {
                 MediaPlayerPlus = MediaPlayer;
+                MediaPlayerPlus.EnableKeyInput = false;
                 FullScreen = full;
-                ScreenHeight = 800;
+                ScreenHeight = 750;
                 ScreenWidth = 1200;
             }
             else
@@ -438,10 +439,7 @@ namespace TaymadeEntities.ViewModels
 
         public void CloseApp()
         {
-            if (Caller != null)
-            {
-                Caller.Close();
-            }
+            
         }
 
         public void DecVolume()
@@ -605,6 +603,12 @@ namespace TaymadeEntities.ViewModels
             MoveBy(-5.0);
         }
 
+        public double MovementValue 
+        {
+            get => movementValue; 
+            set => this.RaiseAndSetIfChanged(ref movementValue, value); 
+        }
+
         //public PlayerControl? Player { get; internal set; }
         public void MoveByValue()
         {
@@ -612,13 +616,7 @@ namespace TaymadeEntities.ViewModels
 
             if (main != null)
             {
-                //VideoPlayer vp = main.FindControl<VideoPlayer>("VideoPlay");
-                //if (vp != null)
-                //{
-                //    string moveValue = vp.moveTxt.Text;
-                //    double dbValue = Double.Parse(moveValue);
-                //    MoveBy(dbValue);
-                //}
+                   MoveBy(MovementValue);
             }
         }
 
@@ -1023,6 +1021,7 @@ namespace TaymadeEntities.ViewModels
 
         private TextWriter writer { get; set; } = null;
         private bool initialised = false;
+        private double movementValue = 0.1;
 
         private void InitialseViewModel()
         {
@@ -1046,6 +1045,7 @@ namespace TaymadeEntities.ViewModels
             };
 
             MediaPlayer = new MediaPlayer(_libVlc);
+            MediaPlayer.EnableKeyInput = false;
 
             ScreenSizelist = new List<int>() { 400, 800, 1200, 1400, 1600, 1800 };
 

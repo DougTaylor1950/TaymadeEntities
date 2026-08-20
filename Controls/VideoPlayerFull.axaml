@@ -66,48 +66,57 @@
 					<tcb:ImagedButton Command="{Binding Plus20}"
 									  Margin="5,5,5,5"
 									  LabelText="+20"
+									  HotKey="Alt+D2"
 									  ImageSource="avares://TaymadeControls/Assets/move.png"
 									  />
 					<tcb:ImagedButton Command="{Binding Plus10}"
 									  Margin="5,5,5,5"
 									  LabelText="+10"
+									  HotKey="Alt+D1"
 									  ImageSource="avares://TaymadeControls/Assets/move.png"
 									  />
 					<tcb:ImagedButton Command="{Binding Plus5}"
 									  Margin="5,5,5,5"
 									  LabelText="+5"
+									  HotKey="Alt+D5"
 									  ImageSource="avares://TaymadeControls/Assets/move.png"
 									  />
 					<tcb:ImagedButton Command="{Binding Plus1}"
 									  Margin="5,5,5,5"
 									  LabelText="+1"
+									  HotKey="Alt+Control+D1"
 									  ImageSource="avares://TaymadeControls/Assets/move.png"
 									  />
 					<tcb:ImagedButton Command="{Binding Minus1}"
 									  Margin="5,5,5,5"
 									  LabelText="-1"
+									  HotKey="Control+D1"
 									  ImageSource="avares://TaymadeControls/Assets/moveleft.png"
 									  />
 					<tcb:ImagedButton Command="{Binding Minus5}"
 									  Margin="5,5,5,5"
 									  LabelText="-5"
+									  HotKey="Control+D5"
 									  ImageSource="avares://TaymadeControls/Assets/moveleft.png"
 									  />
 					<tcb:ImagedButton Command="{Binding Minus10}"
 									  Margin="5,5,20,5"
 									  LabelText="-10"
+									  HotKey="Control+D0"
 									  ImageSource="avares://TaymadeControls/Assets/moveleft.png"
 									  />
 					<tcb:ImagedButton Command="{Binding NextBookmark}"
 									  IsVisible="{Binding HasBookmarks}"
 									  Margin="20,5,5,5"
 									  LabelText="Next"
+									  HotKey="Right"
 									  ImageSource="avares://TaymadeControls/Assets/next.png"
 									  />
 					<tcb:ImagedButton Command="{Binding PrevBookmark}"
 									  IsVisible="{Binding HasBookmarks}"
 									  Margin="5,5,20,5"
 									  LabelText="Prev"
+									  HotKey="Left"
 
 									  ImageSource="avares://TaymadeControls/Assets/prev.png"
 									  />

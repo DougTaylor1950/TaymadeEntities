@@ -84,7 +84,8 @@ namespace TaymadeEntities.Controllers
         public FrameSetCollection? GetFrameSetsByHeaderId(int frameSetHeaderId)
         {
             FrameSetCollection? returnedSet = null;
-            List<FrameSet>? temp = movieRepository.GetFrameSetsByHeaderId(frameSetHeaderId)?.ToList();
+            List<FrameSet>? temp = movieRepository.GetFrameSetsByHeaderId(frameSetHeaderId)?
+                .OrderBy(f=>f.Index).ToList();
             if (temp != null)
             {
                 returnedSet = new FrameSetCollection(temp);
