@@ -45,6 +45,10 @@ namespace TaymadeEntities.Support
 
         public string OutputStream { get; internal set; }
 
+        public string? BitmapFileName { get; internal set; }
+
+        public Avalonia.Media.Imaging.Bitmap? Bitmap { get; set; }
+
         #endregion
     }
 }

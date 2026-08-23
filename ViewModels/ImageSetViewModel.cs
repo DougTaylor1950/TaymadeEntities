@@ -1544,7 +1544,7 @@ namespace TaymadeEntities.ViewModels
             //}
         }
 
-        private void DoReloadPicture()
+        internal void DoReloadPicture()
         {
             RootFolder.CurrentImageItem.ReloadImage();
         }
@@ -1571,141 +1571,8 @@ namespace TaymadeEntities.ViewModels
                     {
                         ZoomInfo zoomInfo = await pictureDialog.ShowDialog<ZoomInfo>(main);
                         Zooming = false;
-                        if (zoomInfo != null && zoomInfo.ZoomFrames > 0)
+                        if (zoomInfo != null && zoomInfo.ZoomFrames >= 0)
                         {
-                            //ZoomedImage = null;
-                            //Support.Support support = new Support.Support();
-                            //support.ProgressInformation += Support_ProgressInformation;
-
-                            //string imagePath = "";
-                            //if (RootFolder.CurrentImageItem != null)
-                            //{
-                            //    imagePath = RootFolder.CurrentImageItem.ImagePath;
-                            //    zoomInfo.ImagePath = imagePath;
-                            //}
-                            //MovieProgress += ImageSetViewModel_MovieProgress;
-
-                            //if (RootFolder?.CurrentImageItem?.ImageBMP == null) return;
-                            //zoomInfo.ImageWidth = viewModel.ImageWidth;
-                            //zoomInfo.ImageHeight = viewModel.ImageHeight;
-
-                            //bool success = await BuildImagesInternal(zoomInfo, imagePath);
-
-                            //System.Threading.Thread.Sleep(1000);
-
-                            //CurrentSubFolder.FrameSetHeader = DataController.MovieController.GetFrameSetHeaderByMovieImageId(CurrentSubFolder.Id);
-                            ////IsConvertedImageVisible = false;
-
-                            //int maxWidth = CurrentSubFolder.FrameSetHeader.MaxXSize;
-                            //int maxHeight = CurrentSubFolder.FrameSetHeader.MaxYSize;
-                            //if (CurrentSubFolder.FrameSetHeader.MaxXSize == 0 || CurrentSubFolder.FrameSetHeader.MaxYSize == 0)
-                            //{
-                            //    ImageItemsCollection? images = CurrentSubFolder.ImageItems;
-
-
-                            //    //(absMaxWidth, absMaxHeight, progressChangedEventArgs, indx,
-                            //    (maxWidth, maxHeight) =
-                            //        await support.GetMaxSizes(null, images);
-                            //    CurrentSubFolder.FrameSetHeader.MaxXSize = maxWidth;
-                            //    CurrentSubFolder.FrameSetHeader.MaxYSize = maxHeight;
-                            //    //currentSubFolder.ToJson();
-                            //    CurrentSubFolder.Save();
-                            //}
-
-                            //// need to covert these images to a video, 
-                            //ImageItemsCollection? imageItems = new ImageItemsCollection();
-
-                            //var files = Directory.GetFiles(Path.Combine(Path.GetDirectoryName(imagePath), "Zoomed"), "*.jpg").ToList();
-                            //int indx = 1;
-                            //foreach (var file in files)
-                            //{
-                            //    var imageItem = new ImageItem()
-                            //    {
-                            //        ImagePath = file,
-                            //        ImageName = System.IO.Path.GetFileName(file),
-                            //        FrameSetIndex = 0,
-                            //        Selected = false
-                            //    };
-                            //    imageItems.Add(imageItem);
-                            //    var progressChangedEventArgs = new Support.MovieProgressEventargs(0, null);
-                            //    progressChangedEventArgs.ProgressPercentage = (indx * 100) / files.Count;
-                            //    progressChangedEventArgs.Info = "building bitmaps";
-                            //    progressChangedEventArgs.Bitmap = imageItem.ImageBMP;
-                            //    System.Threading.Thread.Sleep(50);
-                            //    ProgressPercent = (indx * 100) / files.Count;
-                            //    OnMovieProgress(progressChangedEventArgs);
-                            //    indx += 1;
-                            //}
-
-                            //if (maxHeight % 2 != 0) maxHeight += 1;
-                            //if (maxWidth % 2 != 0) maxWidth += 1;
-
-                            //// then we go through all images and save them to a created temp directory 
-                            //// resizing the images to fit 
-                            //System.Drawing.SolidBrush solidBrush = new System.Drawing.SolidBrush(System.Drawing.Color.WhiteSmoke);
-
-                            //int count = imageItems.Count;
-                            //double absMaxWidth = 0;
-                            //double absMaxHeight = 0;
-
-                            //imagePath = Support.Support.FixImagePath(System.IO.Path.GetDirectoryName(RootFolder.CurrentImageItem.ImagePath));
-                            //imagePath = System.IO.Path.Combine(imagePath, "Zoomed");
-                            //string imageFileStub = imagePath;
-                            //success = await support.BuildImages(imageItems, imageFileStub, absMaxWidth,
-                            //    absMaxHeight, RootFolder.CurrentSubFolder.FrameSetHeader.FrameSetList, maxWidth, maxHeight
-                            //        , count);
-
-                            //if (success)
-                            //{
-                            //    // check to see if the Movies directory exists, if not create it
-                            //    string imageFileDir = System.IO.Path.Combine(imageFileStub, "Movies");
-
-                            //    if (!Directory.Exists(imageFileDir))
-                            //    {
-                            //        Directory.CreateDirectory(imageFileDir);
-                            //    }
-
-                            //    string outputFileName = imageFileDir + "\\" + System.IO.Path.GetFileNameWithoutExtension(CurrentSubFolder.Path) + ".mp4";
-
-                            //    int duration = 5; // default duration (to calculate frame rate)
-                            //    duration = (duration > 0) ? duration : 5;
-
-                            //    if (CurrentSubFolder.CurrentFrameSet != null)
-                            //    {
-                            //        outputFileName = imageFileDir + "\\FrameSet" + CurrentSubFolder.CurrentFrameSet.Index.ToString("000") + ".mp4";
-                            //        if (CurrentSubFolder.CurrentFrameSet.ZoomDuration != null)
-                            //        {
-                            //            duration = CurrentSubFolder.CurrentFrameSet.ZoomDuration.Value;
-                            //            duration = (duration > 0) ? duration : 5;
-                            //            CurrentSubFolder.CurrentFrameSet.ZoomDuration = duration;
-                            //            CurrentSubFolder.CurrentFrameSet.Save();
-                            //        }
-
-                            //    }
-                            // double framerate = imageItems.Count / duration;  // should produce a sub movie lasting 5 seconds
-
-                            //FFMpegSupport fFMpeg = new FFMpegSupport();
-                            //fFMpeg.CliWrapProgress += FFMpeg_CliWrapProgress;
-                            //string ffMpegCommand = " -framerate " + framerate.ToString("0.00") + " -i " + '"' + imageFileStub + "\\" + "%04d.jpg" + '"' + " -c:v libx264 -pix_fmt yuv420p -r 20 " + '"' + outputFileName + '"' + " -y";
-
-                            //Views.MainWindow? main = GetMainWindow();
-
-                            //fFMpeg.action = "CreateMovie";
-                            //fFMpeg.FrameCount = imageItems.Count;
-
-                            //int result = await fFMpeg.DoCliWrapCreateMovie(ffMpegCommand);
-
-                            //if (result == 0 && CurrentSubFolder.CurrentFrameSet != null)
-                            //{
-                            //    CurrentSubFolder.CurrentFrameSet.MoviePath = outputFileName;
-                            //    CurrentSubFolder.CurrentFrameSet.HasMovie = true;
-                            //    CurrentSubFolder.Save();
-
-                            //}
-                            //ImageBMPConverted?.Dispose();
-                            ////ImageBMP?.Dispose();
-                            //ImageBMPConverted = null;
-                            //files = ClearImagesInFolder(imagePath);
 
                             if (viewModel.SaveImageAfterClose)
                             {
@@ -1723,20 +1590,31 @@ namespace TaymadeEntities.ViewModels
                             DoReloadPictures();
                             DoReloadPicture();
                             SetImageRow();
-                            //imagePath = ClearZoomedFolder();
 
+                            if (ImageSetControl != null)
+                            {
+                                ImageSetControl.MainTabControl?.SelectedItem =
+                                    ImageSetControl.MainTabControl?.Items[0];
+                                ImageSetControl?.dgItemImages.Focus();
+                                System.Threading.Thread.Sleep(100);
+
+                                //imagePath = ClearZoomedFolder();
+
+                            }
                         }
                     }
                 }
-            }
-            // check whether to move file
-            if (moveFile)
-            {
-                //File.Delete(RootFolder.CurrentImageItem.ImagePath);
-                //File.Move(filename, RootFolder.CurrentImageItem.ImagePath);
+                // check whether to move file
+                if (moveFile)
+                {
+                    //File.Delete(RootFolder.CurrentImageItem.ImagePath);
+                    //File.Move(filename, RootFolder.CurrentImageItem.ImagePath);
 
+                }
             }
         }
+
+
 
 
         internal string ClearZoomedFolder()

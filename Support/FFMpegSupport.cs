@@ -591,9 +591,7 @@ namespace TaymadeEntities.Support
                 string metafilePath = GetFFMetaDataPath(movie.MoviePath);
                 if (!string.IsNullOrEmpty(metafilePath))
                 {
-
                     // check we have a valid path
-
                     if (File.Exists(metafilePath))
                     {
                         File.Delete(metafilePath);

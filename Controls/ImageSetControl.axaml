@@ -167,7 +167,7 @@
 							<DataGrid ItemsSource="{Binding RootFolder.CurrentSubFolder.ImageItems}"
 									  Name="dgItemImages"
 									  SelectedItem="{Binding RootFolder.CurrentImageItem}"
-
+									  Margin="5,5,5,5"
 									  Height="600" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Visible">
 								<DataGrid.Columns>
 									<DataGridTextColumn Header="Id" Binding="{Binding Id}" />
@@ -191,10 +191,13 @@
 
 										<MenuItem Header="Split Here" Click="SplitFolder_Click" />
 										<MenuItem Header="Rename File" Click="MenuItem_Click"  />
-										<MenuItem Header="Zoom to feature" Click="Zoom_Click" />
+										<MenuItem Header="Zoom to feature"
+												  HotKey="Ctrl+Shift+Z"
+												  Click="Zoom_Click" />
 										<MenuItem Header="Fix Image"
 												  Click="FixImage_Click"
-												  HotKey="Alt+F"
+												  HotKey="Ctrl+I"
+												  Name="FixImageMenuItem"
 												  />
 										<MenuItem Header="FrameSets ">
 											<MenuItem Header="Add new frameset at end" Click="AddFrameSet_Click"/>
@@ -207,7 +210,18 @@
 									</ContextMenu>
 								</DataGrid.ContextMenu>
 							</DataGrid>
-
+							<StackPanel Orientation="Horizontal">
+								<tcb:ImagedButton LabelText="Zoom"
+												  HotKey="Ctrl+Shift+Z"
+												  ImageSource="avares://TaymadeControls/Assets/maximize_icon.png"
+												  Click="Zoom_Click"
+												  />
+								<tcb:ImagedButton LabelText="Fix Image"
+												  HotKey="Ctrl+I"
+												  ImageSource="avares://TaymadeControls/Assets/maintenance.png"
+												  Click="FixImage_Click"
+												  />
+							</StackPanel>
 						</StackPanel>
 						<StackPanel Orientation="Vertical">
 							<StackPanel Width="800" Height="800">
@@ -278,8 +292,14 @@
 
 						<tcb:ImagedButton  Command="{Binding CreateMP4_Click}"
 										   IsVisible="{Binding RootFolder.HasTempMP4}"
-										   ImageSource="avares://TaymadeControls/Assets/Pharmacy.jpeg"
+										   ImageSource="avares://TaymadeControls/Assets/add_icon.png"
 										   LabelText="Create Movie"
+										   />
+
+						<tcb:ImagedButton  LabelText="Add Bookmarks"
+										   ImageSource="avares://TaymadeControls/Assets/build.png"
+										 
+										   Click="AddBookmarks_Click"
 										   />
 
 					</StackPanel>

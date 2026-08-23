@@ -725,18 +725,6 @@ namespace TaymadeEntities.Support
 
             int progress = (i * 100 / vm.ZoomFrames);
 
-            //MovieProgressEventargs movieProgressEventargs =
-            //    new MovieProgressEventargs(progress, null)
-            //    {
-            //        //Bitmap = vm.ImageBMPConverted,
-            //        BitmapPath = filename,
-            //        ProgressPercentage = progress
-            //    };
-
-            //OnProgress(movieProgressEventargs);
-            //System.Threading.Thread.Sleep(250);
-
-
             return filename;
         }
 
@@ -973,7 +961,10 @@ namespace TaymadeEntities.Support
             double absMaxHeight = 0;
             int indx = 1;
             int cnt = 1;
-            foreach (ImageItem item in images)
+
+            
+
+                foreach (ImageItem item in images)
             {
                 if (progressChangedEventArgs != null)
                 {

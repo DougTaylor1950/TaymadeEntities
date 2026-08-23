@@ -7,10 +7,9 @@ using Avalonia.Threading;
 using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Wordprocessing;
 using ReactiveUI;
-using SixLabors.ImageSharp.Drawing;
-using SixLabors.ImageSharp.Drawing.Processing;
-using Support.Core.Handlers;
+
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using TaymadeEntities.Models;
@@ -34,12 +33,14 @@ public partial class ZoomPictureDialog : WindowBase
     {
         InitializeComponent();
         this.DataContext = new ZoomPictureViewModel();
+        VM = this.DataContext as ZoomPictureViewModel;
     }
 
     public ZoomPictureDialog(ZoomPictureViewModel viewModel)
     {
         InitializeComponent();
         this.DataContext = viewModel;
+        VM = viewModel;
     }
 
     #endregion Public Constructors
@@ -63,6 +64,7 @@ public partial class ZoomPictureDialog : WindowBase
     private Image? pictureImage { get; set; }
 
     private PointerPoint? start { get; set; }
+    public ZoomPictureViewModel? VM { get; }
 
     #endregion Private Properties
 
@@ -73,7 +75,7 @@ public partial class ZoomPictureDialog : WindowBase
         BuildImagesInternal();
     }
 
-    private bool BuildImagesInternal(string? imagePathOveride = "",
+    private async Task<bool> BuildImagesInternal(string? imagePathOveride = "",
         Support.Support support = null)
     {
         bool success = false;
@@ -116,49 +118,47 @@ public partial class ZoomPictureDialog : WindowBase
 
             Clear_Click(null, null);
             vm.ImageBMPConverted?.Dispose();
-
-            var temp = Support.Support.ConvertAvaloniaBMPToSystem(vm.ImageBMP);
-            for (int i = 0; i < vm.ZoomFrames; i++)
+            await Task.Run(async () =>
             {
-                (bool flowControl, Rectangle rect) = CreateScalingRectangle(xWidth, xStart, yStart, yHeight, temp);
-                if (!flowControl)
+                vm.Info = "Building Images";
+                var temp = Support.Support.ConvertAvaloniaBMPToSystem(vm.ImageBMP);
+                for (int i = 0; i < vm.ZoomFrames; i++)
                 {
-                    continue;
+                    (bool flowControl, Rectangle rect) = CreateScalingRectangle(xWidth, xStart, yStart, yHeight, temp);
+                    if (!flowControl)
+                    {
+                        continue;
+                    }
+
+                    string filename = vm.BuildBitmap(imagePath, fileNameStub, i, temp, rect);
+                    xStart += stepX;
+                    yStart += stepY;
+                    yHeight -= heightStep;
+                    xWidth -= widthStep;
+
+                    vm.Progress = (i * 100 / vm.ZoomFrames);
+
+
+                    Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        vm.RaisePropertyChanged(nameof(vm.Progress));
+                        vm.RaisePropertyChanged(nameof(vm.ImageBMPConverted));
+                        vm.RaisePropertyChanged(nameof(vm.Info));
+                    });
+
+
+                    //OnProgress(movieProgressEventargs);
+                    System.Threading.Thread.Sleep(50);
+
+                    // update xStart, yStart, xWidth, yHeight as before
+
                 }
-
-                string filename = support.BuildBitmap(vm, imagePath, fileNameStub, i, temp, rect);
-                xStart += stepX;
-                yStart += stepY;
-                yHeight -= heightStep;
-                xWidth -= widthStep;
-
-                int progress = (i * 100 / vm.ZoomFrames);
-
-                //Support.MovieProgressEventargs movieProgressEventargs =
-                //    new Support.MovieProgressEventargs(progress, null)
-                //    {
-                //        Bitmap = vm.ImageBMPConverted,
-                //        BitmapPath = filename,
-                //        ProgressPercentage = progress
-                //    };
-
-                Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    vm.RaisePropertyChanged(nameof(vm.Progress));
-                    vm.RaisePropertyChanged(nameof(vm.ImageBMPConverted));
-                    //vm.RaisePropertyChanged(nameof(vm.ZoomedImage));
-                });
+                temp?.Dispose();
+            });
 
 
-                //OnProgress(movieProgressEventargs);
-                System.Threading.Thread.Sleep(350);
-
-                // update xStart, yStart, xWidth, yHeight as before
-
-            }
-            temp?.Dispose();
-            success = true;
         }
+        success = true;
         return success;
     }
 
@@ -202,12 +202,14 @@ public partial class ZoomPictureDialog : WindowBase
         if (DataContext is ZoomPictureViewModel vm && start != null
                     && end != null && vm.ZoomFrames > 0)
         {
+
+            this.ProgressInformation += ZoomPictureDialog_ProgressInformation;
             //vm.Zooming = true;
             string orginalFilename = vm.ImagePath;
             //vm.ZoomedImage = null;
             vm.ImageBMPConverted = null;
             vm.RaisePropertyChanged(nameof(vm.ImageBMPConverted));
-           // vm.RaisePropertyChanged(nameof(vm.ZoomedImage));
+            // vm.RaisePropertyChanged(nameof(vm.ZoomedImage));
 
             string imagePath = Support.Support.FixImagePath(System.IO.Path.GetDirectoryName(orginalFilename));
             imagePath = System.IO.Path.Combine(imagePath, "Zoomed");
@@ -224,6 +226,8 @@ public partial class ZoomPictureDialog : WindowBase
             //this.Clear_Click(null, null);
 
             Support.FFMpegSupport fFMpeg = new Support.FFMpegSupport();
+            fFMpeg.CliWrapProgress += FFMpeg_CliWrapProgress;
+            fFMpeg.CliWrapCompleted += FFMpeg_CliWrapCompleted;
 
             vm.ImageBMPConverted?.Dispose();
 
@@ -272,8 +276,8 @@ public partial class ZoomPictureDialog : WindowBase
             // now rebuild images
             vm.IsConvertedImageVisible = true;
 
-            bool success = BuildImagesInternal(imagePath, support);
-            support.ProgressInformation += ZoomPictureDialog_ProgressInformation;
+            bool success = await BuildImagesInternal(imagePath, support);
+            //support.ProgressInformation += ZoomPictureDialog_ProgressInformation;
             vm.CurrentSubFolder.FrameSetHeader = DataController.MovieController.GetFrameSetHeaderByMovieImageId(vm.CurrentSubFolder.Id);
             vm.IsConvertedImageVisible = false;
 
@@ -309,12 +313,12 @@ public partial class ZoomPictureDialog : WindowBase
                 };
                 imageItems.Add(imageItem);
 
-                vm.ImageBMPConverted = imageItem.ImageBMP;
+                
 
-                vm.Progress = (indx * 100) / files.Count;
-
-                Dispatcher.UIThread.Post(() =>
+                await Dispatcher.UIThread.InvokeAsync(() =>
                 {
+                    vm.ImageBMPConverted = imageItem.ImageBMP;
+                    vm.Progress = (indx * 100) / files.Count;
                     vm.RaisePropertyChanged(nameof(vm.Progress));
                     vm.RaisePropertyChanged(nameof(vm.ImageBMPConverted));
                 });
@@ -336,7 +340,7 @@ public partial class ZoomPictureDialog : WindowBase
 
 
             string imageFileStub = imagePath;
-            success = BuildImages(imageItems, imageFileStub, absMaxWidth,
+            success = await BuildImages(imageItems, imageFileStub, absMaxWidth,
                 absMaxHeight, null, maxWidth, maxHeight
                     , count);
 
@@ -407,7 +411,33 @@ public partial class ZoomPictureDialog : WindowBase
         }
     }
 
-    public bool BuildImages(ImageItemsCollection imageItemsCollection, string imageFileStub,
+    private void FFMpeg_CliWrapCompleted(object sender, Support.CliWrapCompletedEventArgs e)
+    {
+        throw new NotImplementedException();
+    }
+
+    private async void FFMpeg_CliWrapProgress(object sender, Support.CliWrapProgressEventArgs e)
+    {
+        if (e != null)
+        {
+            await Dispatcher.UIThread.InvokeAsync(() => 
+            {
+                VM?.Progress = e.ProgressPercentage;
+                VM?.Info = e.Progress;
+                VM?.RaisePropertyChanged(nameof(VM.Progress));
+                VM?.RaisePropertyChanged(nameof(VM.Info));
+            });
+
+            Task.Delay(100);
+        }
+    }
+
+    private void ZoomPictureDialog_ProgressInformation1(object sender, Support.MovieProgressEventargs e)
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task<bool> BuildImages(ImageItemsCollection imageItemsCollection, string imageFileStub,
             double absMaxWidth, double absMaxHeight,
             List<FrameSet>? frameSets, int maxWidth, int maxHeight, int count)
     {
@@ -418,131 +448,143 @@ public partial class ZoomPictureDialog : WindowBase
 
         int index = 1;
         SolidBrush solidBrush = new SolidBrush(System.Drawing.Color.WhiteSmoke);
-
-        foreach (ImageItem item in imageItemsCollection)
+        await Task.Run(async () =>
         {
-            // get existing image
-            System.Drawing.Bitmap image = new System.Drawing.Bitmap(item.ImagePath);
-            // resize to new consistent size
-            System.Drawing.Image reSizedImage = image;
-
-            // find the average colour of image for the borders
-            System.Drawing.Color averageColour = Support.Support.GetAverageColorFast(image);
-
-            // create a brush
-            solidBrush = new SolidBrush(averageColour);
-
-            // ensure we keep aspect ratio of original image
-            aspectRatio = (double)image.Width / (double)image.Height;
-
-            int newHeight = image.Height;
-            int newWidth = image.Width;
-            // check size the new image will have borders added depending on
-            // whether it is portrait or landscape
-            if (absMaxWidth - image.Width >= absMaxHeight - image.Height)
+            ImageItem? last =  imageItemsCollection.LastOrDefault();
+            if (last != null)
             {
-                newHeight = maxHeight;
-                newWidth = (int)(maxHeight * aspectRatio);
+                imageItemsCollection.Add(last);
+                imageItemsCollection.Add(last); 
+                imageItemsCollection.Add(last);
+                imageItemsCollection.Add(last);
+
             }
-            else
+            foreach (ImageItem item in imageItemsCollection)
             {
-                newWidth = maxWidth;
-                newHeight = (int)((double)maxWidth / aspectRatio);
+                // get existing image
+                System.Drawing.Bitmap image = new System.Drawing.Bitmap(item.ImagePath);
+                // resize to new consistent size
+                System.Drawing.Image reSizedImage = image;
+
+                // find the average colour of image for the borders
+                System.Drawing.Color averageColour = Support.Support.GetAverageColorFast(image);
+
+                // create a brush
+                solidBrush = new SolidBrush(averageColour);
+
+                // ensure we keep aspect ratio of original image
+                aspectRatio = (double)image.Width / (double)image.Height;
+
+                int newHeight = image.Height;
+                int newWidth = image.Width;
+                // check size the new image will have borders added depending on
+                // whether it is portrait or landscape
+                if (absMaxWidth - image.Width >= absMaxHeight - image.Height)
+                {
+                    newHeight = maxHeight;
+                    newWidth = (int)(maxHeight * aspectRatio);
+                }
+                else
+                {
+                    newWidth = maxWidth;
+                    newHeight = (int)((double)maxWidth / aspectRatio);
+                }
+                // create the resized image
+                reSizedImage = Support.Support.ResizeImage(image, newWidth, newHeight);
+
+                // if we want to add text it needs to be on the resized image
+
+
+                // find which dimension is furthest away from target
+                int xdif = (maxWidth - reSizedImage.Width) / 2;
+                int ydif = (maxHeight - reSizedImage.Height) / 2;
+                // create new bitmap of max sizes
+                System.Drawing.Bitmap newBitmap = new System.Drawing.Bitmap(maxWidth, maxHeight);
+
+                // create a new image with just the background colour
+                // then draw the image over it.
+                using (Graphics g = Graphics.FromImage(newBitmap))
+                {
+                    g.FillRectangle(solidBrush, 0, 0, maxWidth, maxHeight);
+                    g.DrawImage(reSizedImage, xdif, ydif, reSizedImage.Width, reSizedImage.Height);
+                }
+
+
+                // save image twice
+
+                // use current image item to determine the number of replicates for the image
+                int saveCount = 1;
+                if (frameSets != null)
+                {
+                    FrameSet? frameSet = frameSets.Where(f => f.Index == item.FrameSetIndex).FirstOrDefault();
+                    if (frameSet != null) saveCount = (int)frameSet.FrameRate;
+                }
+                char slash = '\\';
+                char endChar = imageFileStub[imageFileStub.Length - 1];
+                if (endChar != '\\')
+                {
+                    imageFileStub += @"\";
+                }
+                string tempImageFileName = "";
+                for (int i = 0; i < saveCount; i++)
+                {
+                    tempImageFileName = imageFileStub + index.ToString("0000") + ".jpg";
+                    newBitmap.Save(tempImageFileName, ImageFormat.Jpeg);
+                    index += 1;
+                }
+
+                // stop double saving 
+                //newBitmap.Save(imageFileStub + index.ToString("0000") + ".jpg", ImageFormat.Jpeg);
+                //index += 1;
+                // dispose of temporary bitmap
+                newBitmap.Dispose();
+                newBitmap = null;
+                // update progress
+
+                vm?.Progress = (index * 100) / imageItemsCollection.Count;
+                vm?.Info = "Progress:" + vm.Progress.ToString("00.00") + "%";
+                //Info = "building bitmaps",
+                vm?.ImageBMPConverted = Support.Support.ConvertFileToAvaloniaBitmap(tempImageFileName);
+                //BitmapPath = tempImageFileName
+
+
+
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    vm?.RaisePropertyChanged(nameof(vm.Progress));
+                    vm?.RaisePropertyChanged(nameof(vm.Info));
+                    vm?.RaisePropertyChanged(nameof(vm.ImageBMPConverted));
+                });
             }
-            // create the resized image
-            reSizedImage = Support.Support.ResizeImage(image, newWidth, newHeight);
+        });
+        System.Threading.Thread.Sleep(100);
+        //await Task.Delay(50);
+        solidBrush?.Dispose();
+        solidBrush = null;
 
-            // if we want to add text it needs to be on the resized image
-
-
-            // find which dimension is furthest away from target
-            int xdif = (maxWidth - reSizedImage.Width) / 2;
-            int ydif = (maxHeight - reSizedImage.Height) / 2;
-            // create new bitmap of max sizes
-            System.Drawing.Bitmap newBitmap = new System.Drawing.Bitmap(maxWidth, maxHeight);
-
-            // create a new image with just the background colour
-            // then draw the image over it.
-            using (Graphics g = Graphics.FromImage(newBitmap))
-            {
-                g.FillRectangle(solidBrush, 0, 0, maxWidth, maxHeight);
-                g.DrawImage(reSizedImage, xdif, ydif, reSizedImage.Width, reSizedImage.Height);
-            }
-
-
-            // save image twice
-
-            // use current image item to determine the number of replicates for the image
-            int saveCount = 1;
-            if (frameSets != null)
-            {
-                FrameSet? frameSet = frameSets.Where(f => f.Index == item.FrameSetIndex).FirstOrDefault();
-                if (frameSet != null) saveCount = (int)frameSet.FrameRate;
-            }
-            char slash = '\\';
-            char endChar = imageFileStub[imageFileStub.Length - 1];
-            if (endChar != '\\')
-            {
-                imageFileStub += @"\";
-            }
-            string tempImageFileName = "";
-            for (int i = 0; i < saveCount; i++)
-            {
-                tempImageFileName = imageFileStub + index.ToString("0000") + ".jpg";
-                newBitmap.Save(tempImageFileName, ImageFormat.Jpeg);
-                index += 1;
-            }
-
-            // stop double saving 
-            //newBitmap.Save(imageFileStub + index.ToString("0000") + ".jpg", ImageFormat.Jpeg);
-            //index += 1;
-            // dispose of temporary bitmap
-            newBitmap.Dispose();
-            newBitmap = null;
-            // update progress
-            //MovieProgressEventargs progressChangedEventArgs = new MovieProgressEventargs((index * 100) / count, null)
-            //{
-            vm?.Progress = (index * 100) / count;
-            //    Info = "building bitmaps",
-            vm?.ImageBMPConverted = Support.Support.ConvertFileToAvaloniaBitmap(tempImageFileName);
-            //    //BitmapPath = tempImageFileName
-            //};
-
-            //OnProgress(progressChangedEventArgs);
-
-            Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                vm?.RaisePropertyChanged(nameof(vm.Progress));
-                vm?.RaisePropertyChanged(nameof(vm.ImageBMPConverted));
-            });
-
-            System.Threading.Thread.Sleep(150);
-            //await Task.Delay(50);
-            solidBrush?.Dispose();
-            solidBrush = null;
-        }
         return success;
     }
 
-    private void ZoomPictureDialog_ProgressInformation(object sender, Support.MovieProgressEventargs e)
+    private async void ZoomPictureDialog_ProgressInformation(object sender, Support.MovieProgressEventargs e)
     {
         if (this.DataContext != null && this.DataContext is ZoomPictureViewModel zoomPictureView)
         {
+            await Task.Delay(100);
             if (e != null)
             {
                 zoomPictureView.Progress = e.ProgressPercentage;
                 if (e.Bitmap != null)
                 {
-                    Dispatcher.UIThread.Post(() =>
-                    {
-                        zoomPictureView.ImageBMPConverted = e.Bitmap;
-                        //zoomPictureView.ImageBMPConverted = e.Bitmap;
+                    await Dispatcher.UIThread.InvokeAsync(() =>
+                     {
+                         zoomPictureView.ImageBMPConverted = e.Bitmap;
+                         //zoomPictureView.ImageBMPConverted = e.Bitmap;
 
-                        //this.ConvertedImage.UpdateLayout();
-                        zoomPictureView.RaisePropertyChanged(nameof(zoomPictureView.ImageBMPConverted));
-                        zoomPictureView.RaisePropertyChanged(nameof(zoomPictureView.Progress));
-                      //  zoomPictureView.RaisePropertyChanged(nameof(zoomPictureView.ZoomedImage));
-                    });
+                         //this.ConvertedImage.UpdateLayout();
+                         zoomPictureView.RaisePropertyChanged(nameof(zoomPictureView.ImageBMPConverted));
+                         zoomPictureView.RaisePropertyChanged(nameof(zoomPictureView.Progress));
+                         //  zoomPictureView.RaisePropertyChanged(nameof(zoomPictureView.ZoomedImage));
+                     });
                     //Dispatcher.Yield();
                 }
                 else if (!string.IsNullOrEmpty(e.BitmapPath))
@@ -557,7 +599,7 @@ public partial class ZoomPictureDialog : WindowBase
 
                     }
                 }
-                System.Threading.Thread.Sleep(150);
+                //System.Threading.Thread.Sleep(150);
 
             }
         }
@@ -615,8 +657,8 @@ public partial class ZoomPictureDialog : WindowBase
         { ImageFixed = false };
         if (DataContext is ZoomPictureViewModel vm)
         {
-            returnValue = vm.ZoomInfo.Clone();
-            returnValue.ImageFixed = false;
+            returnValue = vm?.ZoomInfo?.Clone();
+            returnValue?.ImageFixed = false;
         }
 
         Dispatcher.UIThread.Post(() =>
@@ -705,6 +747,7 @@ public partial class ZoomPictureDialog : WindowBase
                             }
                         }
                     }
+                    this.OkButton_Click(null, null);
                 }
             }
         }
@@ -787,17 +830,36 @@ public partial class ZoomPictureDialog : WindowBase
 
                 if (cloneRectangle)
                 {
+                    CheckLimits(width,height);
                     rect = new Rectangle((int)startX, (int)startY, (int)width, (int)height);
-                    using (var newClone = vm.SystemBitmap.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                    if (width * height > 0)
                     {
-                        var reSizedImage = Support.Support.ResizeImage(newClone, (int)imageWidth, (int)imageHeight);
-                        using (System.IO.MemoryStream memory = new System.IO.MemoryStream())
+                        Debug.WriteLine("Sx: " + startX.ToString() + " sy:" + startY.ToString()
+                            + " w: " + width.ToString() + " H: " + height.ToString());
+                        try
                         {
-                            reSizedImage?.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
-                            memory.Position = 0;
+                            using (var newClone = vm.SystemBitmap.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                            {
+                                var reSizedImage = Support.Support.ResizeImage(newClone, (int)imageWidth, (int)imageHeight);
+                                using (System.IO.MemoryStream memory = new System.IO.MemoryStream())
+                                {
+                                    reSizedImage?.Save(memory, System.Drawing.Imaging.ImageFormat.Bmp);
+                                    memory.Position = 0;
 
-                            vm.ImageBMPConverted = new Avalonia.Media.Imaging.Bitmap(memory);
+                                    vm.ImageBMPConverted = new Avalonia.Media.Imaging.Bitmap(memory);
+                                }
+                                reSizedImage?.Dispose();
+                                reSizedImage = null;
+                                GC.Collect();
+                                Task.Delay(200);
+                            }
                         }
+                        catch (Exception)
+                        {
+
+                            throw;
+                        }
+                        
                     }
                 }
                 //vm.SystemBitmap?.Dispose();
@@ -892,9 +954,26 @@ public partial class ZoomPictureDialog : WindowBase
                 startY -= vm.Step;
             }
             downright = !downright;
+            CheckLimits();
+
             DrawRectangle(true);
             vm.ZoomInfo.StartX = startX;
             vm.ZoomInfo.EndX = endX;
+        }
+    }
+
+    private void CheckLimits(double? width = null,double?  height = null)
+    {
+        // check we haven't gone out of limits
+
+        if (startX < 0) startX = 0;
+        if (startY < 0) startY = 0;
+        if (endX > pictureImage.Width) endX = pictureImage.Width;
+        if (endY > pictureImage.Height) endY = pictureImage.Height;
+        if (width != null && height != null)
+        {
+            width = endX - startX; 
+            height = endY - startY;
         }
     }
 
@@ -903,11 +982,19 @@ public partial class ZoomPictureDialog : WindowBase
         if (DataContext is ZoomPictureViewModel vm)
         {
             // decrease the rectangle size by the step amount in both directions
+            if (endX * endY == 0)
+            {
+                endX = pictureImage.Width;
+                endY = pictureImage.Height;
+            }
             endX -= vm.Step;
             endY -= vm.Step;
+
+            CheckLimits();
             DrawRectangle(true);
-            vm.ZoomInfo.StartX = startX;
-            vm.ZoomInfo.EndX = endX;
+            
+            vm?.ZoomInfo?.StartX = startX;
+            vm?.ZoomInfo?.EndX = endX;
         }
     }
 
@@ -944,6 +1031,7 @@ public partial class ZoomPictureDialog : WindowBase
             int step = vm.Step;
             startX += step;
             endX += step;
+            CheckLimits();
             DrawRectangle(true);
             vm.ZoomInfo.StartX = startX;
             vm.ZoomInfo.EndX = endX;
@@ -957,6 +1045,7 @@ public partial class ZoomPictureDialog : WindowBase
             int step = vm.Step;
             startY -= step;
             endY -= step;
+            CheckLimits();
             DrawRectangle(true);
             vm.ZoomInfo.StartX = startX;
             vm.ZoomInfo.EndX = endX;
@@ -969,8 +1058,8 @@ public partial class ZoomPictureDialog : WindowBase
         { ImageFixed = true };
         if (DataContext is ZoomPictureViewModel vm)
         {
-            returnValue = vm.ZoomInfo.Clone();
-            returnValue.ImageFixed = true;
+            returnValue = vm.ZoomInfo?.Clone();
+            returnValue?.ImageFixed = true;
         }
 
         Dispatcher.UIThread.Post(() =>

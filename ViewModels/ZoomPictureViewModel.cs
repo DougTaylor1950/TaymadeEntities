@@ -41,6 +41,7 @@ namespace TaymadeEntities.ViewModels
         private bool isConvertedImageVisible = false;
         private bool zooming = false;
         private Bitmap? zoomedImage;
+        private string? info= "Progress Info";
 
         #endregion Private Fields
 
@@ -96,6 +97,11 @@ namespace TaymadeEntities.ViewModels
             get => frames;
             set => this.RaiseAndSetIfChanged(ref frames, value);
         }
+
+        public string? Info 
+        { 
+            get => info; 
+            set => this.RaiseAndSetIfChanged(ref info, value); }
 
         public int ZoomFrames
         {
@@ -197,6 +203,33 @@ namespace TaymadeEntities.ViewModels
         #endregion Public Properties
 
         #region Public Methods
+
+        public string BuildBitmap(
+            string imagePath,
+            string fileNameStub,
+            int i, System.Drawing.Bitmap? temp,
+            System.Drawing.Rectangle rect)
+        {
+            string filename = "";
+            using (var newBitmap = temp.Clone(rect, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+            using (var reSizedImage = Support.Support.ResizeImage(newBitmap, (int)temp.Width, (int)temp.Height))
+            {
+                filename = System.IO.Path.Combine(imagePath, $"{fileNameStub}-{(i + 1):000}.jpg");
+                reSizedImage.Save(filename, System.Drawing.Imaging.ImageFormat.Jpeg);
+                // convert image back to avalonia and display
+                var fileBytes = File.ReadAllBytes(filename);
+                using (var ms2 = new MemoryStream(fileBytes, writable: false))
+                {
+                    ImageBMPConverted = new Avalonia.Media.Imaging.Bitmap(ms2);
+                    System.Threading.Thread.Sleep(150);
+                    //ZoomedImage = ImageBMPConverted;
+                }
+            }
+
+            int progress = (i * 100 / ZoomFrames);
+
+            return filename;
+        }
 
         public void CreateInMemoryBitmaps()
         {
