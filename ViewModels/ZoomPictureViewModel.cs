@@ -221,7 +221,7 @@ namespace TaymadeEntities.ViewModels
                 using (var ms2 = new MemoryStream(fileBytes, writable: false))
                 {
                     ImageBMPConverted = new Avalonia.Media.Imaging.Bitmap(ms2);
-                    System.Threading.Thread.Sleep(150);
+                    System.Threading.Thread.Sleep(50);
                     //ZoomedImage = ImageBMPConverted;
                 }
             }

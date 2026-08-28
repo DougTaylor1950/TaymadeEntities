@@ -25,6 +25,7 @@ namespace TaymadeEntities.Models
         private int? movieImageId = 0;
         private int? lastFrameSetIndex;
         private FrameSet? titleFrameSet;
+        private FrameSet? outroFrameSet;
 
         #endregion Private Fields
 
@@ -88,6 +89,13 @@ namespace TaymadeEntities.Models
         {
             get => titleFrameSet;
             set => this.RaiseAndSetIfChanged(ref titleFrameSet, value);
+        }
+
+        [NotMapped]
+        public FrameSet? OutroFrameSet 
+        { 
+            get => outroFrameSet; 
+            set => this.RaiseAndSetIfChanged(ref outroFrameSet, value); 
         }
 
         #endregion Public Properties

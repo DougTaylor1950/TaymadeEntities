@@ -11,7 +11,7 @@ namespace TaymadeEntities.Support
     using Avalonia.Controls;
     using CliWrap;
     using CliWrap.EventStream;
-   // using Microsoft.CodeAnalysis.CSharp.Syntax;
+    // using Microsoft.CodeAnalysis.CSharp.Syntax;
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -25,7 +25,7 @@ namespace TaymadeEntities.Support
     /// <summary>
     /// Defines the <see cref="FFMpegSupport" />.
     /// </summary>
-    public class FFMpegSupport :IDisposable
+    public class FFMpegSupport : IDisposable
     {
         #region Constants
 
@@ -294,19 +294,19 @@ namespace TaymadeEntities.Support
             cts.Dispose();
         }
 
-        public  async Task<string> GrabImage(string? moviePath, string? bookmarkImagePath
+        public async Task<string> GrabImage(string? moviePath, string? bookmarkImagePath
             , double? seconds)
         {
             string outimagename = string.Empty;
 
             TimeSpan ts = TimeSpan.FromSeconds(seconds.Value);
 
-            string command = " -ss " + ts.ToString() + " -i " + '"' + moviePath + '"' + " -frames:v 1 -q:v 2  -update 1 " + '"' +bookmarkImagePath + '"' + " -y";
+            string command = " -ss " + ts.ToString() + " -i " + '"' + moviePath + '"' + " -frames:v 1 -q:v 2  -update 1 " + '"' + bookmarkImagePath + '"' + " -y";
 
             int errorcode = await DoCliWrap(command);
 
-            if (errorcode == 0 )
-            outimagename = bookmarkImagePath; 
+            if (errorcode == 0)
+                outimagename = bookmarkImagePath;
 
             return outimagename;
         }
@@ -392,11 +392,58 @@ namespace TaymadeEntities.Support
                 {
                     TimeSpan duration = TimeSpan.Parse(info.Duration);
                     time = (int)duration.TotalSeconds;
-                    
+
                 }
             }
 
             return time;
+        }
+
+        // ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 input1.mp4
+        public static async Task<double> GetMovieDuration(string? filename)
+        {
+            double returnDuration = 0;
+            if (string.IsNullOrEmpty(filename)) return 0;
+            if (string.IsNullOrEmpty(FFProbeFilePath))
+            {
+                FFProbeFilePath = FFProbeFilePath = @"C:\Program Files\FFMpeg\bin\ffprobe.exe";
+            }
+
+            string arguments = " -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "
+                + '"' + filename + '"';
+
+            var cmd = Cli.Wrap(FFProbeFilePath)
+                .WithArguments(arguments);
+
+            string commandOutput = "";
+            await foreach (var cmdEvent in cmd.ListenAsync(System.Text.Encoding.Default))
+            {
+                switch (cmdEvent)
+                {
+                    case StartedCommandEvent started:
+                        Console.WriteLine($"Process started; ID: {started.ProcessId}");
+                        break;
+                    case StandardOutputCommandEvent stdOut:
+                        //_output.WriteLine($"Out> {stdOut.Text}");
+                        // process received data 
+                        string output = stdOut.Text;
+                        commandOutput = output;
+                        break;
+                    case StandardErrorCommandEvent stdErr:
+                        ProcessOutput = stdErr.Text;
+                        break;
+                    case ExitedCommandEvent exited:
+                        ExitCode = exited.ExitCode;
+                        //errorCode = ExitCode;
+                        //ProcessOutput = $"Process exited; Code: " + exited.ExitCode.ToString();
+
+                        break;
+
+
+                }
+            }
+            returnDuration = double.Parse(commandOutput);
+            return returnDuration;
         }
 
         public static async Task<FFProbeInfo?> GetFFProbeInfo(string filename)
@@ -549,7 +596,7 @@ namespace TaymadeEntities.Support
             string strParam = " -i \"" + movie.MoviePath + '"';
 
             if (movie.StartBookmark != null)
-            { 
+            {
                 strParam += "\" -ss " + movie.StartBookmark.FormattedTime;
             }
             if (convert && movie.EndBookmark != null)
@@ -672,12 +719,12 @@ namespace TaymadeEntities.Support
                         if (movie.DurationSeconds == null)
                         {
                             TaymadeEntities.Support.FFProbeInfo? info = await FFMpegSupport.GetFFProbeInfo(movie.MoviePath);
-                            if (info != null  && !string.IsNullOrEmpty(info.Duration))
+                            if (info != null && !string.IsNullOrEmpty(info.Duration))
                             {
                                 movie.DurationSeconds = int.Parse(info.Duration);
                             }
-                           
-                            
+
+
                         }
                         chapterFile += "[CHAPTER]" + Environment.NewLine;
                         chapterFile += "TIMEBASE=1/1000" + Environment.NewLine;   // time is in seconds
@@ -919,7 +966,7 @@ namespace TaymadeEntities.Support
             return success;
         }
 
-        
+
 
         /// <summary>
         /// The ConvertToMTS.
@@ -952,7 +999,7 @@ namespace TaymadeEntities.Support
                     int exitCode = await DoCliWrap(strParam);
 
                     success = (ExitCode == 0);
-                    
+
                 }
                 catch (Exception ex)
                 {
@@ -1390,13 +1437,13 @@ namespace TaymadeEntities.Support
                 try
                 {
                     source = Support.FixImagePath(source);
-                        
+
                     // -i INPUT -i FFMETADATAFILE -map_metadata 1 -codec copy OUTPUT
                     string param = "  -i \"" + source + "\" -i \"" + FFMetaDataFile + "\" -map_metadata l -codec copy  \"" + output + "\"" + ReportOn;
-                    
+
                     action = "SetChapters";
 
-                   ExitCode = await DoCliWrap(param);
+                    ExitCode = await DoCliWrap(param);
 
                     if (ExitCode == 0)
                     {
@@ -1459,7 +1506,7 @@ namespace TaymadeEntities.Support
 
             string extn = Path.GetExtension(movie.MoviePath);
 
-            string inputVideoPath = Support.FixImagePath(movie.MoviePath); 
+            string inputVideoPath = Support.FixImagePath(movie.MoviePath);
 
             outputVideoPath = Support.FixImagePath(movie.MoviePath.Replace(extn, "temp" + extn));
             // -c:v libx264 -preset slow -crf 22 
@@ -1743,10 +1790,10 @@ namespace TaymadeEntities.Support
         {
             int errorCode = 0;
 
-           // var cts = new CancellationTokenSource();
+            // var cts = new CancellationTokenSource();
             //TimeSpan cancelDelay = TimeSpan.FromSeconds(15000);
 
-           // cts.CancelAfter(cancelDelay);
+            // cts.CancelAfter(cancelDelay);
 
             var cmd = Cli.Wrap(commandPath)
                 .WithArguments(param);
@@ -1762,7 +1809,7 @@ namespace TaymadeEntities.Support
                 string error = ex.ToString();
             }
 
-               
+
 
             return errorCode;
         }
@@ -1776,7 +1823,7 @@ namespace TaymadeEntities.Support
         {
             int errorCode = 0;
 
-            
+
 
             // timeout extended as it was cancelling on setting chapters
             TimeSpan cancelDelay = TimeSpan.FromSeconds(400);
@@ -1793,7 +1840,7 @@ namespace TaymadeEntities.Support
 
             var cmd = Cli.Wrap(FFmpegFilePath)
                 .WithArguments(param);
-            
+
             try
             {
 
@@ -1886,8 +1933,8 @@ namespace TaymadeEntities.Support
                             OnCliWrapProgress(cliWrapProgress);
                             break;
                         // cancellation token triggered
-                        
-                            
+
+
 
                         case ExitedCommandEvent exited:
                             //if (exited.)
@@ -1959,7 +2006,7 @@ namespace TaymadeEntities.Support
                         case StartedCommandEvent started:
                             Console.WriteLine($"Process started; ID: {started.ProcessId}");
                             // start viewer
-                           // PlayFromFile(OutputVideoPath);
+                            // PlayFromFile(OutputVideoPath);
                             break;
                         case StandardOutputCommandEvent stdOut:
                             //_output.WriteLine($"Out> {stdOut.Text}");
@@ -2014,7 +2061,7 @@ namespace TaymadeEntities.Support
                             break;
                         // cancellation token triggered
                         case ExitedCommandEvent exited:
-                            
+
                             ExitCode = exited.ExitCode;
                             errorCode = ExitCode;
                             if (string.IsNullOrEmpty(MovieName) && action == "JOIN") MovieName = OutputVideoPath;
@@ -2030,7 +2077,7 @@ namespace TaymadeEntities.Support
 
 
                             OnCliWrapComplete(eventArgs);
-                            
+
                             break;
                     }
                 }
@@ -2065,7 +2112,7 @@ namespace TaymadeEntities.Support
                     {
                         await playerDialog.ShowDialog(main);
                     }
-                    
+
                 }
             }
         }

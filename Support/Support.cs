@@ -913,6 +913,7 @@ namespace TaymadeEntities.Support
                 {
                     FrameSet? frameSet = frameSets.Where(f => f.Index == item.FrameSetIndex).FirstOrDefault();
                     if (frameSet != null) saveCount = (int)frameSet.FrameRate;
+                    if (saveCount == 0) saveCount = 1;
                 }
                 char slash = '\\';
                 char endChar = imageFileStub[imageFileStub.Length - 1];

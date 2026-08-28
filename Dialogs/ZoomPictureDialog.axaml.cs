@@ -122,15 +122,26 @@ public partial class ZoomPictureDialog : WindowBase
             {
                 vm.Info = "Building Images";
                 var temp = Support.Support.ConvertAvaloniaBMPToSystem(vm.ImageBMP);
-                for (int i = 0; i < vm.ZoomFrames; i++)
+                int i = 1;
+                int dupfrom = vm.ZoomFrames / 5 * 4;
+                Rectangle rect = new Rectangle();
+
+                while (i <= vm.ZoomFrames + 10)
                 {
-                    (bool flowControl, Rectangle rect) = CreateScalingRectangle(xWidth, xStart, yStart, yHeight, temp);
+                    (bool flowControl, rect) = CreateScalingRectangle(xWidth, xStart, yStart, yHeight, temp);
                     if (!flowControl)
                     {
                         continue;
                     }
 
                     string filename = vm.BuildBitmap(imagePath, fileNameStub, i, temp, rect);
+                    i++;
+                    if (i >= dupfrom)
+                    {
+                        vm.BuildBitmap(imagePath, fileNameStub, i, temp, rect);
+                        i++;
+                    }
+
                     xStart += stepX;
                     yStart += stepY;
                     yHeight -= heightStep;
@@ -153,10 +164,16 @@ public partial class ZoomPictureDialog : WindowBase
                     // update xStart, yStart, xWidth, yHeight as before
 
                 }
+
+                for (int j = 0; j < 5; j++)
+                {
+                    vm.BuildBitmap(imagePath, fileNameStub, i, temp, rect);
+                    i++;
+                }
+
+
                 temp?.Dispose();
             });
-
-
         }
         success = true;
         return success;
@@ -313,7 +330,7 @@ public partial class ZoomPictureDialog : WindowBase
                 };
                 imageItems.Add(imageItem);
 
-                
+
 
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
@@ -420,7 +437,7 @@ public partial class ZoomPictureDialog : WindowBase
     {
         if (e != null)
         {
-            await Dispatcher.UIThread.InvokeAsync(() => 
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 VM?.Progress = e.ProgressPercentage;
                 VM?.Info = e.Progress;
@@ -432,11 +449,7 @@ public partial class ZoomPictureDialog : WindowBase
         }
     }
 
-    private void ZoomPictureDialog_ProgressInformation1(object sender, Support.MovieProgressEventargs e)
-    {
-        throw new NotImplementedException();
-    }
-
+    
     public async Task<bool> BuildImages(ImageItemsCollection imageItemsCollection, string imageFileStub,
             double absMaxWidth, double absMaxHeight,
             List<FrameSet>? frameSets, int maxWidth, int maxHeight, int count)
@@ -450,15 +463,15 @@ public partial class ZoomPictureDialog : WindowBase
         SolidBrush solidBrush = new SolidBrush(System.Drawing.Color.WhiteSmoke);
         await Task.Run(async () =>
         {
-            ImageItem? last =  imageItemsCollection.LastOrDefault();
-            if (last != null)
-            {
-                imageItemsCollection.Add(last);
-                imageItemsCollection.Add(last); 
-                imageItemsCollection.Add(last);
-                imageItemsCollection.Add(last);
+            //ImageItem? last = imageItemsCollection.LastOrDefault();
+            //if (last != null)
+            //{
+            //    imageItemsCollection.Add(last);
+            //    imageItemsCollection.Add(last);
+            //    imageItemsCollection.Add(last);
+            //    imageItemsCollection.Add(last);
 
-            }
+            //}
             foreach (ImageItem item in imageItemsCollection)
             {
                 // get existing image
@@ -830,7 +843,7 @@ public partial class ZoomPictureDialog : WindowBase
 
                 if (cloneRectangle)
                 {
-                    CheckLimits(width,height);
+                    CheckLimits(width, height);
                     rect = new Rectangle((int)startX, (int)startY, (int)width, (int)height);
                     if (width * height > 0)
                     {
@@ -859,7 +872,7 @@ public partial class ZoomPictureDialog : WindowBase
 
                             throw;
                         }
-                        
+
                     }
                 }
                 //vm.SystemBitmap?.Dispose();
@@ -962,7 +975,7 @@ public partial class ZoomPictureDialog : WindowBase
         }
     }
 
-    private void CheckLimits(double? width = null,double?  height = null)
+    private void CheckLimits(double? width = null, double? height = null)
     {
         // check we haven't gone out of limits
 
@@ -972,7 +985,7 @@ public partial class ZoomPictureDialog : WindowBase
         if (endY > pictureImage.Height) endY = pictureImage.Height;
         if (width != null && height != null)
         {
-            width = endX - startX; 
+            width = endX - startX;
             height = endY - startY;
         }
     }
@@ -992,7 +1005,7 @@ public partial class ZoomPictureDialog : WindowBase
 
             CheckLimits();
             DrawRectangle(true);
-            
+
             vm?.ZoomInfo?.StartX = startX;
             vm?.ZoomInfo?.EndX = endX;
         }

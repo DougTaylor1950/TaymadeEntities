@@ -298,7 +298,7 @@
 
 						<tcb:ImagedButton  LabelText="Add Bookmarks"
 										   ImageSource="avares://TaymadeControls/Assets/build.png"
-										 
+
 										   Click="AddBookmarks_Click"
 										   />
 
@@ -459,11 +459,17 @@
 														  LabelText="Build Movie"
 														  HotKey="Alt+B"
 														  />
-
+									</StackPanel>
+									<StackPanel Orientation="Horizontal">
 										<tcb:ImagedButton LabelText="Create Title"
 														  ImageSource="avares://TaymadeControls/Assets/build.png"
 														  HotKey="Alt+T"
 														  Click="CreateTitle_Click"
+														  />
+										<tcb:ImagedButton LabelText="Create Outro"
+														  ImageSource="avares://TaymadeControls/Assets/build.png"
+														  HotKey="Alt+O"
+														  Click="CreateOutro_Click"
 														  />
 									</StackPanel>
 									<tcb:ImagedButton LabelText="Previous"

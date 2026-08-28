@@ -583,15 +583,20 @@ namespace TaymadeEntities.ViewModels
                 }
             }
 
+            DeleteTemporaryFiles();
+
+            // perhaps should delete temp directory
+
+        }
+
+        private void DeleteTemporaryFiles()
+        {
             // delete image files to tidy
             string[] files = Directory.GetFiles(RootFolder.TempDirectory(), "*.jpg");
             foreach (var item in files)
             {
                 File.Delete(item);
             }
-
-            // perhaps should delete temp directory
-
         }
 
         /// <summary>
