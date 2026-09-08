@@ -25,7 +25,7 @@ namespace TaymadeEntities;
 /// </remarks>
 public partial class PlayerDialog : Avalonia.Controls.Window, IDisposable
 {
-
+    private const int VideoHeight = 750;
     private bool IsClosed = false;
     public PlayerDialog()
     {
@@ -48,6 +48,29 @@ public partial class PlayerDialog : Avalonia.Controls.Window, IDisposable
         Opened += PlayerDialog_Opened;
         SizeChanged += PlayerDialog_SizeChanged;
         KeyDown += PlayerDialog_KeyDown;
+
+
+        viewModel.MediaPlayer.EndReached += viewModel.OnMediaEndReached;
+        if (viewModel != null && viewModel.CurrentMovie != null)
+        {
+            this.Title = "Playing: " + viewModel.CurrentMovie.MovieName;
+
+            
+        } 
+        else if (!string.IsNullOrEmpty(viewModel.MoviePath))
+        {
+            this.Title = "Playing: " + viewModel.MoviePath;
+        }
+    }
+
+    private void MediaPlayer_EndReached(object? sender, EventArgs e)
+    {
+        //if (DataContext is PlayerViewModel vm)
+        //{
+        //    vm.OnMediaEndReached();
+        //}
+
+
     }
 
     private void PlayerDialog_KeyDown(object? sender, KeyEventArgs e)
@@ -146,7 +169,7 @@ public partial class PlayerDialog : Avalonia.Controls.Window, IDisposable
             ControlledPlayer.Height = this.Height - 80;
             // Adjust for padding and title bar
             vm.ScreenWidth = 1200;
-            vm.ScreenHeight = 780;
+            vm.ScreenHeight = VideoHeight;
         }
 
         if (FullScreenPlayer != null &&

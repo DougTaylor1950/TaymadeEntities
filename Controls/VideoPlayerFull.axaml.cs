@@ -11,6 +11,7 @@ namespace TaymadeEntities.Controls
         public VideoPlayerFull()
         {
             InitializeComponent();
+            
 
             //this.BookmarksCombo.SelectionChanged += this.BookmarksCombo_SelectionChanged;
 

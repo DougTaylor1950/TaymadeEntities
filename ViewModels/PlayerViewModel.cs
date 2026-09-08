@@ -35,18 +35,24 @@ namespace TaymadeEntities.ViewModels
         private bool hasBookmarks;
         private bool hasTracks = true;
         private Bitmap? imageBMP;
+        private int imageHeight = 900;
+        private int imageWidth = 1800;
+        private bool initialised = false;
         private bool isMusic = true;
+        private bool isTrackOnly = false;
         private string? labelContent;
+        private double movementValue = 0.1;
         private int paneWidth = 400;
         private bool paused = false;
         private string? percent = "0 %";
         private int playerHeight = 10;
         private int playerWidth = 800;
         private bool playing = false;
+
         private double progress = 0;
         private double progressBar = 1.0;
+        private int progressInt;
         private int screenHeight = 750;
-
         /// <summary>
         /// The screen width
         /// </summary>
@@ -62,10 +68,6 @@ namespace TaymadeEntities.ViewModels
         private string? selectedBookmark;
         private ObservableCollection<string>? usedBookmarks;
         private int volume;
-        private bool isTrackOnly = false;
-        private int progressInt;
-        private int imageHeight = 900;
-        private int imageWidth = 1800;
 
         #endregion Private Fields
 
@@ -75,8 +77,6 @@ namespace TaymadeEntities.ViewModels
         {
             InitialseViewModel();
         }
-
-
 
         public PlayerViewModel(string? currentMovie, bool autoPlay = false)
         {
@@ -135,8 +135,6 @@ namespace TaymadeEntities.ViewModels
             this.MediaPlayer.EndReached += MediaPlayer_EndReached;
 
             MoviePath = Support.Support.FixImagePath(CurrentTrack.TrackPath);
-
-
         }
 
         public PlayerViewModel(Movies? currentMovie, bool autoPlay = false, bool full = false)
@@ -157,7 +155,7 @@ namespace TaymadeEntities.ViewModels
                 FullScreen = full;
             }
             CurrentMovie = currentMovie;
-            MoviePath = Support.Support.FixImagePath(  currentMovie.MoviePath);
+            MoviePath = Support.Support.FixImagePath(currentMovie.MoviePath);
             AutoPlay = autoPlay;
 
             // build used bookmarks list
@@ -183,15 +181,6 @@ namespace TaymadeEntities.ViewModels
 
         #region Public Properties
 
-        public new int Volume
-        {
-            get => volume;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref volume, value);
-                this.SetVolume(value);
-            }
-        }
         public AutoCompleteBox? AutoCompleteBox { get; set; }
         public List<string>? AutoCompleteList
         {
@@ -256,27 +245,47 @@ namespace TaymadeEntities.ViewModels
             set => this.RaiseAndSetIfChanged(ref imageBMP, value);
         }
 
+        public int ImageHeight
+        {
+            get => imageHeight;
+            set => this.RaiseAndSetIfChanged(ref imageHeight, value);
+        }
+
+        public int ImageWidth
+        {
+            get => imageWidth;
+            set => this.RaiseAndSetIfChanged(ref imageWidth, value);
+        }
+
         public bool IsMusic
         {
             get => isMusic;
             set => this.RaiseAndSetIfChanged(ref isMusic, value);
         }
+
         public bool IsTrackOnly
         {
             get => isTrackOnly;
             set => this.RaiseAndSetIfChanged(ref isTrackOnly, value);
         }
+
         public string? LabelContent
         {
             get => labelContent;
             set => this.RaiseAndSetIfChanged(ref labelContent, value);
         }
 
+        public float LastPosition { get; private set; }
+        public Media? media { get; set; } = null;
         public MediaPlayer? MediaPlayer { get; internal set; }
         public MediaPlayer? MediaPlayerFull { get; internal set; }
-        public MediaPlayer? MediaPlayerPlus { get; internal set; }
         public MediaPlayer? MediaPlayerMusic { get; internal set; }
-
+        public MediaPlayer? MediaPlayerPlus { get; internal set; }
+        public double MovementValue
+        {
+            get => movementValue;
+            set => this.RaiseAndSetIfChanged(ref movementValue, value);
+        }
 
         public new int MusicPlayerHeight { get => playerHeight; set => this.RaiseAndSetIfChanged(ref playerHeight, value); }
         public int MusicPlayerWidth { get => playerWidth; set => this.RaiseAndSetIfChanged(ref playerWidth, value); }
@@ -295,6 +304,7 @@ namespace TaymadeEntities.ViewModels
             set => this.RaiseAndSetIfChanged(ref percent, value);
         }
 
+        public bool playerInitialised { get; private set; }
         public bool PlayFromBookmark { get; set; } = false;
         public bool PlayFromLastBookmark { get; private set; }
         //public Movies? Movies { get; internal set; }
@@ -308,17 +318,19 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        //    public Thickness ProgressMargin =>
-        //new Thickness(Progress *18,0, 0, 0 );
-
-        public double ProgressX => Progress * 18;
         public int ProgressInt
         {
             get => progressInt;
             set => this.RaiseAndSetIfChanged(ref progressInt, value);
         }
 
+        public double ProgressX => Progress * 18;
+        public bool Recording { get; set; } = false;
+        public string RecordName { get; set; }
+        //    public Thickness ProgressMargin =>
+        //new Thickness(Progress *18,0, 0, 0 );
         public new int ScreenHeight { get => screenHeight; set => this.RaiseAndSetIfChanged(ref screenHeight, value); }
+
         public List<int>? ScreenSizelist { get; private set; }
         public new int ScreenWidth { get => screenWidth; set => this.RaiseAndSetIfChanged(ref screenWidth, value); }
         public string? SelectedBookmark
@@ -328,6 +340,7 @@ namespace TaymadeEntities.ViewModels
         }
 
         public List<float>? SpeedList { get; private set; }
+        public bool Stopped { get; private set; }
         public DataGrid? TrackGrid { get; set; }
 
         public ObservableCollection<string>? UsedBookmarks
@@ -336,7 +349,23 @@ namespace TaymadeEntities.ViewModels
             set => this.RaiseAndSetIfChanged(ref usedBookmarks, value);
         }
 
+        public new int Volume
+        {
+            get => volume;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref volume, value);
+                this.SetVolume(value);
+            }
+        }
+
         #endregion Public Properties
+
+        #region Private Properties
+
+        private TextWriter writer { get; set; } = null;
+
+        #endregion Private Properties
 
         #region Public Methods
 
@@ -439,7 +468,6 @@ namespace TaymadeEntities.ViewModels
 
         public void CloseApp()
         {
-            
         }
 
         public void DecVolume()
@@ -602,13 +630,6 @@ namespace TaymadeEntities.ViewModels
         {
             MoveBy(-5.0);
         }
-
-        public double MovementValue 
-        {
-            get => movementValue; 
-            set => this.RaiseAndSetIfChanged(ref movementValue, value); 
-        }
-
         //public PlayerControl? Player { get; internal set; }
         public void MoveByValue()
         {
@@ -616,7 +637,7 @@ namespace TaymadeEntities.ViewModels
 
             if (main != null)
             {
-                   MoveBy(MovementValue);
+                MoveBy(MovementValue);
             }
         }
 
@@ -627,6 +648,9 @@ namespace TaymadeEntities.ViewModels
                 NextAlbumTrack();
             }
             else
+            {
+                if (CurrentMovie != null && CurrentBookmark == null && CurrentMovie.Bookmarks?.Count > 0)
+                    CurrentBookmark = CurrentMovie.Bookmarks.FirstOrDefault();
                 if (CurrentBookmark != null)
                 {
                     int index = CurrentMovie.Bookmarks.IndexOf(CurrentBookmark);
@@ -636,6 +660,7 @@ namespace TaymadeEntities.ViewModels
                         DoGotoBookmark();
                     }
                 }
+            }
         }
 
         /// <summary>
@@ -655,7 +680,6 @@ namespace TaymadeEntities.ViewModels
                 paused = false;
             }
         }
-
         public void Play()
         {
             if (Design.IsDesignMode)
@@ -663,18 +687,30 @@ namespace TaymadeEntities.ViewModels
                 return;
             }
 
-            Media? media = null;
-
             if (FullScreen) MediaPlayerFull = MediaPlayer;
 
             if (!string.IsNullOrEmpty(MoviePath) && _libVlc != null && MediaPlayer != null)
             {
                 if (!playing)
                 {
-                    if (string.IsNullOrEmpty(MoviePath))
+                    if (Stopped && media != null)
+                    {
+                        // move to start
+                        // set playing to true set Stopped to false;
+
+                        var pos = MediaPlayer.Length * LastPosition;
+                        Stopped = false;
+                        MediaPlayer.SeekTo(TimeSpan.FromMilliseconds(pos));
+                        playing = true;
+                        playerInitialised = true;
+                        MediaPlayer.Play(media);
+                        MediaPlayer.SeekTo(TimeSpan.FromMilliseconds(pos));
+                    }
+                    else if (string.IsNullOrEmpty(MoviePath))
                     {
                         media = new Media(_libVlc, new Uri("http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"));
                         MediaPlayer.Play(media);
+                        playerInitialised = true;
                     }
                     else
                     {
@@ -684,18 +720,14 @@ namespace TaymadeEntities.ViewModels
                         }
                         catch (Exception ex)
                         {
-
-                            
                         }
-                        
 
-                        if (Recording  && media != null )
+                        if (Recording && media != null)
                         {
-                            string dest = @"K:\TD1\White\Download\" + RecordName + ".mp4" ;
+                            string dest = @"K:\TD1\White\Download\" + RecordName + ".mp4";
                             string option = ":sout=#std{access=file,mux=mp4,dst=" + dest + "}";
                             media.AddOption(option);
                             media.AddOption(":sout-keep");
-                           
                         }
 
                         if (CurrentBookmark != null)
@@ -713,7 +745,7 @@ namespace TaymadeEntities.ViewModels
                         //    throw exception;
                         //}
                         if (!Recording)
-                        new DispatcherTimer(TimeSpan.FromMilliseconds(60), DispatcherPriority.Normal, TimerTick).Start();
+                            new DispatcherTimer(TimeSpan.FromMilliseconds(60), DispatcherPriority.Normal, TimerTick).Start();
                         else Recording = false;
                     }
                     paused = false;
@@ -751,6 +783,9 @@ namespace TaymadeEntities.ViewModels
                 PrevAlbumTrack();
             }
             else
+            {
+                if (CurrentMovie != null && CurrentBookmark == null && CurrentMovie.Bookmarks?.Count > 0)
+                    CurrentBookmark = CurrentMovie.Bookmarks.FirstOrDefault();
                 if (CurrentBookmark != null)
                 {
                     int index = CurrentMovie.Bookmarks.IndexOf(CurrentBookmark);
@@ -760,6 +795,25 @@ namespace TaymadeEntities.ViewModels
                         DoGotoBookmark();
                     }
                 }
+            }
+        }
+
+        public Bitmap? RenderBitMap(int width = 1800, int topHeight = 450, int bottomHeight = 450)
+        {
+            var myRendererSettings = new StandardWaveFormRendererSettings();
+            myRendererSettings.Width = width;
+            myRendererSettings.TopHeight = topHeight;
+            myRendererSettings.BottomHeight = bottomHeight;
+
+            var myPeakProvider = new AveragePeakProvider(4); // e.g. 4
+            var renderer = new WaveFormRenderer();
+            var audioFileReader = new AudioFileReader(
+                Support.Support.FixImagePath(CurrentTrack.TrackPath)
+                );
+            System.Drawing.Image image = renderer.Render(audioFileReader, myPeakProvider, myRendererSettings);
+
+            Bitmap? imageAv = Support.Support.GetBMPFromBitmap(image);
+            return imageAv;
         }
 
         public void SeekCurrentBookmark()
@@ -812,6 +866,7 @@ namespace TaymadeEntities.ViewModels
         {
             MediaPlayer.Stop();
             playing = false;
+            Stopped = true;
         }
 
         #endregion Public Methods
@@ -845,9 +900,6 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-
-
-
         internal void MoveToStart()
         {
             MediaPlayer?.SeekTo(TimeSpan.FromMilliseconds(0));
@@ -869,6 +921,12 @@ namespace TaymadeEntities.ViewModels
             {
                 Play();
             }
+        }
+
+        internal void OnMediaEndReached(object? sender, EventArgs e)
+        {
+            Stopped = true;
+            playing = false;
         }
 
         /// <summary>
@@ -1018,16 +1076,11 @@ namespace TaymadeEntities.ViewModels
                 Console.Out.WriteLine("New Bookmark=" + Bookmark.Id.ToString());
             }
         }
-
-        private TextWriter writer { get; set; } = null;
-        private bool initialised = false;
-        private double movementValue = 0.1;
-
         private void InitialseViewModel()
         {
             if (initialised) return;
             Core.Initialize();
-            _libVlc = new LibVLC(new[] { "--verbose=2"});
+            _libVlc = new LibVLC(new[] { "--verbose=2" });
 
             writer = TextWriter.Synchronized(
                 new StreamWriter(
@@ -1053,7 +1106,6 @@ namespace TaymadeEntities.ViewModels
             CurrentSpeed = 1;
         }
 
-
         private void MediaPlayer_EndReached(object? sender, EventArgs e)
         {
             if (IsMusic && CurrentAlbum != null && CurrentTrack != null)
@@ -1061,39 +1113,6 @@ namespace TaymadeEntities.ViewModels
                 NextAlbumTrack();
             }
         }
-
-        public int ImageHeight
-        {
-            get => imageHeight;
-            set => this.RaiseAndSetIfChanged(ref imageHeight, value);
-        }
-
-        public int ImageWidth
-        {
-            get => imageWidth;
-            set => this.RaiseAndSetIfChanged(ref imageWidth, value);
-        }
-        public bool Recording { get; set; } = false;
-        public string RecordName { get;  set; }
-
-        public Bitmap? RenderBitMap(int width = 1800, int topHeight = 450, int bottomHeight = 450)
-        {
-            var myRendererSettings = new StandardWaveFormRendererSettings();
-            myRendererSettings.Width = width;
-            myRendererSettings.TopHeight = topHeight;
-            myRendererSettings.BottomHeight = bottomHeight;
-
-            var myPeakProvider = new AveragePeakProvider(4); // e.g. 4
-            var renderer = new WaveFormRenderer();
-            var audioFileReader = new AudioFileReader(
-                Support.Support.FixImagePath(CurrentTrack.TrackPath)
-                );
-            System.Drawing.Image image = renderer.Render(audioFileReader, myPeakProvider, myRendererSettings);
-
-            Bitmap? imageAv = Support.Support.GetBMPFromBitmap(image);
-            return imageAv;
-        }
-
         private void NextAlbumTrack()
         {
             if (CurrentAlbum == null && CurrentTrack.Album == null) return;
@@ -1191,12 +1210,16 @@ namespace TaymadeEntities.ViewModels
             ImageBMP = RenderBitMap(ImageWidth, ImageHeight / 2, ImageHeight / 2);
             AutoPlay = true;
         }
+
         private void SetPercent()
         {
             if (!playing) return;
             long movieLengtthMsecs = MediaPlayer.Time;
 
+            LastPosition = MediaPlayer.Position;
+
             double percent = MediaPlayer.Position * 100;
+
             progress = percent;
             ProgressInt = (int)percent;
             this.RaisePropertyChanged(nameof(Progress));
@@ -1215,6 +1238,7 @@ namespace TaymadeEntities.ViewModels
 
             MediaPlayer.Position = position / 100;
         }
+
         /// <summary>
         /// Timers the tick.
         /// </summary>

@@ -266,34 +266,11 @@ namespace TaymadeEntities.Models
         public void Save()
         {
             DataController.BookmarkController.Update(this);
-            //var local = DataController.SandboxEntities.Set<Bookmark>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-            //// check if local is not null
-            //if (local != null)
-            //{
-            //    // detach
-            //   // DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-            //}
-            //DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            //DataController.SandboxEntities.SaveChanges();
         }
 
         public async Task<bool> SaveAsync()
         {
             return await DataController.BookmarkController.UpdateAsync(this);
-            // bool success = false;
-            // var local = DataController.SandboxEntities.Set<Bookmark>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-            // // check if local is not null
-            // if (local != null)
-            // {
-            //     // detach
-            //      DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-            // }
-            // DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            //int count = await DataController.SandboxEntities.SaveChangesAsync();
-            // success = (count == 1);
-            // return success;
         }
 
         /// <summary>
