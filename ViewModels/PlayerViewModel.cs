@@ -641,6 +641,14 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        /// <summary>
+        /// </summary>
+        /// <author>
+        /// Doug Taylor - Taymade Software Services
+        /// </author>
+        /// <remarks>
+        ///   <created> 08/09/2026 08/09/2026 </created>
+        /// </remarks>
         public void NextBookmark()
         {
             if (IsMusic)
@@ -680,6 +688,10 @@ namespace TaymadeEntities.ViewModels
                 paused = false;
             }
         }
+
+        /// <summary>
+        /// Plays this instance.
+        /// </summary>
         public void Play()
         {
             if (Design.IsDesignMode)

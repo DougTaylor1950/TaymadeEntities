@@ -5,9 +5,9 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using TaymadeEntities.Models;
-using TaymadeEntities.Support;
+
 using TaymadeEntities.ViewModels;
-using TaymadeEntities.Views;
+
 using ExCSS;
 using System;
 using System.Collections.Generic;
@@ -17,19 +17,23 @@ using System.Linq;
 using System.Threading.Tasks;
 using TaymadeControls;
 using TaymadeControls.Buttons;
-using static TaymadeEntities.Support.FFMpegSupport;
+
 using Colors = Avalonia.Media.Colors;
+using TaymadeEntities.Support;
+using static TaymadeEntities.Support.FFMpegSupport;
+using ReactiveUI;
+using MovieDBViewer.Dialogs;
 
 namespace TaymadeEntities.Dialogs;
 
 public partial class EditMovie : Window
 {
-    private ImagedButtonNoText _MissingImages;
-    private ImagedButton _playFromLast;
-    private ImagedButton _ReloadBookmarks;
-    private ImagedButton _repeatLast;
-    private ImagedButton AddBookmarks;
-    private ImagedButton AddPoster;
+    private ImagedButtonNoText? _MissingImages;
+    private ImagedButton? _playFromLast;
+    private ImagedButton? _ReloadBookmarks;
+    private ImagedButton? _repeatLast;
+    private ImagedButton? AddBookmarks;
+    private ImagedButton? AddPoster;
 
     #region Public Constructors
 
@@ -140,7 +144,7 @@ public partial class EditMovie : Window
     {
         Button? button = sender as Button;
 
-        Window? main = TaymadeEntities.Support.Support.GetMainWindow() as Window;
+        Window? main = Support.GetMainWindow() as Window;
 
         if (button != null && main != null)
         {
@@ -189,11 +193,7 @@ public partial class EditMovie : Window
 
     private void CancelButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            this.Close(false);
-        }
-        );
+        Avalonia.Threading.Dispatcher.UIThread.Post(() => this.Close(false));
     }
 
     private void EditMovie_DataContextChanged(object? sender, EventArgs e)
@@ -223,19 +223,19 @@ public partial class EditMovie : Window
             //ViewModels.MovieViewModel? model = button.DataContext as ViewModels.MovieViewModel;
             if (ViewModel != null && ViewModel.CurrentMovie != null)
             {
-                if (Support.FFMpegSupport.FfMpegProc != null && !Support.FFMpegSupport.FfMpegProc.HasExited && Support.FFMpegSupport.FfMpegProc.ProcessName.ToLower() == "vlc")
+                if (FFMpegSupport.FfMpegProc != null && !FFMpegSupport.FfMpegProc.HasExited && FFMpegSupport.FfMpegProc.ProcessName.ToLower() == "vlc")
                 {
-                    Support.FFMpegSupport.FfMpegProc.Kill();
+                    FFMpegSupport.FfMpegProc.Kill();
                 }
 
-                Support.FFMpegSupport mpegSupport = new Support.FFMpegSupport();
+                FFMpegSupport mpegSupport = new FFMpegSupport();
 
                 //bool success = await mpegSupport.GetChapterFileAsync(CurrentMovie);
 
                 //if (success)
                 //{
                 //    string chapterFile = string.Empty;
-                //    string fixedPath = Support.Support.FixImagePath((CurrentMovie.MoviePath));
+                //    string fixedPath = Support.FixImagePath((CurrentMovie.MoviePath));
 
                 //    string metafilePath = Support.FFMpegSupport.GetFFMetaDataPath(CurrentMovie.MoviePath);
                 //    if (!string.IsNullOrEmpty(metafilePath))
@@ -282,7 +282,7 @@ public partial class EditMovie : Window
 
                 // look for bmp and jpgs in base directory
 
-                string? tempFilename = Support.Support.FixImagePath(ViewModel.CurrentMovie.MoviePath);
+                string? tempFilename = Support.FixImagePath(ViewModel.CurrentMovie.MoviePath);
 
                 string? imagename = Path.GetFileNameWithoutExtension(tempFilename);
 
@@ -293,7 +293,8 @@ public partial class EditMovie : Window
                 await GetExistingImage(this, ViewModel.CurrentMovie, null, images, imagename);
 
                 images = Directory.GetFiles(path, imagename + "*.jpg");
-
+                if (images.Length == 0)
+                    images = Directory.GetFiles(path, imagename + "*.bmp");
                 await GetExistingImage(this, ViewModel.CurrentMovie, null, images, imagename);
             }
         }
@@ -356,7 +357,7 @@ public partial class EditMovie : Window
                 //CurrentMovie = temp;
                 //CurrentMovie.Save();
 
-                //AvalonMVVM.Support.Support.PlayMovie(Support.FixImagePath(CurrentMoviePath), null);
+                //AvalonMVVM.Support.PlayMovie(Support.FixImagePath(CurrentMoviePath), null);
             }
         }
     }
@@ -403,10 +404,12 @@ public partial class EditMovie : Window
                         Type = "BOOKMARK"
                     };
 
-                    if (model == null)
-                    {
-                        return;
-                    }
+                    DataController.BookmarkController.Update(bookmark);
+
+                    //if (model == null)
+                    //{
+                    //    return;
+                    //}
 
                     // await model.AddActualBookmark(main, bookmark);
 
@@ -429,29 +432,29 @@ public partial class EditMovie : Window
 
             if (ViewModel != null && ViewModel.CurrentMovie != null)
             {
-                PhraseSelectDialog phraseSelectDialog = new PhraseSelectDialog();
-                PhraseViewModel phraseViewModel = new PhraseViewModel();
+                //PhraseSelectDialog phraseSelectDialog = new PhraseSelectDialog();
+                //PhraseViewModel phraseViewModel = new PhraseViewModel();
 
-                if (phraseViewModel != null)
-                {
-                    phraseSelectDialog.DataContext = phraseViewModel;
-                    //viewModel.Caller = phraseSelectDialog;
+                //if (phraseViewModel != null)
+                //{
+                //    phraseSelectDialog.DataContext = phraseViewModel;
+                //    //viewModel.Caller = phraseSelectDialog;
 
-                    DialogResultButton result = await phraseSelectDialog.ShowDialog<DialogResultButton>(this);
+                //    DialogResultButton result = await phraseSelectDialog.ShowDialog<DialogResultButton>(this);
 
-                    if (result != null && result.Result == DialogResultButton.ResultType.Ok)
-                    {
-                        if (phraseViewModel.CurrentSubPhrase != null)
-                            ViewModel.CurrentMovie.FilmGroup = phraseViewModel.CurrentSubPhrase.Id;
-                        else if (phraseViewModel.CurrentPhrase != null)
-                        {
-                            ViewModel.CurrentMovie.FilmGroup = phraseViewModel.CurrentPhrase.Id;
-                            ViewModel.CurrentMovie.PrimaryFilmGroup = phraseViewModel.CurrentPhrase.Id;
-                        }
+                //    if (result != null && result.Result == DialogResultButton.ResultType.Ok)
+                //    {
+                //        if (phraseViewModel.CurrentSubPhrase != null)
+                //            ViewModel.CurrentMovie.FilmGroup = phraseViewModel.CurrentSubPhrase.Id;
+                //        else if (phraseViewModel.CurrentPhrase != null)
+                //        {
+                //            ViewModel.CurrentMovie.FilmGroup = phraseViewModel.CurrentPhrase.Id;
+                //            ViewModel.CurrentMovie.PrimaryFilmGroup = phraseViewModel.CurrentPhrase.Id;
+                //        }
 
-                        ViewModel.CurrentMovie.CreateXSPFDirectory(phraseViewModel.CurrentPhrase, ViewModel.CurrentMovie.MovieName);
-                    }
-                }
+                //        ViewModel.CurrentMovie.CreateXSPFDirectory(phraseViewModel.CurrentPhrase, ViewModel.CurrentMovie.MovieName);
+                //    }
+                //}
             }
         }
     }
@@ -471,12 +474,25 @@ public partial class EditMovie : Window
                     {
                         ViewModel.CurrentActor.ImagePath = @"k:\TD1\MovieImages\ActorImages\id-" + ViewModel.CurrentActor.Id.ToString().Trim() + ".jpg";
 
-                        if (!System.IO.File.Exists(Support.Support.FixImagePath(ViewModel.CurrentActor.ImagePath)))
+                        if (!System.IO.File.Exists(Support.FixImagePath(ViewModel.CurrentActor.ImagePath)))
                         {
-                            temp.Save(Support.Support.FixImagePath(ViewModel.CurrentActor.ImagePath));
+                            temp.Save(Support.FixImagePath(ViewModel.CurrentActor.ImagePath));
                         }
                         ViewModel.CurrentActor.ImageBMP = temp;
                         //temp?.Dispose();
+                    }
+                }
+                else if (!string.IsNullOrEmpty(ViewModel.CurrentActor.ImagePath))
+                {
+                    string checkPath = Support.FixImagePath(ViewModel.CurrentActor.ImagePath);
+                    if (!System.IO.File.Exists(checkPath))
+                    {
+                        ViewModel.CurrentActor.ImagePath = checkPath;
+                        if (ViewModel.CurrentActor.ImageBMP == null)
+                        {
+                            ViewModel.CurrentActor.SetImageBMP();
+                        }
+                        ViewModel.CurrentActor.Save();
                     }
                 }
             }
@@ -546,14 +562,14 @@ public partial class EditMovie : Window
     {
         //MovieViewModel? viewModel = DataContext as MovieViewModel;
 
-        Window? window = Support.Support.GetMainWindow() as Window;
+        Window? window = Support.GetMainWindow() as Window;
 
         if (window != null)
         {
             {
                 if (ViewModel != null && ViewModel.CurrentMovie != null && !string.IsNullOrEmpty(ViewModel.CurrentMovie.MoviePath))
                 {
-                    string existingPath = TaymadeEntities.Support.Support.FixImagePath(ViewModel.CurrentMovie.MoviePath);
+                    string existingPath = Support.FixImagePath(ViewModel.CurrentMovie.MoviePath);
 
                     if (File.Exists(existingPath))
                     {
@@ -709,7 +725,7 @@ public partial class EditMovie : Window
         bool result = await MoveFile(newFilename, existingPath);
         if (result)
         {
-            currentMovie.MoviePath = TaymadeEntities.Support.Support.FixPathBack(newFilename);
+            currentMovie.MoviePath = Support.FixPathBack(newFilename);
             //CurrentMovie.PathWrong = false;
             currentMovie.Save();
         }
@@ -739,15 +755,11 @@ public partial class EditMovie : Window
 
     private void OkButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (ViewModel != null)
-        {
-            ViewModel.CurrentMovie?.Save();
-        }
-        Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            this.Close(true);
-        }
-        );
+        //if (ViewModel != null)
+        //{
+        //    ViewModel.CurrentMovie?.Save();
+        //}
+        Avalonia.Threading.Dispatcher.UIThread.Post(() => this.Close(true));
     }
     /// <summary>
     /// Renames the file.
@@ -810,7 +822,7 @@ public partial class EditMovie : Window
                 !string.IsNullOrEmpty(ViewModel.CurrentMovie.MoviePath))
             {
                 string? originalFolder = Path.GetDirectoryName(ViewModel.CurrentMovie.MoviePath);
-                string? folder = Support.PathExtensions.GetLastPathSegment(originalFolder);
+                string? folder = PathExtensions.GetLastPathSegment(originalFolder);
 
                 string? stub = Path.GetDirectoryName(ViewModel.CurrentMovie.MoviePath).Replace(folder, "");
 
@@ -928,12 +940,12 @@ public partial class EditMovie : Window
             if (cast.Actor == null && cast.ActorId > 0)
             {
                 ViewModel?.CurrentActor = new Actor(cast.ActorId.Value);
-                ViewModel?.CurrentActor?.Parent = cast;
+                //  ViewModel?.CurrentActor?.Parent = cast;
             }
             else
             {
                 ViewModel?.CurrentActor = cast.Actor;
-                ViewModel?.CurrentActor?.Parent = cast;
+                //  ViewModel?.CurrentActor?.Parent = cast;
             }
             if (ViewModel != null && ViewModel.CurrentActor != null)
             {
@@ -971,18 +983,18 @@ public partial class EditMovie : Window
         {
             Button? button = sender as Button;
 
-            if (button != null && button.DataContext is MovieEditViewModel)
+            if (button != null && button.DataContext is MovieEditViewModel viewModel)
             {
-                MovieEditViewModel viewModel = button.DataContext as MovieEditViewModel;
+                //    MovieEditViewModel viewModel = button.DataContext as MovieEditViewModel;
                 if (viewModel != null && viewModel.CurrentActor != null)
                 {
-                    ActorSearchModel? actorSearchModel = new ActorSearchModel(viewModel.CurrentActor);
-                    Dialogs.TMDBActorSearchDialog? searchDialog = new Dialogs.TMDBActorSearchDialog(actorSearchModel);
+                    TaymadeEntities.ViewModels.ActorSearchModel? actorSearchModel = new ActorSearchModel(viewModel.CurrentActor);
+                    TMDBActorSearchDialog? searchDialog = new TMDBActorSearchDialog(actorSearchModel);
 
                     bool result = await searchDialog.ShowDialog<bool>(this);
                     if (result)
                     {
-                        string? tmidb = actorSearchModel.GetTMIDB();
+                            string? tmidb = actorSearchModel.GetTMIDB();
 
                         if (!string.IsNullOrEmpty(tmidb))  // not  cancelled or none selected
                         {
@@ -992,21 +1004,21 @@ public partial class EditMovie : Window
                             //viewModel.CurrentActor.SetDetailsFromPerson(found);
                             //viewModel.CurrentActor.Save();
                         }
-                        else if (actorSearchModel.CurrentActor != null)
+                        else if (actorSearchModel.TMDBID != null)
                         {
-                            viewModel.CurrentActor.TMDBID = actorSearchModel.CurrentActor.TMDBID;
+                            viewModel.CurrentActor.TMDBID = actorSearchModel.TMDBID;
                         }
-                        //viewModel.CurrentActor.Save();
-                        //actorSearchModel?.Dispose();
-                        //actorSearchModel = null;
-                        //searchDialog?.Dispose();
-                        //searchDialog = null;
-                        //found = null;
+                        //    //viewModel.CurrentActor.Save();
+                        //    //actorSearchModel?.Dispose();
+                        //    //actorSearchModel = null;
+                        //    //searchDialog?.Dispose();
+                        //    //searchDialog = null;
+                        //    //found = null;
 
                     }
-                    searchDialog = null;
-                    //actorSearchModel?.Dispose();
-                    //actorSearchModel = null;
+                    searchDialog.Dispose();
+                    actorSearchModel?.Dispose();
+                    actorSearchModel = null;
                 }
             }
         }
@@ -1047,81 +1059,76 @@ public partial class EditMovie : Window
                     Cast tempCastMember = new Cast();
                     tempCastMember.MovieID = viewModel.CurrentMovie.Id;
                     ActorSearchModel? actorSearchModel = new ActorSearchModel();
-                    actorSearchModel.CurrentActor = new Actor()
-                    {
-                        Name = "<enter>"
-                    };
-                    Dialogs.TMDBActorSearchDialog? searchDialog = new Dialogs.TMDBActorSearchDialog(actorSearchModel);
+                    actorSearchModel.ActorName = "<enter Actor Name>";
+                    
+                    //Dialogs.TMDBActorSearchDialog? searchDialog = new Dialogs.TMDBActorSearchDialog(actorSearchModel);
 
-                    bool result = await searchDialog.ShowDialog<bool>(this);
-                    searchDialog = null;
+                    //bool result = await searchDialog.ShowDialog<bool>(this);
+                    //searchDialog = null;
 
-                    if (result)
-                    {
-                        Person? found = actorSearchModel.FoundPerson;
+                    //if (result)
+                    //{
+                    //    Person? found = actorSearchModel.FoundPerson;
 
-                        if (found != null)  // not  cancelled or none selected
-                        {
-                            Actor? actor = DataController.ActorList
-                                .Where(x => x.Name.ToLower() == found.Name.ToLower())
-                                .FirstOrDefault();
+                    //    if (found != null)  // not  cancelled or none selected
+                    //    {
+                    //        Actor? actor = DataController.ActorList
+                    //            .Where(x => x.Name.ToLower() == found.Name.ToLower())
+                    //            .FirstOrDefault();
 
-                            if (actor != null) // we already know about this actor
-                            {
-                                Cast? castmember =
-                                    actor.Casts
-                                        .Where(x => x.MovieID == viewModel.CurrentMovie.Id)
-                                        .FirstOrDefault() as Cast;
+                    //        if (actor != null) // we already know about this actor
+                    //        {
+                    //            Cast? castmember =
+                    //                actor.Casts
+                    //                    .Where(x => x.MovieID == viewModel.CurrentMovie.Id)
+                    //                    .FirstOrDefault() as Cast;
 
-                                if (castmember == null)
-                                {
-                                    actor.SetDetailsFromPerson(found);
+                    //            if (castmember == null)
+                    //            {
+                    //                actor.SetDetailsFromPerson(found);
 
-                                    tempCastMember.ActorId = actor.Id;
-                                    //tempCastMember.Actor = actor;
+                    //                tempCastMember.ActorId = actor.Id;
+                    //                //tempCastMember.Actor = actor;
 
-                                    tempCastMember.MovieID = viewModel.CurrentMovie.Id;
-                                    tempCastMember.Insert();
-                                    tempCastMember.Actor = actor;
-                                    tempCastMember.Movies = viewModel.CurrentMovie;
-                                    viewModel.CurrentMovie.Casts.Add(tempCastMember);
-                                }
-                            }
-                            else
-                            {
-                                actor = new Actor();
-                                actor.Name = found.Name;
-                                if (actor.Id == 0) actor.Insert();
+                    //                tempCastMember.MovieID = viewModel.CurrentMovie.Id;
+                    //                tempCastMember.Insert();
+                    //                tempCastMember.Actor = actor;
+                    //                tempCastMember.Movies = viewModel.CurrentMovie;
+                    //                viewModel.CurrentMovie.Casts.Add(tempCastMember);
+                    //            }
+                    //        }
+                    //        else
+                    //        {
+                    //            actor = new Actor();
+                    //            actor.Name = found.Name;
+                    //            if (actor.Id == 0) actor.Insert();
 
-                                actor.SetDetailsFromPerson(found);
-                                //tempCastMember.Actor = actor;
-                                DataController.ActorList.Add(actor);
-                                tempCastMember.ActorId = actor.Id;
-                                tempCastMember.MovieID = viewModel.CurrentMovie.Id;
-                                tempCastMember.Insert();
-                                tempCastMember.Actor = actor;
-                                tempCastMember.Movies = viewModel.CurrentMovie;
-                                viewModel.CurrentMovie.Casts.Add(tempCastMember);
-                            }
-                        }
+                    //            actor.SetDetailsFromPerson(found);
+                    //            //tempCastMember.Actor = actor;
+                    //            DataController.ActorList.Add(actor);
+                    //            tempCastMember.ActorId = actor.Id;
+                    //            tempCastMember.MovieID = viewModel.CurrentMovie.Id;
+                    //            tempCastMember.Insert();
+                    //            tempCastMember.Actor = actor;
+                    //            tempCastMember.Movies = viewModel.CurrentMovie;
+                    //            viewModel.CurrentMovie.Casts.Add(tempCastMember);
+                    //        }
+                    //    }
 
 
-                        actorSearchModel.Dispose();
-                        actorSearchModel = null;
-                    }
-
+                    actorSearchModel.Dispose();
+                    actorSearchModel = null;
                 }
-            }
 
+            }
         }
 
-
     }
 
-    private void Button_Click(object? sender, RoutedEventArgs e)
-    {
-    }
 
+    //}
+
+    
     private async void SaveMovie_Click(object? sender, RoutedEventArgs e)
     {
         if (sender != null && sender is Button)
@@ -1137,6 +1144,51 @@ public partial class EditMovie : Window
                 }
             }
         }
+    }
+
+    private async void TabControl_SelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (sender is TabControl tabControl)
+        {
+            TabItem tabItem = tabControl.SelectedValue as TabItem;
+            if (tabItem.Tag == "CastTab")
+            {
+                //if ( this.DataContext is MovieEditViewModel viewModel)
+                //{
+                //    if (viewModel.CurrentMovie.Casts.Count== 0)
+                //    {
+                //        List<Cast> casts = await DataController.SandboxEntities.GetCastByMovieId(viewModel.CurrentMovie.Id);
+                //        viewModel.CurrentMovie.Casts = new ObservableCollection<Cast>(
+                //            casts);
+                //        viewModel.CurrentMovie.RaisePropertyChanged(nameof(viewModel.CurrentMovie.Casts));
+                //    }
+                //}
+            }
+        }
+    }
+
+    private void PlayButton_Click(object? sender, RoutedEventArgs e)
+    {
+
+    }
+
+    private async void EditActor_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is MovieEditViewModel editViewModel)
+        {
+            if (editViewModel.CurrentActor != null)
+            {
+                ActorViewModel actorViewModel = new ActorViewModel()
+                {
+                    CurrentActor = editViewModel.CurrentActor
+                };
+
+                ActorEditDialog actorEditDialog = new ActorEditDialog(actorViewModel);
+
+                bool result = await actorEditDialog.ShowDialog<bool>(this);
+            }
+        }
+
     }
 
 

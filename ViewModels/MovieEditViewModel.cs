@@ -52,7 +52,7 @@ namespace TaymadeEntities.ViewModels
         public MovieEditViewModel(Movies? currentMovie)
         {
             CurrentMovie = currentMovie;
-            AddPhrase = ReactiveCommand.Create(DoAddPhrase);
+            //AddPhrase = ReactiveCommand.Create(DoAddPhrase);
 
             NewBookmark = ReactiveCommand.Create(Do_AddBookmark);
             EditBookmark = ReactiveCommand.Create(DoEditBookmark);
@@ -71,8 +71,8 @@ namespace TaymadeEntities.ViewModels
             Phrases = new ObservableCollection<PhraseEntry>(DataController.PhraseEntries);
 
             // setup SeriesList property in this view model from DataController
-            SeriesList = new ObservableCollection<Series>(
-                DataController.SandboxEntities.Series.ToList()
+            SeriesList = new ObservableCollection<Models.Series>(
+                DataController.MovieController.GetSeriesList()
                 );
 
             GenderList = new List<string>()
@@ -87,8 +87,6 @@ namespace TaymadeEntities.ViewModels
         #endregion Public Constructors
 
         #region Public Properties
-
-        public ReactiveCommand<Unit, Unit> AddPhrase { get; set; }
 
         public ReactiveCommand<Unit, Unit>? AddText { get; set; }
 
@@ -112,8 +110,7 @@ namespace TaymadeEntities.ViewModels
             set => autoCompleteList = value;
         }
 
-        public bool ByMovie { get; internal set; }
-
+       
         public Actor? CurrentActor
         {
             get => currentActor;
@@ -123,17 +120,6 @@ namespace TaymadeEntities.ViewModels
                 this.RaiseAndSetIfChanged(ref currentActor, value);
             }
         }
-
-        public Bookmark CurrentBookmark
-        {
-            get => currentBookmark;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref currentBookmark, value);
-                // this.RaisePropertyChanged(nameof(CurrentBookmarkImageBMP));
-            }
-        }
-
         public Avalonia.Media.Imaging.Bitmap? CurrentBookmarkImageBMP
         {
             get
@@ -147,44 +133,19 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        public MovieGenre? CurrentGenre { get => currentGenre; set => this.RaiseAndSetIfChanged(ref currentGenre, value); }
-
-        public new Movies? CurrentMovie
-        {
-            get => currentMovie;
-            set
-            {
-                currentMovie = value;
-            }
-        }
-
-        public Models.Season CurrentSeason
-        {
-            get => currentSeason;
-            set => this.RaiseAndSetIfChanged(ref currentSeason, value);
-        }
-
-        public Models.Series? CurrentSeries
-        {
-            get => currentSeries;
-            set => this.RaiseAndSetIfChanged(ref currentSeries, value);
-        }
-
-        public ReactiveCommand<Unit, Unit>? DelBookmark { get; set; }
+        //   public new Movies? CurrentMovie
+        //{
+        //    get => currentMovie;
+        //    set
+        //    {
+        //        currentMovie = value;
+        //    }
+        //}
 
         /// <summary>
         /// Gets or sets the DelImage.
         /// </summary>
         public ReactiveCommand<Unit, Unit>? DelImage { get; set; }
-
-        public ObservableCollection<Director>? DirectorList
-        {
-            get => directorList;
-            set => this.RaiseAndSetIfChanged(ref directorList, value);
-        }
-
-        public ReactiveCommand<Unit, Unit>? EditBookmark { get; set; }
-
         public int Found { get; internal set; }
 
         public List<string> GenderList
@@ -193,46 +154,17 @@ namespace TaymadeEntities.ViewModels
             internal set => genderList = value;
         }
 
-        public ReactiveCommand<Unit, Unit> GetMissingImages { get; set; }
-
+  
         /// <summary>
         /// Gets or sets the Grab.
         /// </summary>
         public ReactiveCommand<Unit, Unit> Grab { get; set; }
 
-        public bool HasEpisode { get; internal set; }
-
-        /// <summary>
-        /// Gets the NewBookmark.
-        /// </summary>
-        public ReactiveCommand<Unit, Unit> NewBookmark { get; set; }
-
-        public ReactiveCommand<Unit, Unit> NewCastMember { get; set; }
 
         public Models.TVEpisode NewEpisode
         {
             get => newEpisode;
             set => this.RaiseAndSetIfChanged(ref newEpisode, value);
-        }
-
-        public PhraseEntry? NewPhrase
-        {
-            get => newPhrase;
-            set => this.RaiseAndSetIfChanged(ref newPhrase, value);
-        }
-
-        public ReactiveCommand<Unit, Unit>? NewPoster { get; }
-
-        public Models.Season? NewSeason
-        {
-            get => newSeason;
-            set => this.RaiseAndSetIfChanged(ref newSeason, value);
-        }
-
-        public PhraseEntry? NewSubPhrase
-        {
-            get => newSubPhrase;
-            set => this.RaiseAndSetIfChanged(ref newSubPhrase, value);
         }
 
         /// <summary>
@@ -242,61 +174,7 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets or sets the Phrases.
         /// </summary>
-        public ObservableCollection<Models.PhraseEntry>? Phrases
-        {
-            get => phraseEntries;
-            set => this.RaiseAndSetIfChanged(ref phraseEntries, value);
-        }
-
-        public ReactiveCommand<Unit, Unit>? PlayBookmark { get; set; }
-
-        /// <summary>
-        /// Gets the NewPoster.
-        /// </summary>
-        /// <summary>
-        /// Gets the PlayFromLast.
-        /// </summary>
-        public ReactiveCommand<Unit, Unit>? PlayFromLast { get; }
-
-        /// <summary>
-        /// Gets or sets the Progress.
-        /// </summary>
-        public string? Progress
-        {
-            get => this.progress;
-            set => this.RaiseAndSetIfChanged(ref this.progress, value);
-        }
-
-        /// <summary>
-        /// Gets the ProgressPercent.
-        /// </summary>
-        public int ProgressPercent { get => progressPercent; private set => this.RaiseAndSetIfChanged(ref progressPercent, value); }
-
-        public ReactiveCommand<Unit, Unit>? ReloadBookmarks { get; }
-
-        /// <summary>
-        /// Gets the RepeatLast.
-        /// </summary>
-        public ReactiveCommand<Unit, Unit>? RepeatLast { get; }
-
-        public ObservableCollection<Series>? SeriesList
-        {
-            get => seriesList;
-            set => this.RaiseAndSetIfChanged(ref seriesList, value);
-        }
-
-        /// <summary>
-        /// Gets or sets the SubPhrases.
-        /// </summary>
-        public ObservableCollection<Models.PhraseEntry>? SubPhrases
-        {
-            get => subPhrases;
-            set
-            {
-                this.RaiseAndSetIfChanged(ref subPhrases, value);
-                this.NewSubPhrase = null;
-            }
-        }
+      
 
         #endregion Public Properties
 
@@ -320,16 +198,6 @@ namespace TaymadeEntities.ViewModels
             this.NewEpisode = newEpisode;
         }
 
-        public void AddSeasonCommand()
-        {
-            if (CurrentMovie != null && CurrentSeries != null)
-            {
-                NewSeason = new Models.Season();
-                NewSeason.Series = CurrentSeries.Id;
-                NewSeason.ShowId = CurrentSeries.TMID;
-            }
-        }
-
         public void DeleteBookmark()
         {
             if (CurrentBookmark != null && CurrentBookmark.Movies != null)
@@ -341,18 +209,12 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
+        
         public void DoPlayBookmark()
         {
             if (CurrentBookmark != null && CurrentBookmark.Movies != null)
             {
-                string moviePath = CurrentBookmark.Movies.MoviePath;
+                string moviePath = CurrentBookmark?.Movies?.MoviePath;
 
                 if (!string.IsNullOrEmpty(moviePath))
                 {
@@ -361,91 +223,14 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        public void EditActor()
-        {
-            // will open the edit actor dialog for the current cast member
-        }
-
-        public Director GetDirector()
-        {
-            Director returnVal = null;
-
-            //if (CurrentMovie != null && CurrentMovie.TMDBID != null)
-            //{
-            //    Support.CastList castMembers = Support.TmdbSupport.GetMovieCredits(CurrentMovie.TMDBID.Value);
-
-            //    var director = castMembers.Where(cl => cl.IsDirector).FirstOrDefault();
-
-            //    if (director != null)
-            //    {
-            //        Models.Director? mdirector = Models.DataController.SandboxEntities.Directors.Where(d => d.Name.ToLower() == director.Name.ToLower()).FirstOrDefault();
-            //        if (mdirector != null)
-            //        {
-            //            CurrentMovie.Director = mdirector;
-            //            CurrentMovie.DirectorID = mdirector.Id;
-            //        }
-            //        else
-            //        {
-            //            // create new director
-            //            mdirector = new Models.Director();
-            //            mdirector.Name = director.Name;
-            //            Models.DataController.SandboxEntities.Directors.Add(mdirector);
-            //            Models.DataController.SandboxEntities.SaveChanges();
-            //            CurrentMovie.Director = mdirector;
-            //            CurrentMovie.DirectorID = mdirector.Id;
-            //            DirectorList.Add(mdirector);
-            //        }
-            //    }
-            //    else { CurrentMovie.DirectorID = 14; }
-            //}
-
-            return returnVal;
-        }
+       
 
         //public Cast CurrentCastMember
         //{
         //    get => currentCastMember;
         //    set =>this.RaiseAndSetIfChanged(ref currentCastMember, value);
         //}
-        public void GetSearchDirector()
-        {
-            GetDirector();
-        }
-
-        /// <summary>
-        /// Gets the TMDB details.
-        /// </summary>
-        /// <autogeneratedoc />
-        public void GetTMDBDetails()
-        {
-            if (CurrentMovie != null && (CurrentMovie.TMDBID != null && CurrentMovie.TMDBID > 0))
-            {
-                GetFromTMDB(CurrentMovie, CurrentMovie.TMDBID.Value, true);
-            }
-        }
-
-        public async void MissingImages()
-        {
-            if (CurrentMovie != null)
-            {
-                if (CurrentMovie.Bookmarks != null && CurrentMovie.Bookmarks.Count > 0)
-                {
-                    foreach (Bookmark bookmark in CurrentMovie.Bookmarks)
-                    {
-                        if (bookmark.ImagePath != null && !File.Exists(bookmark.ImagePath))
-                        {
-                            // get the image using the bookmark time
-                            // if the image does not exist, then grab image
-                            //await Support.VideoSupport.GrabBookmarkImage(CurrentMovie, bookmark, 0);
-
-                            CurrentBookmark = bookmark;
-                            //bookmark.ImagePath = string.Empty;
-                            bookmark.Save();
-                        }
-                    }
-                }
-            }
-        }
+       
 
         public void NullOutVariables()
         {
@@ -462,14 +247,6 @@ namespace TaymadeEntities.ViewModels
             //this.SubPhrases = null;
         }
 
-        public void RemoveGenre()
-        {
-            if (CurrentMovie != null)
-            {
-                //CurrentMovie.Genre = null;
-                //CurrentMovie.GenreID = null;
-            }
-        }
 
         /// <summary>
         /// Saves the episode command.
@@ -533,48 +310,13 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// The DoReloadBookmarks.
         /// </summary>
-        internal void DoReloadBookmarks()
-        {
-            Window mainWindow = Support.Support.GetMainWindow() as Window;
-
-            // CurrentMovie = Support.GetCurrentMovie();
-
-            if (CurrentMovie != null && mainWindow != null)
-            {
-                CurrentMovie.Save();
-                DataController.ReloadMovie(CurrentMovie);
-                CurrentMovie.Bookmarks = new ObservableCollection<Bookmark>();
-                CurrentMovie.Bookmarks = new ObservableCollection<Bookmark>(
-                    DataController.BookmarkController.GetBookmarksByMovieId(CurrentMovie.Id)
-                    );
-                CurrentMovie.ImagesCount = CurrentMovie.Bookmarks.Count;
-                CurrentMovie.SetPercentUnmarked();
-
-                // mainWindow.SetBookmarks(CurrentMovie);
-                //Support.Support.SetCurrentMovie(CurrentMovie);
-            }
-        }
+        
 
         #endregion Internal Methods
 
         #region Protected Methods
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects)
-                    NullOutVariables();
-                    //  CurrentActor?.Dispose();
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
-                disposedValue = true;
-            }
-        }
+        
 
         #endregion Protected Methods
 
@@ -682,9 +424,7 @@ namespace TaymadeEntities.ViewModels
             // }
         }
 
-        private void DoAddPhrase()
-        {
-        }
+        
 
         /// <summary>
         /// Adds the tv episode command.

@@ -97,10 +97,10 @@ namespace TaymadeEntities.DAL.Classes
             return GetSubPhrasesByPhraseID(9, compkey);
         }
 
-        public IEnumerable<PhraseEntry>? GetSubPhrasesByPhraseID(int id, string phraseId)
+        public IEnumerable<PhraseEntry>? GetSubPhrasesByPhraseID(int id, string? phraseId)
         {
             // check to see if phraseId contains a '.' if so only use part before '.'
-            if (phraseId.Contains("."))
+            if (!string.IsNullOrEmpty(phraseId) && !phraseId.Contains("."))
             {
                 int index = phraseId.IndexOf(".");
                 if (index > 0)

@@ -323,7 +323,7 @@ namespace TaymadeEntities.ViewModels
 
             FilterList = new ObservableCollection<Models.Filter>(DataController.SandboxEntities.Filter.ToList());
 
-            SeriesList = DataController.SeriesList;
+            SeriesList = new ObservableCollection<Models.Series>(DataController.MovieController.GetSeriesList());
 
             RemoveGenre = ReactiveCommand.Create(DoRemoveGenre);
 
@@ -1164,7 +1164,7 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets the NewCastMember.
         /// </summary>
-        public ReactiveCommand<Unit, Unit> NewCastMember { get; private set; }
+        public ReactiveCommand<Unit, Unit> NewCastMember { get; set; }
 
         /// <summary>
         /// Creates new phrase.
@@ -1190,7 +1190,7 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets the NewPoster.
         /// </summary>
-        public ReactiveCommand<Unit, Unit>? NewPoster { get; }
+        public ReactiveCommand<Unit, Unit>? NewPoster { get; set; }
 
         /// <summary>
         /// Gets or sets the NewSeason.
@@ -1223,7 +1223,7 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets the PlayFromLast.
         /// </summary>
-        public ReactiveCommand<Unit, Unit>? PlayFromLast { get; }
+        public ReactiveCommand<Unit, Unit>? PlayFromLast { get; set; }
 
         /// <summary>
         /// Gets or sets the ProcessOutput.
@@ -1243,7 +1243,7 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets the ReloadBookmarks.
         /// </summary>
-        public ReactiveCommand<Unit, Unit>? ReloadBookmarks { get; }
+        public ReactiveCommand<Unit, Unit>? ReloadBookmarks { get; set; }
 
         /// <summary>
         /// Gets the RefreshMovies.
@@ -1252,7 +1252,7 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets the RepeatLast.
         /// </summary>
-        public ReactiveCommand<Unit, Unit>? RepeatLast { get; }
+        public ReactiveCommand<Unit, Unit>? RepeatLast { get; set; }
 
         /// <summary>
         /// Gets or sets the ResultTask.
@@ -1298,7 +1298,7 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets or sets the SeriesList.
         /// </summary>
-        public List<Models.Series>? SeriesList { get; set; }
+        public ObservableCollection<Models.Series>? SeriesList { get; set; }
         public object RemoveGenre { get; private set; }
 
         /// <summary>
@@ -2084,6 +2084,57 @@ namespace TaymadeEntities.ViewModels
                 CurrentSubPhrase.Save();
 
                 SubPhrases = new ObservableCollection<PhraseEntry>(DataController.GetSubPhraseEntries(CurrentPhrase));
+            }
+        }
+
+        public async void DoSearchTMDB()
+        {
+            MovieBase? movieBase = null;
+            if (CurrentMovie != null)
+            {
+                using MovieSearchViewModel viewModel = new MovieSearchViewModel(CurrentMovie);
+                {
+                    using Dialogs.TMDBSearchDialog searchDialog = new TMDBSearchDialog(viewModel);
+                    {
+
+                        Views.MainWindow? main = Support.Support.GetWindow() as Views.MainWindow;
+
+                        if (main != null)
+                        {
+                            movieBase = await searchDialog.ShowDialog<MovieBase>(main);
+                            //searchDialog.Dispose();
+                        }
+                    }
+                }
+                if (movieBase != null) GetTMDBDetails(movieBase);
+
+                //bool success = await CurrentMovie.SaveAsync();
+
+            }
+        }
+
+        public void GetTMDBDetails(MovieBase movieBase)
+        {
+            if (movieBase != null)
+            {
+                CurrentMovie.TMDBID = movieBase.ID;
+                if (!string.IsNullOrEmpty(movieBase.Overview))
+                    CurrentMovie.Info = movieBase.Overview;
+                if (!string.IsNullOrEmpty(movieBase.Year))
+                {
+                    DateTime temp = DateTime.MinValue;
+                    if (DateTime.TryParse(movieBase.Year, out temp))
+                    {
+                        CurrentMovie.Year = temp.Year;
+                    }
+                }
+                // need to do year
+            }
+
+            if (CurrentMovie.TMDBID != null && CurrentMovie.TMDBID > 0)
+            {
+                GetFromTMDB(CurrentMovie, CurrentMovie.TMDBID.Value, true);
+                //bool success = CurrentMovie.Save();
             }
         }
 

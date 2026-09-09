@@ -68,6 +68,11 @@ namespace TaymadeEntities.DAL.Classes
             return Save();
         }
 
+        public List<Series> GetSeriesList()
+        {
+            return _context.Series.OrderBy(s => s.Name).ToList();
+        }
+
         public bool DeleteFrameSet(FrameSet frameSet)
         {
             _context.FrameSet.Remove(frameSet);

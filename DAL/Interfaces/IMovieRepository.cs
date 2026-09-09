@@ -71,6 +71,7 @@ namespace TaymadeEntities.DAL.Interfaces
 
         Task<bool> UpdateMovieAsync(Movies movie);
         bool DeleteFrameSet(FrameSet frameSet);
+        List<Series> GetSeriesList();
 
         #endregion Public Methods
     }

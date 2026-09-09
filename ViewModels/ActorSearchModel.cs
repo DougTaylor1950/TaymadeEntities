@@ -71,6 +71,10 @@ namespace TaymadeEntities.ViewModels
 
         #region Properties
 
+        public string? ActorName { get; set; }
+
+        public int? TMDBID { get; internal set; }
+
         private ObservableCollection<Person>? foundPeople;
         private bool disposedValue;
 

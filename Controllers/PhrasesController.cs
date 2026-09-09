@@ -78,28 +78,28 @@ namespace TaymadeEntities.Controllers
             GC.SuppressFinalize(this);
         }
 
-        internal List<PhraseEntry>? GetPhrasesByPhraseHeaderId(int v)
+        public List<PhraseEntry>? GetPhrasesByPhraseHeaderId(int v)
         {
             return phrasesRepository.GetPhrasesByPhraseHeaderId(v)?.ToList();
         }
 
-        internal List<PhraseEntry>? GetSubPhraseEntries(string phraseId)
+        public List<PhraseEntry>? GetSubPhraseEntries(string phraseId)
         {
             return phrasesRepository.GetSubPhrasesByPhraseID(phraseId)?.ToList();
         }
 
-        internal void Add(PhraseEntry tempPhrase)
+        public void Add(PhraseEntry tempPhrase)
         {
             phrasesRepository.Add(tempPhrase);
         }
 
-        internal PhraseEntry? GetByPhraseId(string value)
+        public   PhraseEntry? GetByPhraseId(string value)
         {
             return phrasesRepository.GetByPhraseId(value);
 
         }
 
-        internal PhraseEntry? GetByCompKey(int phraseId, string genre)
+        public PhraseEntry? GetByCompKey(int phraseId, string genre)
         {
             return phrasesRepository.GetByCompKey(phraseId, genre);
         }

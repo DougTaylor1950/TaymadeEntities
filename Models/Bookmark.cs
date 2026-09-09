@@ -101,7 +101,7 @@ namespace TaymadeEntities.Models
         /// Gets or sets the Movies.
         /// </summary>
         [NotMapped]
-        public virtual Movies Movies { get; set; }
+        public virtual Movies? Movies { get; set; }
 
         /// <summary>
         /// Gets or sets the Name.

@@ -2,12 +2,12 @@
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-		xmlns:vm="using:TaymadeEntities.ViewModels"
+		xmlns:vm="using:MovieDBViewer.ViewModels"
 		xmlns:tc="using:TaymadeControls"
 		xmlns:tcb="using:TaymadeControls.Buttons"
 		mc:Ignorable="d"
 		d:DesignWidth="1800" d:DesignHeight="900"
-		x:Class="TaymadeEntities.Dialogs.EditMovie"
+		x:Class="MovieDBViewer.Dialogs.EditMovie"
 		x:DataType="vm:MovieEditViewModel"
 		WindowState="Maximized"
 		Title="Edit Movie">
@@ -18,9 +18,9 @@
 
 	<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" >
 		<StackPanel Orientation="Vertical">
-			<TabControl>
+			<TabControl SelectionChanged="TabControl_SelectionChanged">
 				<!-- Movie Edit	Tab -->
-				<TabItem Header="Edit">
+				<TabItem Header="Edit" Tag="MovieTab">
 					<StackPanel Orientation="Vertical">
 						<tc:HeaderControl2
 						Height="80"
@@ -219,7 +219,13 @@
 							<TextBlock Text="Primary" Classes="h2" Grid.Column="0" Grid.Row="6" />
 							<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.PrimaryFilmGroup, Mode=TwoWay}"  Grid.Column="1" Grid.Row="6" />
 							<TextBlock Text="Director" Grid.Column="5" Grid.Row="6" Classes="h2" />
-							<ComboBox  Classes="c1" ItemsSource="{Binding DirectorList}" Grid.Column="6" Grid.Row="6" SelectedItem="{Binding CurrentMovie.Director}" />
+							<ComboBox  Classes="c1" 
+									   ItemsSource="{Binding DirectorList}" 
+									   Grid.Column="6" 
+									   Grid.Row="6" 
+									   
+									   SelectedItem="{Binding CurrentDirector}"
+									   />
 							<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.DirectorsName}"  Grid.Column="7" Grid.Row="6" />
 							<tcb:ImagedButton  Grid.Column="8"
 											   Grid.Row="6"
@@ -298,15 +304,40 @@
 								</DataGrid.ContextMenu>
 							</DataGrid>
 
+							<DataGrid
+							ItemsSource="{Binding CurrentMovie.ProductionCompanies}"
+							AutoGenerateColumns="False"
+							VerticalScrollBarVisibility="Visible"
+							HorizontalScrollBarVisibility="Visible"
+							Margin="10,90,10,10"
+							Grid.Column="11" Grid.Row="0" Grid.RowSpan="9"
+							>
+								<DataGrid.Columns>
+									<DataGridTextColumn Header="Companies" Binding="{Binding CompanyName}" />
+								</DataGrid.Columns>
+							</DataGrid>
 
-						</Grid>
+							<DataGrid
+							ItemsSource="{Binding CurrentMovie.MovieLanguages}"
+							AutoGenerateColumns="False"
+							VerticalScrollBarVisibility="Visible"
+							HorizontalScrollBarVisibility="Visible"
+							Margin="10,90,10,10"
+							Grid.Column="12" Grid.Row="0" Grid.RowSpan="4"
+							>
+								<DataGrid.Columns>
+									<DataGridTextColumn Header="Language" Binding="{Binding LanguageName}" />
+								</DataGrid.Columns>
+							</DataGrid>
+
+					</Grid>
 						<Image Source="{Binding CurrentMovie.ImageBMP}" Height="200" Width="300"  DockPanel.Dock="Bottom"> </Image>
 
 					</StackPanel>
 
 				</TabItem>
 
-				<TabItem Header="Bookmarks" >
+				<TabItem Header="Bookmarks" Tag="BookmarkTab">
 					<StackPanel Orientation="Horizontal" >
 						<StackPanel Orientation="Vertical" Background="Transparent" Name="BookmarksTab">
 							<tc:HeaderControl2 Title="Movie Bookmarks"
@@ -319,7 +350,9 @@
 										CornerRadius="5"
 										>
 									<StackPanel>
-										<tcb:ToolbarPanel Name="ToolbarBookmarks" Height="50" />
+										<tcb:ToolbarPanel Name="ToolbarBookmarks" Height="50" >
+
+									</tcb:ToolbarPanel>
 										<StackPanel Height="800">
 											<StackPanel Orientation="Horizontal">
 												<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2">
@@ -475,7 +508,9 @@
 						</StackPanel>
 					</StackPanel>
 				</TabItem>
-				<TabItem Header="Series" IsVisible="{Binding CurrentMovie.HasSeries}">
+				<TabItem Header="Series"
+						 IsVisible="{Binding CurrentMovie.HasSeries}"
+						 Tag="SeriesTab">
 					<Border CornerRadius="6"
 							BorderBrush="Gray"
 							Background="LightGray"
@@ -749,7 +784,7 @@
 				</TabItem>
 
 				<!-- Cast Tab -->
-				<TabItem Header="Cast Details">
+				<TabItem Header="Cast Details" Tag="CastTab">
 					<StackPanel Orientation="Vertical">
 						<tc:HeaderControl2 TitleForeground="Black"
 										   TitleBackground="LightGray"
@@ -764,7 +799,7 @@
 											   />
 
 							<tcb:ImagedButton  Name="EditActor"
-											   Command="{Binding EditActor}"
+											   Click="EditActor_Click"
 											   LabelText="Edit Actor"
 											   ImageSource="avares://TaymadeControls/Assets/edit_icon.png"
 											   />
@@ -800,7 +835,7 @@
 												<ContextMenu>
 													<!--		<MenuItem Header="Delete" Command="{Binding DeleteMember}" />
 													-->
-													<MenuItem Header="Edit" Command="{Binding EditActor}" />
+													<MenuItem Header="Edit" Click="EditActor_Click" />
 													<MenuItem Header="New" Command="{Binding NewCastMember}" />
 
 												</ContextMenu>
@@ -914,7 +949,11 @@
 										</Grid>
 										<StackPanel Background="Gray" Height="5" />
 										<StackPanel>
-											<DataGrid Name="dgMovies" Grid.Column="2" Grid.Row="6" Grid.ColumnSpan="5" ItemsSource="{Binding CurrentActor.Movies}">
+											<DataGrid Name="dgMovies"
+													  Grid.Column="2"
+													  Grid.Row="6"
+													  Grid.ColumnSpan="5"
+													  ItemsSource="{Binding CurrentActor.Movies}">
 												<DataGrid.Columns>
 													<DataGridTemplateColumn Header="Name" Width="250" >
 														<DataGridTemplateColumn.CellTemplate>
@@ -926,7 +965,7 @@
 													<DataGridTemplateColumn Header="Play">
 														<DataGridTemplateColumn.CellTemplate >
 															<DataTemplate>
-																<Button Content="Play" Click="Button_Click" />
+																<Button Content="Play" Click="PlayButton_Click" />
 															</DataTemplate>
 														</DataGridTemplateColumn.CellTemplate>
 													</DataGridTemplateColumn>
@@ -951,15 +990,11 @@
 				<tcb:CancelButton Click="CancelButton_Click" Margin="5,5,5,5" HotKey="Escape"/>
 				<tcb:ImagedButton
 				LabelText="Get Chapters"
-				Command="{Binding DoChapters}"
+				Command="{Binding Chapters}"
 				Name="ChaptersButton" HotKey="Alt+Add"
 				ImageSource="avares://TaymadeControls/Assets/get.png"
-				/>
-				<tcb:ImagedButton LabelText="Search TMDB"
-								  Command="{Binding DoSearchTMDB}"
-								  Margin="5,5,5,5"
-								  ImageSource="avares://TaymadeControls/Assets/search_icon.png"
-								  />
+				>
+				</tcb:ImagedButton>
 			</StackPanel>
 		</StackPanel>
 	</Border>

@@ -11,17 +11,19 @@ namespace TaymadeEntities.Dialogs
     using Avalonia;
     using Avalonia.Controls;
     using Avalonia.Markup.Xaml;
-    using TaymadeEntities.Support;
-    using TaymadeEntities.ViewModels;
     using DocumentFormat.OpenXml.Bibliography;
+    using TaymadeEntities.ViewModels;
     using ReactiveUI;
+    using System;
     using System.Collections.Generic;
     using System.Reactive;
+    using System.Reactive.Disposables;
+    using TaymadeEntities.Support;
 
     /// <summary>
     /// Defines the <see cref="TMDBSearchDialog" />.
     /// </summary>
-    public partial class TMDBSearchDialog : Window
+    public partial class TMDBSearchDialog : Window, IDisposable
     {
         #region Fields
 
@@ -29,6 +31,7 @@ namespace TaymadeEntities.Dialogs
         /// Defines the FoundMovies.
         /// </summary>
         private IEnumerable<MovieBase>? FoundMovies;
+        private bool disposedValue;
 
         #endregion
 
@@ -42,64 +45,35 @@ namespace TaymadeEntities.Dialogs
             InitializeComponent();
         }
 
+        private readonly CompositeDisposable _disposables = new();
+
+        protected override void OnClosed(EventArgs e)
+        {
+            _disposables.Dispose();
+            
+            Content = null;
+
+            base.OnClosed(e);
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TMDBSearchDialog"/> class.
         /// </summary>
         /// <param name="model">The model<see cref="ViewModels.MovieViewModel"/>.</param>
-        public TMDBSearchDialog(ViewModels.MovieViewModel model)
+        public TMDBSearchDialog(ViewModels.MovieSearchViewModel model)
         {
             InitializeComponent();
 
             DataContext = model;
 
-            TextBox searchFor = this.Find<TextBox>("SearchFor");
+            //TextBox searchFor = this.Find<TextBox>("SearchFor");
 
-            Button searchTMDP = this.Find<Button>("TMDBSearch");
-            Button searchTMDPOnly = this.Find<Button>("TMDBSearchOnly");
-
-
-            if (searchFor != null && model != null && model.CurrentMovie != null)
-            {
-                if (string.IsNullOrEmpty(model.MovieTitle)) model.MovieTitle = model.CurrentMovie.MovieName;
-                // If there is a year put in the year property
-                if (model.CurrentMovie.Year != null && model.CurrentMovie.Year > 0)
-                { model.Year = model.CurrentMovie.Year.Value; }
-            }
-
-
-            SearchTMDP = ReactiveCommand.Create(SearchDatabase);
-
-            if (searchTMDP != null)
-            {
-                searchTMDP.Command = SearchTMDP;
-            }
-
-            SearchTMDPOnly = ReactiveCommand.Create(SearchDatabaseOnly);
-
-            if (searchTMDPOnly != null)
-            {
-                searchTMDPOnly.Command = SearchTMDP;
-            }
-
-            if (this.TMDBSearchOKPanel != null)
-            {
-                MovieViewModelBase movieViewModelBase = this.DataContext as MovieViewModelBase;
-                if (movieViewModelBase != null)
-                {
-                    this.TMDBSearchOKPanel.OkButton.Command = movieViewModelBase.AddOKCommand();
-                    this.TMDBSearchOKPanel.CancelButton.Command = movieViewModelBase.AddCancelCommand();
-                }
-            }
             Opened += TMDBSearchDialog_Opened;
         }
 
         private void TMDBSearchDialog_Opened(object? sender, System.EventArgs e)
         {
-            if (Screens.ScreenCount > 1 && Models.DataController.ShowOnAlternateScreen())
-            {
-                int screenWidth = (int)this.Width;
-                this.Position = new PixelPoint(-screenWidth, 50);
-            }
+
             this.WindowState = WindowState.Maximized;
         }
 
@@ -112,6 +86,7 @@ namespace TaymadeEntities.Dialogs
         /// </summary>
         public ReactiveCommand<Unit, Unit>? SearchTMDP { get; set; }
         public ReactiveCommand<Unit, Unit>? SearchTMDPOnly { get; set; }
+        public MovieBase? FoundItem { get; private set; }
 
         #endregion
 
@@ -147,35 +122,61 @@ namespace TaymadeEntities.Dialogs
         /// <summary>
         /// The SearchDatabase.
         /// </summary>
-        private void SearchDatabase()
+
+
+        private void OkButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            TextBox searchFor = this.Find<TextBox>("SearchFor");
-            if (searchFor != null)
+            MovieBase? returnValue = new MovieBase();
+            if (this.DataContext is MovieSearchViewModel viewModel)
+            { 
+                if (viewModel != null && viewModel.CurrentItem != null)
+                {
+                    returnValue.ID = viewModel.CurrentItem.ID;
+                    returnValue.Overview = viewModel.CurrentItem.Overview;
+                    returnValue.Year = viewModel.CurrentItem.Year;
+                    returnValue.Title = viewModel.CurrentItem.Title;
+
+                }
+            }
+
+            Avalonia.Threading.Dispatcher.UIThread.Post(() => 
+            this.Close(returnValue));
+        }
+
+        private void CancelButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+
+            Avalonia.Threading.Dispatcher.UIThread.Post(() => this.Close(null));
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
             {
-                string searchText = searchFor.Text;
+                if (disposing)
+                {
+                    FoundItem = null;
+                    // TODO: dispose managed state (managed objects)
+                }
 
-                FoundMovies = TmdbSupport.SearchMovieDatabaseList(searchText);
-
-                DataGrid dataGrid = this.Find<DataGrid>("dgFoundMovies");
-                dataGrid.SelectionChanged += MovieSelected;
-                dataGrid.ItemsSource = FoundMovies;
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
             }
         }
 
-        private void SearchDatabaseOnly()
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~TMDBSearchDialog()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
         {
-            TextBox searchFor = this.Find<TextBox>("SearchFor");
-            if (searchFor != null)
-            {
-                string searchText = searchFor.Text;
-
-                FoundMovies = TmdbSupport.SearchMovieDatabaseList(searchText);
-
-                DataGrid dataGrid = this.Find<DataGrid>("dgFoundMovies");
-                dataGrid.SelectionChanged += MovieSelected;
-                dataGrid.ItemsSource = FoundMovies;
-            }
-
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }

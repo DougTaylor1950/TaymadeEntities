@@ -47,7 +47,8 @@ namespace TaymadeEntities.Controllers
 
         public List<Bookmark> GetBookmarksByMovieId(int id)
         {
-            List<Bookmark> tempList = bookmarkRepository.GetBookmarksByMovieId(id).ToList() 
+            List<Bookmark> tempList = bookmarkRepository.GetBookmarksByMovieId(id).OrderBy(b=> b.Time).
+                ToList() 
                 ?? new List<Bookmark>();
 
             return tempList;

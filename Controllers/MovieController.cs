@@ -396,7 +396,12 @@ namespace TaymadeEntities.Controllers
         {
             return movieRepository.DeleteFrameSet(frameSet);
         }
-            
+
+        internal List<Series> GetSeriesList()
+        {
+            return movieRepository.GetSeriesList(); 
+        }
+
         #endregion Protected Methods
     }
 }
