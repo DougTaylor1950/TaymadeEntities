@@ -102,7 +102,7 @@ public partial class PlayerDialog : Avalonia.Controls.Window, IDisposable
             {
                 vm.Stop();
                 if (!IsClosed)
-                    Avalonia.Threading.Dispatcher.UIThread.Invoke(() => { Close(); });
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() => { Close(); });
                 e.Handled = true;
             }
             else if (e.Key == Key.NumPad6 || e.Key == Key.Right)

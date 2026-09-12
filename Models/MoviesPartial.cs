@@ -561,7 +561,7 @@ namespace TaymadeEntities.Models
         {
             ViewModels.MovieEditViewModel? mvm = new ViewModels.MovieEditViewModel(this);
 
-            Dialogs.MovieEditDialog editor = new Dialogs.MovieEditDialog(mvm);
+            Dialogs.EditMovie editor = new Dialogs.EditMovie(mvm);
             editor.DataContext = mvm;
             //Window main = GetWindow();
             mvm.Caller = editor;

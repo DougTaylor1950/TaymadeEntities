@@ -39,7 +39,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the genderDisplay.
         /// </summary>
-        private string? genderDisplay;
+        internal string? genderDisplay;
 
         /// <summary>
         /// Defines the genderValue.

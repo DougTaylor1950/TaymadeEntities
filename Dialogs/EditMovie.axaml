@@ -6,7 +6,7 @@
 		xmlns:tc="using:TaymadeControls"
 		xmlns:tcb="using:TaymadeControls.Buttons"
 		mc:Ignorable="d"
-		d:DesignWidth="1800" d:DesignHeight="900"
+		d:DesignWidth="1800" d:DesignHeight="1000"
 		x:Class="TaymadeEntities.Dialogs.EditMovie"
 		x:DataType="vm:MovieEditViewModel"
 		WindowState="Maximized"
@@ -328,6 +328,7 @@
 																  Background="Transparent"
 																  >
 														<DataGrid
+														Height="800"
 														Background="Transparent"
 														RowBackground="Bisque"
 														VerticalScrollBarVisibility="Visible"
@@ -415,8 +416,8 @@
 
 													<tcb:ImagedButton Grid.Row="1"
 																	  Grid.Column="6"
-																	  Command="{Binding DelImage}"
-																	  ImageSource="avares://TaymadeControls/Assets/Cross2.png"
+																	  Command="{Binding DeleteBookmarkImage}"
+																	  ImageSource="avares://TaymadeControls/Assets/delete_icon.png"
 																	  LabelText="Del Image"
 																	  />
 
@@ -434,10 +435,16 @@
 													<NumericUpDown Value="{Binding CurrentBookmark.Seconds}" Increment="1" Minimum="0" Maximum="60" Grid.Row="5" Grid.Column="3"/>
 													<NumericUpDown Value="{Binding CurrentBookmark.Milli}" Increment="10" Minimum="0" Maximum="999" Grid.Row="5" Grid.Column="5"/>
 													<tcb:ImagedButton  Grid.Row="6"
+																	   Grid.Column="1"
+																	   Command="{Binding SaveBookmark}"
+																	   LabelText="Save Bookmark"
+																	   ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+																	   />
+													<tcb:ImagedButton  Grid.Row="6"
 																	   Grid.Column="2"
 																	   Command="{Binding DelBookmark}"
 																	   LabelText="Del Bookmark"
-																	   ImageSource="avares://TaymadeControls/Assets/Cross2.png"
+																	   ImageSource="avares://TaymadeControls/Assets/delete_icon.png"
 																	   />
 
 
@@ -780,7 +787,7 @@
 												  Width="700"
 												  VerticalScrollBarVisibility="Visible"
 												  ItemsSource="{Binding CurrentMovie.Casts}"
-												  SelectionChanged="dgCast_SelectionChanged"
+												  SelectedItem ="{Binding CurrentCastMember}"
 												  VerticalAlignment="Top"
 												  >
 
@@ -788,11 +795,11 @@
 												<DataGridTextColumn Header="Id" Binding="{Binding Id,Mode=TwoWay}" />
 												<DataGridTextColumn Header="ActorId" Binding="{Binding ActorId,Mode=TwoWay}" />
 												<DataGridTextColumn Header="Role" Binding="{Binding Role,Mode=TwoWay}" />
-												<DataGridTextColumn Header="Name" Binding="{Binding Actor.Name,Mode=TwoWay}" />
-												<DataGridTextColumn Header="Gender" Binding="{Binding Actor.GenderDisplay,Mode=TwoWay}" />
-												<DataGridTextColumn Header="Aliases" Binding="{Binding Actor.Aliases,Mode=TwoWay}" Width="200" />
-												<DataGridCheckBoxColumn Header="Adult" Binding="{Binding Actor.Adult,Mode=TwoWay}" />
-												<DataGridTextColumn Header="Date of Birth" Binding="{Binding Actor.DOB,Mode=TwoWay}" />
+												<DataGridTextColumn Header="Name" Binding="{Binding ActorName,Mode=TwoWay}" />
+												<DataGridTextColumn Header="Gender" Binding="{Binding ActorGenderDisplay,Mode=TwoWay}" />
+												<DataGridTextColumn Header="Aliases" Binding="{Binding ActorAliases,Mode=TwoWay}" Width="200" />
+												<DataGridCheckBoxColumn Header="Adult" Binding="{Binding ActorAdult,Mode=TwoWay}" />
+												<DataGridTextColumn Header="Date of Birth" Binding="{Binding ActorDOB,Mode=TwoWay}" />
 											</DataGrid.Columns>
 
 
@@ -812,7 +819,7 @@
 												CornerRadius="6"
 												>
 
-											<Image Source="{Binding CurrentActor.ImageBMP}"
+											<Image Source="{Binding CurrentCastMember.Actor.ImageBMP}"
 												   Margin="5,5,5,5"
 												   Height="500"
 												   Grid.Column="0"
@@ -848,24 +855,24 @@
 
 											</Grid.RowDefinitions>
 											<TextBlock Classes="h2" Text="Actor Name"  Grid.Column="0" Grid.Row="0"/>
-											<TextBox Classes="c1" Text="{Binding CurrentActor.Name, Mode=TwoWay }"   Grid.Column="1" />
+											<TextBox Classes="c1" Text="{Binding CurrentCastMember.ActorName, Mode=TwoWay }"   Grid.Column="1" />
 											<TextBlock Classes="h2" Text="Adult"  Grid.Column="3" Grid.Row="0"/>
-											<CheckBox IsChecked="{Binding	CurrentActor.Adult}" Grid.Column="4" Grid.Row="0" />
+											<CheckBox IsChecked="{Binding	CurrentCastMember.Actor.Adult}" Grid.Column="4" Grid.Row="0" />
 											<TextBlock Classes="h2" Text="Aliases"  Grid.Column="0" Grid.Row="1"/>
-											<TextBox Classes="c1H" Text="{Binding CurrentActor.Aliases, Mode=TwoWay }"  Grid.Row="1"
+											<TextBox Classes="c1H" Text="{Binding CurrentCastMember.Actor.Aliases, Mode=TwoWay }"  Grid.Row="1"
 													 Grid.Column="1" Grid.ColumnSpan="3" />
 											<TextBlock Classes="h2" Text="Info"  Grid.Column="0" Grid.Row="2"/>
-											<TextBox Classes="c1H" Text="{Binding CurrentActor.Info, Mode=TwoWay }"  Grid.Row="2" Grid.Column="1" />
+											<TextBox Classes="c1H" Text="{Binding CurrentCastMember.Actor.Info, Mode=TwoWay }"  Grid.Row="2" Grid.Column="1" />
 											<TextBlock Classes="h2" Text="Date of Death"  Grid.Column="3" Grid.Row="2"/>
-											<TextBox Classes="c1" Text="{Binding CurrentActor.DeathDayString}" Grid.Column="4" Grid.Row="2" />
+											<TextBox Classes="c1" Text="{Binding CurrentCastMember.Actor.DeathDayString}" Grid.Column="4" Grid.Row="2" />
 
 											<TextBlock Classes="h2" Text="Image Path"  Grid.Column="0" Grid.Row="3"/>
-											<TextBox Classes="c1H" Text="{Binding CurrentActor.ImagePath, Mode=TwoWay }"  Grid.Row="3" Grid.Column="1" />
+											<TextBox Classes="c1H" Text="{Binding CurrentCastMember.Actor.ImagePath, Mode=TwoWay }"  Grid.Row="3" Grid.Column="1" />
 											<TextBlock Classes="h2" Text="Gender"  Grid.Column="3" Grid.Row="3"/>
 											<!--<TextBox Classes="c1H" Text="{Binding CurrentActor.GenderString}" Grid.Column="4" Grid.Row="3" /> -->
 
 											<ComboBox ItemsSource="{Binding GenderList}"
-													  SelectedIndex="{Binding CurrentActor.Gender}"
+													  SelectedIndex="{Binding CurrentCastMember.Actor.Gender}"
 													  VerticalAlignment="Center"
 													  Margin="5,5,5,5"
 													  Grid.Column="4" Grid.ColumnSpan="2"
@@ -881,13 +888,13 @@
 															  />
 
 											<TextBlock Classes="h2" Text="Birth Place"  Grid.Column="0" Grid.Row="4"/>
-											<TextBox Classes="c1" Text="{Binding CurrentActor.PlaceOfBirth, Mode=TwoWay }"  Grid.Row="4" Grid.Column="1" />
+											<TextBox Classes="c1" Text="{Binding CurrentCastMember.Actor.PlaceOfBirth, Mode=TwoWay }"  Grid.Row="4" Grid.Column="1" />
 											<TextBlock Classes="h2" Text="TMDBID"  Grid.Column="3" Grid.Row="4"/>
-											<TextBox Classes="c1" Text="{Binding CurrentActor.TMDBID}" Grid.Column="4" Grid.Row="4" />
+											<TextBox Classes="c1" Text="{Binding CurrentCastMember.Actor.TMDBID}" Grid.Column="4" Grid.Row="4" />
 											<TextBlock Classes="h2" Text="IMDB"  Grid.Column="3" Grid.Row="5"/>
-											<TextBox Classes="c1" Text="{Binding CurrentActor.IMDB}" Grid.Column="4" Grid.Row="5" />
+											<TextBox Classes="c1" Text="{Binding CurrentCastMember.Actor.IMDB}" Grid.Column="4" Grid.Row="5" />
 											<TextBlock Classes="h2" Text="Thumb"  Grid.Column="0" Grid.Row="5"/>
-											<TextBox Classes="c1" Text="{Binding CurrentActor.Thumb}" Grid.Column="1" Grid.Row="5" />
+											<TextBox Classes="c1" Text="{Binding CurrentCastMember.Actor.Thumb}" Grid.Column="1" Grid.Row="5" />
 											<tcb:ImagedButton Grid.Column="5"
 															  Grid.Row="5"
 															  Click="Save_Click"

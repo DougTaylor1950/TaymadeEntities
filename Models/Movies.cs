@@ -347,6 +347,17 @@ namespace TaymadeEntities.Models
         {
             get
             {
+                if (casts == null || casts.Count == 0)
+                {
+                    casts = DataController.CastController.GetCastsByMovieId(this.Id).ToList();
+                    foreach (var item in casts)
+                    {
+                        if (item.Actor == null && item.ActorId != null)
+                        {
+                            item.Actor = DataController.SandboxEntities.Actors.Find(item.ActorId);
+                        }
+                    }
+                }
                 return casts;
             }
 

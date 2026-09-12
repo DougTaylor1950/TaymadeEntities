@@ -39,6 +39,7 @@ namespace TaymadeEntities.Models
         private string? role;
         private bool actorChanged;
         private bool disposedValue;
+        private string? actorName;
 
         #endregion
 
@@ -67,10 +68,10 @@ namespace TaymadeEntities.Models
         {
             get
             {
-                if (actor == null)
+                if (actor == null && ActorId != null)
                 {
                     //actor = new Actor(ActorId);
-                    actor = DataController.ActorController.GetActorById(Id);
+                    actor = DataController.ActorController.GetActorById(ActorId.Value);
 
                 }
                 if (actor != null) actor.SetGenderDisplay();
@@ -85,6 +86,89 @@ namespace TaymadeEntities.Models
         /// </summary>
         [ForeignKey("Actor")]
         public int? ActorId { get => actorId; set => this.RaiseAndSetIfChanged(ref actorId, value); }
+
+
+        [NotMapped]
+        public string? ActorName 
+        { 
+            get 
+            { 
+                if (Actor != null)
+                {
+                    actorName = Actor.Name;
+                }
+                return actorName; 
+            }
+            set 
+            { 
+                this.RaiseAndSetIfChanged(ref actorName, value);
+                if (Actor != null && Actor.Name != value)
+                {
+                    Actor.Name = value;
+                    ActorChanged = true;
+                }
+            }
+        }
+
+        [NotMapped]
+        public string? ActorGenderDisplay
+        {
+            get
+            {
+                return Actor?.GenderDisplay;
+            }
+            set
+            {
+                if (Actor != null)
+                this.RaiseAndSetIfChanged(ref Actor.genderDisplay, value);
+            }
+        }
+
+        [NotMapped]
+        public string? ActorAliases
+        {
+            get
+            {
+                return Actor?.Aliases;
+            }
+            set
+            {
+                if (Actor != null)
+                    this.RaiseAndSetIfChanged(ref Actor.aliases, value);
+            }
+        }
+
+        [NotMapped]
+        public bool? ActorAdult
+        {
+            get
+            {
+                return Actor?.Adult;
+            }
+            set
+            {
+                if (Actor != null)
+                    this.RaiseAndSetIfChanged(ref Actor.adult, value);
+            }
+        }
+
+        [NotMapped]
+        public DateTime? ActorDOB
+        {
+            get
+            {
+                return Actor?.DOB;
+            }
+            set
+            {
+                if (Actor != null)
+                    this.RaiseAndSetIfChanged(ref Actor.dob1, value);
+            }
+        }
+
+
+
+
 
         /// <summary>
         /// Gets or sets the CastId.

@@ -309,6 +309,7 @@
 																  >
 														<DataGrid
 														Background="Transparent"
+														Height="800"
 														RowBackground="Bisque"
 														VerticalScrollBarVisibility="Visible"
 														HorizontalScrollBarVisibility="Auto"

@@ -31,12 +31,12 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the adult.
         /// </summary>
-        private bool? adult = false;
+        internal bool? adult = false;
 
         /// <summary>
         /// Defines the dob1.
         /// </summary>
-        private DateTime? dob1;
+        internal DateTime? dob1;
 
         /// <summary>
         /// Defines the gender.
@@ -62,7 +62,7 @@ namespace TaymadeEntities.Models
         /// Defines the tMDBID.
         /// </summary>
         private int? tMDBID;
-        private string? aliases;
+        internal string? aliases;
         private ICollection<Cast>? casts;
         private DateTime? deathDay;
         private string? filmGroup;

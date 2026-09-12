@@ -26,7 +26,7 @@ namespace TaymadeEntities.ViewModels
         private Bookmark currentBookmark;
         private Cast currentCastMember;
         private MovieGenre? currentGenre;
-        private new Movies? currentMovie;
+        //private new Movies? currentMovie;
         private Models.Season currentSeason;
         private Series? currentSeries;
         private ObservableCollection<Director>? directorList;
@@ -52,15 +52,32 @@ namespace TaymadeEntities.ViewModels
         public MovieEditViewModel(Movies? currentMovie)
         {
             CurrentMovie = currentMovie;
+            // check to see is we have bookmarks if not load them
+            // and set current bookmark to first or default
+
+            if (CurrentMovie == null) return;
+
+            if (CurrentMovie.Bookmarks != null && CurrentMovie.Bookmarks.Count > 0)
+            {
+                CurrentBookmark = CurrentMovie.Bookmarks.FirstOrDefault();
+            }
+            else
+            {
+                CurrentMovie.Bookmarks = new ObservableCollection<Bookmark>(
+                DataController.BookmarkController.GetBookmarksByMovieId(CurrentMovie.Id)
+                );
+                CurrentBookmark = CurrentMovie.Bookmarks.FirstOrDefault();
+            }
+
             //AddPhrase = ReactiveCommand.Create(DoAddPhrase);
 
             NewBookmark = ReactiveCommand.Create(Do_AddBookmark);
             EditBookmark = ReactiveCommand.Create(DoEditBookmark);
-            PlayBookmark = ReactiveCommand.Create(DoPlayBookmark);
+            PlayBookmark = ReactiveCommand.Create(Do_PlayBookmark);
             DelBookmark = ReactiveCommand.Create(DeleteBookmark);
             Grab = ReactiveCommand.Create(DoGrab);
             AddText = ReactiveCommand.Create(AddTextToList);
-            DelImage = ReactiveCommand.Create(DeleteImage);
+            DelImage = ReactiveCommand.Create(DeleteBookmarkImage);
             GetMissingImages = ReactiveCommand.Create(MissingImages);
             NewPoster = ReactiveCommand.Create(Do_AddPoster);
             NewCastMember = ReactiveCommand.Create(Do_AddCastMember);
@@ -110,16 +127,16 @@ namespace TaymadeEntities.ViewModels
             set => autoCompleteList = value;
         }
 
-       
-        public Actor? CurrentActor
-        {
-            get => currentActor;
-            set
-            {
-                //currentActor?.Dispose();
-                this.RaiseAndSetIfChanged(ref currentActor, value);
-            }
-        }
+
+        //public Actor? CurrentActor
+        //{
+        //    get => currentActor;
+        //    set
+        //    {
+        //        //currentActor?.Dispose();
+        //        this.RaiseAndSetIfChanged(ref currentActor, value);
+        //    }
+        //}
         public Avalonia.Media.Imaging.Bitmap? CurrentBookmarkImageBMP
         {
             get
@@ -154,7 +171,7 @@ namespace TaymadeEntities.ViewModels
             internal set => genderList = value;
         }
 
-  
+
         /// <summary>
         /// Gets or sets the Grab.
         /// </summary>
@@ -174,7 +191,7 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets or sets the Phrases.
         /// </summary>
-      
+
 
         #endregion Public Properties
 
@@ -209,12 +226,12 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        
-        public void DoPlayBookmark()
+
+        public void Do_PlayBookmark()
         {
-            if (CurrentBookmark != null && CurrentBookmark.Movies != null)
+            if (CurrentBookmark != null && CurrentMovie != null)
             {
-                string moviePath = CurrentBookmark?.Movies?.MoviePath;
+                string moviePath = CurrentMovie.MoviePath;
 
                 if (!string.IsNullOrEmpty(moviePath))
                 {
@@ -223,20 +240,37 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-       
 
-        //public Cast CurrentCastMember
-        //{
-        //    get => currentCastMember;
-        //    set =>this.RaiseAndSetIfChanged(ref currentCastMember, value);
-        //}
-       
+
+        public new Cast CurrentCastMember
+        {
+            get => currentCastMember;
+            set
+            { 
+                this.RaiseAndSetIfChanged(ref currentCastMember, value);
+                if (value != null)
+                {
+                    //if (value.Actor == null && value.ActorId != null)
+                    //{
+                    //    value.Actor = DataController.ActorController.GetActorById(value.ActorId.Value);
+                    //}
+                    CurrentActor = value.Actor;
+                }
+            }
+        }
+
+        public Actor? CurrentActor
+        {
+            get => currentActor;
+            set => this.RaiseAndSetIfChanged(ref currentActor, value);
+        }
+
 
         public void NullOutVariables()
         {
             //this.CurrentBookmark = null;
             this.CurrentMovie = null;
-            this.CurrentActor?.ImageBMP?.Dispose();
+            this.CurrentCastMember?.Actor?.ImageBMP?.Dispose();
             //this.CurrentActor = null;
             //this.CurrentGenre = null;
             //this.DirectorList = null;
@@ -310,13 +344,13 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// The DoReloadBookmarks.
         /// </summary>
-        
+
 
         #endregion Internal Methods
 
         #region Protected Methods
 
-        
+
 
         #endregion Protected Methods
 
@@ -327,7 +361,7 @@ namespace TaymadeEntities.ViewModels
             // throw new NotImplementedException();
         }
 
-        private void DeleteImage()
+        public void DeleteBookmarkImage()
         {
             if (CurrentBookmark != null && CurrentMovie != null && !string.IsNullOrEmpty(CurrentBookmark.ImagePath))
             {
@@ -400,6 +434,9 @@ namespace TaymadeEntities.ViewModels
                     MovieID = mId,
                     Type = "BOOKMARK"
                 };
+                // insert bookmark into database and add to current movie bookmarks list
+                DataController.BookmarkController.Add(bookmark);
+                CurrentMovie.Bookmarks.Add(bookmark);
 
                 //  await AddActualBookmark(main, vm, bookmark);
             }
@@ -409,22 +446,22 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// The Do_PlayFromLast.
         /// </summary>
-        private void Do_PlayFromLast()
+        private async void Do_PlayFromLast()
         {
-            if (currentMovie != null && CurrentMovie.Bookmarks.Count > 0)
+            if (currentMovie != null && CurrentMovie?.Bookmarks.Count > 0)
             {
                 CurrentBookmark = currentMovie.Bookmarks.Last();
-                string moviePath = currentMovie.MoviePath;
+                string? moviePath = currentMovie.MoviePath;
 
                 if (!string.IsNullOrEmpty(moviePath))
                 {
-                    FFMpegSupport.PlayMovie(moviePath, CurrentBookmark);
+                    DoPlay(CurrentMovie, CurrentBookmark);
                 }
             }
             // }
         }
 
-        
+
 
         /// <summary>
         /// Adds the tv episode command.

@@ -68,37 +68,37 @@ namespace TaymadeEntities.Controllers
             return actor;
         }
 
-        internal Actor? GetActorByTMDBID(int iD)
+        public Actor? GetActorByTMDBID(int iD)
         {
             return actorRepository.GetActorByTMID(iD);
         }
 
-        internal void Save(Actor actor)
+        public void Save(Actor actor)
         {
             actorRepository.Save(actor);
         }
 
-        internal void AddActor(Actor actor)
+        public void AddActor(Actor actor)
         {
             actorRepository.AddActor(actor);
         }
 
-        internal void SetDetailsFromCastMember(Actor actor, CastMember person)
+        public void SetDetailsFromCastMember(Actor actor, CastMember person)
         {
             actorRepository.SetDetailsFromCastMember(actor, person);
         }
 
-        internal Actor? GetActorById(int id)
+        public Actor? GetActorById(int id)
         {
             return actorRepository.GetActorById(id);
         }
 
-        internal List<Actor> GetActors()
+        public List<Actor> GetActors()
         {
             return actorRepository.GetActors().ToList();
         }
 
-        internal List<Actor> GetActorsByName(string v)
+        public List<Actor> GetActorsByName(string v)
         {
             return actorRepository.GetActorsByName(v).ToList();
         }

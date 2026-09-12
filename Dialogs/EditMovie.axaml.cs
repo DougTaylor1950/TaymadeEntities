@@ -22,7 +22,7 @@ using Colors = Avalonia.Media.Colors;
 
 namespace TaymadeEntities.Dialogs;
 
-public partial class EditMovie : Window
+public partial class EditMovie : Window, IDisposable
 {
     private ImagedButtonNoText _MissingImages;
     private ImagedButton _playFromLast;
@@ -30,6 +30,7 @@ public partial class EditMovie : Window
     private ImagedButton _repeatLast;
     private ImagedButton AddBookmarks;
     private ImagedButton AddPoster;
+    private bool disposedValue;
 
     #region Public Constructors
 
@@ -75,13 +76,14 @@ public partial class EditMovie : Window
 
         Closed += (_, _) =>
         {
-            (DataContext as IDisposable)?.Dispose();
+            //(DataContext as IDisposable)?.Dispose();
+            this.Dispose();
         };
 
         DataContext = viewModel;
         if (viewModel.CurrentMovie != null)
         {
-            viewModel.CurrentMovie.FixMovieData();
+           // viewModel.CurrentMovie.FixMovieData();
         }
     }
 
@@ -189,7 +191,8 @@ public partial class EditMovie : Window
 
     private void CancelButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+
+        Avalonia.Threading.Dispatcher.UIThread.Invoke( () =>
         {
             this.Close(false);
         }
@@ -739,11 +742,11 @@ public partial class EditMovie : Window
 
     private void OkButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        if (ViewModel != null)
-        {
-            ViewModel.CurrentMovie?.Save();
-        }
-        Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+        //if (ViewModel != null)
+        //{
+        //    ViewModel.CurrentMovie?.Save();
+        //}
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
             this.Close(true);
         }
@@ -1137,6 +1140,43 @@ public partial class EditMovie : Window
                 }
             }
         }
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                _MissingImages.Dispose();
+                _playFromLast.Dispose();
+                _ReloadBookmarks.Dispose();
+                _repeatLast.Dispose();
+                AddBookmarks.Dispose();
+                AddPoster.Dispose();
+                EpisodeList.Clear();
+                SeriesList.Clear();
+                ViewModel?.Dispose();
+            }
+
+            // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+            // TODO: set large fields to null
+            disposedValue = true;
+        }
+    }
+
+    // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+    // ~EditMovie()
+    // {
+    //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+    //     Dispose(disposing: false);
+    // }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 
 
