@@ -530,7 +530,7 @@ namespace TaymadeEntities.ViewModels
                 if (resultButton != null && resultButton.Result == DialogResultButton.ResultType.Ok)
                 {
                     string? oldname = RootFolder.CurrentImageItem.ImagePath;
-                    string? newName = resultButton.Paramater;
+                    string? newName = resultButton.Parameter;
                     if (!string.IsNullOrEmpty(newName) && !string.IsNullOrEmpty(oldname) && !File.Exists(newName))
                     {
                         File.Move(oldname, newName);
@@ -1516,7 +1516,7 @@ namespace TaymadeEntities.ViewModels
 
                     MovieImage newSubFolder = new MovieImage()
                     {
-                        Path = resultButton.Paramater,
+                        Path = resultButton.Parameter,
                         ParentId = RootFolder.CurrentImageFolder.Id
                     };
                     RootFolder.CurrentImageFolder.SubDirectoryList.Add(newSubFolder);

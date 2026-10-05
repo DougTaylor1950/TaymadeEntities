@@ -12,6 +12,7 @@ namespace TaymadeEntities.Dialogs
     using Avalonia.Controls;
     using Avalonia.Markup.Xaml;
     using TaymadeEntities.Models;
+    using TaymadeEntities.ViewModels;
 
     /// <summary>
     /// Defines the <see cref="EntryDialog" />.
@@ -34,6 +35,11 @@ namespace TaymadeEntities.Dialogs
         /// Defines the EntryTime.
         /// </summary>
         private TextBox? EntryTime;
+
+        private ComboBox? EntryList;
+
+        private StackPanel? EntryEpisodePanel;
+
         private bool disposedValue;
 
         #endregion
@@ -67,42 +73,76 @@ namespace TaymadeEntities.Dialogs
             EntryText = this.FindControl<TextBox>("entryText");
             EntryTime = this.FindControl<TextBox>("entryTime");
             EntryDate = this.FindControl<DatePicker>("entryDate");
+            EntryList = this.FindControl<ComboBox>("entryList");
+            EntryEpisodePanel = this.EpisodePanel;
 
             // set max string length property;
             if (model.MaxStringLength != null)
-                EntryText.MaxLength = model.MaxStringLength.Value;
+                EntryText?.MaxLength = model.MaxStringLength.Value;
 
             switch (model.EntryTypeValue)
             {
                 case ViewModels.EntryDialogModel.EntryType.Text:
-                    EntryDate.IsVisible = false;
-                    EntryText.IsVisible = true;
-                    EntryTime.IsVisible = false;
+                    EntryDate?.IsVisible = false;
+                    EntryText?.IsVisible = true;
+                    EntryTime?.IsVisible = false;
+                    EntryList?.IsVisible = false;
+                    EntryEpisodePanel.IsVisible = false;
                     break;
                 case ViewModels.EntryDialogModel.EntryType.Time:
-                    EntryDate.IsVisible = false;
-                    EntryText.IsVisible = false;
-                    EntryTime.IsVisible = true;
+                    EntryDate?.IsVisible = false;
+                    EntryText?.IsVisible = false;
+                    EntryList?.IsVisible = false;
+                    EntryTime?.IsVisible = true;
+                    EntryEpisodePanel.IsVisible = false;
                     break;
                 case ViewModels.EntryDialogModel.EntryType.Date:
-                    EntryDate.IsVisible = true;
-                    EntryText.IsVisible = false;
-                    EntryTime.IsVisible = false;
+                    EntryDate?.IsVisible = true;
+                    EntryText?.IsVisible = false;
+                    EntryTime?.IsVisible = false;
+                    EntryList?.IsVisible = false;
+                    EntryEpisodePanel.IsVisible = false;
+                    break;
+                case ViewModels.EntryDialogModel.EntryType.List:
+                    EntryList?.IsVisible = true;
+                    EntryText?.IsVisible = false;
+                    EntryTime?.IsVisible = false;
+                    EntryDate?.IsVisible = false;
+                    EntryEpisodePanel.IsVisible = false;
+                    break;
+
+                case ViewModels.EntryDialogModel.EntryType.Episode:
+                    EntryList?.IsVisible = false;
+                    EntryText?.IsVisible = false;
+                    EntryTime?.IsVisible = false;
+                    EntryDate?.IsVisible = false;
+                    EntryEpisodePanel.IsVisible = true;
                     break;
             }
         }
 
         private void Accept_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
+            EntryDialogModel? dialogModel = (EntryDialogModel)DataContext;
+
             DialogResultButton result = new DialogResultButton()
             {
                 Result = DialogResultButton.ResultType.Ok,
-                Paramater = EntryText?.Text
+                Parameter = EntryText?.Text
+
             };
-            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            if (dialogModel.EntryTypeValue == EntryDialogModel.EntryType.List)
             {
-                Close(result);
-            });
+                result.ListValue = EntryList?.SelectedItem;
+            } else if (dialogModel.EntryTypeValue == EntryDialogModel.EntryType.Episode)
+            {
+                result.ListValue = dialogModel.Episode;
+            }
+
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    Close(result);
+                });
         }
 
         private void Cancel_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)

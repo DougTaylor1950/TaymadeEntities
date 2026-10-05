@@ -8,9 +8,8 @@
 
 namespace TaymadeEntities.Models
 {
+    using Avalonia.Controls;
     using Avalonia.Media;
-    using TaymadeEntities.Support;
-    using TaymadeEntities.ViewModels;
     //using DocumentFormat.OpenXml.Office2010.Excel;
     // using DocumentFormat.OpenXml.Office2010.ExcelAc;
     using DynamicData.Binding;
@@ -25,7 +24,9 @@ namespace TaymadeEntities.Models
     using System.Diagnostics;
     using System.Linq;
     using System.Threading.Tasks;
-    using Avalonia.Controls;
+    using TaymadeEntities.DBContext;
+    using TaymadeEntities.Support;
+    using TaymadeEntities.ViewModels;
 
     /// <summary>
     /// Defines the <see cref="MovieMetaData" />.
@@ -124,6 +125,7 @@ namespace TaymadeEntities.Models
         private ObservableCollection<MovieLanguage> movieLanguages;
 
         private ObservableCollection<ProductionCompany> productionCompanies;
+        private Season? seasonEntity1;
 
         /// <summary>
         /// Gets or sets the BackColour.
@@ -339,6 +341,22 @@ namespace TaymadeEntities.Models
             }
         }
 
+        [NotMapped]
+        public Season? SeasonEntity
+        {
+            get => seasonEntity;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref seasonEntity, value);
+
+                if (value != null)
+                {
+                    value.TVEpisodes = new ObservableCollection<TVEpisode>(
+                        DataController.MovieController.GetTVEpisodesBySeasonID(value.Id).ToList() ?? new List<TVEpisode>());
+                }
+            }
+        }
+
         /// <summary>
         /// Gets or sets the SeriesEntity.
         /// </summary>
@@ -354,7 +372,24 @@ namespace TaymadeEntities.Models
                 return seriesEntity;
             }
 
-            set => seriesEntity = value;
+            set
+            {
+                seriesEntity = value;
+                if (value != null)
+                {
+                    Series = value.Id;
+                    if (value.Seasons == null || value.Seasons.Count == 0)
+                    {
+                        value.Seasons = DataController.MovieController.GetSeasonsBySeriesID(value.Id);
+                    }
+
+                    if (SeasonEntity == null && Season > 0)
+                    {
+                        SeasonEntity = value.Seasons.Where(s => s.SeasonNo == Season).FirstOrDefault();
+                    }
+
+                }
+            }
         }
 
         /// <summary>
@@ -486,19 +521,13 @@ namespace TaymadeEntities.Models
                     bookmark.Time = 10;
                     bookmark.Type = "BOOKMARK";
                     bookmark.MovieID = Id;
-                    //VideoSupport videoSupport = new VideoSupport();
-                    //VideoSupport.GrabBookmarkImage(this, bookmark);
+                    DataController.BookmarkController.Add(bookmark);
 
-                    //bookmark.ImagePath = VideoSupport.thumbnailPath;
-                    //if (Id > 0)
-                    //{
-                    //    DataController.SandboxEntities.Bookmarks.Add(bookmark);
-                    //    DataController.SandboxEntities.SaveChanges();
-                    //    SetPercentUnmarked();
-                    //}
+                    Support.GetBookmarkImage(this, bookmark, 10000);
 
                     ImagePath = bookmark.ImagePath;
                     Save();
+                    DataController.BookmarkController.Update(bookmark);
                 }
                 catch (Exception ex)
                 {
@@ -681,9 +710,9 @@ namespace TaymadeEntities.Models
                 catch (Exception ex)
                 {
 
-                    
+
                 }
-                
+
             }
             catch (Exception)
             {
@@ -839,14 +868,37 @@ namespace TaymadeEntities.Models
                 return filmDuration;
         }
 
-        public bool Delete()
+        public async Task<bool> DeleteMovieAsync(int id)
         {
-            return DataController.MovieController.DeleteMovie(Id);
+            await using var context = new SandboxEntities();
 
+            var movie = new Movies
+            {
+                Id = id
+            };
 
-            //DataController.SandboxEntities.Movies.Remove(this);
-            //DataController.SandboxEntities.SaveChanges();
+            context.Movies.Attach(movie);
+            context.Movies.Remove(movie);
+
+            return await context.SaveChangesAsync() > 0;
         }
+
+        /// <summary>
+        /// Deletes this instance.
+        /// </summary>
+        /// <returns></returns>
+        public  async Task<bool> Delete()
+        {
+
+            return await DeleteMovieAsync(this.Id);
+
+            //using var _context = new TaymadeEntities.DBContext.SandboxEntities();
+            //{
+            //    _context.Movies.Remove(this);
+            //    return _context.SaveChanges() > 0;
+            //}
+        }
+
         public Bookmark GetLastBookmark()
         {
             return Bookmarks.LastOrDefault();
@@ -858,10 +910,13 @@ namespace TaymadeEntities.Models
             {
                 int tmpYear = 0;
                 if (Year != null) tmpYear = Year.Value;
-                Movies? temp = DataController.SandboxEntities.CreateMovie(MovieName, tmpYear, MoviePath, FilmGroup);
-                if (temp != null)
+                using var _context = new TaymadeEntities.DBContext.SandboxEntities();
                 {
-                    this.Id = temp.Id;
+                    Movies? temp = _context.CreateMovie(MovieName, tmpYear, MoviePath, FilmGroup);
+                    if (temp != null)
+                    {
+                        this.Id = temp.Id;
+                    }
                 }
             }
             catch (Exception ex)
@@ -1007,29 +1062,29 @@ namespace TaymadeEntities.Models
                     Series = SeriesEntity.Id;
                 }
 
-                //if (Director != null)
-                //{
-                //    Director.Save();
-                //}
 
-                //EntityState state = DataController.SandboxEntities.Entry(this).State;
-                //if (state == EntityState.Detached) DataController.SandboxEntities.Movies.Attach(this);
-
-                //var local = DataController.SandboxEntities.Set<Movies>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-                //// check if local is not null
-                //if (local != null)
-                //{
-                //    // detach
-                //    //DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-                //}
-                // set Modified flag in your entry
                 ModifiedOn = DateTime.Now;
-                //DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                //int saved = DataController.SandboxEntities.SaveChanges();
+                Movies? movie = null;
+                using var _context = new TaymadeEntities.DBContext.SandboxEntities();
+                {
+                    if (this.Id > 0)
+                    {
+                        movie = _context.Movies.Find(this.Id);
+                        if (movie != null)
+                        {
 
-                success = DataController.MovieController.UpdateMovie(this);
+                            _context.Movies.Update(movie);
+                            success = _context.SaveChanges() > 0;
 
+                        }
+                        else
+                        {
+                            _context.Movies.Add(this);
+                            success = _context.SaveChanges() > 0;
+                        }
+                    }
+
+                }
                 ClearErrors();
                 LogMessage("Saved " + ChangedFields);
                 ChangedFields = string.Empty;

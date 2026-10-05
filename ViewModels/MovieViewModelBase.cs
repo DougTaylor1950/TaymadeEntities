@@ -357,27 +357,8 @@ namespace TaymadeEntities.ViewModels
 
             ShowDialog = new Interaction<MovieViewModelBase, SeriesViewModel?>();
 
-            CreateSeasonCommand = ReactiveCommand.CreateFromTask(async () =>
-            {
-                var store = new MovieViewModel()
-                {
-                    CurrentSeries = CurrentSeries,
-                    NewSeason = new Models.Season(CurrentSeries),
-                    HasEpisode = false
-                };
-
-                var result = await ShowDialog.Handle(store);
-
-                if (result != null)
-                {
-                    if (result.CurrentSeason != null)
-                    {
-                        result.CurrentSeason.Insert();
-                        if (CurrentSeries.Seasons == null) CurrentSeries.Seasons = [];
-                        CurrentSeries.Seasons.Add(result.CurrentSeason);
-                    }
-                }
-            });
+            CreateSeasonCommand = ReactiveCommand.Create(DoCreateSeason);
+            
 
             AddEpisodeCommand = ReactiveCommand.CreateFromTask(async () =>
             {
@@ -385,24 +366,20 @@ namespace TaymadeEntities.ViewModels
                 {
                     CurrentSeries = CurrentSeries,
                     NewSeason = CurrentSeason,
-                    Episode = new TVEpisode(CurrentSeason),
-                    HasEpisode = true
+                    Episode = EpisodeEntity,
+                    HasEpisode = false
                 };
-
                 var result = await ShowDialog.Handle(store);
-
                 if (result != null)
                 {
                     if (result.CurrentSeason != null && result.EpisodeEntity != null)
                     {
-                        result.EpisodeEntity.Insert();
-                        CurrentSeason.TVEpisodes.Add(result.EpisodeEntity);
-                        EpisodeEntity = result.EpisodeEntity;
-
-                        CurrentSeason.TVEpisodes = new ObservableCollection<TVEpisode>([.. CurrentSeason.TVEpisodes.DistinctBy(x => x.Id).OrderBy(x => x.EpisodeNumber)]);
+                        result.CurrentSeason.TVEpisodes.Add(result.EpisodeEntity);
+                        result.EpisodeEntity.Save();
                     }
                 }
             });
+
 
             DeleteEpisodeCommand = ReactiveCommand.CreateFromTask(async () =>
             {
@@ -430,6 +407,21 @@ namespace TaymadeEntities.ViewModels
             this.MpegSupport.CliWrapCompleted += this.MpegSupport_CliWrapCompleted;
             this.MpegSupport.CliWrapProgress += this.MpegSupport_CliWrapProgress;
             this.MpegSupport.CliWrapError += this.MpegSupport_CliWrapErrored;
+        }
+
+        private void DoCreateSeason()
+        {
+            if (CurrentSeries != null)
+            {
+                Models.Season newSeason = new Models.Season()
+                {
+                    Series = CurrentSeries.Id,
+                    SeasonNo = 1
+                };
+                CurrentSeries.Seasons.Add(newSeason);
+                newSeason.Save();
+                SeasonsList = CurrentSeries.Seasons;
+            }
         }
 
         private void DoRemoveGenre()
@@ -524,7 +516,9 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        public string? AutoCompleteToken { get => autoCompleteToken; set => this.RaiseAndSetIfChanged(ref autoCompleteToken, value); }
+        public string? AutoCompleteToken 
+        { get => autoCompleteToken; 
+            set => this.RaiseAndSetIfChanged(ref autoCompleteToken, value); }
 
         /// <summary>
         /// Gets or sets the AutoCompleteTokens.
@@ -555,12 +549,16 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets the CreateSeasonCommand.
         /// </summary>
-        public ICommand? CreateSeasonCommand { get; }
+        public ReactiveCommand<Unit, Unit>? CreateSeasonCommand { get; }
 
         /// <summary>
         /// Gets or sets the CurrentBookmark.
         /// </summary>
-        public Models.Bookmark? CurrentBookmark { get => bookmark; set => this.RaiseAndSetIfChanged(ref bookmark, value); }
+        public Models.Bookmark? CurrentBookmark 
+        { 
+            get => bookmark; 
+            set => this.RaiseAndSetIfChanged(ref bookmark, value);
+        }
 
         /// <summary>
         /// Gets or sets the CurrentCastMember.
@@ -740,7 +738,7 @@ namespace TaymadeEntities.ViewModels
         // which returned a List<Movies> and caused assignment of List to ObservableCollection (CS0029).
         // Fix by building a list first (or passing IEnumerable) and then creating the ObservableCollection.
 
-        public Models.Season CurrentSeason
+        public Models.Season? CurrentSeason
         {
             get => currentSeason;
             set
@@ -752,9 +750,7 @@ namespace TaymadeEntities.ViewModels
                     // If CurrentSeries is available, filter by both season and series.
                     if (CurrentSeries != null)
                     {
-                        var moviesForSeason = DataController.SandboxEntities.Movies
-                            .Where(m => m.Season == value.Id && m.Series == CurrentSeries.Id)
-                            .ToList();
+                        var moviesForSeason = DataController.MovieController.GetMoviesBySeason(value.Id).ToList();
 
                         SeasonMovies = new ObservableCollection<Movies>(moviesForSeason);
                     }
@@ -1775,7 +1771,7 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// The DoDeleteMovie.
         /// </summary>
-        public void DeleteMovie()
+        public async void DeleteMovie()
         {
             //Views.MainWindow? mainWindow = GetWindow() as Views.MainWindow;
 
@@ -1835,7 +1831,7 @@ namespace TaymadeEntities.ViewModels
 
                 CurrentMovie.LogMessage("Delete");
 
-                CurrentMovie.Delete();
+                await CurrentMovie.Delete();
                 MovieList.Remove(CurrentMovie);
             }
             // }
@@ -1844,7 +1840,7 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// The DoDeleteMovieEntity.
         /// </summary>
-        public void DeleteMovieEntity()
+        public async void DeleteMovieEntity()
         {
             //Views.MainWindow? mainWindow = GetWindow() as Views.MainWindow;
 
@@ -1853,7 +1849,7 @@ namespace TaymadeEntities.ViewModels
             // MainWindowViewModel? mvm = mainWindow.DataContext as MainWindowViewModel;
             if (CurrentMovie != null)
             {
-                CurrentMovie.Delete();
+                await CurrentMovie.Delete();
                 MovieList.Remove(CurrentMovie);
             }
             //}
@@ -2105,7 +2101,7 @@ namespace TaymadeEntities.ViewModels
                     using Dialogs.TMDBSearchDialog searchDialog = new TMDBSearchDialog(viewModel);
                     {
 
-                        Views.MainWindow? main = Support.Support.GetWindow() as Views.MainWindow;
+                        Window? main = Support.Support.GetWindow() as Window;
 
                         if (main != null)
                         {
@@ -2191,7 +2187,6 @@ namespace TaymadeEntities.ViewModels
         /// <autogeneratedoc />
         public async void EditEpisodeCommand()
         {
-            if (mainWindow == null) mainWindow = Support.Support.GetMainWindow();
             if (CurrentMovie != null && CurrentMovie.Season != null && (CurrentMovie.Episode != null || CurrentMovie.Episode > 0))
             {
                 CurrentSeason = CurrentMovie.SeasonEntity;
@@ -2200,21 +2195,14 @@ namespace TaymadeEntities.ViewModels
                 Episode = CurrentMovie.EpisodeEntity;
                 HasEpisode = true;
 
-                SeriesDialogWindow seriesDialogWindow = new SeriesDialogWindow();
+               using SeriesViewModel seriesViewModel = new SeriesViewModel();
 
-                SeriesViewModel seriesViewModel = new SeriesViewModel(seriesDialogWindow);
+               using SeriesDialogWindow seriesDialogWindow = new SeriesDialogWindow(seriesViewModel);
 
-                if (this.Caller == null) this.Caller = mainWindow;
-
-                oldCaller = this.Caller;
-                Caller = seriesDialogWindow;
-
-                seriesDialogWindow.DataContext = this;
-
-                await seriesDialogWindow.ShowDialog(oldCaller);
+                Window main = Support.Support.GetWindow() as Window;
+                bool ok = await seriesDialogWindow.ShowDialog<bool>(main);
                 if (
-                        resultButton != null
-                        && resultButton.Result == Models.DialogResultButton.ResultType.Ok
+                    ok
                     )
                 {
                     Episode.Save();
@@ -2225,7 +2213,7 @@ namespace TaymadeEntities.ViewModels
                     CurrentMovie.SeasonEntity.TVEpisodes = new ObservableCollection<TVEpisode>(CurrentMovie.SeasonEntity.TVEpisodes.DistinctBy(x => x.Id).OrderBy(x => x.EpisodeNumber).ToList());
                     this.RaisePropertyChanged(nameof(CurrentMovie));
                 }
-                Caller = oldCaller;
+                
             }
         }
 
@@ -2792,6 +2780,7 @@ namespace TaymadeEntities.ViewModels
         {
             if (CurrentMovie != null)
             {
+                FFMpegSupport fFMpegSupport = new FFMpegSupport();
                 if (CurrentMovie.Bookmarks != null && CurrentMovie.Bookmarks.Count > 0)
                 {
                     foreach (Bookmark bookmark in CurrentMovie.Bookmarks)
@@ -2801,13 +2790,17 @@ namespace TaymadeEntities.ViewModels
                             // get the image using the bookmark time
                             // if the image does not exist, then grab image
                             //  await Support.VideoSupport.GrabBookmarkImage(CurrentMovie, bookmark, 0);
-
+                            string winThumbnailpath = await fFMpegSupport.GrabImage(CurrentMovie.MoviePath,
+                                bookmark.ImagePath, bookmark.Time);
                             CurrentBookmark = bookmark;
+                            CurrentBookmark.ImagePath = winThumbnailpath;
+                            CurrentBookmark.SetImageBMP();
                             //bookmark.ImagePath = string.Empty;
                             bookmark.Save();
                         }
                     }
                 }
+                fFMpegSupport.Dispose();
             }
         }
 
@@ -3097,10 +3090,15 @@ namespace TaymadeEntities.ViewModels
         public async void DoPlay(Movies movie, 
             Bookmark? bookmark = null,
             bool recording = false, 
-            string recordName = "")
+            string recordName = "", 
+            bool fullScreen = true,
+            bool autoplay = true)
         {
             using PlayerViewModel playerViewModel = new PlayerViewModel(movie, true);
-            
+
+            playerViewModel.FullScreen = fullScreen;
+            playerViewModel.AutoPlay = autoplay;
+
             using PlayerDialog playerDialog = new PlayerDialog(playerViewModel);
             playerViewModel.Caller = playerDialog;
             playerViewModel.PlayFromBookmark = (bookmark != null);
@@ -3456,7 +3454,7 @@ namespace TaymadeEntities.ViewModels
                             if (ResultTask.Seconds != null) mpegSupport.TotalDuration = ResultTask.Seconds.Value;
                             mpegSupport.MovieName = currentMovie.MovieName;
 
-                            int val = await mpegSupport.TrimMovie(currentMovie, ResultTask.Paramater);
+                            int val = await mpegSupport.TrimMovie(currentMovie, ResultTask.Parameter);
 
                             if (val == 0) HasTemp = true;
                         }

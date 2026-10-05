@@ -64,7 +64,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the episodeEntity.
         /// </summary>
-        private TVEpisode episodeEntity;
+        private TVEpisode? episodeEntity;
 
         /// <summary>
         /// Defines the filmGroup.
@@ -149,7 +149,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the seasonEntity.
         /// </summary>
-        private Season seasonEntity;
+        private Season? seasonEntity;
 
         /// <summary>
         /// Defines the series.
@@ -400,10 +400,10 @@ namespace TaymadeEntities.Models
                     if (EndBookmark != null) EndBookmark.Time = value;
                     //this.SetPercentUnmarked();
                 }
-                else
-                {
-                    SetError("Duration:Must be greater than Zero");
-                }
+                //else
+                //{
+                //    SetError("Duration:Must be greater than Zero");
+                //}
             }
         }
 
@@ -422,7 +422,9 @@ namespace TaymadeEntities.Models
                     {
                         //EpisodeEntity = DataController.SandboxEntities.TVEpisodes.Find(Episode).FirstOrDefault();
                     }
+                    
                 }
+                //this.RaisePropertyChanged(nameof(EpisodeNumber));
                 return episodeNumber;
             }
 
@@ -431,14 +433,14 @@ namespace TaymadeEntities.Models
 
         private void GetEpisodeEntity()
         {
-            EpisodeEntity = DataController.SandboxEntities.TVEpisodes.Find(Episode);
+            EpisodeEntity = DataController.MovieController.GetTVEpisodeById(Episode);
             this.RaisePropertyChanged("EpisodeEntity");
         }
 
         /// <summary>
         /// Gets or sets the Episode.
         /// </summary>
-        public Nullable<int> Episode
+        public int? Episode
         {
             get => episode; set
             {
@@ -465,13 +467,15 @@ namespace TaymadeEntities.Models
         /// </summary>
         [NotMapped]
 
-        public TVEpisode EpisodeEntity
+        public TVEpisode? EpisodeEntity
         {
             get
             {
                 if (episodeEntity == null && (Episode != null && Episode > 0))
                 {
-                    episodeEntity = DataController.SandboxEntities.TVEpisodes.Find(Episode);
+                    episodeEntity = DataController.MovieController.GetTVEpisodeById(Episode);
+                    this.RaisePropertyChanged(nameof(EpisodeEntity));
+                    this.RaisePropertyChanged(nameof(EpisodeNumber));
                 }
 
                 return episodeEntity;
@@ -482,6 +486,11 @@ namespace TaymadeEntities.Models
                 this.RaiseAndSetIfChanged(ref episodeEntity, value);
 
                 this.HasEpisodes = (value != null);
+                if (value != null)
+                {
+                    Episode = value.Id;
+                    EpisodeNumber = value.EpisodeNumber;
+                }
             }
         }
 
@@ -668,12 +677,12 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the Progress.
         /// </summary>
-        public Nullable<int> Progress { get => progress; set => this.RaiseAndSetIfChanged(ref progress, value); }
+        public int? Progress { get => progress; set => this.RaiseAndSetIfChanged(ref progress, value); }
 
         /// <summary>
         /// Gets or sets the Season.
         /// </summary>
-        public Nullable<int> Season
+        public int? Season
         {
             get
             {
@@ -681,36 +690,60 @@ namespace TaymadeEntities.Models
                 else return season;
             }
 
-            set => this.RaiseAndSetIfChanged(ref season, value);
-        }
-
-        /// <summary>
-        /// Gets or sets the SeasonEntity.
-        /// </summary>
-        [NotMapped]
-        public Season SeasonEntity
-        {
-            get
+            set
             {
-                if (seasonEntity == null && Season != null)
+                this.RaiseAndSetIfChanged(ref season, value);
+                if (value != null && value > 0)
                 {
-                    seasonEntity = DataController.SandboxEntities.Seasons.Find(Season);
-
-                    if (seasonEntity != null && (seasonEntity.TVEpisodes == null || seasonEntity.TVEpisodes.Count == 0))
+                    SeasonEntity = DataController.SandboxEntities.Seasons.Find(value);
+                    if (SeasonEntity != null && (SeasonEntity.TVEpisodes == null || SeasonEntity.TVEpisodes.Count == 0))
                     {
-                        seasonEntity.TVEpisodes = new ObservableCollection<TVEpisode>(DataController.SandboxEntities.TVEpisodes.Where(t => t.SeasonID == seasonEntity.Id).ToList());
+                        SeasonEntity.TVEpisodes = new ObservableCollection<TVEpisode>(DataController.SandboxEntities.TVEpisodes.Where(t => t.SeasonID == SeasonEntity.Id).ToList());
                     }
                 }
-                return seasonEntity;
             }
-
-            set => seasonEntity = value;
         }
+
+        ///// <summary>
+        ///// Gets or sets the SeasonEntity.
+        ///// </summary>
+        //[NotMapped]
+        //public Season? SeasonEntity
+        //{
+        //    get
+        //    {
+        //        if (seasonEntity == null && Season != null)
+        //        {
+        //            seasonEntity = DataController.SandboxEntities.Seasons.Find(Season);
+
+        //            if (seasonEntity != null && (seasonEntity.TVEpisodes == null || seasonEntity.TVEpisodes.Count == 0))
+        //            {
+        //                seasonEntity.TVEpisodes = new ObservableCollection<TVEpisode>(DataController.SandboxEntities.TVEpisodes.Where(t => t.SeasonID == seasonEntity.Id).ToList());
+        //            }
+        //        }
+        //        return seasonEntity;
+        //    }
+
+        //    set
+        //    {
+        //        seasonEntity = value;
+        //        if (value != null)
+        //        {
+        //            Season = value.Id;
+        //            if (SeasonEntity.TVEpisodes == null || SeasonEntity.TVEpisodes.Count == 0)
+        //            {
+        //                SeasonEntity.TVEpisodes = DataController.MovieController.GetTVEpisodesBySeasonID(value.Id);
+        //            }
+
+        //            this.RaisePropertyChanged(nameof(SeasonEntity.TVEpisodes));
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Gets or sets the Series.
         /// </summary>
-        public Nullable<int> Series
+        public int? Series
         {
             get
             {
@@ -718,7 +751,24 @@ namespace TaymadeEntities.Models
                 return series;
             }
 
-            set => this.RaiseAndSetIfChanged(ref series, value);
+            set
+            {
+                this.RaiseAndSetIfChanged(ref series, value);
+                if (value != null && value > 0)
+                {
+                    if (SeriesEntity == null)
+                    {
+                        SeriesEntity = DataController.MovieController.GetSeriesById(value.Value);
+                    }
+
+                    if (SeriesEntity != null && (SeriesEntity.Seasons == null || SeriesEntity.Seasons.Count == 0))
+                    {
+                        SeriesEntity.Seasons = new ObservableCollection<Season>(DataController.SandboxEntities.Seasons.Where(s => s.Series == SeriesEntity.Id).ToList());
+                    }
+                    this.RaisePropertyChanged(nameof(SeriesEntity));
+                    this.RaisePropertyChanged(nameof(SeriesEntity.Seasons));
+                }
+            }
         }
 
         [NotMapped]

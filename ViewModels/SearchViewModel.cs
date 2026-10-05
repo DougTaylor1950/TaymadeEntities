@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TaymadeEntities.Models;
 using DocumentFormat.OpenXml.Spreadsheet;
 using ReactiveUI;
+using System.Collections.ObjectModel;
 
 namespace TaymadeEntities.ViewModels
 {
@@ -92,6 +93,7 @@ namespace TaymadeEntities.ViewModels
             set => this.RaiseAndSetIfChanged(ref movieTitle, value);
         }
         public int Year { get; set; }
+        public ObservableCollection<Movies> MovieList { get; set; }
 
         protected virtual void Dispose(bool disposing)
         {

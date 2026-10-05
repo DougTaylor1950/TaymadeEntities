@@ -1,6 +1,7 @@
 ﻿using ShimSkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text;
 using TaymadeEntities.DAL.Classes;
 using TaymadeEntities.DAL.Interfaces;
@@ -198,6 +199,21 @@ namespace TaymadeEntities.Controllers
         internal IEnumerable<Author> GetAuthors()
         {
             return storyRepository.GetAuthors();
+        }
+
+        public bool UpdateStorySeries(StorySeries storySeries)
+        {
+            return storyRepository.UpdateStorySeries(storySeries);
+        }
+
+        internal ObservableCollection<StorySeries>? GetStorySeriesList()
+        {
+            return new ObservableCollection<StorySeries>(storyRepository.GetStorySeriesList());
+        }
+
+        internal List<Story>? GetStoriesByAuthorId(int id)
+        {
+            return storyRepository.GetStoriesByAuthorId(id)?.ToList();
         }
 
         #endregion Protected Methods

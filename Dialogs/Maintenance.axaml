@@ -1,0 +1,380 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:vm="using:TaymadeEntities.ViewModels"
+		xmlns:tc="using:TaymadeControls"
+		xmlns:tcb="using:TaymadeControls.Buttons"
+		xmlns:mo="using:StoryViewer.Models"
+		mc:Ignorable="d" d:DesignWidth="1800" d:DesignHeight="1200"
+		WindowState="FullScreen"
+		x:Class="TaymadeEntities.Dialogs.Maintenance"
+		x:DataType="vm:MaintenanceViewModel"
+		Title="StoryMaintenance">
+
+	<Design.DataContext>
+		<!-- This only sets the DataContext for the previewer in an IDE,
+		to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+		<vm:MaintenanceViewModel/>
+	</Design.DataContext>
+
+	<Window.Styles>
+		<StyleInclude Source="avares://TaymadeControls/Styles/TaymadeStyles.axaml"/>
+	</Window.Styles>
+	<TabControl Name="Maintainencetabs">
+		<TabItem Header="Phrases">
+			<Border BorderBrush="Black"
+					BorderThickness="2"
+					CornerRadius="5"
+					Background="LightGray"
+					Height="100"
+					VerticalAlignment="Top"
+					Margin="5,25,5,5"
+					>
+				<StackPanel	Orientation="Horizontal"
+							HorizontalAlignment="Center"
+							VerticalAlignment="Center"
+							Width="300">
+					<tcb:ImagedButton LabelText="Phrases"
+									  Click="Phrases_Click"
+									  Margin="5,5,5,5"
+									  ImageSource="avares://TaymadeControls/Assets/eye.png"
+									  />
+					<tcb:ImagedButton LabelText="Series Maintenance"
+									  Click="SeriesMaintenance_Click"
+									  Margin="5,5,5,5"
+									  ImageSource="avares://TaymadeControls/Assets/edit_icon.png"
+									  />
+				</StackPanel>
+			</Border>
+		</TabItem>
+		<TabItem Header="Story Maintenance">
+			<Border CornerRadius="6"
+					Margin="5,5,5,5"
+					BorderBrush="Gray"
+					BorderThickness="2"
+					>
+				<StackPanel Orientation="Vertical">
+					<tc:HeaderControl2 Title="Story Maintenance"
+									   Height="80"
+									   Background="{Binding $self.BermudaTriangleBrush}"
+									   Name="StoryMaintenaceHeaderControl"
+									   SubtitleA=""
+									   SubtitleAIsVisible="True"
+									   />
+					<TabControl>
+						<TabItem Header="Story Series">
+							<StackPanel Orientation="Vertical">
+								<tc:HeaderControl2 Title="Story Series" Background="{Binding $self.SpectrumBrush}" Height="75" Name="StorySeriesHeaderControl" />
+								<StackPanel Orientation="Horizontal">
+									<DataGrid Name="dgStorySeries"
+											  Height="400"
+											  ItemsSource="{Binding StorySeriesList}"
+											  SelectedItem="{Binding CurrentStorySeries}">
+										<DataGrid.Columns>
+											<DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+											<DataGridTextColumn Header="Text" Binding="{Binding Name}" />
+										</DataGrid.Columns>
+									</DataGrid>
+
+									<DataGrid
+									Name="dgStories"
+									HorizontalScrollBarVisibility="Visible"
+									Height="300"
+									ItemsSource="{Binding CurrentStorySeries.StoryList}"
+									>
+										<DataGrid.Columns>
+											<DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+											<DataGridTextColumn Header="Author" Binding="{Binding Author}" />
+											<DataGridTextColumn Header="Age" Binding="{Binding Age}" />
+											<DataGridTextColumn Header="Lowest Age" Binding="{Binding LowestAgeInt}" />
+											<DataGridTemplateColumn Header="Codes" Width="250" CanUserSort="true" SortMemberPath="Codes">
+												<DataGridTemplateColumn.CellTemplate>
+													<DataTemplate>
+														<TextBlock Text="{Binding Codes}" TextWrapping="Wrap" />
+													</DataTemplate>
+												</DataGridTemplateColumn.CellTemplate>
+											</DataGridTemplateColumn>
+											<DataGridTemplateColumn Header="Title" Width="200" CanUserSort="true" SortMemberPath="Title">
+												<DataGridTemplateColumn.CellTemplate>
+													<DataTemplate>
+														<TextBlock Text="{Binding Title}" TextWrapping="Wrap" />
+													</DataTemplate>
+												</DataGridTemplateColumn.CellTemplate>
+											</DataGridTemplateColumn>
+											<DataGridTextColumn Header="Added" Binding="{Binding AddedString}" />
+											<DataGridTextColumn Header="Created" Binding="{Binding CreatedString}" />
+											<DataGridTextColumn Header="Modified" Binding="{Binding ModifiedString}" />
+											<DataGridTextColumn Header="Path Error" Binding="{Binding PathWrong}" />
+
+
+
+										</DataGrid.Columns>
+									</DataGrid>
+								</StackPanel>
+								<StackPanel Orientation="Horizontal">
+									<tcb:ImagedButton
+									Margin="5"
+									Name="AddSeries"
+									Command="{Binding DoAddStorySeries}"
+									ImageSource="avares://TaymadeControls/Assets/add_icon.png"
+									LabelText="Add Series"
+									HotKeyText=""
+									/>
+
+									<TextBox Classes="c2"
+											 Name="NewStoryName"
+											 Text="{Binding NewStoryName}" Width="120"/>
+
+								</StackPanel>
+							</StackPanel>
+						</TabItem>
+
+						<TabItem Header="Authors">
+							<StackPanel Orientation="Vertical">
+								<tc:HeaderControl2 Title="Story Authors" Background="{Binding $self.SpectrumBrush}" Height="75" Name="StoryAuthorHeaderControl" />
+
+								<StackPanel Orientation="Horizontal">
+									<DataGrid Name="dgAuthors"  Height="400"
+											  ItemsSource="{Binding AuthorList}"
+											  SelectedItem="{Binding CurrentAuthor}"
+											  >
+										<DataGrid.Columns>
+											<DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+											<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+											<DataGridTextColumn Header="Path" Binding="{Binding StoryPath}" />
+										</DataGrid.Columns>
+									</DataGrid>
+									<StackPanel Width="10" Orientation="Vertical" Background="DarkGray"></StackPanel>
+									<DataGrid
+									Name="dgAuthorStories" SelectedItem="{Binding CurrentStory}"
+									ItemsSource="{Binding CurrentAuthor.StoryList}"
+									Height="400"
+									HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible">
+										<DataGrid.Columns>
+											<DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+											<DataGridTextColumn Header="Author" Binding="{Binding Author}" />
+											<DataGridTextColumn Header="Age" Binding="{Binding Age}" />
+											<DataGridTextColumn Header="Lowest Age" Binding="{Binding LowestAgeInt}" />
+											<DataGridTemplateColumn Header="Codes" Width="250" CanUserSort="true" SortMemberPath="Codes">
+												<DataGridTemplateColumn.CellTemplate>
+													<DataTemplate>
+														<TextBlock Text="{Binding Codes}" TextWrapping="Wrap" />
+													</DataTemplate>
+												</DataGridTemplateColumn.CellTemplate>
+											</DataGridTemplateColumn>
+											<DataGridTemplateColumn Header="Title" Width="200" CanUserSort="true" SortMemberPath="Title">
+												<DataGridTemplateColumn.CellTemplate>
+													<DataTemplate>
+														<TextBlock Text="{Binding Title}" TextWrapping="Wrap" />
+													</DataTemplate>
+												</DataGridTemplateColumn.CellTemplate>
+											</DataGridTemplateColumn>
+											<DataGridTextColumn Header="Added" Binding="{Binding AddedString}" />
+											<DataGridTextColumn Header="Created" Binding="{Binding CreatedString}" />
+											<DataGridTextColumn Header="Modified" Binding="{Binding ModifiedString}" />
+											<DataGridTextColumn Header="Path Error" Binding="{Binding PathWrong}" />
+											<DataGridTemplateColumn Header="Edit">
+												<DataGridTemplateColumn.CellTemplate>
+													<DataTemplate>
+														<tcb:ImagedButton Click ="EditStory"
+																		  ImageSource="avares://TaymadeControls/Assets/edit_icon.png"
+																		  LabelText="Edit"
+																		  HotKeyText=""
+																		  />
+
+													</DataTemplate>
+												</DataGridTemplateColumn.CellTemplate>
+											</DataGridTemplateColumn>
+										</DataGrid.Columns>
+									</DataGrid>
+								</StackPanel>
+								<StackPanel Orientation="Horizontal">
+									<tcb:ImagedButton Margin="5"
+													  Name="AddAuthor"
+													  Command="{Binding DoAddAuthor}"
+													  ImageSource="avares://TaymadeControls/Assets/add_icon.png"
+													  LabelText="Add Author"
+													  HotKeyText=""
+													  />
+
+									<TextBox Classes="c2" Name="NewAuthorName"
+											 Text="{Binding NewAuthorName}"
+											 ></TextBox>
+
+								</StackPanel>
+								<StackPanel Orientation="Vertical" DockPanel.Dock="Top" >
+
+									<ScrollViewer VerticalScrollBarVisibility="Visible">
+										<Grid >
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition Width="100"/>
+												<ColumnDefinition Width="200"/>
+												<ColumnDefinition Width="100"/>
+												<ColumnDefinition Width="200"/>
+												<ColumnDefinition Width="10"/>
+
+												<ColumnDefinition Width="100"/>
+												<ColumnDefinition Width="100"/>
+												<ColumnDefinition Width="100"/>
+												<ColumnDefinition Width="100"/>
+												<ColumnDefinition Width="100"/>
+												<ColumnDefinition Width="100"/>
+												<ColumnDefinition Width="300"/>
+												<ColumnDefinition Width="300"/>
+
+											</Grid.ColumnDefinitions>
+											<Grid.RowDefinitions>
+												<RowDefinition Height="40"></RowDefinition>
+												<RowDefinition Height="40"></RowDefinition>
+												<RowDefinition Height="40"></RowDefinition>
+												<RowDefinition Height="40"></RowDefinition>
+												<RowDefinition Height="40"></RowDefinition>
+												<RowDefinition Height="40"></RowDefinition>
+												<RowDefinition Height="40"></RowDefinition>
+												<RowDefinition Height="40"></RowDefinition>
+
+											</Grid.RowDefinitions>
+											<TextBlock Classes="h2" Text="Story Title"  Grid.Column="0" Grid.Row="0"/>
+											<TextBox Classes="c1" Text="{Binding CurrentStory.Title }"   Grid.Column="1" Grid.ColumnSpan="3"  />
+											<TextBlock Classes="h2" Text="Path Error"  Grid.Column="5" Grid.Row="0"/>
+											<CheckBox IsChecked="{Binding CurrentStory.PathWrong}" Grid.Column="6" Grid.Row="0" />
+											<TextBlock Classes="h2" Text="Characters"  Grid.Column="9" Grid.Row="0"/>
+											<TextBox Classes="c1" Text="{Binding CurrentStory.Characters }"  Grid.Row="0"  Grid.Column="10" />
+
+											<TextBlock Classes="h2" Text="Id"  Grid.Column="7" Grid.Row="0"/>
+											<TextBlock Classes="h2" Text="{Binding CurrentStory.Id }"  Grid.Row="0"  Grid.Column="8" />
+
+											<TextBlock Classes="h2" Text="Codes"  Grid.Column="0" Grid.Row="1"/>
+											<TextBox Classes="c1" Text="{Binding CurrentStory.Codes }"   Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3"  />
+											<TextBlock Classes="h2" Text="Age"  Grid.Column="5" Grid.Row="1"/>
+											<TextBox Classes="c1" Text="{Binding CurrentStory.Age}" Grid.Column="6" Grid.Row="1" />
+											<TextBlock Classes="h2" Text="Headings"  Grid.Column="7" Grid.Row="1"/>
+											<TextBox Classes="c1" Text="{Binding CurrentStory.HeadingCount}" Grid.Column="8" Grid.Row="1" />
+											<TextBlock Classes="h2"   Grid.Column="9" Grid.Row="1"/>
+											<TextBox Classes="c1" Text="{Binding CurrentStory.Lines }"  Grid.Row="1"  Grid.Column="10" />
+
+											<TextBlock Classes="h2" Text="Author"  Grid.Column="0" Grid.Row="2"/>
+											<TextBox Classes="c1" Text="{Binding CurrentStory.Author }"   Grid.Column="1" Grid.Row="2" Grid.ColumnSpan="3"  />
+											<TextBlock Classes="h2" Text="Lowest Age"  Grid.Column="5" Grid.Row="2"/>
+											<TextBox Classes="c1" Text="{Binding CurrentStory.LowestAge}" Grid.Column="6" Grid.Row="2" />
+											<TextBox Classes="c1" Text="{Binding CurrentStory.LowestAgeInt}" Grid.Column="7" Grid.Row="2" />
+											<TextBlock Classes="h2" Text="Pages"  Grid.Column="9" Grid.Row="2"/>
+											<TextBox Classes="c1" Text="{Binding CurrentStory.Pages }"  Grid.Row="2"  Grid.Column="10" />
+
+											<TextBlock Classes="h2" Text="Path"  Grid.Column="0" Grid.Row="3"/>
+											<TextBox Classes="c1" Text="{Binding CurrentStory.Path }"   Grid.Column="1" Grid.Row="3" Grid.ColumnSpan="3" />
+											<tcb:ImagedButton Grid.Row="3"
+															  Grid.Column="5"
+															  Name="Save"
+															  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+															  LabelText="Save"
+															  HotKeyText=""
+															  />
+
+											<tcb:ImagedButton Grid.Row="3"
+															  Grid.Column="6"
+															  Name="Props"
+															  ImageSource="avares://TaymadeControls/Assets/properties.png"
+															  LabelText="Props"
+															  HotKeyText=""
+															  />
+											<TextBlock Classes="h2" Text="Published"  Grid.Column="9" Grid.Row="3"/>
+											<TextBox Classes="c1" Text="{Binding CurrentStory.Published }"  Grid.Row="3"  Grid.Column="10" />
+
+											<TextBlock Classes="h2" Text="Translated"  Grid.Column="0" Grid.Row="4"/>
+											<CheckBox Classes="c1"  IsChecked="{Binding CurrentStory.Translation}"  Grid.Column="1" Grid.Row="4"  />
+											<TextBlock Classes="h2" Text="Language"  Grid.Column="2" Grid.Row="4"/>
+											<TextBox Classes="c1" Text="{Binding CurrentStory.OriginalLanguage }"   Grid.Column="3" Grid.Row="4"  />
+											<TextBlock Classes="h2" Text="Series"  Grid.Column="7" Grid.Row="5"/>
+											<TextBox Name="cbSeries" Grid.Row="5" Grid.Column="8"  Text="{Binding CurrentStory.StorySeries.Name}"/>
+											<TextBlock Classes="h2" Text="Authors"  Grid.Column="9" Grid.Row="5"/>
+											<TextBox Name="cbAuthors" Grid.Row="5" Grid.Column="10"  Text="{Binding CurrentStory.AuthorItem.Name}"/>
+
+											<TextBlock Classes="h2" Text="Added"  Grid.Column="0" Grid.Row="5"/>
+											<TextBox Classes="c1"  Grid.Column="1" Grid.Row="5" Text="{Binding CurrentStory.AddedString}"/>
+											<TextBlock Classes="h2" Text="Created"  Grid.Column="2" Grid.Row="5"/>
+											<TextBox Classes="c1"  Grid.Column="3" Grid.Row="5" Text="{Binding CurrentStory.CreatedString}"/>
+											<DataGrid Name="dgAuthors1" Grid.Column="11" GridLinesVisibility="Horizontal"  Grid.Row="1" Grid.RowSpan="3" ItemsSource="{Binding CurrentStory.Authors}">
+												<DataGrid.Columns>
+													<DataGridTextColumn Header="Id" Binding="{Binding AuthorId}" />
+													<DataGridTextColumn Header="Author" Binding="{Binding Author.Name}" />
+												</DataGrid.Columns>
+
+											</DataGrid>
+										</Grid>
+									</ScrollViewer>
+
+								</StackPanel>
+
+							</StackPanel>
+						</TabItem>
+					</TabControl>
+					<StackPanel Orientation="Vertical"
+								Height="400">
+						<Border BorderBrush="Black"
+								BorderThickness="2"
+								CornerRadius="10">
+							<StackPanel Orientation="Horizontal"	>
+								<StackPanel Orientation="Vertical"
+											Width="280"	>
+
+								</StackPanel>
+								<StackPanel Width="20"
+											Background="LightGray"/>
+
+								<StackPanel Width="20"
+											Background="LightGray"/>
+
+
+							</StackPanel>
+
+						</Border>
+
+					</StackPanel>
+
+
+					<StackPanel Orientation="Horizontal"
+								HorizontalAlignment="Center">
+						<tcb:OkButton Click="OkButton_Click" />
+						<tcb:CancelButton Click="CancelButton_Click" />
+					</StackPanel>
+				</StackPanel>
+			</Border>
+		</TabItem>
+
+		<TabItem Header="Group Text">
+			<StackPanel Orientation="Vertical">
+				<tc:HeaderControl2 Title="Groups" Background="{Binding $self.SpectrumBrush}" Height="75" Name="GroupsHeaderControl" />
+				<TextBox Text="{Binding AutoComplete}"></TextBox>
+				<StackPanel Orientation="Horizontal">
+					<DataGrid ItemsSource="{Binding AutoCompleteTokens}" Name="dgAutoComplete"
+							  AutoGenerateColumns="True" Height="500" SelectedItem="{Binding AutoCompleteToken}"></DataGrid>
+					<StackPanel Orientation="Vertical">
+						<TextBlock Name="selectedToken" Text="{Binding AutoCompleteToken}"/>
+						<tcb:ImagedButton  Click="DeleteToken"
+										   ImageSource="avares://TaymadeControls/Assets/delete_icon.png"
+										   LabelText="Delete"
+										   HotKeyText=""
+										   />
+
+						<TextBox Name="newToken"/>
+						<tcb:ImagedButton Click="AddToken"
+										  ImageSource="avares://TaymadeControls/Assets/add_icon.png"
+										  LabelText="Add"
+										  HotKeyText=""
+										  />
+						<TextBox Text="{Binding AutoCompleteToken}" />
+						<tcb:ImagedButton Command="{Binding UpdateToken}"
+										  ImageSource="avares://TaymadeControls/Assets/edit_icon.png"
+										  LabelText="Update"
+										  HotKeyText=""
+										  />
+
+
+					</StackPanel>
+				</StackPanel>
+			</StackPanel>
+		</TabItem>
+	</TabControl>
+</Window>

@@ -141,7 +141,7 @@ namespace TaymadeEntities.ViewModels
 
                         string mpath = Support.Support.FixImagePath(CurrentMovie.MoviePath);
 
-                        ResultTask.Paramater = " -y -i " + '"' + mpath + '"' + " " + gammaCorrections.GammaCorrectionString() + " -c:v libx264 -preset slow -crf 22 ";
+                        ResultTask.Parameter = " -y -i " + '"' + mpath + '"' + " " + gammaCorrections.GammaCorrectionString() + " -c:v libx264 -preset slow -crf 22 ";
 
                         if (gammaCorrections.Crop)
                         {
@@ -163,7 +163,7 @@ namespace TaymadeEntities.ViewModels
 
                         string mpath = Support.Support.FixImagePath(CurrentMovie.MoviePath);
 
-                        ResultTask.Paramater = " -y -i " + '"' + mpath + '"' + " " + gammaCorrections.GammaCorrectionString() + " -c:v libx264 -preset slow -crf 22 ";
+                        ResultTask.Parameter = " -y -i " + '"' + mpath + '"' + " " + gammaCorrections.GammaCorrectionString() + " -c:v libx264 -preset slow -crf 22 ";
 
                         if (gammaCorrections.Crop)
                         {

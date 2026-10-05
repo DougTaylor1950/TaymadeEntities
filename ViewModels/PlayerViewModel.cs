@@ -174,6 +174,9 @@ namespace TaymadeEntities.ViewModels
                         UsedBookmarks.Add(stub);
                     }
                 }
+
+                // sort by name 
+                UsedBookmarks = new ObservableCollection<string>(UsedBookmarks.OrderBy(x => x));    
             }
         }
 
@@ -194,7 +197,7 @@ namespace TaymadeEntities.ViewModels
             set => this.RaiseAndSetIfChanged(ref autoCompleteList, value);
         }
 
-        public bool AutoPlay { get; private set; }
+        public bool AutoPlay { get; set; }
         public Bookmark? Bookmark { get; set; }
         public Album? CurrentAlbum
         {
@@ -976,7 +979,8 @@ namespace TaymadeEntities.ViewModels
             {
                 if (AutoCompleteBox != null && !string.IsNullOrEmpty(AutoCompleteBox.Text))
                 {
-                    bookmarkName = AutoCompleteBox.Text;
+                    // as spaces get consumed a space can be entered as a "." so replace with a space
+                    bookmarkName = AutoCompleteBox.Text.Replace("."," ");
                 }
 
                 AddMark(bookmarkName);

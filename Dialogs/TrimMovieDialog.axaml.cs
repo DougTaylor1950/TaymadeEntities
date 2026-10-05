@@ -251,13 +251,13 @@ namespace TaymadeEntities.Dialogs
 
         private void Accept_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            DialogResultButton dialogResultButton = new DialogResultButton() { Result = DialogResultButton.ResultType.Ok, Paramater = "TrimMovie" };
+            DialogResultButton dialogResultButton = new DialogResultButton() { Result = DialogResultButton.ResultType.Ok, Parameter = "TrimMovie" };
             if (this.DataContext is MovieConversionViewModel)
             {
                 MovieConversionViewModel movieConversionViewModel = this.DataContext as MovieConversionViewModel;
                 if (movieConversionViewModel != null)
                 {
-                    dialogResultButton.Paramater = movieConversionViewModel.GammaCorrections.GammaCorrectionString();
+                    dialogResultButton.Parameter = movieConversionViewModel.GammaCorrections.GammaCorrectionString();
                 }
             }
             this.Close(dialogResultButton);
@@ -265,7 +265,7 @@ namespace TaymadeEntities.Dialogs
 
         private void Cancel_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            DialogResultButton dialogResultButton = new DialogResultButton() { Result = DialogResultButton.ResultType.Cancel, Paramater = "TrimMovie" };
+            DialogResultButton dialogResultButton = new DialogResultButton() { Result = DialogResultButton.ResultType.Cancel, Parameter = "TrimMovie" };
 
             this.Close(dialogResultButton);
         }

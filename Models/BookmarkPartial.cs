@@ -25,6 +25,8 @@ namespace TaymadeEntities.Models
     {
         #region Fields
 
+        CultureInfo info = new CultureInfo("en-UK");
+
         /// <summary>
         /// Defines the bookmarkTime.
         /// </summary>
@@ -308,7 +310,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         private void SetFormattedTime()
         {
-            CultureInfo info = new CultureInfo("en-UK");
+           
             if (Time != null && Time > 0)
             {
                 //TimeSpan time;//= new TimeSpan(0, 0, (int)Time.Value);

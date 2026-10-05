@@ -16,7 +16,8 @@
 
         public PhraseEntry? SubPhraseEntry { get; set; }
 
-        public string? Paramater { get; set; }
+        public object? ListValue { get; set; }
+        public string? Parameter { get; set; }
 
         public int? Code { get; set; }
 

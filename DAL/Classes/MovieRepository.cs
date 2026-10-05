@@ -9,6 +9,7 @@ namespace TaymadeEntities.DAL.Classes
 {
     public class MovieRepository : IMovieRepository, IDisposable
     {
+
         #region Private Fields
 
         private readonly DBContext.SandboxEntities _context;
@@ -33,6 +34,12 @@ namespace TaymadeEntities.DAL.Classes
             return _context.SaveChanges() >= 1;
         }
 
+        public bool AddFrameSet(FrameSet frameSet)
+        {
+            _context.FrameSet.Add(frameSet);
+            return Save();
+        }
+
         public bool AddMovieImage(MovieImage movieImage)
         {
             _context.MovieImage.Add(movieImage);
@@ -44,9 +51,24 @@ namespace TaymadeEntities.DAL.Classes
             return _context.CreateMovie(filmName, year, path, filmGroup);
         }
 
+        public EntityState? GetTVEpisodeEntityState(TVEpisode episode)
+        {
+            return _context.Entry(episode).State;
+        }
         public MovieGenre? CreateMovieGenre(int movieId, string? genreCompKey, string? subGenreCompKey)
         {
             return _context.CreateMovieGenre(movieId, genreCompKey, subGenreCompKey);
+        }
+
+        public Series? CreateSeries(string newSeriesName)
+        {
+            return _context.CreateSeries(newSeriesName);
+        }
+
+        public bool DeleteFrameSet(FrameSet frameSet)
+        {
+            _context.FrameSet.Remove(frameSet);
+            return Save();
         }
 
         public bool DeleteMovie(int id)
@@ -68,17 +90,6 @@ namespace TaymadeEntities.DAL.Classes
             return Save();
         }
 
-        public List<Series> GetSeriesList()
-        {
-            return _context.Series.OrderBy(s => s.Name).ToList();
-        }
-
-        public bool DeleteFrameSet(FrameSet frameSet)
-        {
-            _context.FrameSet.Remove(frameSet);
-            return Save();
-        }
-
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
@@ -89,6 +100,24 @@ namespace TaymadeEntities.DAL.Classes
         public List<MovieIntResult> GetActorMovieIds(string actorName)
         {
             return _context.GetActorMovieIds(actorName);
+        }
+
+        public FrameSet? GetFrameSetById(int Id)
+        {
+            return _context.FrameSet.Find(Id);
+        }
+
+        public FrameSetHeader? GetFrameSetHeaderByMovieImageId(int movieImageId)
+        {
+            return _context.FrameSetHeader.FirstOrDefault(f => f.MovieImageId == movieImageId);
+        }
+
+        public IEnumerable<FrameSet>? GetFrameSetsByHeaderId(int frameSetHeaderId)
+        {
+            return _context.FrameSet.
+                Where(f => f.FrameSetHeaderId == frameSetHeaderId).
+                OrderBy(f => f.StartImage).
+                ToList();
         }
 
         public MovieImage? GetMovieImageById(int? lastId)
@@ -162,6 +191,11 @@ namespace TaymadeEntities.DAL.Classes
             return _context.GetMoviesbyInfo(stub);
         }
 
+        public IEnumerable<Movies>?  GetMoviesBySeason(int id)
+        {
+            IEnumerable<Movies>? tempList = _context.Movies.Where(m => m.Season == id);
+            return tempList;
+        }
         public IEnumerable<Movies>? GetMoviesByTitle(string title)
         {
             return _context.GetMoviesbyTitle(title);
@@ -173,9 +207,56 @@ namespace TaymadeEntities.DAL.Classes
             return tempList;
         }
 
+        public List<TVEpisode>? GetTVEpisodesBySeasonID(int id)
+        {
+            return _context.TVEpisodes.Where(t => t.SeasonID == id).OrderBy(t => t.EpisodeNumber).ToList();
+        }
+
+        public List<Season>? GetSeasonsBySeriesID(int id)
+        {
+            return _context.Seasons.Where(s => s.Id == id).OrderBy(s => s.SeasonNo).ToList();
+        }
+
+        public Season? GetSeasonById(int? season)
+        {
+            return _context.Seasons.Find(season);
+        }
+        public TVEpisode? GetTVEpisodeById(int? episode)
+        {
+            return _context.TVEpisodes.Find(episode);
+        }
+
+        public Series? GetSeriesById(int? id)
+        {
+            if (id == null) return null;
+            return _context.Series.Find(id);
+        }
+
+        public List<Series> GetSeriesList()
+        {
+            return _context.Series.OrderBy(s => s.Name).ToList();
+        }
+        public bool InsertFrameSetHeader(FrameSetHeader frameSetHeader)
+        {
+            _context.FrameSetHeader.Add(frameSetHeader);
+            return _context.SaveChanges() > 0;
+        }
+
         public bool Save()
         {
-            return _context.SaveChanges() > 0;
+            try
+            {
+                
+                return _context.SaveChanges() > 0;
+
+            }
+            catch (Exception ex)
+            {
+                string error = ex.ToString();
+                return false;
+                //throw;
+            }
+            
         }
 
         public bool Save(Movies movie)
@@ -201,21 +282,11 @@ namespace TaymadeEntities.DAL.Classes
             _context.MovieImage.Update(image);
             return Save();
         }
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~MovieRepository()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
-        public bool UpdateMovie(Movies movie)
-        {
-            _context.Movies.Update(movie);
-            return _context.SaveChanges() > 0;
-        }
 
-        public FrameSetHeader? GetFrameSetHeaderByMovieImageId(int movieImageId)
+        public bool UpdateFrameSet(FrameSet frameSet)
         {
-            return _context.FrameSetHeader.FirstOrDefault(f => f.MovieImageId == movieImageId);
+            _context.FrameSet.Update(frameSet);
+            return _context.SaveChanges() > 0;
         }
 
         public bool UpdateFrameSetHeader(FrameSetHeader frameSetHeader)
@@ -224,10 +295,37 @@ namespace TaymadeEntities.DAL.Classes
             return _context.SaveChanges() > 0;
         }
 
-        public bool InsertFrameSetHeader(FrameSetHeader frameSetHeader)
+        public bool UpdateMovie(Movies movie)
         {
-            _context.FrameSetHeader.Add(frameSetHeader);
+            _context.Movies.Update(movie);
+            _context.Entry(movie).State = EntityState.Modified;
             return _context.SaveChanges() > 0;
+        }
+
+        public bool UpdateSeason(Season season)
+        {
+            _context.Seasons.Update(season);
+            return Save();
+        }
+        public bool UpdateSeries(Series series)
+        {
+            try
+            {
+                _context.Series.Update(series);
+            }
+            catch (Exception)
+            {
+
+                
+            }
+            
+            return Save();
+        }
+        public bool UpdateTVEpisode(TVEpisode tVEpisode)
+        {
+            _context.Entry(tVEpisode).State = EntityState.Modified;
+            _context.TVEpisodes.Update(tVEpisode);
+            return Save();
         }
 
         public async Task<bool> UpdateMovieAsync(Movies movie)
@@ -235,6 +333,25 @@ namespace TaymadeEntities.DAL.Classes
             _context.Movies.Update(movie);
             return await _context.SaveChangesAsync() > 0;
         }
+
+       
+
+        public bool DeleteSeason(Season season)
+        {
+            _context.Seasons.Remove(season);
+            return Save();
+        }
+
+        public Season? AddSeason(Season season)
+        {
+            _context.Seasons.Add(season);
+            if (Save())
+                return season;
+            else
+                return null;
+        }
+
+        
 
         #endregion Public Methods
 
@@ -255,29 +372,27 @@ namespace TaymadeEntities.DAL.Classes
             }
         }
 
-        public bool AddFrameSet(FrameSet frameSet)
+        public TVEpisode? AddTVEpisode(TVEpisode tVEpisode)
         {
-            _context.FrameSet.Add(frameSet);
+            if (tVEpisode == null)
+                return null;
+            if (tVEpisode.Id > 2)
+            {
+                UpdateTVEpisode(tVEpisode);
+                return null;
+            }
+            _context.TVEpisodes.Add(tVEpisode);
+            _context.Entry(tVEpisode).State = EntityState.Added;
+            if (Save())
+                return tVEpisode;
+            else
+                return null;
+        }
+
+        public bool DeleteTVEpisode(TVEpisode tVEpisode)
+        {
+            _context.TVEpisodes.Remove(tVEpisode);
             return Save();
-        }
-
-        public IEnumerable<FrameSet>? GetFrameSetsByHeaderId(int frameSetHeaderId)
-        {
-            return _context.FrameSet.
-                Where(f => f.FrameSetHeaderId == frameSetHeaderId).
-                OrderBy(f=>f.StartImage).
-                ToList();
-        }
-
-        public FrameSet? GetFrameSetById(int Id)
-        {
-            return _context.FrameSet.Find(Id);
-        }
-
-        public bool UpdateFrameSet(FrameSet frameSet)
-        {
-            _context.FrameSet.Update(frameSet);
-            return _context.SaveChanges() > 0;
         }
 
         #endregion Protected Methods

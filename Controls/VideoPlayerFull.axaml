@@ -35,17 +35,17 @@
 
 				</vlc:VideoView>
 				<Slider Minimum="0"
-							 Maximum="100"
-							 Value="{Binding Progress, Mode=TwoWay}"
-							 Width="1800"
-							 Height="40"
-							 Margin="2"
-							 
-							 HorizontalAlignment="Center"
-							 VerticalAlignment="Bottom"
-							 
+						Maximum="100"
+						Value="{Binding Progress, Mode=TwoWay}"
+						Width="1800"
+						Height="40"
+						Margin="2"
 
-							 />
+						HorizontalAlignment="Center"
+						VerticalAlignment="Bottom"
+
+
+						/>
 				<StackPanel Orientation="Horizontal" Height="70">
 					<tcb:ImagedButtonNoText Command="{Binding Play}"
 											Margin="5,5,5,5"
@@ -140,12 +140,12 @@
 					BorderThickness="2"
 					SelectedSpeed ="{Binding CurrentSpeed, Mode=TwoWay}"
 					DoubleTapped="SpeedPicker_DoubleTapped"
-					
+
 
 					Grid.Column="8">
 
 					</controls:SpeedPicker>
-					<Slider Name="volumeSetter" 
+					<Slider Name="volumeSetter"
 							Ticks="0,10,20,30,40,50,60,70,80,90,100"
 							TickFrequency="10"
 							TickPlacement="TopLeft"
@@ -153,6 +153,7 @@
 							Maximum="100"
 							Minimum="0"
 							Width="190"/>
+					<TextBlock Text="{Binding CurrentBookmark}" Margin="5,5,5,5" />
 				</StackPanel>
 			</StackPanel>
 

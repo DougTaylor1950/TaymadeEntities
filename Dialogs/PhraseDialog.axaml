@@ -10,11 +10,17 @@
 		Title="PhraseDialog">
 
 	<StackPanel>
+		<StackPanel Orientation="Horizontal" Margin="10,10,10,10">
+		<TextBlock Text="Phrase Header"
+				   FontSize="16"
+				   FontWeight="Bold"
+				   Margin="10"/>
 		<ComboBox	ItemsSource="{Binding PhraseHeaderList}"
 				  Name="ComboPhraseHeader"
 				  SelectedItem="{Binding SelectedPhraseHeader}"
 				  SelectionChanged="PhraseHeader_SelectionChanged"
 				  Margin="10"/>
+			</StackPanel>
 		<Border BorderBrush="Black"
 				BorderThickness="2"
 				CornerRadius="5"

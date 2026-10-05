@@ -80,6 +80,22 @@ namespace TaymadeEntities.DAL.Classes
             return success;
         }
 
+        public bool UpdateStorySeries(StorySeries storySeries)
+        {
+            _context.StorySeries.Update(storySeries);
+            return Save();
+        }
+
+        public IEnumerable<StorySeries> GetStorySeriesList()
+        {
+            return _context.StorySeries.ToList().OrderBy(s => s.Name);
+        }
+
+        public IEnumerable<Story>? GetStoriesByAuthorId(int id)
+        {
+            return _context.Story.Where(s => s.IDAuthor == id).OrderBy(s => s.Title).ToList();
+        }
+
         public bool AddStoryTransInfo(StoryTransInfo storyTransInfo)
         {
             _context.StoryTransInfo.Add(storyTransInfo);

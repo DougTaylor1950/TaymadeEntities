@@ -32,16 +32,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         internal void Delete()
         {
-            var local = DataController.SandboxEntities.Set<Season>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-            // check if local is not null
-            if (local != null)
-            {
-                // detach
-                DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-            }
-            DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
-            DataController.SandboxEntities.SaveChanges();
+            DataController.MovieController.DeleteSeason(this);
         }
 
         /// <summary>
@@ -49,8 +40,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void Insert()
         {
-            DataController.SandboxEntities.Set<Season>().Add(this);
-            DataController.SandboxEntities.SaveChanges();
+            DataController.MovieController.AddSeason(this);
         }
 
         /// <summary>
@@ -58,16 +48,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void Save()
         {
-            var local = DataController.SandboxEntities.Set<Season>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-            // check if local is not null
-            if (local != null)
-            {
-                // detach
-                DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
-            }
-            DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            DataController.SandboxEntities.SaveChanges();
+            DataController.MovieController.UpdateSeason(this);
         }
 
         #endregion

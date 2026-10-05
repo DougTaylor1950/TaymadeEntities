@@ -24,7 +24,7 @@ namespace TaymadeEntities.Dialogs;
 
 public partial class EditMovie : Window, IDisposable
 {
-    private ImagedButtonNoText _MissingImages;
+    private ImagedButton _MissingImages;
     private ImagedButton _playFromLast;
     private ImagedButton _ReloadBookmarks;
     private ImagedButton _repeatLast;
@@ -746,7 +746,7 @@ public partial class EditMovie : Window, IDisposable
         //{
         //    ViewModel.CurrentMovie?.Save();
         //}
-        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        Avalonia.Threading.Dispatcher.UIThread.Invoke(()=>
         {
             this.Close(true);
         }
@@ -910,8 +910,9 @@ public partial class EditMovie : Window, IDisposable
             };
             this.ToolbarBookmarks.Children.Add(_ReloadBookmarks);
 
-            _MissingImages = new ImagedButtonNoText()
+            _MissingImages = new ImagedButton()
             {
+                LabelText = "Missing Images",
                 ImageSource = ImageHelper.LoadFromResource(new Uri("avares://TaymadeControls/Assets/missing_icon.png"))
             };
             ToolTip.SetTip(_MissingImages, "Look for images not built");
@@ -1123,6 +1124,23 @@ public partial class EditMovie : Window, IDisposable
 
     private void Button_Click(object? sender, RoutedEventArgs e)
     {
+        if (sender != null && sender is Button)
+        {
+            Button? button = sender as Button;
+
+            if (button.DataContext is Movies)
+            {
+                Movies? movieToPlay = button.DataContext as Movies;
+                if (movieToPlay == null) return;
+
+                MovieEditViewModel viewModel = this.DataContext as MovieEditViewModel;
+                if (viewModel.CurrentMovie != null)
+                {
+                    viewModel.FullScreen = false;
+                    viewModel.DoPlay(movieToPlay);
+                }
+            }
+        }
     }
 
     private async void SaveMovie_Click(object? sender, RoutedEventArgs e)

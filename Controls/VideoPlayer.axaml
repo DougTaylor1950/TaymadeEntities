@@ -190,7 +190,7 @@
 					</tcb:EnhancedButton>
 				</Grid>
 				<Grid ColumnDefinitions="75,150,100,100,50,100,50,70,290,60,80"
-					  RowDefinitions="Auto"
+					  RowDefinitions="Auto,Auto"
 					  Margin="1,1,1,1">
 
 					<TextBlock Text="Position"
@@ -244,10 +244,24 @@
 					BorderBrush="Gray"
 					BorderThickness="2"
 					SelectedSpeed ="{Binding CurrentSpeed}"
-					Grid.Column="8">
+					Grid.Column="8"
+					Grid.Row="0"
+					Grid.RowSpan="2">
 
 					</controls:SpeedPicker>
+					<TextBlock Grid.Row="1"
+							   Margin="5"
+							   Text="Bookmark" />
+					<TextBlock  Grid.Row="1"
+								Grid.Column="1"
+								Margin="5"
+								Grid.ColumnSpan="2"
+								Text="{Binding CurrentBookmark.Name}"/>
 
+					<TextBlock Grid.Row="1"
+							   Grid.Column="3"
+							   Margin="5"
+							   Text="{Binding CurrentBookmark.FormattedTime}"/>
 				</Grid>
 
 			</StackPanel>

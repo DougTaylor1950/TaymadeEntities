@@ -60,6 +60,9 @@ namespace TaymadeEntities.DAL.Interfaces
         bool AddStoryTransInfo(StoryTransInfo storyTransInfo);
         Task<bool> InsertStoryAsync(Story story);
         IEnumerable<Author> GetAuthors();
+        bool UpdateStorySeries(StorySeries storySeries);
+        IEnumerable<StorySeries> GetStorySeriesList();
+        IEnumerable<Story>? GetStoriesByAuthorId(int id);
         #endregion Public Methods
     }
 }

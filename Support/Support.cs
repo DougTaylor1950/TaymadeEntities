@@ -188,6 +188,27 @@ namespace TaymadeEntities.Support
 
         #region Methods
 
+        public static void GetBookmarkImage(Movies movie, Bookmark bookmark, int timemsecs)
+        {
+            TimeSpan ts = TimeSpan.FromMilliseconds(timemsecs);
+
+            string ffmpegCommand = "-i " + '"' + movie.MoviePath + '"' + " -ss " + ts.ToString() + " -frames:v 1 ";
+            //    string? ffprobeFilePath = null;
+            var videoPath = FixImagePath(movie.MoviePath);
+
+            //float pos = MediaPlayer.Position;
+            double tempTime = ts.TotalSeconds;
+
+            string winThumbnailpath =
+                System.IO.Path.GetDirectoryName(movie.MoviePath)
+                + @"\"
+                + System.IO.Path.GetFileNameWithoutExtension(movie.MoviePath)
+                + tempTime.ToString("0.######").Trim()
+                + ".BMP";
+
+            bookmark.Time = tempTime;
+            bookmark.ImagePath = winThumbnailpath;
+        }
         public static void FindAges(TaymadeEntities.Support.Word.WordProperties returnProps, string tempKeywords)
         {
             // check on ages

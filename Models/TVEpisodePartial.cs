@@ -93,8 +93,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         internal void Delete()
         {
-            DataController.SandboxEntities.Entry(this).State = EntityState.Deleted;
-            DataController.SandboxEntities.SaveChanges();
+            DataController.MovieController.DeleteTVEpisode(this);
         }
 
         /// <summary>
@@ -102,8 +101,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void Insert()
         {
-            DataController.SandboxEntities.Set<TVEpisode>().Add(this);
-            DataController.SandboxEntities.SaveChanges();
+            DataController.MovieController.AddTVEpisode(this);
         }
 
         /// <summary>
@@ -111,16 +109,25 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void Save()
         {
-            var local = DataController.SandboxEntities.Set<TVEpisode>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-            // check if local is not null
-            if (local != null)
+            if (!string.IsNullOrEmpty(Name) && Name.Length > 50)
             {
-                // detach
-                DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
+                Name = Name.Substring(0, 50);
             }
-            DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            DataController.SandboxEntities.SaveChanges();
+
+
+
+            if (!string.IsNullOrEmpty(Overview) && Overview.Length > 200)
+            {
+                Overview = Overview.Substring(0, 200);
+            }
+
+            if (AirDate == null)
+            {
+                AirDate = DateTime.Now;
+            }
+
+
+            DataController.MovieController.UpdateTVEpisode(this);
         }
 
         #endregion

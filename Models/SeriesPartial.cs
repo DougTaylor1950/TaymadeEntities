@@ -26,6 +26,11 @@ namespace TaymadeEntities.Models
             return this.Name;
         }
 
+        public void Update()
+        {
+            DataController.MovieController.UpdateSeries(this);
+        }
+
         #endregion Public Methods
 
         #region Internal Methods
@@ -37,8 +42,8 @@ namespace TaymadeEntities.Models
         {
             try
             {
-                DataController.SandboxEntities.Entry(this).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                DataController.SandboxEntities.SaveChanges();
+                DataController.MovieController.UpdateSeries(this);
+                // DataController.SandboxEntities.SaveChanges();
 
             }
             catch (Exception)

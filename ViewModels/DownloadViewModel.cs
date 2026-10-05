@@ -1589,7 +1589,7 @@ namespace TaymadeEntities.ViewModels
                 //                        // mainWindow.StopWatcher();
                 //                    }
                 //                }
-                //                int val = await mpegSupport.TrimMovie(currentMovie, result.Paramater);
+                //                int val = await mpegSupport.TrimMovie(currentMovie, result.Parameter);
                 //            }
                 //        }
                 //        HasTemp = File.Exists(CurrentMovie.GetTempFileName());
@@ -1837,12 +1837,12 @@ namespace TaymadeEntities.ViewModels
             DeleteEntity = ReactiveCommand.Create(DoDeleteEntity);
         }
 
-        private void DoDeleteEntity()
+        private async void DoDeleteEntity()
         {
             if (FoundMovie != null)
             {
                 Support.GenerateInfoAndLogMessage("Deleted", "Movie", FoundMovie.Id, FoundMovie.MovieName);
-                FoundMovie.Delete();
+                await FoundMovie.Delete();
                 FoundMovieList?.Remove(FoundMovie);
                 FoundMovie = null;
             }

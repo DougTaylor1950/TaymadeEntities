@@ -1,8 +1,5 @@
-﻿using DocumentFormat.OpenXml.Office.CoverPageProps;
-using ShimSkiaSharp;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.ObjectModel;
 using TaymadeEntities.DAL.Classes;
 using TaymadeEntities.DAL.Interfaces;
 using TaymadeEntities.Models;
@@ -20,6 +17,7 @@ namespace TaymadeEntities.Controllers
     /// </remarks>
     public class MovieController : IDisposable
     {
+
         #region Private Fields
 
         /// <summary>
@@ -31,6 +29,8 @@ namespace TaymadeEntities.Controllers
         /// The movie repository
         /// </summary>
         private IMovieRepository movieRepository;
+
+        
 
         #endregion Private Fields
 
@@ -57,6 +57,21 @@ namespace TaymadeEntities.Controllers
 
         #region Public Methods
 
+        public Movies? CreateMovie(string filmName)
+        {
+            return movieRepository.CreateMovie(filmName);
+        }
+
+        public MovieGenre? CreateMovieGenre(int movieId, string? genreCompKey, string? subGenreCompKey)
+        {
+            return movieRepository.CreateMovieGenre(movieId, genreCompKey, subGenreCompKey);
+        }
+
+        public Series? CreateSeries(string newSeriesName)
+        {
+            return movieRepository.CreateSeries(newSeriesName);
+        }
+
         /// <summary>
         /// </summary>
         /// <param name="id">The identifier.</param>
@@ -81,16 +96,14 @@ namespace TaymadeEntities.Controllers
             GC.SuppressFinalize(this);
         }
 
-        public FrameSetCollection? GetFrameSetsByHeaderId(int frameSetHeaderId)
+        public List<MovieIntResult> GetActorMovieIds(string actorName)
         {
-            FrameSetCollection? returnedSet = null;
-            List<FrameSet>? temp = movieRepository.GetFrameSetsByHeaderId(frameSetHeaderId)?
-                .OrderBy(f=>f.Index).ToList();
-            if (temp != null)
+            List<MovieIntResult> intResults = new List<MovieIntResult>();
+            if (!string.IsNullOrEmpty(actorName))
             {
-                returnedSet = new FrameSetCollection(temp);
+                intResults = movieRepository.GetActorMovieIds(actorName);
             }
-            return returnedSet;
+            return intResults;
         }
 
         public FrameSet? GetFrameSetById(int Id)
@@ -98,16 +111,22 @@ namespace TaymadeEntities.Controllers
             return movieRepository.GetFrameSetById(Id);
         }
 
-        public bool UpdateFrameSet(FrameSet frameSet)
+        public FrameSetHeader? GetFrameSetHeaderByMovieImageId(int movieImageId)
         {
-            if (frameSet.Id ==0)
-            {
-                return movieRepository.AddFrameSet(frameSet);
-            }
-            else
-            return movieRepository.UpdateFrameSet(frameSet);
+            return movieRepository.GetFrameSetHeaderByMovieImageId(movieImageId);
         }
 
+        public FrameSetCollection? GetFrameSetsByHeaderId(int frameSetHeaderId)
+        {
+            FrameSetCollection? returnedSet = null;
+            List<FrameSet>? temp = movieRepository.GetFrameSetsByHeaderId(frameSetHeaderId)?
+                .OrderBy(f => f.Index).ToList();
+            if (temp != null)
+            {
+                returnedSet = new FrameSetCollection(temp);
+            }
+            return returnedSet;
+        }
         /// <summary>
         /// </summary>
         /// <param name="id">The identifier.</param>
@@ -121,6 +140,16 @@ namespace TaymadeEntities.Controllers
         public List<Movies>? GetMoviesByActor(int id)
         {
             return movieRepository.GetMoviesByActor(id)?.ToList();
+        }
+
+        public List<Movies>? GetMoviesbyBookmarkName(string bookmarkText)
+        {
+            if (!string.IsNullOrEmpty(bookmarkText))
+            {
+                IEnumerable<Movies>? tempList = movieRepository.GetMoviesbyBookmarkName(bookmarkText);
+                return tempList.ToList();
+            }
+            else return null;
         }
 
         /// <summary>
@@ -231,6 +260,11 @@ namespace TaymadeEntities.Controllers
             else return null;
         }
 
+        public bool InsertFrameSetHeader(FrameSetHeader frameSetHeader)
+        {
+            return movieRepository.InsertFrameSetHeader(frameSetHeader);
+        }
+
         /// <summary>
         /// Saves this instance.
         /// </summary>
@@ -250,6 +284,20 @@ namespace TaymadeEntities.Controllers
             return movieRepository.Save(movie);
         }
 
+        public bool UpdateFrameSet(FrameSet frameSet)
+        {
+            if (frameSet.Id == 0)
+            {
+                return movieRepository.AddFrameSet(frameSet);
+            }
+            else
+                return movieRepository.UpdateFrameSet(frameSet);
+        }
+        public bool UpdateFrameSetHeader(FrameSetHeader frameSetHeader)
+        {
+            return movieRepository.UpdateFrameSetHeader(frameSetHeader);
+        }
+
         /// <summary>
         /// </summary>
         /// <param name="movie">The movie.</param>
@@ -264,22 +312,6 @@ namespace TaymadeEntities.Controllers
         {
             return movieRepository.UpdateMovie(movie);
         }
-
-        public FrameSetHeader? GetFrameSetHeaderByMovieImageId(int movieImageId)
-        {
-            return movieRepository.GetFrameSetHeaderByMovieImageId(movieImageId);
-        }
-
-        public bool UpdateFrameSetHeader(FrameSetHeader frameSetHeader)
-        {
-            return movieRepository.UpdateFrameSetHeader(frameSetHeader);
-        }
-
-        public bool InsertFrameSetHeader(FrameSetHeader frameSetHeader)
-        {
-            return movieRepository.InsertFrameSetHeader(frameSetHeader);
-        }
-
         /// <summary>
         /// </summary>
         /// <param name="movie">The movie.</param>
@@ -295,6 +327,21 @@ namespace TaymadeEntities.Controllers
             return await movieRepository.UpdateMovieAsync(movie);
         }
 
+        /// <summary>
+        /// </summary>
+        /// <param name="series">The series.</param>
+        /// <returns></returns>
+        /// <author>
+        /// Doug Taylor - Taymade Software Services
+        /// </author>
+        /// <remarks>
+        ///   <created> 02/10/2026 02/10/2026 </created>
+        /// </remarks>
+        public bool UpdateSeries(Series series)
+        {
+            return movieRepository.UpdateSeries(series);
+        }
+
         #endregion Public Methods
 
         #region Internal Methods
@@ -308,55 +355,54 @@ namespace TaymadeEntities.Controllers
         {
             return movieRepository.Add(movies);
         }
-
-        #endregion Internal Methods
-
-        #region Protected Methods
-
-        public List<MovieIntResult> GetActorMovieIds(string actorName)
-        {
-            List<MovieIntResult> intResults = new List<MovieIntResult>();
-            if (!string.IsNullOrEmpty(actorName))
-            {
-                intResults = movieRepository.GetActorMovieIds(actorName);
-            }
-            return intResults;
-        }
-
-        public List<Movies>? GetMoviesbyBookmarkName(string bookmarkText)
-        {
-            if (!string.IsNullOrEmpty(bookmarkText))
-            {
-                IEnumerable<Movies>? tempList = movieRepository.GetMoviesbyBookmarkName(bookmarkText);
-                return tempList.ToList();
-            }
-            else return null;
-        }
-
         internal bool AddMovieImage(MovieImage movieImage)
         {
             return movieRepository.AddMovieImage(movieImage);
         }
 
-        internal bool DeleteMovieImage(MovieImage movieImage)
+        internal Movies? CreateMovie(string filmName, int year = 0, string path = "", string filmGroup = "")
+        {
+            return movieRepository.CreateMovie(filmName, year, path, filmGroup);
+        }
+
+        public bool DeleteFrameSet(FrameSet frameSet)
+        {
+            return movieRepository.DeleteFrameSet(frameSet);
+        }
+
+        public  bool DeleteMovieImage(MovieImage movieImage)
         {
             return movieRepository.DeleteMovieImage(movieImage);
         }
 
-        internal List<MovieImage>? GetMovieImagesByFolder(string v)
+        public MovieImage? GetMovieImageById(int? lastId)
+        {
+            return movieRepository.GetMovieImageById(lastId);
+        }
+
+        public List<MovieImage>? GetMovieImagesByFolder(string v)
         {
             return movieRepository.GetMovieImagesByFolder(v);
         }
 
-        internal List<MovieImage>? GetMovieImagesById(int id)
+        public List<MovieImage>? GetMovieImagesById(int id)
         {
             return movieRepository.GetMovieImagesById(id).ToList();
         }
 
-        internal bool SaveMovieImage(MovieImage movieImage)
+        public List<Series> GetSeriesList()
+        {
+            return movieRepository.GetSeriesList();
+        }
+
+        public bool SaveMovieImage(MovieImage movieImage)
         {
             return movieRepository.SaveMovieImage(movieImage);
         }
+
+        #endregion Internal Methods
+
+        #region Protected Methods
 
         /// <summary>
         /// Releases unmanaged and - optionally - managed resources.
@@ -377,29 +423,72 @@ namespace TaymadeEntities.Controllers
             }
         }
 
-        internal MovieImage? GetMovieImageById(int? lastId)
+        public bool DeleteSeason(Season season)
         {
-            return movieRepository.GetMovieImageById(lastId);
+            return movieRepository.DeleteSeason(season);
         }
 
-        internal Movies? CreateMovie(string filmName, int year = 0, string path = "", string filmGroup = "")
+        public Season? AddSeason(Season season)
         {
-            return movieRepository.CreateMovie(filmName, year, path, filmGroup);
+            return movieRepository.AddSeason(season);
         }
 
-        public MovieGenre? CreateMovieGenre(int movieId, string? genreCompKey, string? subGenreCompKey)
+        public bool UpdateSeason(Season season)
         {
-            return movieRepository.CreateMovieGenre(movieId, genreCompKey, subGenreCompKey);
+            return movieRepository.UpdateSeason(season);
         }
 
-        internal bool DeleteFrameSet(FrameSet frameSet)
+        public bool UpdateTVEpisode(TVEpisode tVEpisode)
         {
-            return movieRepository.DeleteFrameSet(frameSet);
+            return movieRepository.UpdateTVEpisode(tVEpisode);
         }
 
-        internal List<Series> GetSeriesList()
+        public TVEpisode? AddTVEpisode(TVEpisode tVEpisode)
         {
-            return movieRepository.GetSeriesList(); 
+            return movieRepository.AddTVEpisode(tVEpisode);
+        
+        }
+
+        public bool DeleteTVEpisode(TVEpisode tVEpisode)
+        {
+            return movieRepository.DeleteTVEpisode(tVEpisode);
+        }
+
+        public ObservableCollection<TVEpisode>? GetTVEpisodesBySeasonID(int id)
+        {
+            List<TVEpisode>? temp = movieRepository.GetTVEpisodesBySeasonID(id)?.ToList();
+            return new ObservableCollection<TVEpisode>(temp ?? new List<TVEpisode>());
+        }
+
+        public Series? GetSeriesById(int? id)
+        {
+            return movieRepository.GetSeriesById(id);
+        }
+
+        public ObservableCollection<Season>? GetSeasonsBySeriesID(int id)
+        {
+            List<Season>? temp = movieRepository.GetSeasonsBySeriesID(id)?.ToList();
+            return new ObservableCollection<Season>(temp ?? new List<Season>());
+        }
+
+        public Season? GetSeasonById(int? season)
+        {
+            return movieRepository.GetSeasonById(season);
+        }
+
+        public TVEpisode? GetTVEpisodeById(int? episode)
+        {
+            return movieRepository.GetTVEpisodeById(episode);
+        }
+
+        public IEnumerable<Movies> GetMoviesBySeason(int id)
+        {
+            return movieRepository.GetMoviesBySeason(id);
+        }
+
+        public EntityState? GetTVEpisodeEntityState(TVEpisode episode)
+        {
+            return movieRepository.GetTVEpisodeEntityState(episode);
         }
 
         #endregion Protected Methods

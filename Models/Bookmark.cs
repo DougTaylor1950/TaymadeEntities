@@ -9,6 +9,7 @@
 
 namespace TaymadeEntities.Models
 {
+    using DocumentFormat.OpenXml.EMMA;
     using ReactiveUI;
     using System;
     using System.ComponentModel.DataAnnotations;
@@ -157,7 +158,14 @@ namespace TaymadeEntities.Models
         public override string ToString()
         {
             string returnVal = this.Name ;
-            if (Time != null && time.Value > 0) returnVal += "-" + Time.ToString();
+            if (Time != null && time.Value > 0)
+            {
+                TimeSpan = TimeSpan.FromSeconds(Time.Value);
+                FormattedTime = TimeSpan.ToString(@"hh\:mm\:ss", info);
+                returnVal += "-" + FormattedTime;
+            }
+                
+                
             return returnVal;
         }
 

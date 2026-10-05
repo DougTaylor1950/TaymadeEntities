@@ -18,8 +18,9 @@ namespace TaymadeEntities.Dialogs
     /// <summary>
     /// Defines the <see cref="SeriesDialogWindow" />.
     /// </summary>
-    public partial class SeriesDialogWindow : Window
+    public partial class SeriesDialogWindow : Window,IDisposable
     {
+        private bool disposedValue;
         #region Constructors
 
         /// <summary>
@@ -28,6 +29,13 @@ namespace TaymadeEntities.Dialogs
         public SeriesDialogWindow()
         {
             InitializeComponent();
+            //this.WhenActivated(d => d(ViewModel!.AddSeasonCommand.Subscribe(Close)));
+        }
+
+        public SeriesDialogWindow(SeriesViewModel viewModel)
+        {
+            InitializeComponent();
+            this.DataContext = viewModel;
             //this.WhenActivated(d => d(ViewModel!.AddSeasonCommand.Subscribe(Close)));
         }
 
@@ -60,6 +68,35 @@ namespace TaymadeEntities.Dialogs
         private void CancelButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             this.Close(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~SeriesDialogWindow()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         #endregion

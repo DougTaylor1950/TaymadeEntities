@@ -27,11 +27,11 @@ namespace TaymadeEntities.ViewModels
         private Cast currentCastMember;
         private MovieGenre? currentGenre;
         //private new Movies? currentMovie;
-        private Models.Season currentSeason;
+        private Models.Season? currentSeason;
         private Series? currentSeries;
         private ObservableCollection<Director>? directorList;
         private bool disposedValue;
-        private TVEpisode newEpisode;
+        private TVEpisode? currentEpisode;
         private PhraseEntry? newPhrase;
         private Models.Season? newSeason;
         private PhraseEntry? newSubPhrase;
@@ -99,6 +99,31 @@ namespace TaymadeEntities.ViewModels
                 " Male"
 
             };
+
+            if (CurrentMovie?.SeriesEntity == null && CurrentMovie?.Series != null)
+            {
+                CurrentMovie?.SeriesEntity = DataController.MovieController.GetSeriesById(CurrentMovie?.Series);
+            }
+            CurrentSeries = CurrentMovie?.SeriesEntity;
+
+            if (CurrentMovie?.SeasonEntity == null && CurrentMovie?.Season != null)
+            {
+                CurrentMovie?.SeasonEntity = DataController.MovieController.GetSeasonById(CurrentMovie?.Season);
+            }
+            CurrentSeason = CurrentMovie?.SeasonEntity;
+
+
+            if (CurrentMovie?.EpisodeEntity == null && CurrentMovie?.Episode != null)
+            {
+                CurrentMovie?.EpisodeEntity = DataController.MovieController.GetTVEpisodeById(CurrentMovie?.Episode);
+            }
+            CurrentEpisode = CurrentMovie?.EpisodeEntity;
+
+            this.RaisePropertyChanged(nameof(CurrentMovie));
+            this.RaisePropertyChanged(nameof(CurrentSeason));
+            this.RaisePropertyChanged(nameof(CurrentSeries));
+            this.RaisePropertyChanged(nameof(CurrentEpisode));
+
         }
 
         #endregion Public Constructors
@@ -178,11 +203,11 @@ namespace TaymadeEntities.ViewModels
         public ReactiveCommand<Unit, Unit> Grab { get; set; }
 
 
-        public Models.TVEpisode NewEpisode
-        {
-            get => newEpisode;
-            set => this.RaiseAndSetIfChanged(ref newEpisode, value);
-        }
+        //public Models.TVEpisode? NewEpisode
+        //{
+        //    get => newEpisode;
+        //    set => this.RaiseAndSetIfChanged(ref newEpisode, value);
+        //}
 
         /// <summary>
         /// Gets or sets the BookmarkUserControl.
@@ -202,17 +227,31 @@ namespace TaymadeEntities.ViewModels
             // will create the new tv episode for editing
             TVEpisode? newEpisode = new TVEpisode();
             if (CurrentMovie != null &&
-                CurrentMovie.SeriesEntity != null && CurrentMovie.SeasonEntity != null)
+                CurrentSeason != null)
             {
-                newEpisode.ShowID = CurrentMovie.SeriesEntity.TMID;
-                newEpisode.SeasonID = CurrentMovie.SeasonEntity.Id;
+                newEpisode.ShowID = CurrentSeason.ShowId;
+                newEpisode.SeasonID = CurrentSeason?.Id;
+                newEpisode.SeasonNumber = CurrentSeason.SeasonNo;
                 if (CurrentMovie != null)
                 {
                     newEpisode.MovieId = CurrentMovie.Id;
                     newEpisode.Overview = CurrentMovie.Info;
                 }
+                newEpisode.EpisodeNumber = CurrentSeason.TVEpisodes.Count+1;
             }
-            this.NewEpisode = newEpisode;
+            newEpisode.Insert();
+            if (CurrentSeason == null) return;
+
+            // reload the episodes for the current season to get the new episode added to the list
+
+            CurrentSeason.TVEpisodes = DataController.MovieController.GetTVEpisodesBySeasonID(CurrentSeason.Id);
+
+            
+            //CurrentSeason?.TVEpisodes.Add(newEpisode);
+            this.CurrentEpisode = CurrentSeason.TVEpisodes.LastOrDefault();
+            //this.NewEpisode = this.CurrentEpisode;
+            this.RaisePropertyChanged(nameof(CurrentEpisode));
+            this.RaisePropertyChanged(nameof(CurrentSeason.TVEpisodes));
         }
 
         public void DeleteBookmark()
@@ -246,7 +285,7 @@ namespace TaymadeEntities.ViewModels
         {
             get => currentCastMember;
             set
-            { 
+            {
                 this.RaiseAndSetIfChanged(ref currentCastMember, value);
                 if (value != null)
                 {
@@ -265,6 +304,95 @@ namespace TaymadeEntities.ViewModels
             set => this.RaiseAndSetIfChanged(ref currentActor, value);
         }
 
+        public new Models.Season? CurrentSeason
+        {
+            get => currentSeason;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref currentSeason, value);
+                if (CurrentMovie != null && value != null)
+                {
+                    CurrentMovie.SeasonEntity = value;
+                    CurrentMovie.Season = value.Id;
+                    this.RaisePropertyChanged(nameof(CurrentMovie.SeasonEntity));
+                }
+
+                if (value == null)
+                {
+                    HasEpisode = false;
+
+                    
+                }
+                else
+                {
+                    var moviesForSeason = DataController.MovieController.GetMoviesBySeason(value.Id).ToList();
+
+                    SeasonMovies = new ObservableCollection<Movies>(moviesForSeason);
+
+                    if (value.TVEpisodes != null && value.TVEpisodes.Count > 0)
+                    {
+                        HasEpisode = true;
+                    }
+                    else
+                    {
+                        HasEpisode = false;
+                    }
+
+                }
+            }
+        }
+
+
+        public new Series? CurrentSeries
+        {
+            get => currentSeries;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref currentSeries, value);
+                if (CurrentMovie != null && value != null)
+                {
+                    CurrentMovie.SeriesEntity = value;
+                    CurrentMovie.Series = value.Id;
+                    this.RaisePropertyChanged(nameof(CurrentMovie.SeriesEntity));
+                    if (value.Id != 2)
+                    {
+                        CurrentMovie.SeriesEntity.Seasons = DataController.MovieController.GetSeasonsBySeriesID(value.Id);
+                        // if we have seasons for this series, set the current season to the first one or if the currentmovie has a season id that one
+                        if (CurrentMovie.SeriesEntity.Seasons != null && CurrentMovie.SeriesEntity.Seasons.Count > 0)
+                        {
+                            if (CurrentMovie.Season != null)
+                            {
+                                Models.Season? season = CurrentMovie.SeriesEntity.Seasons.Where(s => s.Id == CurrentMovie.Season).FirstOrDefault();
+                                if (season != null)
+                                {
+                                    CurrentSeason = season;
+                                }
+                            }
+                            else
+                            {
+                                CurrentSeason = CurrentMovie.SeriesEntity.Seasons.FirstOrDefault();
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+        public new TVEpisode? CurrentEpisode
+        {
+            get => currentEpisode;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref currentEpisode, value);
+                if (CurrentMovie != null && value != null)
+                {
+                    CurrentMovie.EpisodeEntity = value;
+                    CurrentMovie.EpisodeNumber = value.EpisodeNumber;
+                    //this.RaisePropertyChanged(nameof(CurrentMovie.EpisodeEntity));
+                }
+            }
+        }
 
         public void NullOutVariables()
         {
@@ -289,29 +417,29 @@ namespace TaymadeEntities.ViewModels
         public void SaveEpisodeCommand()
         {
             // Will save the new episode and add it to the CurrentSeries Episode List
-            if (CurrentMovie != null && CurrentMovie.EpisodeEntity != null)
+            if (CurrentEpisode != null)
             {
-                CurrentMovie.EpisodeEntity.Save();
+                CurrentEpisode.Save();
             }
         }
 
         public void SaveNewEpisodeCommand()
         {
-            if (NewEpisode != null)
+            if (CurrentEpisode != null)
             {
                 if (CurrentMovie != null
                     && CurrentMovie.SeasonEntity != null
                     && CurrentMovie.SeasonEntity.TVEpisodes != null)
                 {
-                    CurrentMovie.SeasonEntity.TVEpisodes.Add(NewEpisode);
+                    CurrentMovie.SeasonEntity.TVEpisodes.Add(CurrentEpisode);
                     // rebuild list to trigger UI update
                     CurrentMovie.SeasonEntity.TVEpisodes = new ObservableCollection<TVEpisode>(CurrentMovie.SeasonEntity.TVEpisodes);
-                    NewEpisode.MovieId = CurrentMovie.Id;
-                    NewEpisode.SeasonID = CurrentMovie.SeasonEntity.Id;
+                    CurrentEpisode.MovieId = CurrentMovie.Id;
+                    CurrentEpisode.SeasonID = CurrentMovie.SeasonEntity.Id;
                     HasEpisode = true;
                 }
-                NewEpisode.Insert();
-                CurrentMovie.Episode = NewEpisode.Id;
+                CurrentEpisode.Save();
+                CurrentMovie.Episode = CurrentEpisode.Id;
                 CurrentMovie.Save();
             }
         }
@@ -335,6 +463,23 @@ namespace TaymadeEntities.ViewModels
             {
                 CurrentMovie.SeasonEntity.Save();
             }
+        }
+
+        public bool FullScreen { get; set; } = true;
+        public bool AutoPlay { get; set; } = false;
+        public async void DoPlay(Movies currentMovie)
+        {
+            using PlayerViewModel playerViewModel = new PlayerViewModel(currentMovie, AutoPlay, FullScreen);
+            playerViewModel.CurrentBookmark = currentMovie.Bookmarks.FirstOrDefault();
+            playerViewModel.FullScreen = FullScreen;
+            using PlayerDialog playerDialog = new PlayerDialog(playerViewModel);
+            playerViewModel.Caller = playerDialog;
+            playerViewModel.PlayFromBookmark = false;
+
+            Avalonia.Controls.Window? main = Support.Support.GetWindow();
+
+            await playerDialog.ShowDialog(main);
+
         }
 
         #endregion Public Methods

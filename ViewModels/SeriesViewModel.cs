@@ -67,6 +67,8 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         private bool showVisible = false;
         private string? seriesName = "<new>";
+        private ObservableCollection<Series>? newSeriesList;
+        private Series? currentNewSeries;
 
         #endregion
 
@@ -103,7 +105,13 @@ namespace TaymadeEntities.ViewModels
         public ReactiveCommand<Unit, Unit> SearchForMovie { get; set; }
         public ReactiveCommand<Unit, Unit> CreateEpisode { get; set; }
 
-        public ReactiveCommand<Unit, Unit> CreateSeason { get; set; }
+        public new ReactiveCommand<Unit, Unit> CreateSeason { get; set; }
+
+        public Series? CurrentNewSeries
+        {
+            get => currentNewSeries;
+            set => this.RaiseAndSetIfChanged(ref currentNewSeries, value);
+        }
 
         public ReactiveCommand<Unit, Unit> SaveEpisode { get; set; }
 
@@ -156,6 +164,12 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         public ReactiveCommand<Unit, Unit> NewSeries { get; set; }
 
+        public ObservableCollection<Series>? NewSeriesList
+        {
+            get => newSeriesList;
+            set => this.RaiseAndSetIfChanged(ref newSeriesList, value);
+        }
+
         /// <summary>
         /// Gets or sets the PlayMovie
         /// Gets the PlayMovie..
@@ -196,39 +210,67 @@ namespace TaymadeEntities.ViewModels
 
         #region Methods
 
+        public void DeleteSeason()
+        {
+            if (CurrentSeason != null)
+            {
+                DataController.MovieController.DeleteSeason(CurrentSeason);
+                CurrentSeries.Seasons.Remove(CurrentSeason);
+                CurrentSeason = null;
+            }
+        }
+
         /// <summary>
         /// The DoAddEpisode.
         /// </summary>
         private void DoAddEpisode()
         {
 
-            if (CurrentSeason != null && CurrentSupportEpisode != null)
+            if (CurrentSeason != null)
             {
-                TVEpisode? newEpisode = CurrentSeason.TVEpisodes.Where(s => s.EpisodeNumber == CurrentSupportEpisode.EpisodeNumber).FirstOrDefault();
-
-                if (newEpisode != null)
+                TVEpisode? newEpisode = null;
+                if (CurrentSupportEpisode != null)
                 {
-                    // refresh data
-                    newEpisode.TMID = CurrentSupportEpisode.Id;
-                    newEpisode.Name = CurrentSupportEpisode.Name;
+                    newEpisode = CurrentSeason.TVEpisodes.Where(s => s.EpisodeNumber == CurrentSupportEpisode.EpisodeNumber).FirstOrDefault();
+
+                    if (newEpisode != null)
+                    {
+                        // refresh data
+                        newEpisode.TMID = CurrentSupportEpisode.Id;
+                        newEpisode.Name = CurrentSupportEpisode.Name;
+                    }
+
+                    else
+                    {
+                        newEpisode = new TVEpisode();
+                        newEpisode.TMID = CurrentSupportEpisode.Id;
+                        newEpisode.Name = CurrentSupportEpisode.Name;
+                        newEpisode.EpisodeNumber = CurrentSupportEpisode.EpisodeNumber;
+
+                        newEpisode.AirDate = CurrentSupportEpisode.AirDate;
+                        newEpisode.Overview = CurrentSupportEpisode.Overview;
+                        newEpisode.SeasonID = CurrentSeason.Id;
+                        newEpisode.SeasonNumber = CurrentSupportEpisode.SeasonNumber;
+                        newEpisode.ShowID = CurrentSupportEpisode.ShowId;
+
+                        newEpisode.Insert();
+                        CurrentSeason.TVEpisodes.Add(newEpisode);
+                    }
                 }
                 else
                 {
-                    newEpisode = new TVEpisode();
-                    newEpisode.TMID = CurrentSupportEpisode.Id;
-                    newEpisode.Name = CurrentSupportEpisode.Name;
-                    newEpisode.EpisodeNumber = CurrentSupportEpisode.EpisodeNumber;
-
-                    newEpisode.AirDate = CurrentSupportEpisode.AirDate;
-                    newEpisode.Overview = CurrentSupportEpisode.Overview;
-                    newEpisode.SeasonID = CurrentSeason.Id;
-                    newEpisode.SeasonNumber = CurrentSupportEpisode.SeasonNumber;
-                    newEpisode.ShowID = CurrentSupportEpisode.ShowId;
-
+                    newEpisode = new TVEpisode()
+                    {
+                        SeasonID = CurrentSeason.Id,
+                        ShowID = CurrentSeason.ShowId,
+                        SeasonNumber = CurrentSeason.SeasonNo,
+                        EpisodeNumber = CurrentSeason.TVEpisodes?.Count + 1
+                    };
                     newEpisode.Insert();
                     CurrentSeason.TVEpisodes.Add(newEpisode);
                 }
 
+                CurrentEpisode = newEpisode;
             }
         }
 
@@ -279,7 +321,8 @@ namespace TaymadeEntities.ViewModels
 
             if (!string.IsNullOrEmpty(this.SeriesName)) newSeriesName = SeriesName;
 
-            Series? newSeries = DataController.SandboxEntities.CreateSeries(newSeriesName);
+            Series? newSeries = DataController.MovieController.CreateSeries(newSeriesName);
+
 
 
             if (newSeries != null)
@@ -310,25 +353,13 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         private void Run_Click()
         {
-            //if (EpisodeEntity != null)
-            //{
-            //    int? movieid = EpisodeEntity.MovieId;
-
-            //    string moviePath = string.Empty;
-
-            //    if (movieid != null && movieid.Value > 0)
-            //    {
-            //        // the Episode should really have a movie at this stage
-            //        if (EpisodeEntity.Movie == null)
-            //            EpisodeEntity.Movie = DataController.SandboxEntities.Movies.Find(movieid.Value);
-
-            //        // check yet again or bail if not there
-            //        if (EpisodeEntity.Movie != null)
-            //        {
-            //            moviePath = this.PlayMovieFromPath();
-            //        }
-            //    }
-            //}
+            if (CurrentMovie != null)
+            {
+                DoPlay(CurrentMovie);
+            } else if (CurrentEpisode != null && CurrentEpisode.MovieId > 0)
+            {
+                DoPlayEpisodeMovie();
+            }
         }
 
         private string PlayMovieFromPath()
@@ -381,7 +412,7 @@ namespace TaymadeEntities.ViewModels
             CreateSeason = ReactiveCommand.Create(DoCreateSeason);
             SaveEpisode = ReactiveCommand.Create(DoSaveEpisode);
             SaveSeason = ReactiveCommand.Create(DoSaveSeason);
-           
+
             NewSeries = ReactiveCommand.Create(DoCreateSeries);
             SearchForMovie = ReactiveCommand.Create(DoSearchForMovie);
             SetUpButtons();
@@ -389,15 +420,18 @@ namespace TaymadeEntities.ViewModels
 
         private void DoToMovie()
         {
-            if (CurrentEpisode != null && CurrentEpisode.Movie != null)
+            if (CurrentEpisode != null && CurrentEpisode.MovieId != null) ;
             {
-                CurrentEpisode.Movie.Season = CurrentEpisode.SeasonID;
-                CurrentEpisode.Movie.Episode = CurrentEpisode.EpisodeNumber;
-                CurrentEpisode.Movie.EpisodeNumber = CurrentEpisode.EpisodeNumber;
-                CurrentEpisode.Movie.Info = CurrentEpisode.Overview;
-                CurrentEpisode.Movie.Save();
+                Movies? movie = DataController.MovieController.GetMoviesById(CurrentEpisode.MovieId.Value);
+                movie.Season = CurrentEpisode.SeasonID;
+                movie.Episode = CurrentEpisode.Id;
+                movie.EpisodeNumber = CurrentEpisode.EpisodeNumber;
+                movie.Info = CurrentEpisode.Overview;
+                movie.Save();
             }
         }
+
+        
 
         private void DoPlayEpisodeMovie()
         {
@@ -405,10 +439,11 @@ namespace TaymadeEntities.ViewModels
             {
                 //if (CurrentEpisode.Movie == null)
                 CurrentEpisode.Movie =
-                        DataController.SandboxEntities.Movies.Find(CurrentEpisode.MovieId);
+                        DataController.MovieController.GetMoviesById(CurrentEpisode.MovieId.Value);
                 if (CurrentEpisode.Movie != null)
                 {
-                    Support.Support.PlayMovie(CurrentEpisode.Movie.MoviePath, null);
+                    DoPlay(CurrentEpisode.Movie,null,false,"",false,true);
+                   // Support.Support.PlayMovie(CurrentEpisode.Movie.MoviePath, null);
                 }
             }
 
@@ -457,7 +492,7 @@ namespace TaymadeEntities.ViewModels
             {
                 string pathId = "S" + CurrentSeason.SeasonNo.ToString().PadLeft(2, '0').Trim() + "E" + CurrentEpisode.EpisodeNumber.ToString().PadLeft(2, '0').Trim();
 
-                Movies? foundMovie = DataController.SandboxEntities.Movies.Where(m => m.MovieName.ToLower().Contains(CurrentEpisode.Name.ToLower())).FirstOrDefault();
+                Movies? foundMovie = DataController.SandboxEntities.Movies.Where(m => CurrentEpisode.Name != null  &&  m.MovieName.ToLower().Contains(CurrentEpisode.Name.ToLower())).FirstOrDefault();
                 if (foundMovie != null)
                 {
                     this.SetDetails(foundMovie);
@@ -525,14 +560,14 @@ namespace TaymadeEntities.ViewModels
         {
             if (CurrentSeason != null && CurrentSeries != null)
             {
-                //EpisodeEntity = new TVEpisode()
-                //{
-                //    ShowID = CurrentSeries.TMID,
-                //    SeasonNumber = CurrentSeason.SeasonNo,
-                //    SeasonID = CurrentSeason.Id
-                //};
-                //EpisodeEntity.Insert();
-                //CurrentSeason.TVEpisodes.Add(EpisodeEntity);
+                EpisodeEntity = new TVEpisode()
+                {
+                    ShowID = CurrentSeries.TMID,
+                    SeasonNumber = CurrentSeason.SeasonNo,
+                    SeasonID = CurrentSeason.Id
+                };
+                EpisodeEntity.Insert();
+                CurrentSeason.TVEpisodes.Add(EpisodeEntity);
             }
         }
 

@@ -13,11 +13,13 @@ namespace TaymadeEntities.ViewModels
     using System.Reactive;
     using System.IO;
     using TaymadeEntities.Support;
+    using System.Collections;
+    using TaymadeEntities.Models;
 
     /// <summary>
     /// Defines the <see cref="EntryDialogModel" />.
     /// </summary>
-    public class EntryDialogModel : ViewModelBase
+    public class EntryDialogModel : ViewModelBase,IDisposable
     {
         #region Fields
 
@@ -27,14 +29,28 @@ namespace TaymadeEntities.ViewModels
         private EntryType entryTypeValue = EntryType.Text;
         private string? entryText;
         private TimeSpan entryTime;
+        private IList itemList;
+        private object? selectedItem;
+        private TVEpisode? tVEpisode;
+        private bool isEpisode = true;
 
         public EntryDialogModel()
         {
             //Accept = ReactiveCommand.Create(DoAccept);
             //Cancel = ReactiveCommand.Create(DoCancel);
+            SetupCommands();
+        }
+
+        private void SetupCommands()
+        {
             Hyphenate = ReactiveCommand.Create(DoHyphenate);
             Underscore = ReactiveCommand.Create(DoUnderscore);
             Shorten = ReactiveCommand.Create(DoShorten);
+        }
+
+        public EntryDialogModel(EntryType entryType)
+        {
+            entryTypeValue = entryType;
         }
 
         private void DoUnderscore()
@@ -82,12 +98,39 @@ namespace TaymadeEntities.ViewModels
         {
             Text,
             Time,
-            Date
+            Date,
+            List,
+            Episode
+
         }
 
         #endregion
 
         #region Properties
+
+        public TVEpisode? Episode 
+        { 
+            get => tVEpisode;
+            set => this.RaiseAndSetIfChanged(ref tVEpisode, value); 
+        }
+
+        public IList ItemList 
+        { 
+            get => itemList; 
+            set =>  this.RaiseAndSetIfChanged(ref itemList, value); 
+        }
+
+        public bool IsEpisode 
+        { 
+            get => isEpisode; 
+            set => this.RaiseAndSetIfChanged(ref isEpisode, value); 
+        }
+
+        public Object? SelectedItem 
+        { 
+            get => selectedItem; 
+            set => this.RaiseAndSetIfChanged(ref selectedItem, value); 
+        }
 
         /// <summary>
         /// Gets or sets the EntryDate.
@@ -113,10 +156,10 @@ namespace TaymadeEntities.ViewModels
         /// Gets or sets the MaxStringLength.
         /// </summary>
         public int? MaxStringLength { get; set; }
-        public ReactiveCommand<Unit,Unit> Hyphenate { get; }
-        public ReactiveCommand<Unit, Unit> Underscore { get; }
+        public ReactiveCommand<Unit,Unit> Hyphenate { get; private set; }
+        public ReactiveCommand<Unit, Unit> Underscore { get; private set; }
 
-        public ReactiveCommand<Unit, Unit> Shorten { get; }
+        public ReactiveCommand<Unit, Unit> Shorten { get; private set; }
 
         #endregion
     }
