@@ -40,6 +40,8 @@ using FFMpegSupport = TaymadeEntities.Support.FFMpegSupport;
 using PhraseEntry = TaymadeEntities.Models.PhraseEntry;
 using Task = System.Threading.Tasks.Task;
 using Window = Avalonia.Controls.Window;
+using Series = TaymadeEntities.Models.Series;
+using Season = TaymadeEntities.Models.Season;
 
 namespace TaymadeEntities.ViewModels
 {
@@ -178,7 +180,7 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Defines the hasEpisode.
         /// </summary>
-        private bool hasEpisode;
+        private bool hasEpisode = true;
 
         /// <summary>
         /// Defines the hasTemp.
@@ -358,50 +360,9 @@ namespace TaymadeEntities.ViewModels
             ShowDialog = new Interaction<MovieViewModelBase, SeriesViewModel?>();
 
             CreateSeasonCommand = ReactiveCommand.Create(DoCreateSeason);
+                  
+
             
-
-            AddEpisodeCommand = ReactiveCommand.CreateFromTask(async () =>
-            {
-                var store = new MovieViewModel()
-                {
-                    CurrentSeries = CurrentSeries,
-                    NewSeason = CurrentSeason,
-                    Episode = EpisodeEntity,
-                    HasEpisode = false
-                };
-                var result = await ShowDialog.Handle(store);
-                if (result != null)
-                {
-                    if (result.CurrentSeason != null && result.EpisodeEntity != null)
-                    {
-                        result.CurrentSeason.TVEpisodes.Add(result.EpisodeEntity);
-                        result.EpisodeEntity.Save();
-                    }
-                }
-            });
-
-
-            DeleteEpisodeCommand = ReactiveCommand.CreateFromTask(async () =>
-            {
-                var store = new MovieViewModel()
-                {
-                    CurrentSeries = CurrentSeries,
-                    NewSeason = CurrentSeason,
-                    Episode = EpisodeEntity,
-                    HasEpisode = true
-                };
-
-                var result = await ShowDialog.Handle(store);
-
-                if (result != null)
-                {
-                    if (result.CurrentSeason != null && result.EpisodeEntity != null)
-                    {
-                        result.CurrentSeason.TVEpisodes.Remove(result.EpisodeEntity);
-                        result.EpisodeEntity.Delete();
-                    }
-                }
-            });
 
             this.MpegSupport = new FFMpegSupport();
             this.MpegSupport.CliWrapCompleted += this.MpegSupport_CliWrapCompleted;
@@ -516,9 +477,11 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        public string? AutoCompleteToken 
-        { get => autoCompleteToken; 
-            set => this.RaiseAndSetIfChanged(ref autoCompleteToken, value); }
+        public string? AutoCompleteToken
+        {
+            get => autoCompleteToken;
+            set => this.RaiseAndSetIfChanged(ref autoCompleteToken, value);
+        }
 
         /// <summary>
         /// Gets or sets the AutoCompleteTokens.
@@ -554,9 +517,9 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets or sets the CurrentBookmark.
         /// </summary>
-        public Models.Bookmark? CurrentBookmark 
-        { 
-            get => bookmark; 
+        public Models.Bookmark? CurrentBookmark
+        {
+            get => bookmark;
             set => this.RaiseAndSetIfChanged(ref bookmark, value);
         }
 
@@ -566,9 +529,9 @@ namespace TaymadeEntities.ViewModels
         public Cast? CurrentCastMember
         {
             get => currentCastMember;
-            set 
-            { 
-                this.RaiseAndSetIfChanged(ref currentCastMember, value); 
+            set
+            {
+                this.RaiseAndSetIfChanged(ref currentCastMember, value);
             }
         }
 
@@ -679,7 +642,7 @@ namespace TaymadeEntities.ViewModels
                             // mainWindow.RowChanged(null, null);
                         }
                     }
-                   // value.FixMovieData();
+                    // value.FixMovieData();
                 }
                 else
                 {
@@ -771,7 +734,7 @@ namespace TaymadeEntities.ViewModels
 
         public Movies? CurrentSeasonMovie { get; set; }
 
-        public Models.Series CurrentSeries
+        public Models.Series? CurrentSeries
         {
             get => currentSeries;
             set
@@ -1259,7 +1222,7 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         public Models.DialogResultButton ResultTask { get => resultTask; set => resultTask = value; }
 
-        public ReactiveCommand<Unit,Unit> SaveBookmark { get; set; }
+        public ReactiveCommand<Unit, Unit> SaveBookmark { get; set; }
 
         /// <summary>
         /// Gets or sets the width of the screen.
@@ -1404,7 +1367,7 @@ namespace TaymadeEntities.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref volume, value);
-                
+
             }
         }
         public string? FindText { get => findText; private set => this.RaiseAndSetIfChanged(ref findText, value); }
@@ -1603,38 +1566,68 @@ namespace TaymadeEntities.ViewModels
             if (mainWindow == null) mainWindow = Support.Support.GetMainWindow();
             if (CurrentMovie != null)
             {
-                CurrentSeason = new Models.Season(CurrentMovie.SeriesEntity);
-                CurrentSeries = CurrentMovie.SeriesEntity;
-                HasEpisode = false;
-                SeriesDialogWindow seriesDialogWindow = new SeriesDialogWindow();
-
-                SeriesViewModel seriesViewModel = new SeriesViewModel(seriesDialogWindow);
-
-                if (this.Caller == null) this.Caller = mainWindow;
-
-                oldCaller = this.Caller;
-                Caller = seriesDialogWindow;
-
-                seriesDialogWindow.DataContext = this;
-
-                await seriesDialogWindow.ShowDialog(oldCaller);
-                if (
-                        resultButton != null
-                        && resultButton.Result == Models.DialogResultButton.ResultType.Ok
-                    )
+                if (CurrentMovie.Series == null)
                 {
-                    if (NewSeason != null)
+                    CurrentMovie.SeriesEntity = await Series.AddSeriesToMovie(CurrentMovie.Id, mainWindow);
+                }
+                //CurrentSeason = new Models.Season(CurrentMovie.SeriesEntity);
+
+                CurrentSeries = CurrentMovie.SeriesEntity;
+
+                Season? newSeason = await Season.CreateNewSeasonForSeries(CurrentMovie.SeriesEntity, mainWindow);
+
+                if (newSeason == null) return;
+                // if the CurrentMovie has an episode fix that up
+
+                if (CurrentMovie.Episode != null)
+                {
+                    if (CurrentMovie.EpisodeEntity != null)
                     {
-                        NewSeason.Insert();
-                        CurrentMovie.Season = NewSeason.Id;
-                        CurrentMovie.SeasonEntity = NewSeason;
-                        CurrentMovie.SeriesEntity.Seasons.Add(NewSeason);
-                        CurrentMovie.Save();
-                        this.RaisePropertyChanged(nameof(CurrentMovie));
+                        CurrentMovie.EpisodeEntity.SeasonID = newSeason.Id;
+                        CurrentMovie.EpisodeEntity.SeasonNumber = 1;
+
                     }
                 }
 
-                Caller = oldCaller;
+                CurrentMovie.Season = newSeason.Id;
+                DataController.MovieController.SaveContext();
+                CurrentSeason = newSeason;
+
+                //CurrentEpisode = CurrentMovie.Episode;
+
+                CurrentMovie.SeriesEntity?.Seasons = DataController.MovieController.GetSeasonsBySeriesID(CurrentMovie.Series.Value);
+
+
+                //HasEpisode = false;
+                //SeriesDialogWindow seriesDialogWindow = new SeriesDialogWindow();
+
+                //SeriesViewModel seriesViewModel = new SeriesViewModel(seriesDialogWindow);
+
+                //if (this.Caller == null) this.Caller = mainWindow;
+
+                //oldCaller = this.Caller;
+                //Caller = seriesDialogWindow;
+
+                //seriesDialogWindow.DataContext = this;
+
+                //await seriesDialogWindow.ShowDialog(oldCaller);
+                //if (
+                //        resultButton != null
+                //        && resultButton.Result == Models.DialogResultButton.ResultType.Ok
+                //    )
+                //{
+                //    if (NewSeason != null)
+                //    {
+                //        NewSeason.Insert();
+                //        CurrentMovie.Season = NewSeason.Id;
+                //        CurrentMovie.SeasonEntity = NewSeason;
+                //        CurrentMovie.SeriesEntity.Seasons.Add(NewSeason);
+                //        CurrentMovie.Save();
+                //        this.RaisePropertyChanged(nameof(CurrentMovie));
+                //    }
+                //}
+
+                //Caller = oldCaller;
             }
         }
 
@@ -2195,15 +2188,13 @@ namespace TaymadeEntities.ViewModels
                 Episode = CurrentMovie.EpisodeEntity;
                 HasEpisode = true;
 
-               using SeriesViewModel seriesViewModel = new SeriesViewModel();
+                using SeriesViewModel seriesViewModel = new SeriesViewModel();
 
-               using SeriesDialogWindow seriesDialogWindow = new SeriesDialogWindow(seriesViewModel);
+                using SeriesDialogWindow seriesDialogWindow = new SeriesDialogWindow(seriesViewModel);
 
                 Window main = Support.Support.GetWindow() as Window;
                 bool ok = await seriesDialogWindow.ShowDialog<bool>(main);
-                if (
-                    ok
-                    )
+                if (ok)
                 {
                     Episode.Save();
                     //CurrentMovie.SeasonEntity.TVEpisodes.Add(Episode);
@@ -2213,7 +2204,7 @@ namespace TaymadeEntities.ViewModels
                     CurrentMovie.SeasonEntity.TVEpisodes = new ObservableCollection<TVEpisode>(CurrentMovie.SeasonEntity.TVEpisodes.DistinctBy(x => x.Id).OrderBy(x => x.EpisodeNumber).ToList());
                     this.RaisePropertyChanged(nameof(CurrentMovie));
                 }
-                
+
             }
         }
 
@@ -3087,10 +3078,10 @@ namespace TaymadeEntities.ViewModels
         /// <remarks>
         ///   <created> 10/09/2026 10/09/2026 </created>
         /// </remarks>
-        public async void DoPlay(Movies movie, 
+        public async void DoPlay(Movies movie,
             Bookmark? bookmark = null,
-            bool recording = false, 
-            string recordName = "", 
+            bool recording = false,
+            string recordName = "",
             bool fullScreen = true,
             bool autoplay = true)
         {
@@ -3104,7 +3095,7 @@ namespace TaymadeEntities.ViewModels
             playerViewModel.PlayFromBookmark = (bookmark != null);
             playerViewModel.FullScreen = false;
             playerViewModel.Bookmark = bookmark;
-            playerViewModel.CurrentBookmark = bookmark; 
+            playerViewModel.CurrentBookmark = bookmark;
             playerViewModel.Recording = recording;
             playerViewModel.RecordName = recordName;
             Avalonia.Controls.Window? main = Support.Support.GetWindow();

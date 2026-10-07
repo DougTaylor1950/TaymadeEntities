@@ -214,6 +214,7 @@ namespace TaymadeEntities.ViewModels
         {
             if (CurrentSeason != null)
             {
+                // should relese all movies attached to season and remove and delete episodes as well
                 DataController.MovieController.DeleteSeason(CurrentSeason);
                 CurrentSeries.Seasons.Remove(CurrentSeason);
                 CurrentSeason = null;
@@ -277,36 +278,45 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// The DoAddSeason.
         /// </summary>
-        private void DoAddSeason()
+        private async void DoAddSeason()
         {
             if (CurrentSeries != null)
             {
-                if (CurrentSeason != null)
-                {
-                    Season? newSeason = CurrentSeries.Seasons.Where(s => s.SeasonNo != null && s.SeasonNo == CurrentSeason.SeasonNo).FirstOrDefault();
+                Season? newSeason = await Season.CreateNewSeasonForSeries(CurrentSeries, null);
 
-                    if (newSeason != null)
-                    {
-                        // refresh data
-                        newSeason.TMDBID = CurrentSeries.TMID;
+                if (newSeason == null) return;
+                // should have been added to database so refresh the list 
+                CurrentSeries.Seasons = DataController.MovieController.GetSeasonsBySeriesID(CurrentSeries.Id);
 
-                    }
+                CurrentSeason = newSeason;
 
-                    else
-                    {
-                        NewSeason = new Season(CurrentSeries);
+                //if (CurrentSeason != null)
+                //{
+                    //Season? newSeason = CurrentSeries.Seasons.Where(s => s.SeasonNo != null && s.SeasonNo == CurrentSeason.SeasonNo).FirstOrDefault();
 
-                        NewSeason.ShowId = CurrentSeries.TMID;
-                        NewSeason.Series = CurrentSeries.Id;
-                        NewSeason.SeasonNo = CurrentSeason.SeasonNo;
-                        NewSeason.Name = CurrentSeason.Name;
+                    //if (newSeason != null)
+                    //{
+                    //    refresh data
 
-                        NewSeason.Insert();
+                    //   newSeason.TMDBID = CurrentSeries.TMID;
 
-                    }
+                    //}
 
-                    CurrentSeries.Seasons.Add(NewSeason);
-                }
+                    //else
+                    //{
+                    //    NewSeason = new Season(CurrentSeries);
+
+                    //    NewSeason.ShowId = CurrentSeries.TMID;
+                    //    NewSeason.Series = CurrentSeries.Id;
+                    //    NewSeason.SeasonNo = CurrentSeason.SeasonNo;
+                    //    NewSeason.Name = CurrentSeason.Name;
+
+                    //    NewSeason.Insert();
+
+                    //}
+
+                    //CurrentSeries.Seasons.Add(NewSeason);
+                //}
             }
         }
 

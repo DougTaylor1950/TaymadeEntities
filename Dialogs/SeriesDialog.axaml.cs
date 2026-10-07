@@ -10,14 +10,17 @@ namespace TaymadeEntities.Dialogs
 {
     using Avalonia.Controls;
     using Avalonia.Interactivity;
+
     using Models;
-    using OpenXmlPowerTools;
+    using ReactiveUI;
     using ReactiveUI.Avalonia;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+
     using System.Linq;
     using TaymadeEntities.Support;
     using TaymadeEntities.ViewModels;
+    using Season = Models.Season;
 
     /// <summary>
     /// Defines the <see cref="SeriesDialog" />.
@@ -107,6 +110,69 @@ namespace TaymadeEntities.Dialogs
         #endregion Protected Methods
 
         #region Private Methods
+
+        private async void ChangeSeason_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (this.DataContext is SeriesViewModel vm)
+            {
+                if (vm.CurrentSeries == null) return;
+                if (vm.CurrentEpisode == null) return;
+                if (vm.CurrentEpisode.MovieId == null) return;
+
+                using TaymadeEntities.ViewModels.EntryDialogModel entryDialogModel =
+                    new TaymadeEntities.ViewModels.EntryDialogModel(TaymadeEntities.ViewModels.EntryDialogModel.EntryType.List);
+                using TaymadeEntities.Dialogs.EntryDialog entryDialog = new TaymadeEntities.Dialogs.EntryDialog(entryDialogModel);
+
+                using var _context = new TaymadeEntities.DBContext.SandboxEntities();
+                {
+                    _context.SaveChanges();
+
+                    entryDialog.Title = "Set Season Value";
+                    entryDialogModel.ItemList = vm.CurrentSeries.Seasons;
+
+
+
+                    DialogResultButton result = await entryDialog.ShowDialog<DialogResultButton>(this);
+                    if (result != null && result.Result == DialogResultButton.ResultType.Ok)
+                    {
+
+                        Season? season = result.ListValue as Season;
+
+                        if (season == null) return;
+
+                        TVEpisode? episode = _context.TVEpisodes.Find(vm.CurrentEpisode.Id);
+                        if (episode == null) return;
+
+                        vm.CurrentSeason?.TVEpisodes.Remove(vm.CurrentEpisode);
+                        // need to change the episode details
+                        episode.SeasonID = season.Id;
+                        episode.SeasonNumber = season.SeasonNo;
+                        episode.EpisodeNumber = season.TVEpisodes.Count + 1;
+
+                        // need to get the movie and change its details.
+                        Movies? movie = _context.Movies.Find(vm.CurrentEpisode.MovieId.Value);
+
+                        movie.Season = season.Id;
+                        movie.EpisodeNumber = episode.EpisodeNumber;
+                        //movie.Save();
+                        _context.SaveChanges();
+
+                        // refresh all items.
+
+                        vm.CurrentEpisode = DataController.MovieController.GetTVEpisodeById(episode.Id);
+                        vm.CurrentSeason = DataController.MovieController.GetSeasonById(season.Id);
+                        if (vm.CurrentSeason == null) vm.CurrentSeason = DataController.MovieController.GetSeasonById(season.Id);
+                        if (vm.CurrentSeason == null) return;
+                        vm.CurrentSeason.TVEpisodes = DataController.MovieController.GetTVEpisodesBySeasonID(season.Id);
+                        vm.CurrentSeries.Seasons = DataController.MovieController.GetSeasonsBySeriesID(vm.CurrentSeries.Id);
+                        vm.RaisePropertyChanged(nameof(vm.CurrentEpisode));
+                        vm.RaisePropertyChanged(nameof(vm.CurrentSeason.TVEpisodes));
+                        vm.RaisePropertyChanged(nameof(vm.CurrentSeason));
+                    }
+
+                }
+            }
+        }
 
         /// <summary>
         /// The CreateSeason.
@@ -353,7 +419,66 @@ namespace TaymadeEntities.Dialogs
             {
                 this.Close(true);
             });
-            
+
+        }
+
+        private async void DeleteEpisode_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (this.DataContext is SeriesViewModel vm)
+            {
+                if (vm.CurrentEpisode != null && vm.CurrentSeason != null)
+                {
+                    vm.CurrentEpisode.Delete();
+                    vm.CurrentSeason.TVEpisodes.Remove(vm.CurrentEpisode);
+                    vm.CurrentEpisode = null;
+                    vm.CurrentSeason.TVEpisodes.Clear();
+                    vm.CurrentSeason.TVEpisodes = DataController.MovieController.GetTVEpisodesBySeasonID(vm.CurrentSeason.Id);
+                }
+            }
+        }
+
+        private async void EditEpisode_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (this.DataContext is SeriesViewModel vm)
+            {
+                if (vm.CurrentEpisode != null)
+                {
+                    using SeriesViewModel seriesViewModel = new SeriesViewModel();
+                    seriesViewModel.CurrentSeries = vm.CurrentSeries;
+                    seriesViewModel.NewSeason = vm.CurrentSeason;
+                    seriesViewModel.Episode = vm.CurrentEpisode;
+                    seriesViewModel.HasEpisode = true;
+                    using SeriesDialogWindow dialogWindow = new SeriesDialogWindow(seriesViewModel);
+
+                    bool ok = await dialogWindow.ShowDialog<bool>(this);
+                    if (ok)
+                    {
+                        seriesViewModel.Episode.Save();
+                        seriesViewModel.NewSeason.Save();
+                        vm.CurrentEpisode = seriesViewModel.Episode;
+                        //vm.CurrentSeason = seriesViewModel.NewSeason;
+                        int episodeId = vm.CurrentEpisode.Id;
+                        int seasonId = vm.CurrentSeason.Id;
+                        if (vm.CurrentEpisode?.MovieId != null)
+                        {
+                            vm.CurrentMovie = DataController.MovieController.GetMoviesById(vm.CurrentEpisode.MovieId.Value);
+                            if (vm.CurrentMovie != null)
+                            {
+                                vm.CurrentMovie.Episode = episodeId;
+                                vm.CurrentMovie.Season = seasonId;
+                                vm.CurrentMovie.Series = vm.CurrentSeries.Id;
+                                vm.CurrentMovie.Save();
+                            }
+                        }
+                    }
+                    DataController.MovieController.SaveContext();
+
+                }
+            }
+        }
+
+        private void ImagedButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
         }
 
         #endregion Private Methods

@@ -229,6 +229,7 @@ namespace TaymadeEntities.ViewModels
             if (CurrentMovie != null &&
                 CurrentSeason != null)
             {
+
                 newEpisode.ShowID = CurrentSeason.ShowId;
                 newEpisode.SeasonID = CurrentSeason?.Id;
                 newEpisode.SeasonNumber = CurrentSeason.SeasonNo;
@@ -313,8 +314,13 @@ namespace TaymadeEntities.ViewModels
                 if (CurrentMovie != null && value != null)
                 {
                     CurrentMovie.SeasonEntity = value;
-                    CurrentMovie.Season = value.Id;
+                    if (CurrentMovie.Season != value.Id)
+                    {
+                        CurrentMovie.Season = value.Id;
+                        CurrentMovie.Save();
+                    }
                     this.RaisePropertyChanged(nameof(CurrentMovie.SeasonEntity));
+                    this.RaisePropertyChanged(nameof(CurrentMovie.Season));
                 }
 
                 if (value == null)
@@ -387,8 +393,13 @@ namespace TaymadeEntities.ViewModels
                 this.RaiseAndSetIfChanged(ref currentEpisode, value);
                 if (CurrentMovie != null && value != null)
                 {
-                    CurrentMovie.EpisodeEntity = value;
-                    CurrentMovie.EpisodeNumber = value.EpisodeNumber;
+                    if (CurrentMovie.Episode != value.Id)
+                    {
+                        CurrentMovie.Episode = value.Id;
+                        CurrentMovie.EpisodeEntity = value;
+                        CurrentMovie.EpisodeNumber = value.EpisodeNumber;
+                        CurrentMovie.Save();
+                    }
                     //this.RaisePropertyChanged(nameof(CurrentMovie.EpisodeEntity));
                 }
             }
@@ -420,6 +431,8 @@ namespace TaymadeEntities.ViewModels
             if (CurrentEpisode != null)
             {
                 CurrentEpisode.Save();
+                CurrentMovie?.Episode = CurrentEpisode.Id;
+                CurrentMovie?.Save();
             }
         }
 

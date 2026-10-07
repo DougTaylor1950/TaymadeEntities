@@ -269,7 +269,7 @@ namespace TaymadeEntities.Controllers
         /// Saves this instance.
         /// </summary>
         /// <returns></returns>
-        public bool Save()
+        public bool SaveContext()
         {
             return movieRepository.Save();
         }

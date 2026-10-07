@@ -422,7 +422,7 @@ namespace TaymadeEntities.Models
                     {
                         //EpisodeEntity = DataController.SandboxEntities.TVEpisodes.Find(Episode).FirstOrDefault();
                     }
-                    
+
                 }
                 //this.RaisePropertyChanged(nameof(EpisodeNumber));
                 return episodeNumber;
@@ -679,6 +679,28 @@ namespace TaymadeEntities.Models
         /// </summary>
         public int? Progress { get => progress; set => this.RaiseAndSetIfChanged(ref progress, value); }
 
+        private string? seasonNo = null;
+        [NotMapped]
+        public string? SeasonNo
+        {
+            get
+            {
+                if (seasonNo == null)
+                {
+                    if (Season != null)
+                    {
+                        if (SeasonEntity == null) SeasonEntity = DataController.MovieController.GetSeasonById(Season);
+                        if (SeasonEntity != null) seasonNo = SeasonEntity.SeasonNo?.ToString();
+                        else seasonNo = "-";
+                    }
+                    return seasonNo;
+                }
+                else return seasonNo;
+            }
+                 set;
+        }
+
+
         /// <summary>
         /// Gets or sets the Season.
         /// </summary>
@@ -687,7 +709,11 @@ namespace TaymadeEntities.Models
             get
             {
                 if (season == null) return 0;
-                else return season;
+                else
+                {
+                    
+                    return season;
+                }
             }
 
             set
@@ -696,10 +722,15 @@ namespace TaymadeEntities.Models
                 if (value != null && value > 0)
                 {
                     SeasonEntity = DataController.SandboxEntities.Seasons.Find(value);
-                    if (SeasonEntity != null && (SeasonEntity.TVEpisodes == null || SeasonEntity.TVEpisodes.Count == 0))
+                    if (SeasonEntity != null &&
+                        (SeasonEntity.TVEpisodes == null
+                        || SeasonEntity.TVEpisodes.Count == 0))
                     {
                         SeasonEntity.TVEpisodes = new ObservableCollection<TVEpisode>(DataController.SandboxEntities.TVEpisodes.Where(t => t.SeasonID == SeasonEntity.Id).ToList());
+                        this.RaisePropertyChanged(nameof(SeasonEntity.TVEpisodes));
+
                     }
+                    this.RaisePropertyChanged(nameof(SeasonEntity));
                 }
             }
         }

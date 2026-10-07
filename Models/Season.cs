@@ -9,6 +9,7 @@
 
 namespace TaymadeEntities.Models
 {
+    using Microsoft.Office.Interop.Word;
     using ReactiveUI;
     using System;
     using System.Collections.ObjectModel;
@@ -81,7 +82,6 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Initializes a new instance of the <see cref="Season"/> class.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Season()
         {
             this.TVEpisodes = new ObservableCollection<TVEpisode>();
@@ -185,5 +185,95 @@ namespace TaymadeEntities.Models
         public Nullable<int> Year { get => year; set => this.RaiseAndSetIfChanged(ref year, value); }
 
         #endregion
+
+        public async static Task<Season> CreateNewSeasonForSeries(Series series, 
+            Avalonia.Controls.Window? window = null)
+        {
+            Season newSeason = null;
+
+            if (series == null) return null; // need a series to work 
+
+            using TaymadeEntities.ViewModels.EntryDialogModel entryDialogModel =
+                    new TaymadeEntities.ViewModels.EntryDialogModel(TaymadeEntities.ViewModels.EntryDialogModel.EntryType.Text);
+            using TaymadeEntities.Dialogs.EntryDialog entryDialog = new TaymadeEntities.Dialogs.EntryDialog(entryDialogModel);
+
+            using var _context = new TaymadeEntities.DBContext.SandboxEntities();
+            {
+                newSeason = new Season()
+                {
+                    Series = series.Id,
+                    ShowId = series.TMID
+                };
+
+                entryDialog.Title = "Get Season Name";
+                entryDialog.entryText.Text = "<new season name>";
+
+                if (window == null) window = Support.Support.GetMainWindow() as Avalonia.Controls.Window;
+
+                DialogResultButton result = await entryDialog.ShowDialog<DialogResultButton>(window);
+                if (result != null && result.Result == DialogResultButton.ResultType.Ok)
+                {
+                    newSeason.Name = result.Parameter;
+                }
+                newSeason.SeasonNo = series.Seasons.Count + 1;
+                _context.Seasons.Add(newSeason);
+                _context.SaveChanges();
+            }
+
+            return newSeason;
+        }
+
+        public async static Task<Season> AddSeasonToMovie(int id, Avalonia.Controls.Window? window = null)
+        {
+            Season newSeason = null;
+
+            using TaymadeEntities.ViewModels.EntryDialogModel entryDialogModel =
+                    new TaymadeEntities.ViewModels.EntryDialogModel(TaymadeEntities.ViewModels.EntryDialogModel.EntryType.List);
+            using TaymadeEntities.Dialogs.EntryDialog entryDialog = new TaymadeEntities.Dialogs.EntryDialog(entryDialogModel);
+
+            using var _context = new TaymadeEntities.DBContext.SandboxEntities();
+            {
+                Movies? movie = _context.Movies.Find(id);
+                if (movie != null)
+                {
+                    // check we have a Series essential 
+
+                    if (movie.Series == null)
+                    {
+                        // get Series
+                        Series tempSeries = await Models.Series.AddSeriesToMovie(movie.Id);
+                        if (tempSeries == null) return null;
+                        // set series value
+                        movie.Series = tempSeries.Id;
+                        _context.SaveChanges();
+                        movie.SeriesEntity = tempSeries;
+                    }
+
+                    if (movie.SeriesEntity != null &&
+                        (movie.SeriesEntity.Seasons == null || movie.SeriesEntity.Seasons.Count == 0))
+                    {
+                        movie.SeriesEntity.Seasons = DataController.MovieController.GetSeasonsBySeriesID(movie.Series.Value);
+                    }
+
+                    entryDialog.Title = "Set Season Value";
+                    entryDialogModel.ItemList = movie.SeriesEntity.Seasons;
+
+                    if (window == null) window = Support.Support.GetMainWindow() as Avalonia.Controls.Window;
+
+                    DialogResultButton result = await entryDialog.ShowDialog<DialogResultButton>(window);
+                    if (result != null && result.Result == DialogResultButton.ResultType.Ok)
+                    {
+                        Season? series = result.ListValue as Season;
+                        newSeason = series;
+                        if (series != null)
+                        {
+                            movie.Season = series.Id;
+                            _context.SaveChanges();
+                        }
+                    }
+                }
+            }
+            return newSeason;
+        }
     }
 }

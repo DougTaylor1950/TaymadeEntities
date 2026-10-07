@@ -83,7 +83,7 @@ public partial class EditMovie : Window, IDisposable
         DataContext = viewModel;
         if (viewModel.CurrentMovie != null)
         {
-           // viewModel.CurrentMovie.FixMovieData();
+            // viewModel.CurrentMovie.FixMovieData();
         }
     }
 
@@ -192,7 +192,7 @@ public partial class EditMovie : Window, IDisposable
     private void CancelButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
 
-        Avalonia.Threading.Dispatcher.UIThread.Invoke( () =>
+        Avalonia.Threading.Dispatcher.UIThread.Invoke(() =>
         {
             this.Close(false);
         }
@@ -746,7 +746,7 @@ public partial class EditMovie : Window, IDisposable
         //{
         //    ViewModel.CurrentMovie?.Save();
         //}
-        Avalonia.Threading.Dispatcher.UIThread.Invoke(()=>
+        Avalonia.Threading.Dispatcher.UIThread.Invoke(() =>
         {
             this.Close(true);
         }
@@ -1195,6 +1195,18 @@ public partial class EditMovie : Window, IDisposable
         // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
+    }
+
+    private async void AddNewEpisode(object? sender, RoutedEventArgs e)
+    {
+        if (this.DataContext is MovieEditViewModel ViewModel)
+        {
+            if (ViewModel.CurrentMovie == null) return;
+
+            TVEpisode? newEpisode = await TVEpisode.CreateTVEpisodeForMovie(ViewModel.CurrentMovie.Id, this);
+
+            if (newEpisode != null) ViewModel.CurrentEpisode = newEpisode;
+        }
     }
 
 

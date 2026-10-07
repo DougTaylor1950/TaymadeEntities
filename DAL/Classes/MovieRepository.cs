@@ -297,7 +297,7 @@ namespace TaymadeEntities.DAL.Classes
 
         public bool UpdateMovie(Movies movie)
         {
-            _context.Movies.Update(movie);
+            //_context.Movies.Update(movie);
             _context.Entry(movie).State = EntityState.Modified;
             return _context.SaveChanges() > 0;
         }
@@ -324,7 +324,6 @@ namespace TaymadeEntities.DAL.Classes
         public bool UpdateTVEpisode(TVEpisode tVEpisode)
         {
             _context.Entry(tVEpisode).State = EntityState.Modified;
-            _context.TVEpisodes.Update(tVEpisode);
             return Save();
         }
 

@@ -2,13 +2,13 @@
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:tcb="using:TaymadeControls.Buttons"
 
 		mc:Ignorable="d"
 		d:DesignWidth="1900"
 		d:DesignHeight="1100"
 		xmlns:vm="using:TaymadeEntities.ViewModels"
 		xmlns:uc="using:TaymadeEntities.Controls"
-		xmlns:tcb="using:TaymadeControls.Buttons"
 		WindowState="Maximized"
 		x:Class="TaymadeEntities.Dialogs.SeriesDialog"
 		Title="SeriesDialog"
@@ -24,359 +24,407 @@
 				MaxHeight="1100"
 				DockPanel.Dock="Top" >
 			<DockPanel VerticalAlignment="Top" Margin="5,5,5,5" LastChildFill="True"
-												 MaxHeight="1100">
+					   MaxHeight="1100">
+
+				<StackPanel Orientation="Vertical">
+					<StackPanel Orientation="Horizontal" DockPanel.Dock="Top" >
+						<tcb:ImagedButton LabelText="Show Film"
+										  Margin="5"
+										  Command="{Binding PlayMovie}"
+										  ImageSource="avares://TaymadeControls/Assets/play.png"
+										  Name="ShowFilm"
+										  />
+
+					</StackPanel>
+
+
 
 					<StackPanel Orientation="Vertical">
-						<StackPanel Orientation="Horizontal" DockPanel.Dock="Top" >
-							<Button Content="Show Film" Margin="5" Command="{Binding PlayMovie}"
-									Name="ShowFilm" />
+						<DataGrid Name="dgSeries" AutoGenerateColumns="False"
+								  DockPanel.Dock="Top"
+								  Margin="5,5,5,5"
+								  VerticalScrollBarVisibility="Visible"
+								  MaxHeight="200"
+								  MinHeight="100"
+								  ItemsSource="{Binding SeriesList}"
+								  SelectedItem="{Binding CurrentSeries}">
+							<DataGrid.Columns>
+								<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+								<DataGridTextColumn Header="Overview" Binding="{Binding Overview}" />
+								<DataGridTextColumn Header="TMDB ID" Binding="{Binding TMID}" />
+							</DataGrid.Columns>
+						</DataGrid>
 
-						</StackPanel>
+						<StackPanel Height="20" Background="Wheat" Margin="5,5,5,5"/>
+						<TabControl MaxHeight="800">
+							<TabItem Header="Series Details">
+								<StackPanel Margin="5,5,5,5" MaxHeight="800">
+									<Border CornerRadius="6"
+											Margin="5,5,5,5"
+											BorderBrush="Gray"
+											Background="LightGray"
+											BorderThickness="2">
+										<StackPanel Orientation="Horizontal">
 
+											<DockPanel	LastChildFill="True" Margin="5,5,5,5" >
+												<Grid ShowGridLines="False" DockPanel.Dock="Top" >
+													<Grid.ColumnDefinitions>
+														<ColumnDefinition Width="100"/>
+														<ColumnDefinition Width="100"/>
+														<ColumnDefinition Width="10"/>
 
+														<ColumnDefinition Width="100"/>
+														<ColumnDefinition Width="500"/>
+														<ColumnDefinition Width="20"/>
+														<ColumnDefinition Width="200"/>
 
-						<StackPanel Orientation="Vertical">
-							<DataGrid Name="dgSeries" AutoGenerateColumns="False"
-									  DockPanel.Dock="Top"
-									  Margin="5,5,5,5"
-									  VerticalScrollBarVisibility="Visible"
-									  MaxHeight="200"
-									  MinHeight="100"
-									  ItemsSource="{Binding SeriesList}"
-									  SelectedItem="{Binding CurrentSeries}">
-								<DataGrid.Columns>
-									<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-									<DataGridTextColumn Header="Overview" Binding="{Binding Overview}" />
-									<DataGridTextColumn Header="TMDB ID" Binding="{Binding TMID}" />
-								</DataGrid.Columns>
-							</DataGrid>
+													</Grid.ColumnDefinitions>
+													<Grid.RowDefinitions>
+														<RowDefinition Height="50"></RowDefinition>
+														<RowDefinition Height="40"></RowDefinition>
+														<RowDefinition Height="40"></RowDefinition>
 
-							<StackPanel Height="20" Background="Wheat" Margin="5,5,5,5"/>
-							<TabControl MaxHeight="800">
-								<TabItem Header="Series Details">
-									<StackPanel Margin="5,5,5,5" MaxHeight="800">
-										<Border CornerRadius="6"
-												Margin="5,5,5,5"
-												BorderBrush="Gray"
-												Background="LightGray"
-												BorderThickness="2">
-											<StackPanel Orientation="Horizontal">
+													</Grid.RowDefinitions>
+													<TextBlock Classes="h2"  Text="Series ID"  Grid.Column="0" Grid.Row="0"/>
+													<TextBox Classes="c2" Height="30"  Text="{Binding CurrentSeries.Id}" Grid.Column="1" />
+													<TextBlock Classes="h2"  Text="Series Name"  Grid.Column="3" Grid.Row="0"/>
+													<TextBox Classes="c2" Height="30"  Text="{Binding CurrentSeries.Name}" Grid.Column="4" />
 
-												<DockPanel	LastChildFill="True" Margin="5,5,5,5" >
-													<Grid ShowGridLines="False" DockPanel.Dock="Top" >
-														<Grid.ColumnDefinitions>
-															<ColumnDefinition Width="100"/>
-															<ColumnDefinition Width="100"/>
-															<ColumnDefinition Width="10"/>
+													<TextBlock Classes="h2"  Text="Series Overview"  Grid.Column="0" Grid.Row="1"/>
+													<TextBox Classes="c2" Height="30"  Text="{Binding CurrentSeries.Overview}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" TextWrapping="Wrap" />
+													<TextBlock Classes="h2"  Text="TMDB ID"  Grid.Column="0" Grid.Row="2"/>
+													<TextBox Classes="c2" Height="30"  Text="{Binding CurrentSeries.TMID}" Grid.Column="1" Grid.Row="2" />
 
-															<ColumnDefinition Width="100"/>
-															<ColumnDefinition Width="500"/>
-															<ColumnDefinition Width="20"/>
-															<ColumnDefinition Width="200"/>
+													<tcb:ImagedButton LabelText="Get Seasons"
+																	  Grid.Column="6"
+																	  ImageSource="avares://TaymadeControls/Assets/get.png"
+																	  Click="GetSeasons"/>
+													<tcb:ImagedButton LabelText="Get Episodes"
+																	  Grid.Row="2"
+																	  ImageSource="avares://TaymadeControls/Assets/get.png"
+																	  Click="GetEpisodes" Grid.Column="6" />
+												</Grid >
 
-														</Grid.ColumnDefinitions>
-														<Grid.RowDefinitions>
-															<RowDefinition Height="50"></RowDefinition>
-															<RowDefinition Height="40"></RowDefinition>
-															<RowDefinition Height="40"></RowDefinition>
-
-														</Grid.RowDefinitions>
-														<TextBlock Classes="h2"  Text="Series ID"  Grid.Column="0" Grid.Row="0"/>
-														<TextBox Classes="c2" Height="30"  Text="{Binding CurrentSeries.Id}" Grid.Column="1" />
-														<TextBlock Classes="h2"  Text="Series Name"  Grid.Column="3" Grid.Row="0"/>
-														<TextBox Classes="c2" Height="30"  Text="{Binding CurrentSeries.Name}" Grid.Column="4" />
-
-														<TextBlock Classes="h2"  Text="Series Overview"  Grid.Column="0" Grid.Row="1"/>
-														<TextBox Classes="c2" Height="30"  Text="{Binding CurrentSeries.Overview}" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4" TextWrapping="Wrap" />
-														<TextBlock Classes="h2"  Text="TMDB ID"  Grid.Column="0" Grid.Row="2"/>
-														<TextBox Classes="c2" Height="30"  Text="{Binding CurrentSeries.TMID}" Grid.Column="1" Grid.Row="2" />
-
-														<Button Content="Get Seasons"
-																Grid.Column="6"
-																Click="GetSeasons"/>
-														<Button Content="Get Episodes"
-																Grid.Row="2"
-																Click="GetEpisodes" Grid.Column="6" />
-													</Grid >
-
-													<Border BorderThickness="2"
-															Margin="5,5,5,5"
-															BorderBrush="Black"
-															CornerRadius="10">
-														<StackPanel Orientation="Vertical" >
-
-															<DataGrid Name="SeasonsGrid" AutoGenerateColumns="False"
-																	  VerticalScrollBarVisibility="Visible"
-																	  ItemsSource="{Binding CurrentSeries.Seasons}"
-																	  SelectedItem="{Binding CurrentSeason}"
-																	  Margin="5,5,5,5"
-																	  Width="600" Height="150">
-
-																<DataGrid.Columns>
-																	<DataGridTextColumn Header="Id" Binding="{Binding Id}" />
-																	<DataGridTextColumn Header="Season No" Binding="{Binding SeasonNo}" >
-
-
-																	</DataGridTextColumn>
-																	<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-
-																	<DataGridTextColumn Header="Year" Binding="{Binding Year}" />
-																	<DataGridTextColumn Header="TMDB ID" Binding="{Binding TMDBID}" />
-																</DataGrid.Columns>
-															</DataGrid>
-
-															<StackPanel Orientation="Vertical"
-																		Margin="5,5,5,5">
-																<DataGrid Name="EpisodeGrid"
-																		  AutoGenerateColumns="False"
-																		  VerticalScrollBarVisibility="Visible"
-																		  HorizontalScrollBarVisibility="Visible"
-																		  DockPanel.Dock="Top"
-																		  ItemsSource="{Binding CurrentSeason.TVEpisodes}"
-																		  SelectedItem="{Binding CurrentEpisode}"
-																		  Width="600"
-																		  Height="200">
-																	<DataGrid.Columns>
-																		<DataGridTextColumn Header="Episode No" Binding="{Binding EpisodeNumber}" />
-																		<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-																		<DataGridTextColumn Header="Movie ID" Binding="{Binding MovieId}" />
-																		<DataGridTextColumn Header="TMDB ID" Binding="{Binding TMID}" />
-																		<DataGridTextColumn Header="RunTime" Binding="{Binding Runtime}" />
-																		<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-																		<DataGridTextColumn Header="Overview" Binding="{Binding Overview}" />
-
-																	</DataGrid.Columns>
-																	<DataGrid.ContextMenu>
-																		<ContextMenu Name="ctxSeasons">
-																			<MenuItem Header="Find Movie" Command="{Binding SearchForMovie}"/>
-																			<MenuItem Header="Play Movie" Command="{Binding PlayEpisodeMovie}"/>
-																			<MenuItem Header="Edit movie" Click="EditMovie_Click" />
-																			<MenuItem Header="To Movie" Command="{Binding ToMovie}" />
-																		</ContextMenu>
-																	</DataGrid.ContextMenu>
-																</DataGrid>
-																<StackPanel Orientation="Vertical" Margin="5,5,5,5">
-																	<StackPanel Orientation="Horizontal">
-																		<Button Content="Add Episode" Command="{Binding AddEpisode}" Width="115" Margin="5" />
-																		<Button Content="Save Episode" Command="{Binding SaveEpisode}" Width="115" Margin="5" />
-																		<Button Content="Edit Episode" Command="{Binding EditEpisodeCommand}" Margin="5" />
-																		<Button Content="Delete Episode" Command="{Binding DeleteEpisodeCommand}" Margin="5" />
-																	</StackPanel>
-																	<StackPanel Orientation="Horizontal" Margin="5,5,5,5">
-																		<Button Content="Add Season" Command="{Binding AddSeason}" Margin="5" Width="115" />
-																		<Button Content="Save Season" Command="{Binding SaveSeason}" Margin="5" Width="115"/>
-																		<Button Content="Edit Season" Command="{Binding EditSeasonCommand}" Margin="5" />
-																		<Button Content="Delete Season" Command="{Binding DeleteSeason}" Margin="5" />
-																	</StackPanel>
-
-																</StackPanel>
-															</StackPanel>
-														</StackPanel>
-													</Border>
-												</DockPanel>
-
-												<Border BorderBrush="Black"
-														BorderThickness="2"
+												<Border BorderThickness="2"
+														Margin="5,5,5,5"
+														BorderBrush="Black"
 														CornerRadius="10">
-													<StackPanel Orientation="Vertical" Margin="5,5,5,5">
-														<DataGrid Name="dgSeasons"
-																  AutoGenerateColumns="False"
-																  MaxWidth="600"
-																  MaxHeight="200"
+													<StackPanel Orientation="Vertical" >
 
-																  Margin="5,5,5,5"
-																  ItemsSource="{Binding	SeasonList}"
-																  SelectedItem="{Binding CurrentSeason}"
+														<DataGrid Name="SeasonsGrid" AutoGenerateColumns="False"
 																  VerticalScrollBarVisibility="Visible"
-																  HorizontalScrollBarVisibility="Visible"
-																  >
+																  ItemsSource="{Binding CurrentSeries.Seasons}"
+																  SelectedItem="{Binding CurrentSeason}"
+																  Margin="5,5,5,5"
+																  Width="600" Height="150">
+
 															<DataGrid.Columns>
+																<DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+																<DataGridTextColumn Header="Season No" Binding="{Binding SeasonNo}" >
+
+
+																</DataGridTextColumn>
 																<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-																<DataGridTextColumn Header="Season No" Binding="{Binding SeasonNo}" />
-																<DataGridTextColumn Header="TMID" Binding="{Binding TMDBID}" />
-																<DataGridTextColumn Header="Air Date" Binding="{Binding Year}" />
 
+																<DataGridTextColumn Header="Year" Binding="{Binding Year}" />
+																<DataGridTextColumn Header="TMDB ID" Binding="{Binding TMDBID}" />
 															</DataGrid.Columns>
-															<DataGrid.ContextMenu >
-																<ContextMenu Name="ctxSeasonMenu">
-																	<MenuItem Header="Add Season" Command="{Binding AddSeason}"/>
-
-																</ContextMenu>
-															</DataGrid.ContextMenu>
 														</DataGrid>
 
-														<StackPanel Width="40" Background="Wheat" Margin="5,5,5,5"/>
+														<StackPanel Orientation="Vertical"
+																	Margin="5,5,5,5">
+															<DataGrid Name="EpisodeGrid"
+																	  AutoGenerateColumns="False"
+																	  VerticalScrollBarVisibility="Visible"
+																	  HorizontalScrollBarVisibility="Visible"
+																	  DockPanel.Dock="Top"
+																	  ItemsSource="{Binding CurrentSeason.TVEpisodes}"
+																	  SelectedItem="{Binding CurrentEpisode}"
+																	  Width="600"
+																	  Height="200">
+																<DataGrid.Columns>
+																	<DataGridTextColumn Header="ID" Binding="{Binding Id}" />
+																	<DataGridTextColumn Header="Episode No" Binding="{Binding EpisodeNumber}" />
+																	<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+																	<DataGridTextColumn Header="Movie ID" Binding="{Binding MovieId}" />
+																	<DataGridTextColumn Header="TMDB ID" Binding="{Binding TMID}" />
+																	<DataGridTextColumn Header="RunTime" Binding="{Binding Runtime}" />
+																	<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+																	<DataGridTextColumn Header="Overview" Binding="{Binding Overview}" />
 
-														<StackPanel Orientation="Vertical" Margin="5,5,5,5">
-
-
-															<DataGrid Name="dgEpisodes"
-																	  SelectedItem="{Binding CurrentSupportEpisode}"
-																	  AutoGenerateColumns="True"
-																	  Margin="5,5,5,5">
-																<DataGrid.ContextMenu >
-																	<ContextMenu Name="ctxEpisodes">
-																		<MenuItem Header="Add Episode" Command="{Binding AddEpisode}"/>
+																</DataGrid.Columns>
+																<DataGrid.ContextMenu>
+																	<ContextMenu Name="ctxSeasons">
+																		<MenuItem Header="Find Movie" Command="{Binding SearchForMovie}"/>
+																		<MenuItem Header="Play Movie" Command="{Binding PlayEpisodeMovie}"/>
+																		<MenuItem Header="Edit movie" Click="EditMovie_Click" />
+																		<MenuItem Header="To Movie" Command="{Binding ToMovie}" />
+																		<MenuItem Header="Change Season" Click="ChangeSeason_Click" />
 																	</ContextMenu>
 																</DataGrid.ContextMenu>
 															</DataGrid>
+															<StackPanel Orientation="Vertical" Margin="5,5,5,5">
+																<StackPanel Orientation="Horizontal">
+																	<tcb:ImagedButton LabelText="Add Episode" Command="{Binding AddEpisode}"
+																					  MaxWidth="115" Margin="5,5,5,5"
+																					  ToolTip.Tip="Add Episode"
+																					  ImageSource="avares://TaymadeControls/Assets/add_icon.png"/>
+																	<tcb:ImagedButton LabelText="Save Episode"
+																					  Command="{Binding SaveEpisode}"
+																					  ToolTip.Tip="Save Episode"
+																					  MaxWidth="115"
+																					  Margin="5,5,5,5"
+																					  ImageSource="avares://TaymadeControls/Assets/add_icon.png"
+																					  />
+																	<tcb:ImagedButton LabelText="Edit Episode"
+																					  Click="EditEpisode_Click"
+																					  ToolTip.Tip="Edit Episode"
+																					  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+																					  Margin="5,5,5,5" 
+																					  />
+																	<tcb:ImagedButton LabelText="Delete Episode"
+																					  Click="DeleteEpisode_Click"
+																					  Margin="5,5,5,5" 
+																					  ToolTip.Tip="Delete Episode"
+																					  ImageSource="avares://TaymadeControls/Assets/edit_icon.png"
+																					  />
+																</StackPanel>
+																<StackPanel Orientation="Horizontal" Margin="5,5,5,5">
+																	<tcb:ImagedButton LabelText="Add Season"
+																					  Command="{Binding AddSeason}"
+																					  Margin="5"
+																					  ToolTip.Tip="Add Season"
+																					  Width="115" 
+																					  ImageSource="avares://TaymadeControls/Assets/delete_icon.png"
+																					  />
+																	<tcb:ImagedButton LabelText="Save Season" 
+																					  Command="{Binding SaveSeason}"
+																					  Margin="5,5,5,5" 
+																					  Width="115"
+																					  ToolTip.Tip="Save Season"
+																					  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+																					  />
+																	<tcb:ImagedButton LabelText="Edit Season"
+																					  Command="{Binding EditSeasonCommand}" 
+																					  ToolTip.Tip="Edit Season"
+																					  Margin="5,5,5,5"
+																					  ImageSource="avares://TaymadeControls/Assets/edit_icon.png"
+																					  />
+																	<tcb:ImagedButton LabelText="Delete Season" 
+																					  Command="{Binding DeleteSeason}" 
+																					  Margin="5,5,5,5" 
+																					  ToolTip.Tip="Delete Season"
+																					  ImageSource="avares://TaymadeControls/Assets/delete_icon.png" />
+																</StackPanel>
+
+															</StackPanel>
 														</StackPanel>
 													</StackPanel>
-
 												</Border>
-											</StackPanel>
-										</Border>
-									</StackPanel>
-								</TabItem>
-								<TabItem Header="Movies">
-									<Border BorderBrush="Black"
-											BorderThickness="2"
-											CornerRadius="10"
-											Margin="5,5,5,5"
-											MaxHeight="800"
-											MaxWidth="1900"
-											DockPanel.Dock="Top"
-											>
-										<StackPanel>
-											<Grid ShowGridLines="False" DockPanel.Dock="Top" Margin="5,5,5,5">
-												<Grid.ColumnDefinitions>
-													<ColumnDefinition Width="100"/>
-													<ColumnDefinition Width="100"/>
-													<ColumnDefinition Width="10"/>
+											</DockPanel>
 
-													<ColumnDefinition Width="100"/>
-													<ColumnDefinition Width="500"/>
-													<ColumnDefinition Width="20"/>
-													<ColumnDefinition Width="200"/>
+											<Border BorderBrush="Black"
+													BorderThickness="2"
+													CornerRadius="10">
+												<StackPanel Orientation="Vertical" Margin="5,5,5,5">
+													<DataGrid Name="dgSeasons"
+															  AutoGenerateColumns="False"
+															  MaxWidth="600"
+															  MaxHeight="200"
 
-												</Grid.ColumnDefinitions>
-												<Grid.RowDefinitions>
-													<RowDefinition Height="Auto"></RowDefinition>
+															  Margin="5,5,5,5"
+															  ItemsSource="{Binding	SeasonList}"
+															  SelectedItem="{Binding CurrentSeason}"
+															  VerticalScrollBarVisibility="Visible"
+															  HorizontalScrollBarVisibility="Visible"
+															  >
+														<DataGrid.Columns>
+															<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+															<DataGridTextColumn Header="Season No" Binding="{Binding SeasonNo}" />
+															<DataGridTextColumn Header="TMID" Binding="{Binding TMDBID}" />
+															<DataGridTextColumn Header="Air Date" Binding="{Binding Year}" />
 
-													<RowDefinition Height="Auto"></RowDefinition>
+														</DataGrid.Columns>
+														<DataGrid.ContextMenu >
+															<ContextMenu Name="ctxSeasonMenu">
+																<MenuItem Header="Add Season" Command="{Binding AddSeason}"/>
 
-													<RowDefinition Height="Auto"></RowDefinition>
-													<RowDefinition Height="Auto"></RowDefinition>
+															</ContextMenu>
+														</DataGrid.ContextMenu>
+													</DataGrid>
 
-												</Grid.RowDefinitions>
-												<TextBlock Classes="h2"  Text="Series ID"  Grid.Column="0" Grid.Row="0"/>
-												<TextBlock Classes="c2" Height="30"  Text="{Binding CurrentSeries.Id}" Grid.Column="1" />
-												<TextBlock Classes="h2"  Text="Series Name"  Grid.Column="3" Grid.Row="0"/>
-												<TextBlock Classes="c2" Height="30"  Text="{Binding CurrentSeries.Name}" Grid.Column="4" />
+													<StackPanel Width="40" Background="Wheat" Margin="5,5,5,5"/>
 
-												<TextBlock Classes="h2"  Text="Series Overview"  Grid.Column="0" Grid.Row="1"/>
-												<TextBlock Classes="c2" Height="30"
-														   Text="{Binding CurrentSeries.Overview}"
-														   Grid.Column="1"
-														   Grid.Row="1"
-														   Grid.ColumnSpan="4"
-														   TextWrapping="Wrap" />
-												<TextBlock Classes="h2"  Text="Season"  Grid.Column="0" Grid.Row="4"/>
-												<TextBlock Classes="c2" Height="30"  Text="{Binding CurrentSeason.Name}"
-														   Grid.Column="1"
-														   Grid.Row="4"/>
-											</Grid>
-											<StackPanel Height="20" Background="Wheat" Margin="5,5,5,5"/>
-											<ComboBox ItemsSource="{Binding CurrentSeries.Seasons}"
-													  SelectedItem="{Binding CurrentSeason}"
-													  />
-											<StackPanel Height="20" Background="Wheat" Margin="5,5,5,5"/>
-											<Border MaxWidth="1800">
-												<DataGrid Name="dgSeriesMovies"
-														  ItemsSource="{Binding SeasonMovies}"
-														  SelectedItem="{Binding CurrentSeasonMovie}"
-														  Margin="5,5,5,5"
-														  MaxHeight="400"
-														  MinHeight="100"
-														  MaxWidth="1800"
-														  HorizontalAlignment="Left"
-														  VerticalScrollBarVisibility="Auto"
-														  HorizontalScrollBarVisibility="Auto"
-														  >
-													<DataGrid.Columns>
-														<DataGridTextColumn Header="Id" Binding="{Binding Id}" />
-														<DataGridTextColumn Header="Name" Width="350" Binding="{Binding MovieName}">
+													<StackPanel Orientation="Vertical" Margin="5,5,5,5">
 
-														</DataGridTextColumn>
-														<DataGridTextColumn Header="#Bookmarks" Binding="{Binding ImagesCount}" />
-														<DataGridTextColumn Header="Duration" Binding="{Binding MovieDuration, Mode=OneWay}" />
-														<DataGridTextColumn Header="Added" Binding="{Binding Added, Mode=OneWay}" />
-														<DataGridTextColumn Header="Modified" Binding="{Binding ModifiedOn, Mode=OneWay}" />
-														<DataGridCheckBoxColumn Header="Has Chapter" Binding="{Binding HasChapters, Mode=OneWay}" />
-														<DataGridCheckBoxColumn Header="Has Episode" Binding="{Binding HasEpisodes, Mode=OneWay}" />
-														<DataGridTextColumn Header="Rating" Binding="{Binding MovieExtension.Rating, Mode=OneWay}" />
-														<DataGridTextColumn Header="Episode No" Binding="{Binding EpisodeNumber, Mode=OneWay}" />
-														<DataGridTemplateColumn Header="Play">
-															<DataGridTemplateColumn.CellTemplate>
-																<DataTemplate >
-																	<Button Content="Play" Click="PlayEpisodeMovie" />
-																</DataTemplate>
-															</DataGridTemplateColumn.CellTemplate>
-														</DataGridTemplateColumn>
-														<DataGridTemplateColumn Header="Edit">
-															<DataGridTemplateColumn.CellTemplate>
-																<DataTemplate>
-																	<Button Content="Edit" Click="EditMovie_Click" />
-																</DataTemplate>
-															</DataGridTemplateColumn.CellTemplate>
-														</DataGridTemplateColumn>
-													</DataGrid.Columns>
-												</DataGrid>
+
+														<DataGrid Name="dgEpisodes"
+																  SelectedItem="{Binding CurrentSupportEpisode}"
+																  AutoGenerateColumns="True"
+																  Margin="5,5,5,5">
+															<DataGrid.ContextMenu >
+																<ContextMenu Name="ctxEpisodes">
+																	<MenuItem Header="Add Episode" Command="{Binding AddEpisode}"/>
+																</ContextMenu>
+															</DataGrid.ContextMenu>
+														</DataGrid>
+													</StackPanel>
+												</StackPanel>
+
 											</Border>
 										</StackPanel>
 									</Border>
-								</TabItem>
+								</StackPanel>
+							</TabItem>
+							<TabItem Header="Movies">
+								<Border BorderBrush="Black"
+										BorderThickness="2"
+										CornerRadius="10"
+										Margin="5,5,5,5"
+										MaxHeight="800"
+										MaxWidth="1900"
+										DockPanel.Dock="Top"
+										>
+									<StackPanel>
+										<Grid ShowGridLines="False" DockPanel.Dock="Top" Margin="5,5,5,5">
+											<Grid.ColumnDefinitions>
+												<ColumnDefinition Width="100"/>
+												<ColumnDefinition Width="100"/>
+												<ColumnDefinition Width="10"/>
 
-							</TabControl>
+												<ColumnDefinition Width="100"/>
+												<ColumnDefinition Width="500"/>
+												<ColumnDefinition Width="20"/>
+												<ColumnDefinition Width="200"/>
+
+											</Grid.ColumnDefinitions>
+											<Grid.RowDefinitions>
+												<RowDefinition Height="Auto"></RowDefinition>
+
+												<RowDefinition Height="Auto"></RowDefinition>
+
+												<RowDefinition Height="Auto"></RowDefinition>
+												<RowDefinition Height="Auto"></RowDefinition>
+
+											</Grid.RowDefinitions>
+											<TextBlock Classes="h2"  Text="Series ID"  Grid.Column="0" Grid.Row="0"/>
+											<TextBlock Classes="c2" Height="30"  Text="{Binding CurrentSeries.Id}" Grid.Column="1" />
+											<TextBlock Classes="h2"  Text="Series Name"  Grid.Column="3" Grid.Row="0"/>
+											<TextBlock Classes="c2" Height="30"  Text="{Binding CurrentSeries.Name}" Grid.Column="4" />
+
+											<TextBlock Classes="h2"  Text="Series Overview"  Grid.Column="0" Grid.Row="1"/>
+											<TextBlock Classes="c2" Height="30"
+													   Text="{Binding CurrentSeries.Overview}"
+													   Grid.Column="1"
+													   Grid.Row="1"
+													   Grid.ColumnSpan="4"
+													   TextWrapping="Wrap" />
+											<TextBlock Classes="h2"  Text="Season"  Grid.Column="0" Grid.Row="4"/>
+											<TextBlock Classes="c2" Height="30"  Text="{Binding CurrentSeason.Name}"
+													   Grid.Column="1"
+													   Grid.Row="4"/>
+										</Grid>
+										<StackPanel Height="20" Background="Wheat" Margin="5,5,5,5"/>
+										<ComboBox ItemsSource="{Binding CurrentSeries.Seasons}"
+												  SelectedItem="{Binding CurrentSeason}"
+												  />
+										<StackPanel Height="20" Background="Wheat" Margin="5,5,5,5"/>
+										<Border MaxWidth="1800">
+											<DataGrid Name="dgSeriesMovies"
+													  ItemsSource="{Binding SeasonMovies}"
+													  SelectedItem="{Binding CurrentSeasonMovie}"
+													  Margin="5,5,5,5"
+													  MaxHeight="400"
+													  MinHeight="100"
+													  MaxWidth="1800"
+													  HorizontalAlignment="Left"
+													  VerticalScrollBarVisibility="Auto"
+													  HorizontalScrollBarVisibility="Auto"
+													  >
+												<DataGrid.Columns>
+													<DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+													<DataGridTextColumn Header="Name" Width="350" Binding="{Binding MovieName}">
+
+													</DataGridTextColumn>
+													<DataGridTextColumn Header="#Bookmarks" Binding="{Binding ImagesCount}" />
+													<DataGridTextColumn Header="Duration" Binding="{Binding MovieDuration, Mode=OneWay}" />
+													<DataGridTextColumn Header="Added" Binding="{Binding Added, Mode=OneWay}" />
+													<DataGridTextColumn Header="Modified" Binding="{Binding ModifiedOn, Mode=OneWay}" />
+													<DataGridCheckBoxColumn Header="Has Chapter" Binding="{Binding HasChapters, Mode=OneWay}" />
+													<DataGridCheckBoxColumn Header="Has Episode" Binding="{Binding HasEpisodes, Mode=OneWay}" />
+													<DataGridTextColumn Header="Rating" Binding="{Binding MovieExtension.Rating, Mode=OneWay}" />
+													<DataGridTextColumn Header="Episode No" Binding="{Binding EpisodeNumber, Mode=OneWay}" />
+													<DataGridTemplateColumn Header="Play">
+														<DataGridTemplateColumn.CellTemplate>
+															<DataTemplate >
+																<Button Content="Play" Click="PlayEpisodeMovie" />
+															</DataTemplate>
+														</DataGridTemplateColumn.CellTemplate>
+													</DataGridTemplateColumn>
+													<DataGridTemplateColumn Header="Edit">
+														<DataGridTemplateColumn.CellTemplate>
+															<DataTemplate>
+																<Button Content="Edit" Click="EditMovie_Click" />
+															</DataTemplate>
+														</DataGridTemplateColumn.CellTemplate>
+													</DataGridTemplateColumn>
+												</DataGrid.Columns>
+											</DataGrid>
+										</Border>
+									</StackPanel>
+								</Border>
+							</TabItem>
+
+						</TabControl>
+					</StackPanel>
+
+
+
+					<StackPanel Orientation="Vertical">
+						<!--<DataGrid Name="dgNewSeries" AutoGenerateColumns="False"
+						DockPanel.Dock="Top"
+						Margin="5,5,5,5"
+						VerticalScrollBarVisibility="Visible" Height="250"
+						ItemsSource="{Binding NewSeriesList}"
+						SelectedItem="{Binding CurrentNewSeries}">
+						<DataGrid.Columns>
+						<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+						<DataGridTextColumn Header="Overview" Binding="{Binding Overview}" />
+						<DataGridTextColumn Header="TMDB ID" Binding="{Binding TMID}" />
+						</DataGrid.Columns>
+						</DataGrid> -->
+					</StackPanel>
+
+
+					<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray"
+							BorderThickness="2" DockPanel.Dock="Bottom">
+						<StackPanel Orientation="Horizontal"
+									VerticalAlignment="Bottom"
+									Margin="5,5,5,5">
+
+							<tcb:OkButton LabelText="Close" Margin="5,5,5,5"
+										  Click="Accept_Click"
+										  HotKey="Enter"
+
+										  Name="Accept" />
+
+							<TextBlock Text="Series Name" VerticalAlignment="Center" Margin="5,5,5,5"/>
+							<TextBox Text="{Binding SeriesName}"
+									 VerticalAlignment="Center"
+									 Margin="5,5,5,5" Width="150"/>
+							<tcb:ImagedButton LabelText="New Series"
+											  Margin="5,5,5,5	"
+											  Command="{Binding NewSeries}"
+											  ImageSource="avares://TaymadeControls/Assets/add_icon.png"
+											  Name="NewSeries"
+											  />
+
+
 						</StackPanel>
-					
+					</Border>
+				</StackPanel>
 
-
-		<StackPanel Orientation="Vertical">
-			<!--<DataGrid Name="dgNewSeries" AutoGenerateColumns="False"
-			DockPanel.Dock="Top"
-			Margin="5,5,5,5"
-			VerticalScrollBarVisibility="Visible" Height="250"
-			ItemsSource="{Binding NewSeriesList}"
-			SelectedItem="{Binding CurrentNewSeries}">
-			<DataGrid.Columns>
-			<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-			<DataGridTextColumn Header="Overview" Binding="{Binding Overview}" />
-			<DataGridTextColumn Header="TMDB ID" Binding="{Binding TMID}" />
-			</DataGrid.Columns>
-			</DataGrid> -->
-		</StackPanel>
-
-
-		<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray"
-				BorderThickness="2" DockPanel.Dock="Bottom">
-			<StackPanel Orientation="Horizontal"
-						VerticalAlignment="Bottom"
-						Margin="5,5,5,5">
-
-				<tcb:OkButton LabelText="Close" Margin="5,5,5,5"
-								  Click="Accept_Click"
-								  HotKey="Enter"
-								  
-								  Name="Accept" />
-
-				<TextBlock Text="Series Name" VerticalAlignment="Center" Margin="5,5,5,5"/>
-				<TextBox Text="{Binding SeriesName}"
-						 VerticalAlignment="Center"
-						 Margin="5,5,5,5" Width="150"/>
-				<tcb:ImagedButton LabelText="New Series"
-								  Margin="5,5,5,5	"
-								  Command="{Binding NewSeries}"
-								  ImageSource="avares://TaymadeControls/Assets/add_icon.png"
-								  Name="NewSeries"
-								  />
-
-
-			</StackPanel>
-			</Border>
-		</StackPanel>
-
-</DockPanel>
-</Border>
-</StackPanel>
+			</DockPanel>
+		</Border>
+	</StackPanel>
 </Window>

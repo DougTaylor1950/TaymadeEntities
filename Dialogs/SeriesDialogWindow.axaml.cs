@@ -62,12 +62,18 @@ namespace TaymadeEntities.Dialogs
 
         private void OKButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            this.Close(true);
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                this.Close(true);
+            });
         }
 
         private void CancelButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            this.Close(false);
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                this.Close(false);
+            });
         }
 
         protected virtual void Dispose(bool disposing)

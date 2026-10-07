@@ -612,7 +612,8 @@
 								<TextBox   Classes="c1" Height="30"   Text="{Binding CurrentEpisode.EpisodeNumber}" Grid.Column="5" Grid.Row="3"  Width="100" />
 								<tcb:ImagedButton Grid.Row="3"
 												  Grid.Column="10"
-												  Command="{Binding AddNewEpisodeCommand}"
+												  Click="AddNewEpisode"
+												 
 												  ToolTip.Tip="Add a new Episode"
 												  ImageSource="avares://TaymadeControls/Assets/add_icon.png"
 												  LabelText="Add Episode"

@@ -1072,8 +1072,17 @@ namespace TaymadeEntities.Models
                         movie = _context.Movies.Find(this.Id);
                         if (movie != null)
                         {
-
-                            _context.Movies.Update(movie);
+                            movie.Episode = this.Episode;
+                            movie.Season = this.Season;
+                            movie.Series = this.Series;
+                            movie.ImagesCount = this.imagesCount;
+                            movie.MovieDuration = this.MovieDuration;
+                            movie.MovieName = this.MovieName;
+                            movie.Year = this.Year;
+                            movie.ImagePath = this.ImagePath;
+                            movie.ModifiedOn = DateTime.Now;
+                            movie.MoviePath = this.MoviePath;
+                            //_context.Movies.Update(movie);
                             success = _context.SaveChanges() > 0;
 
                         }
@@ -1082,6 +1091,7 @@ namespace TaymadeEntities.Models
                             _context.Movies.Add(this);
                             success = _context.SaveChanges() > 0;
                         }
+                       // DataController.MovieController.Save(this);
                     }
 
                 }

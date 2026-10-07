@@ -48,7 +48,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void Save()
         {
-            DataController.MovieController.UpdateSeason(this);
+            DataController.MovieController.SaveContext();
         }
 
         #endregion
