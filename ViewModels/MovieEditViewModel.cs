@@ -332,7 +332,10 @@ namespace TaymadeEntities.ViewModels
                 else
                 {
                     var moviesForSeason = DataController.MovieController.GetMoviesBySeason(value.Id).ToList();
-
+                    foreach (var item in moviesForSeason)
+                    {
+                        item.Loaded = true;
+                    }
                     SeasonMovies = new ObservableCollection<Movies>(moviesForSeason);
 
                     if (value.TVEpisodes != null && value.TVEpisodes.Count > 0)

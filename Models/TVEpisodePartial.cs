@@ -158,6 +158,7 @@ namespace TaymadeEntities.Models
                     if (result != null && result.Result == DialogResultButton.ResultType.Ok)
                     {
                         string? episodeName = result.Parameter;
+                        if (episodeName.Length > 50) episodeName = episodeName.Substring(0, 50);
                         episode.Name = episodeName;
 
                         entryDialogModel.EntryText = movie.MovieName;

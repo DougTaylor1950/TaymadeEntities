@@ -30,7 +30,7 @@ namespace TaymadeEntities.Controllers
         /// </summary>
         private IMovieRepository movieRepository;
 
-        
+
 
         #endregion Private Fields
 
@@ -164,7 +164,13 @@ namespace TaymadeEntities.Controllers
         /// </remarks>
         public List<Movies>? GetMoviesByDirector(int id)
         {
-            return movieRepository.GetMoviesByDirector(id)?.ToList();
+            List<Movies>? tempList = movieRepository.GetMoviesByDirector(id)?.ToList();
+            if (tempList != null)
+                foreach (Movies movie in tempList)
+                {
+                    movie.Loaded = true;
+                }
+            return tempList;
         }
 
         // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
@@ -188,7 +194,13 @@ namespace TaymadeEntities.Controllers
             string? subGenre = "")
 
         {
-            return movieRepository.GetMoviesByGenre(genre, subGenre)?.ToList();
+            List<Movies>? tempList = movieRepository.GetMoviesByGenre(genre, subGenre)?.ToList();
+            if (tempList != null)
+                foreach (Movies movie in tempList)
+                {
+                    movie.Loaded = true;
+                }
+            return tempList;
         }
 
         /// <summary>
@@ -219,7 +231,15 @@ namespace TaymadeEntities.Controllers
         public List<Movies>? GetMoviesByInfo(string? stub)
         {
             if (!string.IsNullOrEmpty(stub))
-                return movieRepository.GetMoviesByInfo(stub)?.ToList();
+            {
+                List<Movies>? tempList = movieRepository.GetMoviesByInfo(stub)?.ToList();
+                if (tempList != null)
+                    foreach (Movies movie in tempList)
+                    {
+                        movie.Loaded = true;
+                    }
+                return tempList;
+            }
             else return null;
         }
 
@@ -254,8 +274,14 @@ namespace TaymadeEntities.Controllers
         {
             if (!string.IsNullOrEmpty(title))
             {
-                IEnumerable<Movies>? tempList = await movieRepository.GetMoviesByTitleAsync(title);
-                return tempList.ToList();
+                List<Movies>? tempList = await movieRepository.GetMoviesByTitleAsync(title);
+                if (tempList != null)
+                    foreach (Movies movie in tempList)
+                    {
+                        movie.Loaded = true;
+                    }
+                return tempList;
+                
             }
             else return null;
         }
@@ -370,7 +396,7 @@ namespace TaymadeEntities.Controllers
             return movieRepository.DeleteFrameSet(frameSet);
         }
 
-        public  bool DeleteMovieImage(MovieImage movieImage)
+        public bool DeleteMovieImage(MovieImage movieImage)
         {
             return movieRepository.DeleteMovieImage(movieImage);
         }
@@ -446,7 +472,7 @@ namespace TaymadeEntities.Controllers
         public TVEpisode? AddTVEpisode(TVEpisode tVEpisode)
         {
             return movieRepository.AddTVEpisode(tVEpisode);
-        
+
         }
 
         public bool DeleteTVEpisode(TVEpisode tVEpisode)
@@ -481,9 +507,15 @@ namespace TaymadeEntities.Controllers
             return movieRepository.GetTVEpisodeById(episode);
         }
 
-        public IEnumerable<Movies> GetMoviesBySeason(int id)
+        public List<Movies>? GetMoviesBySeason(int id)
         {
-            return movieRepository.GetMoviesBySeason(id);
+            List<Movies>? tempList = movieRepository.GetMoviesBySeason(id).ToList();
+            if (tempList != null)
+                foreach (Movies movie in tempList)
+                {
+                    movie.Loaded = true;
+                }
+            return tempList;
         }
 
         public EntityState? GetTVEpisodeEntityState(TVEpisode episode)

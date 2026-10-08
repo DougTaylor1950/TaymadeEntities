@@ -62,7 +62,7 @@ namespace TaymadeEntities.DAL.Interfaces
 
         IEnumerable<Movies>? GetMoviesByTitle(string title);
 
-        Task<IEnumerable<Movies>> GetMoviesByTitleAsync(string title);
+        Task<List<Movies>> GetMoviesByTitleAsync(string title);
 
         List<Series> GetSeriesList();
         List<TVEpisode>? GetTVEpisodesBySeasonID(int id);

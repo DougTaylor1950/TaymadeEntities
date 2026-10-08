@@ -267,12 +267,52 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void Save()
         {
-            DataController.BookmarkController.Update(this);
+            using var _context = new TaymadeEntities.DBContext.SandboxEntities();
+            {
+                Bookmark? bookmark = _context.Bookmarks.Find(this.Id);
+                if (bookmark != null)
+                {
+                    bookmark.Comment = this.Comment;
+                    bookmark.ImagePath = this.ImagePath;
+                    bookmark.MovieID = this.MovieID;
+                    bookmark.Name = this.Name;
+                    bookmark.Time = this.Time;
+                    bookmark.Type = this.Type;
+                }
+                else
+                {
+                    _context.Bookmarks.Add(this);
+                }
+                _context.SaveChanges();
+
+            }
+
+            DataController.BookmarkController.GetById(this.Id);
         }
 
         public async Task<bool> SaveAsync()
         {
-            return await DataController.BookmarkController.UpdateAsync(this);
+            using var _context = new TaymadeEntities.DBContext.SandboxEntities();
+            {
+                Bookmark? bookmark = _context.Bookmarks.Find(this.Id);
+                if (bookmark != null)
+                {
+                    bookmark.Comment = this.Comment;
+                    bookmark.ImagePath = this.ImagePath;
+                    bookmark.MovieID = this.MovieID;
+                    bookmark.Name = this.Name;
+                    bookmark.Time = this.Time;
+                    bookmark.Type = this.Type;
+                }
+                else
+                {
+                    _context.Bookmarks.Add(this);
+                }
+                DataController.BookmarkController.GetById(this.Id);
+                return await _context.SaveChangesAsync() >0;
+
+            }
+            //return await DataController.BookmarkController.UpdateAsync(this);
         }
 
         /// <summary>

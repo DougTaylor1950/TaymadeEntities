@@ -18,6 +18,7 @@ namespace TaymadeEntities.Models
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
     using Avalonia.Metadata;
+    using System.Diagnostics;
 
 
     /// <summary>
@@ -27,9 +28,10 @@ namespace TaymadeEntities.Models
 
     public partial class Movies : ModelBase, IDisposable
     {
-        #region Fields
 
         //private static Logger logger = LogManager.GetCurrentClassLogger();
+
+        #region Private Fields
 
         /// <summary>
         /// Defines the added.
@@ -39,22 +41,32 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the addedOn.
         /// </summary>
-        private string addedOn;
+        private string? addedOn;
 
         /// <summary>
         /// Defines the bookmarks.
         /// </summary>
-        private ObservableCollection<Bookmark> bookmarks;
+        private ObservableCollection<Bookmark>? bookmarks;
 
         /// <summary>
         /// Defines the casts.
         /// </summary>
-        private ICollection<Cast> casts;
+        private ICollection<Cast>? casts;
+
+        private Director? director;
+
+        private int? directorID;
+
+        private bool dirty = false;
+
+        private bool disposedValue;
 
         /// <summary>
         /// Defines the durationSeconds.
         /// </summary>
         private int? durationSeconds;
+
+        private Bookmark? endBookmark;
 
         /// <summary>
         /// Defines the episode.
@@ -65,6 +77,8 @@ namespace TaymadeEntities.Models
         /// Defines the episodeEntity.
         /// </summary>
         private TVEpisode? episodeEntity;
+
+        private int? episodeNumber;
 
         /// <summary>
         /// Defines the filmGroup.
@@ -81,10 +95,16 @@ namespace TaymadeEntities.Models
         /// </summary>
         private bool? hasEpisodes;
 
+        private bool? hasSeason;
+
+        private bool? hasSeries;
+
+        private int id;
+
         /// <summary>
         /// Defines the imagePath.
         /// </summary>
-        private string imagePath;
+        private string? imagePath;
 
         /// <summary>
         /// Defines the imagesCount.
@@ -94,22 +114,30 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the iMDBID.
         /// </summary>
-        private string iMDBID;
+        private string? iMDBID;
 
         /// <summary>
         /// Defines the info.
         /// </summary>
-        private string info;
+        private string? info;
+
+        private bool isLoaded = false;
+
+        private string? json;
 
         /// <summary>
         /// Defines the link1.
         /// </summary>
         private int? link1;
 
+        private bool loaded = false;
+
         /// <summary>
         /// Defines the modifiedOn.
         /// </summary>
         private DateTime? modifiedOn = DateTime.MinValue;
+
+        private ObservableCollection<MovieGenre>? movieGenres;
 
         /// <summary>
         /// Defines the movieName.
@@ -124,17 +152,17 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the path.
         /// </summary>
-        private string path;
+        private string? path;
 
         /// <summary>
         /// Defines the plexKey.
         /// </summary>
-        private string plexKey;
+        private string? plexKey;
 
         /// <summary>
         /// Defines the primaryFilmGroup.
         /// </summary>
-        private string primaryFilmGroup;
+        private string? primaryFilmGroup;
 
         /// <summary>
         /// Defines the progress.
@@ -151,10 +179,16 @@ namespace TaymadeEntities.Models
         /// </summary>
         private Season? seasonEntity;
 
+        private string? seasonNo = null;
+
+        private bool selected;
+
         /// <summary>
         /// Defines the series.
         /// </summary>
         private int? series;
+
+        private Bookmark? startBookmark;
 
         /// <summary>
         /// Defines the tMDBID.
@@ -164,33 +198,21 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Defines the tVEpisodes.
         /// </summary>
-        private ICollection<TVEpisode> tVEpisodes;
+        private List<TVEpisode>? tVEpisodes;
 
         /// <summary>
         /// Defines the wIKIPageID.
         /// </summary>
-        private string wIKIPageID;
+        private string? wIKIPageID;
 
         /// <summary>
         /// Defines the year.
         /// </summary>
         private int? year;
-        private int? episodeNumber;
-        private bool dirty = false;
-        private Bookmark startBookmark;
-        private Bookmark endBookmark;
-        private bool selected;
-        private ObservableCollection<MovieGenre> movieGenres;
-        private Director director;
-        private int? directorID;
-        private string json;
-        private bool? hasSeries;
-        private bool? hasSeason;
-        private bool disposedValue;
 
-        #endregion
+        #endregion Private Fields
 
-        #region Cons
+        #region Public Constructors
 
         public Movies(string moviePath)
         {
@@ -213,33 +235,14 @@ namespace TaymadeEntities.Models
             this.EndBookmark = new Bookmark() { Name = "End", Time = DurationSeconds, Type = "Special" };
         }
 
-        private void Movies_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-        {
-            string name = e.PropertyName;
+        #endregion Public Constructors
 
-            if (!(name == "link" || name == "ModifiedOn" || name == "ErrorText" || name == "BackColour" || name == "PercentUnBookmarked"
-                || name == "Bookmarks" || name == "EpisodeEntity" || name == "SeasonEntity" || name == "SeriesEntity" || name == "Casts" || name == "Added" || name == "MovieDuration"))
-            {
-                Dirty = true;
-                if (!string.IsNullOrEmpty(ChangedFields)) ChangedFields += ",";
-                ChangedFields += name;
-            }
-        }
-
-        #endregion
-
-        #region Properties
-
-        [NotMapped]
-
-        public bool Dirty { get => dirty; set => dirty = value; }
-
-
+        #region Public Properties
 
         /// <summary>
         /// Gets or sets the Added.
         /// </summary>
-        public Nullable<System.DateTime> Added
+        public System.DateTime? Added
         {
             get => added;
             set
@@ -272,36 +275,10 @@ namespace TaymadeEntities.Models
             }
         }
 
-        [NotMapped]
-        public bool? HasSeries
-        {
-            get => hasSeries;
-            set => this.RaiseAndSetIfChanged(ref hasSeries, value);
-        }
-
-        [NotMapped]
-        public bool? HasSeason
-        {
-            get => hasSeason;
-            set => this.RaiseAndSetIfChanged(ref hasSeason, value);
-        }
-
-        // add a ToString override to return the MovieName and Year
-        public override string ToString()
-        {
-            return $"{MovieName} ({Year}) Runtime {MovieDuration.ToString()}";
-        }
-
-        [NotMapped]
-        public Bookmark StartBookmark { get => startBookmark; set => this.RaiseAndSetIfChanged(ref startBookmark, value); }
-
-        [NotMapped]
-        public Bookmark EndBookmark { get => endBookmark; set => this.RaiseAndSetIfChanged(ref endBookmark, value); }
-
         /// <summary>
         /// Gets or sets the Bookmarks.
         /// </summary>
-        public ObservableCollection<Bookmark> Bookmarks
+        public ObservableCollection<Bookmark>? Bookmarks
         {
             get => bookmarks;
             set
@@ -312,38 +289,10 @@ namespace TaymadeEntities.Models
         }
 
         /// <summary>
-        /// Gets or sets the movie genres.
-        /// </summary>
-        /// <value>
-        /// The movie genres.
-        /// </value>
-        /// <autogeneratedoc />
-        public ObservableCollection<MovieGenre> MovieGenres
-        {
-            get
-            {
-                if (movieGenres == null || movieGenres.Count == 0)
-                {
-                    movieGenres = new System.Collections.ObjectModel.ObservableCollection<MovieGenre>(
-                        DataController.SandboxEntities.MovieGenre.ToList().Where(mg => mg.MovieId == Id).OrderBy(o => o.Genre).ToList()
-                        );
-                    // if (notBuilt && movieGenres.Count == 0) this.BuildGenreList();
-                }
-                return movieGenres;
-            }
-
-            set
-            {
-                this.RaiseAndSetIfChanged(ref movieGenres, value);
-                this.RaisePropertyChanged(nameof(MovieGenres));
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the Casts.
         /// </summary>
         [NotMapped]
-        public ICollection<Cast> Casts
+        public ICollection<Cast>? Casts
         {
             get
             {
@@ -368,12 +317,28 @@ namespace TaymadeEntities.Models
         /// Gets or sets the Director.
         /// </summary>
         [NotMapped]
-        public virtual Director Director { get => director; set => this.RaiseAndSetIfChanged(ref director, value); }
+        public virtual Director? Director 
+        {
+            get => director; 
+            set => this.RaiseAndSetIfChanged(ref director, value); 
+        }
 
         /// <summary>
         /// Gets or sets the DirectorID.
         /// </summary>
-        public Nullable<int> DirectorID { get => directorID; set => this.RaiseAndSetIfChanged(ref directorID, value); }
+        public int? DirectorID 
+        { 
+            get => directorID; 
+            set => this.RaiseAndSetIfChanged(ref directorID, value); 
+        }
+
+        [NotMapped]
+
+        public bool Dirty 
+        { 
+            get => dirty; 
+            set => dirty = value; 
+        }
 
         /// <summary>
         /// Gets or sets the DurationSeconds.
@@ -407,34 +372,11 @@ namespace TaymadeEntities.Models
             }
         }
 
-
-
         [NotMapped]
-        public int? EpisodeNumber
-        {
-            get
-            {
-                if (episodeNumber == null)
-                {
-                    if (EpisodeEntity != null)
-                    { episodeNumber = EpisodeEntity.EpisodeNumber; }
-                    else if (Episode != null)
-                    {
-                        //EpisodeEntity = DataController.SandboxEntities.TVEpisodes.Find(Episode).FirstOrDefault();
-                    }
-
-                }
-                //this.RaisePropertyChanged(nameof(EpisodeNumber));
-                return episodeNumber;
-            }
-
-            set => this.RaiseAndSetIfChanged(ref episodeNumber, value);
-        }
-
-        private void GetEpisodeEntity()
-        {
-            EpisodeEntity = DataController.MovieController.GetTVEpisodeById(Episode);
-            this.RaisePropertyChanged("EpisodeEntity");
+        public Bookmark? EndBookmark 
+        { 
+            get => endBookmark; 
+            set => this.RaiseAndSetIfChanged(ref endBookmark, value); 
         }
 
         /// <summary>
@@ -494,6 +436,28 @@ namespace TaymadeEntities.Models
             }
         }
 
+        [NotMapped]
+        public int? EpisodeNumber
+        {
+            get
+            {
+                if (episodeNumber == null)
+                {
+                    if (EpisodeEntity != null)
+                    { episodeNumber = EpisodeEntity.EpisodeNumber; }
+                    else if (Episode != null)
+                    {
+                        //EpisodeEntity = DataController.SandboxEntities.TVEpisodes.Find(Episode).FirstOrDefault();
+                    }
+
+                }
+                //this.RaisePropertyChanged(nameof(EpisodeNumber));
+                return episodeNumber;
+            }
+
+            set => this.RaiseAndSetIfChanged(ref episodeNumber, value);
+        }
+
         /// <summary>
         /// Gets or sets the FilmGroup.
         /// </summary>
@@ -511,27 +475,53 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the h.
         /// </summary>
-        public Nullable<bool> h { get; set; }
+        public bool? h { get; set; }
 
         /// <summary>
         /// Gets or sets the HasChapters.
         /// </summary>
-        public Nullable<bool> HasChapters { get => hasChapters; set => this.RaiseAndSetIfChanged(ref hasChapters, value); }
+        public bool? HasChapters 
+        {
+            get => hasChapters;
+            set => this.RaiseAndSetIfChanged(ref hasChapters, value); 
+        }
 
         /// <summary>
         /// Gets or sets the HasEpisodes.
         /// </summary>
-        public Nullable<bool> HasEpisodes { get => hasEpisodes; set => this.RaiseAndSetIfChanged(ref hasEpisodes, value); }
+        public bool? HasEpisodes
+        { 
+            get => hasEpisodes; 
+            set => this.RaiseAndSetIfChanged(ref hasEpisodes, value);
+        }
+
+        [NotMapped]
+        public bool? HasSeason
+        {
+            get => hasSeason;
+            set => this.RaiseAndSetIfChanged(ref hasSeason, value);
+        }
+
+        [NotMapped]
+        public bool? HasSeries
+        {
+            get => hasSeries;
+            set => this.RaiseAndSetIfChanged(ref hasSeries, value);
+        }
 
         /// <summary>
         /// Gets or sets the Id.
         /// </summary>
-        public new int Id { get; set; }
+        public new int Id
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Gets or sets the ImagePath.
         /// </summary>
-        public string ImagePath
+        public string? ImagePath
         {
             get
             {
@@ -552,7 +542,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the ImagesCount.
         /// </summary>
-        public Nullable<int> ImagesCount
+        public int? ImagesCount
         {
             get
             {
@@ -582,17 +572,64 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the IMDBID.
         /// </summary>
-        public string IMDBID { get => iMDBID; set => this.RaiseAndSetIfChanged(ref iMDBID, value); }
+        public string? IMDBID 
+        {
+            get => iMDBID; 
+            set => this.RaiseAndSetIfChanged(ref iMDBID, value); 
+        }
 
         /// <summary>
         /// Gets or sets the Info.
         /// </summary>
-        public string Info { get => info; set => this.RaiseAndSetIfChanged(ref info, value); }
+        public string? Info 
+        { 
+            get => info; 
+            set => this.RaiseAndSetIfChanged(ref info, value); 
+        }
+
+        [NotMapped]
+        public bool IsSelected 
+        { 
+            get => selected; 
+            set => this.RaiseAndSetIfChanged(ref selected, value); 
+        }
+
+        public string? Json 
+        { 
+            get => json; 
+            set => this.RaiseAndSetIfChanged(ref json, value); 
+        }
 
         /// <summary>
         /// Gets or sets the link.
         /// </summary>
-        public Nullable<int> link { get => link1; set => this.RaiseAndSetIfChanged(ref link1, value); }
+        public int? link 
+        {
+            get => link1; 
+            set => this.RaiseAndSetIfChanged(ref link1, value); 
+        }
+
+        public bool IsLoaded { get => isLoaded; }
+
+        [NotMapped]
+        public bool Loaded
+        {
+            get => loaded;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref loaded, value);
+                if (value)
+                {
+                    if (!IsLoaded)
+                    {
+                        LoadChildren();
+                        Debug.WriteLine(Id.ToString());
+                        isLoaded = true;
+                    }
+                    // build properties if not already loaded;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets the ModifiedOn.
@@ -605,6 +642,34 @@ namespace TaymadeEntities.Models
             {
                 if (value != null)
                     this.RaiseAndSetIfChanged(ref modifiedOn, value);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the movie genres.
+        /// </summary>
+        /// <value>
+        /// The movie genres.
+        /// </value>
+        /// <autogeneratedoc />
+        public ObservableCollection<MovieGenre>? MovieGenres
+        {
+            get
+            {
+                if (movieGenres == null || movieGenres.Count == 0)
+                {
+                    movieGenres = new System.Collections.ObjectModel.ObservableCollection<MovieGenre>(
+                        DataController.SandboxEntities.MovieGenre.ToList().Where(mg => mg.MovieId == Id).OrderBy(o => o.Genre).ToList()
+                        );
+                    // if (notBuilt && movieGenres.Count == 0) this.BuildGenreList();
+                }
+                return movieGenres;
+            }
+
+            set
+            {
+                this.RaiseAndSetIfChanged(ref movieGenres, value);
+                this.RaisePropertyChanged(nameof(MovieGenres));
             }
         }
 
@@ -653,7 +718,7 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the Path.
         /// </summary>
-        public string Path
+        public string? Path
         {
             get => path;
 
@@ -667,39 +732,29 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets or sets the PlexKey.
         /// </summary>
-        public string PlexKey { get => plexKey; set => this.RaiseAndSetIfChanged(ref plexKey, value); }
+        public string? PlexKey 
+        { 
+            get => plexKey; 
+            set => this.RaiseAndSetIfChanged(ref plexKey, value);
+        }
 
         /// <summary>
         /// Gets or sets the PrimaryFilmGroup.
         /// </summary>
-        public string PrimaryFilmGroup { get => primaryFilmGroup; set => this.RaiseAndSetIfChanged(ref primaryFilmGroup, value); }
+        public string? PrimaryFilmGroup 
+        {
+            get => primaryFilmGroup; 
+            set => this.RaiseAndSetIfChanged(ref primaryFilmGroup, value); 
+        }
 
         /// <summary>
         /// Gets or sets the Progress.
         /// </summary>
-        public int? Progress { get => progress; set => this.RaiseAndSetIfChanged(ref progress, value); }
-
-        private string? seasonNo = null;
-        [NotMapped]
-        public string? SeasonNo
-        {
-            get
-            {
-                if (seasonNo == null)
-                {
-                    if (Season != null)
-                    {
-                        if (SeasonEntity == null) SeasonEntity = DataController.MovieController.GetSeasonById(Season);
-                        if (SeasonEntity != null) seasonNo = SeasonEntity.SeasonNo?.ToString();
-                        else seasonNo = "-";
-                    }
-                    return seasonNo;
-                }
-                else return seasonNo;
-            }
-                 set;
+        public int? Progress 
+        { 
+            get => progress; 
+            set => this.RaiseAndSetIfChanged(ref progress, value); 
         }
-
 
         /// <summary>
         /// Gets or sets the Season.
@@ -711,7 +766,6 @@ namespace TaymadeEntities.Models
                 if (season == null) return 0;
                 else
                 {
-                    
                     return season;
                 }
             }
@@ -735,41 +789,25 @@ namespace TaymadeEntities.Models
             }
         }
 
-        ///// <summary>
-        ///// Gets or sets the SeasonEntity.
-        ///// </summary>
-        //[NotMapped]
-        //public Season? SeasonEntity
-        //{
-        //    get
-        //    {
-        //        if (seasonEntity == null && Season != null)
-        //        {
-        //            seasonEntity = DataController.SandboxEntities.Seasons.Find(Season);
-
-        //            if (seasonEntity != null && (seasonEntity.TVEpisodes == null || seasonEntity.TVEpisodes.Count == 0))
-        //            {
-        //                seasonEntity.TVEpisodes = new ObservableCollection<TVEpisode>(DataController.SandboxEntities.TVEpisodes.Where(t => t.SeasonID == seasonEntity.Id).ToList());
-        //            }
-        //        }
-        //        return seasonEntity;
-        //    }
-
-        //    set
-        //    {
-        //        seasonEntity = value;
-        //        if (value != null)
-        //        {
-        //            Season = value.Id;
-        //            if (SeasonEntity.TVEpisodes == null || SeasonEntity.TVEpisodes.Count == 0)
-        //            {
-        //                SeasonEntity.TVEpisodes = DataController.MovieController.GetTVEpisodesBySeasonID(value.Id);
-        //            }
-
-        //            this.RaisePropertyChanged(nameof(SeasonEntity.TVEpisodes));
-        //        }
-        //    }
-        //}
+        [NotMapped]
+        public string? SeasonNo
+        {
+            get
+            {
+                if (seasonNo == null)
+                {
+                    if (Season != null)
+                    {
+                        if (SeasonEntity == null) SeasonEntity = DataController.MovieController.GetSeasonById(Season);
+                        if (SeasonEntity != null) seasonNo = SeasonEntity.SeasonNo?.ToString();
+                        else seasonNo = "-";
+                    }
+                    return seasonNo;
+                }
+                else return seasonNo;
+            }
+            
+        }
 
         /// <summary>
         /// Gets or sets the Series.
@@ -803,24 +841,36 @@ namespace TaymadeEntities.Models
         }
 
         [NotMapped]
-        public bool IsSelected { get => selected; set => this.RaiseAndSetIfChanged(ref selected, value); }
+        public Bookmark? StartBookmark 
+        { 
+            get => startBookmark; 
+            set => this.RaiseAndSetIfChanged(ref startBookmark, value); 
+        }
 
-        public string? Json { get => json; set => this.RaiseAndSetIfChanged(ref json, value); }
-
+        
         /// <summary>
         /// Gets or sets the TMDBID.
         /// </summary>
-        public Nullable<int> TMDBID { get => tMDBID; set => this.RaiseAndSetIfChanged(ref tMDBID, value); }
+        public int? TMDBID 
+        {
+            get => tMDBID; 
+            set => this.RaiseAndSetIfChanged(ref tMDBID, value); 
+        }
 
         /// <summary>
         /// Gets or sets the WIKIPageID.
         /// </summary>
-        public string WIKIPageID { get => wIKIPageID; set => this.RaiseAndSetIfChanged(ref wIKIPageID, value); }
+        public string? WIKIPageID 
+        { 
+            get => wIKIPageID; 
+            set => this.RaiseAndSetIfChanged(ref wIKIPageID, value); 
+        }
 
+       
         /// <summary>
         /// Gets or sets the Year.
         /// </summary>
-        public Nullable<int> Year
+        public int? Year
         {
             get
             {
@@ -831,7 +881,28 @@ namespace TaymadeEntities.Models
             set => this.RaiseAndSetIfChanged(ref year, value);
         }
 
-        protected virtual void Dispose(bool disposing)
+        #endregion Public Properties
+
+        #region Public Methods
+
+        //public void Dispose()
+        //{
+        //    // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //    Dispose(disposing: true);
+        //    GC.SuppressFinalize(this);
+        //}
+
+        // add a ToString override to return the MovieName and Year
+        public override string ToString()
+        {
+            return $"{MovieName} ({Year}) Runtime {MovieDuration.ToString()}";
+        }
+
+        #endregion Public Methods
+
+        #region Protected Methods
+
+        protected new virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
@@ -840,27 +911,35 @@ namespace TaymadeEntities.Models
                     imageBMP?.Dispose();
                     // TODO: dispose managed state (managed objects)
                 }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
+                
                 disposedValue = true;
             }
         }
 
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~Movies()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
+        #endregion Protected Methods
 
-        public void Dispose()
+        #region Private Methods
+
+        private void GetEpisodeEntity()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            EpisodeEntity = DataController.MovieController.GetTVEpisodeById(Episode);
+            this.RaisePropertyChanged("EpisodeEntity");
         }
 
-        #endregion
+        private void Movies_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            string name = e.PropertyName;
+
+            if (!(name == "link" || name == "ModifiedOn" || name == "ErrorText" || name == "BackColour" || name == "PercentUnBookmarked"
+                || name == "Bookmarks" || name == "EpisodeEntity" || name == "SeasonEntity" || name == "SeriesEntity" || name == "Casts" || name == "Added" || name == "MovieDuration"))
+            {
+                Dirty = true;
+                if (!string.IsNullOrEmpty(ChangedFields)) ChangedFields += ",";
+                ChangedFields += name;
+            }
+        }
+
+        #endregion Private Methods
+       
     }
 }

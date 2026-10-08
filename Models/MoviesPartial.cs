@@ -526,8 +526,10 @@ namespace TaymadeEntities.Models
                     Support.GetBookmarkImage(this, bookmark, 10000);
 
                     ImagePath = bookmark.ImagePath;
+
+                    bookmark.Save();
                     Save();
-                    DataController.BookmarkController.Update(bookmark);
+                    //DataController.BookmarkController.Update(bookmark);
                 }
                 catch (Exception ex)
                 {
@@ -887,7 +889,7 @@ namespace TaymadeEntities.Models
         /// Deletes this instance.
         /// </summary>
         /// <returns></returns>
-        public  async Task<bool> Delete()
+        public async Task<bool> Delete()
         {
 
             return await DeleteMovieAsync(this.Id);
@@ -940,17 +942,22 @@ namespace TaymadeEntities.Models
         {
             try
             {
-                Casts = new ObservableCollection<Cast>(
-                    DataController.CastController.GetCastsByMovieId(this.Id)
-                    );
-                Bookmarks = new ObservableCollection<Bookmark>(
-                    DataController.BookmarkController.GetBookmarksByMovieId(this.Id));
+                if (Casts == null || Casts.Count < 1)
+                    Casts = new ObservableCollection<Cast>(
+                        DataController.CastController.GetCastsByMovieId(this.Id)
+                        );
+                if (Bookmarks == null || Bookmarks.Count == 0)
+                    Bookmarks = new ObservableCollection<Bookmark>(
+                        DataController.BookmarkController.GetBookmarksByMovieId(this.Id));
                 //DataController.SandboxEntities.Bookmarks.Where(b => b.MovieID == this.Id).OrderBy(b => b.Id).ToList());
-                Director = DataController.SandboxEntities.Directors.Where(d => d.Movies.Contains(this)).FirstOrDefault();
+                if (Director == null)
+                    Director = DataController.SandboxEntities.Directors.Where(d => d.Movies.Contains(this)).FirstOrDefault();
 
                 // set bookmark count
                 if (Bookmarks != null) ImagesCount = Bookmarks.Count;
-
+                if (Series != null && Series != 2) DataController.MovieController.GetSeriesById(Series.Value);
+                if (Season != null) DataController.MovieController.GetSeasonById(Season);
+                if (Episode != null) DataController.MovieController.GetTVEpisodeById(Episode);
             }
             catch (Exception)
             {
@@ -1003,7 +1010,31 @@ namespace TaymadeEntities.Models
                 //}
 
                 ModifiedOn = DateTime.Now;
-                success = await DataController.MovieController.UpdateMovieAsync(this);
+                Movies? movie = null;
+                using var _context = new TaymadeEntities.DBContext.SandboxEntities();
+                {
+                    if (this.Id > 0)
+                    {
+                        movie = _context.Movies.Find(this.Id);
+                        if (movie != null)
+                        {
+                            // clone the current values before saving using a separate context
+                            CloneCurrentPropertyValues(movie);
+
+                            //_context.Movies.Update(movie);
+                            success = await _context.SaveChangesAsync() > 0;
+                            movie = _context.Movies.Find(this.Id);
+                        }
+                        else
+                        {
+                            _context.Movies.Add(this);
+                            success = await _context.SaveChangesAsync() > 0;
+                            movie = _context.Movies.Find(this.Id);
+                        }
+                        // DataController.MovieController.Save(this);
+                    }
+                }
+                // success = await DataController.MovieController.UpdateMovieAsync(this);
 
                 ClearErrors();
                 LogMessage("Saved " + ChangedFields);
@@ -1072,26 +1103,19 @@ namespace TaymadeEntities.Models
                         movie = _context.Movies.Find(this.Id);
                         if (movie != null)
                         {
-                            movie.Episode = this.Episode;
-                            movie.Season = this.Season;
-                            movie.Series = this.Series;
-                            movie.ImagesCount = this.imagesCount;
-                            movie.MovieDuration = this.MovieDuration;
-                            movie.MovieName = this.MovieName;
-                            movie.Year = this.Year;
-                            movie.ImagePath = this.ImagePath;
-                            movie.ModifiedOn = DateTime.Now;
-                            movie.MoviePath = this.MoviePath;
+                            // clone the current values before saving using a separate context
+                            CloneCurrentPropertyValues(movie);
+
                             //_context.Movies.Update(movie);
                             success = _context.SaveChanges() > 0;
-
+                            movie = _context.Movies.Find(this.Id);
                         }
                         else
                         {
                             _context.Movies.Add(this);
                             success = _context.SaveChanges() > 0;
                         }
-                       // DataController.MovieController.Save(this);
+                        // DataController.MovieController.Save(this);
                     }
 
                 }
@@ -1120,6 +1144,32 @@ namespace TaymadeEntities.Models
             }
             //}
             return success;
+        }
+
+        private void CloneCurrentPropertyValues(Movies? movie)
+        {
+            movie.Info = this.Info;
+            movie.DirectorID = this.DirectorID;
+            movie.DurationSeconds = this.DurationSeconds;
+            movie.Episode = this.Episode;
+            movie.FilmGroup = this.FilmGroup;
+            movie.HasChapters = this.HasChapters;
+            movie.HasEpisodes = this.HasEpisodes;
+            movie.ImagePath = this.ImagePath;
+            movie.ImagesCount = this.imagesCount;
+            movie.Json = this.Json;
+            movie.link = this.link;
+            movie.ModifiedOn = DateTime.Now;
+            movie.MovieDuration = this.MovieDuration;
+            movie.MovieName = this.MovieName;
+            movie.MoviePath = this.MoviePath;
+            movie.PlexKey = this.PlexKey;
+            movie.PrimaryFilmGroup = this.PrimaryFilmGroup;
+            movie.Season = this.Season;
+            movie.Series = this.Series;
+            movie.TMDBID = this.TMDBID;
+            movie.WIKIPageID = this.WIKIPageID;
+            movie.Year = this.Year;
         }
 
         public void ReloadCasts()

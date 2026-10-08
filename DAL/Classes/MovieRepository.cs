@@ -150,6 +150,10 @@ namespace TaymadeEntities.DAL.Classes
                          select x;
             // should be a list of movies
             tempList = result.ToList();
+            foreach (Movies movie in tempList)
+            {
+                movie.Loaded = true;
+            }
             result = null;
             return tempList;
         }
@@ -162,7 +166,9 @@ namespace TaymadeEntities.DAL.Classes
 
         public IEnumerable<Movies>? GetMoviesByDirector(int id)
         {
-            return _context.Movies.Where(d => d.DirectorID == id).ToList();
+            return _context.Movies.Where(d => d.DirectorID == id)
+                
+                .ToList();
         }
 
         public IEnumerable<Movies>? GetMoviesByGenre(string? genre, string? subGenre = "")
@@ -183,17 +189,24 @@ namespace TaymadeEntities.DAL.Classes
 
         public Movies? GetMoviesById(int id)
         {
-            return _context.Movies.Find(id);
+            return _context.Movies.Find(id)
+                                ;
         }
 
         public IEnumerable<Movies>? GetMoviesByInfo(string stub)
         {
-            return _context.GetMoviesbyInfo(stub);
+            return _context.GetMoviesbyInfo(stub)
+                                ;
         }
 
         public IEnumerable<Movies>?  GetMoviesBySeason(int id)
         {
-            IEnumerable<Movies>? tempList = _context.Movies.Where(m => m.Season == id);
+            IEnumerable<Movies>? tempList = _context.Movies.Where(m => m.Season == id)
+                .Include(x => x.Director)
+                .Include(x => x.MovieGenres)
+                .Include(x => x.Bookmarks)
+                .Include(x => x.Casts);
+            
             return tempList;
         }
         public IEnumerable<Movies>? GetMoviesByTitle(string title)
@@ -201,7 +214,7 @@ namespace TaymadeEntities.DAL.Classes
             return _context.GetMoviesbyTitle(title);
         }
 
-        public async Task<IEnumerable<Movies>>? GetMoviesByTitleAsync(string title)
+        public async Task<List<Movies>>? GetMoviesByTitleAsync(string title)
         {
             List<Movies>? tempList = await _context.GetMoviesByTitleAsync(title);
             return tempList;
@@ -329,7 +342,7 @@ namespace TaymadeEntities.DAL.Classes
 
         public async Task<bool> UpdateMovieAsync(Movies movie)
         {
-            _context.Movies.Update(movie);
+           // _context.Movies.Update(movie);
             return await _context.SaveChangesAsync() > 0;
         }
 

@@ -87,7 +87,7 @@ namespace TaymadeEntities.DAL.Classes
 
         public void Update(Bookmark bookmark)
         {
-            _context.Bookmarks.Update(bookmark);
+            //_context.Bookmarks.Update(bookmark);
             _context.SaveChanges();
         }
 
@@ -104,7 +104,7 @@ namespace TaymadeEntities.DAL.Classes
 
         public async Task<bool> UpdateAsync(Bookmark bookmark)
         {
-             _context.Bookmarks.Update(bookmark);
+             //_context.Bookmarks.Update(bookmark);
             return await _context.SaveChangesAsync() >= 0;
         }
     }
