@@ -305,6 +305,7 @@ namespace TaymadeEntities.ViewModels
         private bool? hasMovie;
         private MovieGenre currentMovieGenre;
         private int screenHeight;
+        private ObservableCollection<Series>? seriesList;
 
         #endregion Private Fields
 
@@ -325,7 +326,8 @@ namespace TaymadeEntities.ViewModels
 
             FilterList = new ObservableCollection<Models.Filter>(DataController.SandboxEntities.Filter.ToList());
 
-            SeriesList = new ObservableCollection<Models.Series>(DataController.MovieController.GetSeriesList());
+            SeriesList = new ObservableCollection<Models.Series>(
+                DataController.SeriesController.GetSeriesList());
 
             RemoveGenre = ReactiveCommand.Create(DoRemoveGenre);
 
@@ -1265,7 +1267,11 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets or sets the SeriesList.
         /// </summary>
-        public ObservableCollection<Models.Series>? SeriesList { get; set; }
+        public ObservableCollection<Models.Series>? SeriesList 
+        { 
+            get => seriesList; 
+            set => this.RaiseAndSetIfChanged(ref seriesList,value); 
+        }
         public object RemoveGenre { get; private set; }
 
         /// <summary>
@@ -1595,7 +1601,7 @@ namespace TaymadeEntities.ViewModels
 
                 //CurrentEpisode = CurrentMovie.Episode;
 
-                CurrentMovie.SeriesEntity?.Seasons = DataController.MovieController.GetSeasonsBySeriesID(CurrentMovie.Series.Value);
+                CurrentMovie.SeriesEntity?.Seasons = DataController.SeriesController.GetSeasonsBySeriesID(CurrentMovie.Series.Value);
 
 
                 //HasEpisode = false;

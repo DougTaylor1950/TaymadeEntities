@@ -1,5 +1,5 @@
-﻿using TaymadeEntities.Models;
-using DocumentFormat.OpenXml.Office2010.Excel;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using ExCSS;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,6 +9,7 @@ using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TaymadeEntities.Models;
 using static TaymadeEntities.Support.FFMpegSupport;
 
 namespace TaymadeEntities.Support
@@ -41,7 +42,7 @@ namespace TaymadeEntities.Support
             // backgroundWorker1
             //
             this.backgroundMovieGetter.WorkerSupportsCancellation = true;
-            this.backgroundMovieGetter.DoWork += this.backgroundMovieGetter_DoWork;
+            this.backgroundMovieGetter.DoWork += this.backgroundMovieGetter_DoWorkAsync;
             this.backgroundMovieGetter.RunWorkerCompleted += backgroundMovieGetter_RunWorkerCompleted;
             this.backgroundMovieGetter.ProgressChanged += this.BackgroundMovieGetter_ProgressChanged;
 
@@ -106,7 +107,7 @@ namespace TaymadeEntities.Support
         }
 
         public Models.PhraseEntry? LastID { get; private set; }
-        public ObservableCollection<Movies> MovieList 
+        public ObservableCollection<Movies>? MovieList 
         { get => movieList; set => movieList = value; }
 
         #endregion Public Properties
@@ -126,6 +127,25 @@ namespace TaymadeEntities.Support
             bw.ReportProgress(0);
             e.Result = this.LoadData(e);
             bw.ReportProgress(100);
+
+        }
+
+        public async void backgroundMovieGetter_DoWorkAsync(object? sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker? bw = sender as BackgroundWorker;
+            bw?.ReportProgress(0);
+            e.Result = await this.LoadDataAsync(e);
+            DataGetCompletedEventArgs completedEventArgs = new DataGetCompletedEventArgs(null, false, null);
+            completedEventArgs.Result = e.Result as ObservableCollection<Movies>;
+
+            OnDataGetComplete(completedEventArgs);
+            
+            //DataGetProgressEventArgs progressEventArgs = new DataGetProgressEventArgs(100, null);
+                       
+            //progressEventArgs.Progress = "Completed";
+
+            //OnDataGetProgress(progressEventArgs);
+            //bw?.ReportProgress(100);
 
         }
 
@@ -184,7 +204,7 @@ namespace TaymadeEntities.Support
             };
 
 
-            OnDataGetComplete(completedEventArgs);
+           // OnDataGetComplete(completedEventArgs);
         }
         private ObservableCollection<Models.Movies> LoadData(DoWorkEventArgs e)
         {
@@ -194,26 +214,15 @@ namespace TaymadeEntities.Support
             {
                 if (SubPhrase == null)
                 {
-                    //using (var context = _contentFactory.Create())
-                    //{
-                    //    List<Models.Movies> tempList = context.Movies
-                    //            .Where(x => x.FilmGroup.Contains(Phrase.Id))
-                    //            .Include(x => x.Casts)
-                    //            .Include(b => b.Bookmarks)
-                    //            .Include(d => d.Director)
-                    //            .ToList();
                     List<Models.Movies>? tempList = DataController.MovieController.GetMoviesByGenre(Phrase.COMPKEY);
-
                     MovieList = MovieCollection.GetAndSortObservableCollection(tempList);
-                    //}
+                    
                 }
                 else
                 {
                     List<Models.Movies>? tempList = DataController.MovieController.GetMoviesByGenre(Phrase.COMPKEY, SubPhrase.COMPKEY);
-                        
                     MovieList = MovieCollection.GetAndSortObservableCollection(tempList);
                 }
-                //MovieList = new ObservableCollection<Movies>(tempList);
             }
 
             else
@@ -227,8 +236,39 @@ namespace TaymadeEntities.Support
                 //MovieList = new ObservableCollection<Movies>(tempList);
                 MovieList = MovieCollection.GetAndSortObservableCollection(tempList);
             }
+            return MovieList;
+        }
 
+        private async Task<ObservableCollection<Models.Movies>> LoadDataAsync(DoWorkEventArgs e)
+        {
 
+            busy = true;
+            if (Phrase != null)
+            {
+                if (SubPhrase == null)
+                {
+                    List<Models.Movies>? tempList = await DataController.MovieController.GetMoviesByGenreAsync(Phrase.COMPKEY);
+                    MovieList = MovieCollection.GetAndSortObservableCollection(tempList);
+
+                }
+                else
+                {
+                    List<Models.Movies>? tempList = await DataController.MovieController.GetMoviesByGenreAsync(Phrase.COMPKEY, SubPhrase.COMPKEY);
+                    MovieList = MovieCollection.GetAndSortObservableCollection(tempList);
+                }
+            }
+
+            else
+            {
+
+                List<Models.Movies> tempList = _SandboxEntities.Movies
+                        .Include(x => x.Casts)
+                        .Include(b => b.Bookmarks)
+                        .Include(d => d.Director)
+                        .ToList();
+                //MovieList = new ObservableCollection<Movies>(tempList);
+                MovieList = MovieCollection.GetAndSortObservableCollection(tempList);
+            }
             return MovieList;
         }
 

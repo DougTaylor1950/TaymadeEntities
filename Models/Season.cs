@@ -99,6 +99,15 @@ namespace TaymadeEntities.Models
             ShowId = series.TMID;
         }
 
+        public Season(int id)
+        {
+            using var _context = new TaymadeEntities.DBContext.SandboxEntities();
+            {
+                Season? temp = _context.Seasons.Find(id);
+                this.CreateFromSeason(temp);
+            }
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Season"/> class.
         /// </summary>
@@ -252,7 +261,7 @@ namespace TaymadeEntities.Models
                     if (movie.SeriesEntity != null &&
                         (movie.SeriesEntity.Seasons == null || movie.SeriesEntity.Seasons.Count == 0))
                     {
-                        movie.SeriesEntity.Seasons = DataController.MovieController.GetSeasonsBySeriesID(movie.Series.Value);
+                        movie.SeriesEntity.Seasons = DataController.SeriesController.GetSeasonsBySeriesID(movie.Series.Value);
                     }
 
                     entryDialog.Title = "Set Season Value";

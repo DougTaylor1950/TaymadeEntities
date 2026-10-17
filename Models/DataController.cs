@@ -40,6 +40,8 @@ namespace TaymadeEntities.Models
         public static MoviePropertiesController? moviePropertiesController;
 
         public static PhrasesController? phrasesController = null;
+
+        public static SeriesController? seriesController = null;
         public static UnboundController? unboundController = null;
 
         /// <summary>
@@ -231,13 +233,13 @@ namespace TaymadeEntities.Models
             {
                 if (bookmarkController == null)
                 {
-                    bookmarkController = new BookmarkController(new BookmarkRepository(SandboxEntities));
+                    bookmarkController = new BookmarkController();
                 }
                 return bookmarkController;
             }
         }
 
-        public static CastController CastController
+        public static TaymadeEntities.Controllers.CastController CastController
         {
             get
             {
@@ -409,6 +411,18 @@ namespace TaymadeEntities.Models
             }
         }
 
+        public static SeriesController SeriesController
+        {
+            get
+            {
+                if (seriesController == null)
+                {
+                    seriesController = new SeriesController(new SeriesRepository());
+                }
+                return seriesController;
+            }
+        }
+
         public static StoryController StoryController
         {
             get
@@ -460,11 +474,11 @@ namespace TaymadeEntities.Models
         {
             get
             {
-                if (movieProperties == null)
-                {
+                //if (movieProperties == null)
+                //{
                     movieProperties = MoviePropertiesController.GetById(1);
                     //SandboxEntities.MovieProperties.Attach(movieProperties);
-                }
+                //}
 
                 return movieProperties;
             }

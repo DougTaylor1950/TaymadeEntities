@@ -287,7 +287,7 @@ namespace TaymadeEntities.Models
 
             }
 
-            DataController.BookmarkController.GetById(this.Id);
+           // DataController.BookmarkController.GetById(this.Id);
         }
 
         public async Task<bool> SaveAsync()
@@ -308,7 +308,7 @@ namespace TaymadeEntities.Models
                 {
                     _context.Bookmarks.Add(this);
                 }
-                DataController.BookmarkController.GetById(this.Id);
+                //DataController.BookmarkController.GetById(this.Id);
                 return await _context.SaveChangesAsync() >0;
 
             }

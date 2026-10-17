@@ -1,7 +1,4 @@
-﻿using ShimSkiaSharp;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿
 using TaymadeEntities.DAL.Classes;
 using TaymadeEntities.DAL.Interfaces;
 using TaymadeEntities.Models;
@@ -24,35 +21,56 @@ namespace TaymadeEntities.Controllers
             this.directorRepository = repository;
         }
 
+        public bool UpdateDirector(Director director)
+        {
+            return directorRepository.UpdateDirector(director);
+        }
+
+        public async Task<bool> UpdateDirectorAsync(Director director)
+        {
+            return await directorRepository.UpdateDirectorAsync(director);
+        }
+
         public bool Save()
         {
             return directorRepository.Save();
         }
 
-        public async Task<bool> SaveAsync()
+        public bool DeleteDirector(Director director)
         {
-            return await directorRepository.SaveAsync();
+            return directorRepository.DeleteDirector(director);
         }
 
-        public bool Save(Models.Director movie)
+        public bool AddDirector(Director director)
         {
-            return directorRepository.Save(movie);
+            return directorRepository.AddDirector(director);
         }
+
+        public Director? GetDirectorById(int id)
+        {
+            return directorRepository.GetDirectorById(id);
+        }
+
+        //public async Task<bool> SaveAsync()
+        //{
+        //    return await directorRepository.SaveAsync();
+        //}
+
+        //public bool Save(Models.Director movie)
+        //{
+        //    return directorRepository.Save(movie);
+        //}
 
         public bool Update(Models.Director movie)
         {
             return directorRepository.Update(movie);
         }
 
-        public async Task<bool> UpdateAsync(Models.Director movie)
-        {
-            return await directorRepository.UpdateAsync(movie);
-        }
+        //public async Task<bool> UpdateAsync(Models.Director movie)
+        //{
+        //    return await directorRepository.UpdateAsync(movie);
+        //}
 
-        public void Delete(int id)
-        {
-            directorRepository.Delete(id);
-        }
 
         public Director? GetById(int id)
         {
@@ -110,6 +128,16 @@ namespace TaymadeEntities.Controllers
         public Director? GetByName(string findDirectorText)
         {
             return directorRepository.GetByName(findDirectorText);
+        }
+
+        internal Director? GetOrCreateDirector(string newName)
+        {
+            return directorRepository.GetOrCreate(newName);
+        }
+
+        public List<Director>? GetDirectorsByName(string findDirectorText)
+        {
+            return directorRepository.GetDirectorsByName(findDirectorText);
         }
     }
 }

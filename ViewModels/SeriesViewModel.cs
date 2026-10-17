@@ -215,7 +215,7 @@ namespace TaymadeEntities.ViewModels
             if (CurrentSeason != null)
             {
                 // should relese all movies attached to season and remove and delete episodes as well
-                DataController.MovieController.DeleteSeason(CurrentSeason);
+                DataController.SeriesController.DeleteSeason(CurrentSeason);
                 CurrentSeries.Seasons.Remove(CurrentSeason);
                 CurrentSeason = null;
             }
@@ -286,7 +286,7 @@ namespace TaymadeEntities.ViewModels
 
                 if (newSeason == null) return;
                 // should have been added to database so refresh the list 
-                CurrentSeries.Seasons = DataController.MovieController.GetSeasonsBySeriesID(CurrentSeries.Id);
+                CurrentSeries.Seasons = DataController.SeriesController.GetSeasonsBySeriesID(CurrentSeries.Id);
 
                 CurrentSeason = newSeason;
 
@@ -331,7 +331,7 @@ namespace TaymadeEntities.ViewModels
 
             if (!string.IsNullOrEmpty(this.SeriesName)) newSeriesName = SeriesName;
 
-            Series? newSeries = DataController.MovieController.CreateSeries(newSeriesName);
+            Series? newSeries = DataController.SeriesController.CreateSeries(newSeriesName);
 
 
 

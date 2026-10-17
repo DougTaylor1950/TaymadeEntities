@@ -2,20 +2,20 @@
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-		mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+		mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="1000"
 		xmlns:vm="using:TaymadeEntities.ViewModels"
 		xmlns:tc="using:TaymadeControls"
 		xmlns:tcb="using:TaymadeControls.Buttons"
 		x:DataType="vm:ActorSearchModel"
 		x:Class="TaymadeEntities.Dialogs.TMDBActorSearchDialog"
-		
+		WindowState="Maximized"
 		Title="Actor Search Dialog">
 
 	<Design.DataContext>
 		<vm:ActorSearchModel/>
 	</Design.DataContext>
 
-	
+
 
 	<DockPanel>
 		<Grid DockPanel.Dock="Top">
@@ -23,8 +23,8 @@
 				<ColumnDefinition Width="100"/>
 
 				<ColumnDefinition Width="400"/>
-				<ColumnDefinition Width="100"/>
-				<ColumnDefinition Width="100"/>
+				<ColumnDefinition Width="Auto"/>
+				<ColumnDefinition Width="Auto"/>
 				<ColumnDefinition Width="100"/>
 
 
@@ -34,23 +34,34 @@
 			</Grid.RowDefinitions>
 			<TextBlock Classes="h1" FontSize="20" Text="Name" TextAlignment="Left" Grid.Column="0" Grid.Row="0"/>
 			<TextBox Classes="c1" FontSize="20" Name="SearchFor" Text="" IsReadOnly="False"  Grid.Column="1" />
-			<Button Content="Search" Grid.Row="0" Grid.Column="2" Name="TMDBSearch" />
-			<Button Content="Search only" Grid.Row="0" Grid.Column="3" Name="TMDBSearchOnly" />
+			<tcb:ImagedButton LabelText="Search"
+							  Grid.Row="0"
+							  Grid.Column="2"
+							  ImageSource="avares://TaymadeControls/Assets/search_icon.png"
+							  Name="TMDBSearch" />
+			<tcb:ImagedButton LabelText="Search only"
+							  Grid.Row="0"
+							  Grid.Column="3"
+							  ImageSource="avares://TaymadeControls/Assets/search_icon.png"
+							  Name="TMDBSearchOnly"
+							  />
 
 		</Grid>
-		<Border  CornerRadius="6" 
-		   BorderBrush="Gray" 
-		   Background="LightGray"
-		   BorderThickness="2" 
-		   DockPanel.Dock="Top">
+		<Border  CornerRadius="6"
+				 BorderBrush="Gray"
+				 Background="LightGray"
+				 BorderThickness="2"
+				 DockPanel.Dock="Top">
 
 			<StackPanel DockPanel.Dock="Top">
-				<DataGrid Name="dgFoundMovies" 
-			  AutoGenerateColumns="False" 
-			  VerticalScrollBarVisibility="Visible" 
-			  ItemsSource="{Binding	FoundPeople}"
-			  SelectedItem="{Binding FoundPerson}"
-			  Height="300">
+				<DataGrid Name="dgFoundMovies"
+						  Margin="10,10,10,10"
+						  AutoGenerateColumns="False"
+						  VerticalScrollBarVisibility="Visible"
+						  ItemsSource="{Binding	FoundPeople}"
+						  SelectedItem="{Binding FoundPerson}"
+						  MinHeight="150"
+						  MaxHeight="300">
 					<DataGrid.Columns>
 						<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
 						<DataGridTextColumn Header="Id" Binding="{Binding PersonId}" />
@@ -58,21 +69,34 @@
 						<DataGridTextColumn Header="Gender" Binding="{Binding GenderValue}" />
 						<DataGridTextColumn Header="Profile" Binding="{Binding ProfilePath}" />
 					</DataGrid.Columns>
-					<DataGrid.RowDetailsTemplate>
-						<DataTemplate x:DataType="vm:ActorSearchModel">
-							<StackPanel Orientation="Vertical">
-								<TextBlock Classes="c1" Text="{Binding FoundPerson.KnownForDescription}" />
-								<!--<TextBlock Classes="c1" Text="{Binding FoundPerson.Aliases}}" />-->
-								<TextBlock Classes="c1" Text="{Binding FoundPerson.DateOfBirth}" />
-							</StackPanel>
-						</DataTemplate>
-					</DataGrid.RowDetailsTemplate>
+
 				</DataGrid>
 
-				<DataGrid Name="dgFoundActors" 
-			  ItemsSource="{Binding ActorList}"
-			  AutoGenerateColumns="False" 
-			  VerticalScrollBarVisibility="Visible" Height="200">
+				<StackPanel Height="100" Background="Beige">
+					<Grid>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="Auto" />
+						</Grid.RowDefinitions>
+						<Grid.ColumnDefinitions  >
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+						</Grid.ColumnDefinitions>
+						<TextBlock Text="Aliases" Grid.Row=" 0" Grid.Column="0"/>
+						<TextBox Text="{Binding FoundPerson.AlsoKnownAs}"
+								 Grid.Row=" 0" Grid.Column="1"/>
+						<TextBlock Text="Other Movies" Grid.Row=" 1" Grid.Column="0" />
+						<TextBox Text="{Binding FoundPerson.KnownFor.DescriptionList}" 
+								 Grid.Row=" 1" Grid.Column="1"/>
+
+					</Grid>
+				</StackPanel>
+				<DataGrid Name="dgFoundActors"
+						  ItemsSource="{Binding ActorList}"
+						  SelectedItem="{Binding SelectedActor}"
+						  AutoGenerateColumns="False"
+						  VerticalScrollBarVisibility="Visible"
+						  Height="400">
 					<DataGrid.Columns>
 						<DataGridTextColumn Header="Name" Binding="{Binding Name}" />
 						<DataGridTextColumn Header="Id" Binding="{Binding Id}" />
@@ -81,7 +105,7 @@
 						<DataGridTextColumn Header="Image" Binding="{Binding ImagePath}" />
 					</DataGrid.Columns>
 				</DataGrid>
-			
+
 			</StackPanel>
 		</Border>
 		<StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center" Height="50">

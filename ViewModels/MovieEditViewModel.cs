@@ -47,7 +47,9 @@ namespace TaymadeEntities.ViewModels
         #region Public Constructors
 
         public MovieEditViewModel()
-        { }
+        {
+            SetUpLists();
+        }
 
         public MovieEditViewModel(Movies? currentMovie)
         {
@@ -69,16 +71,41 @@ namespace TaymadeEntities.ViewModels
                 CurrentBookmark = CurrentMovie.Bookmarks.FirstOrDefault();
             }
 
-            //AddPhrase = ReactiveCommand.Create(DoAddPhrase);
+            if (CurrentMovie?.SeriesEntity == null && CurrentMovie?.Series != null)
+            {
+                CurrentMovie?.SeriesEntity = DataController.SeriesController.GetSeriesById(CurrentMovie?.Series);
+            }
+            CurrentSeries = CurrentMovie?.SeriesEntity;
 
-            NewBookmark = ReactiveCommand.Create(Do_AddBookmark);
-            EditBookmark = ReactiveCommand.Create(DoEditBookmark);
-            PlayBookmark = ReactiveCommand.Create(Do_PlayBookmark);
-            DelBookmark = ReactiveCommand.Create(DeleteBookmark);
-            Grab = ReactiveCommand.Create(DoGrab);
-            AddText = ReactiveCommand.Create(AddTextToList);
-            DelImage = ReactiveCommand.Create(DeleteBookmarkImage);
-            GetMissingImages = ReactiveCommand.Create(MissingImages);
+            if (CurrentMovie?.SeasonEntity == null && CurrentMovie?.Season != null)
+            {
+                CurrentMovie?.SeasonEntity = DataController.SeriesController.GetSeasonById(CurrentMovie?.Season);
+            }
+            CurrentSeason = CurrentMovie?.SeasonEntity;
+
+            if (CurrentMovie?.EpisodeEntity == null && CurrentMovie?.Episode != null)
+            {
+                CurrentMovie?.EpisodeEntity = DataController.SeriesController.GetTVEpisodeById(CurrentMovie?.Episode);
+            }
+            CurrentEpisode = CurrentMovie?.EpisodeEntity;
+
+            this.RaisePropertyChanged(nameof(CurrentMovie));
+            this.RaisePropertyChanged(nameof(CurrentSeason));
+            this.RaisePropertyChanged(nameof(CurrentSeries));
+            this.RaisePropertyChanged(nameof(CurrentEpisode));
+            SetUpLists();
+        }
+
+        private void SetUpLists()
+        {
+            GenderList = new List<string>()
+            {
+                " Unknown",
+                " Female",
+                " Male"
+
+            };
+
             NewPoster = ReactiveCommand.Create(Do_AddPoster);
             NewCastMember = ReactiveCommand.Create(Do_AddCastMember);
             PlayFromLast = ReactiveCommand.Create(Do_PlayFromLast);
@@ -89,40 +116,17 @@ namespace TaymadeEntities.ViewModels
 
             // setup SeriesList property in this view model from DataController
             SeriesList = new ObservableCollection<Models.Series>(
-                DataController.MovieController.GetSeriesList()
+                DataController.SeriesController.GetSeriesList()
                 );
 
-            GenderList = new List<string>()
-            {
-                " Unknown",
-                " Female",
-                " Male"
-
-            };
-
-            if (CurrentMovie?.SeriesEntity == null && CurrentMovie?.Series != null)
-            {
-                CurrentMovie?.SeriesEntity = DataController.MovieController.GetSeriesById(CurrentMovie?.Series);
-            }
-            CurrentSeries = CurrentMovie?.SeriesEntity;
-
-            if (CurrentMovie?.SeasonEntity == null && CurrentMovie?.Season != null)
-            {
-                CurrentMovie?.SeasonEntity = DataController.MovieController.GetSeasonById(CurrentMovie?.Season);
-            }
-            CurrentSeason = CurrentMovie?.SeasonEntity;
-
-
-            if (CurrentMovie?.EpisodeEntity == null && CurrentMovie?.Episode != null)
-            {
-                CurrentMovie?.EpisodeEntity = DataController.MovieController.GetTVEpisodeById(CurrentMovie?.Episode);
-            }
-            CurrentEpisode = CurrentMovie?.EpisodeEntity;
-
-            this.RaisePropertyChanged(nameof(CurrentMovie));
-            this.RaisePropertyChanged(nameof(CurrentSeason));
-            this.RaisePropertyChanged(nameof(CurrentSeries));
-            this.RaisePropertyChanged(nameof(CurrentEpisode));
+            NewBookmark = ReactiveCommand.Create(Do_AddBookmark);
+            EditBookmark = ReactiveCommand.Create(DoEditBookmark);
+            PlayBookmark = ReactiveCommand.Create(Do_PlayBookmark);
+            DelBookmark = ReactiveCommand.Create(DeleteBookmark);
+            Grab = ReactiveCommand.Create(DoGrab);
+            AddText = ReactiveCommand.Create(AddTextToList);
+            DelImage = ReactiveCommand.Create(DeleteBookmarkImage);
+            GetMissingImages = ReactiveCommand.Create(MissingImages);
 
         }
 
@@ -193,7 +197,7 @@ namespace TaymadeEntities.ViewModels
         public List<string> GenderList
         {
             get => genderList;
-            internal set => genderList = value;
+            set => this.RaiseAndSetIfChanged(ref genderList, value);
         }
 
 
@@ -245,7 +249,7 @@ namespace TaymadeEntities.ViewModels
 
             // reload the episodes for the current season to get the new episode added to the list
 
-            CurrentSeason.TVEpisodes = DataController.MovieController.GetTVEpisodesBySeasonID(CurrentSeason.Id);
+            CurrentSeason.TVEpisodes = DataController.SeriesController.GetTVEpisodesBySeasonID(CurrentSeason.Id);
 
             
             //CurrentSeason?.TVEpisodes.Add(newEpisode);
@@ -351,6 +355,12 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        public new ObservableCollection<Models.Series>? SeriesList
+        {
+            get => seriesList;
+            set => this.RaiseAndSetIfChanged(ref seriesList, value);
+        }
+        
 
         public new Series? CurrentSeries
         {
@@ -365,7 +375,7 @@ namespace TaymadeEntities.ViewModels
                     this.RaisePropertyChanged(nameof(CurrentMovie.SeriesEntity));
                     if (value.Id != 2)
                     {
-                        CurrentMovie.SeriesEntity.Seasons = DataController.MovieController.GetSeasonsBySeriesID(value.Id);
+                        CurrentMovie.SeriesEntity.Seasons = DataController.SeriesController.GetSeasonsBySeriesID(value.Id);
                         // if we have seasons for this series, set the current season to the first one or if the currentmovie has a season id that one
                         if (CurrentMovie.SeriesEntity.Seasons != null && CurrentMovie.SeriesEntity.Seasons.Count > 0)
                         {
@@ -818,6 +828,11 @@ namespace TaymadeEntities.ViewModels
             //if (getCast)
             //    Support.Support.GetCastData(movie, iMovie);
             //      }
+        }
+
+        public void RaiseCurrentMovieChanged()
+        {
+            this.RaisePropertyChanged(nameof(CurrentMovie));
         }
 
         #endregion Private Methods

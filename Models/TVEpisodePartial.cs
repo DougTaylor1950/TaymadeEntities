@@ -104,7 +104,7 @@ namespace TaymadeEntities.Models
                     if (movie?.SeriesEntity == null)
                     {
                         // get series entity for this movie
-                        Series series = DataController.MovieController.GetSeriesById(movie.Series);
+                        Series? series = DataController.SeriesController.GetSeriesById(movie.Series);
                         movie.SeriesEntity = series;
                     }
 
@@ -122,7 +122,7 @@ namespace TaymadeEntities.Models
                     {
                         // get season entity for this movie
                         TaymadeEntities.Models.Season season =
-                            DataController.MovieController.GetSeasonById(movie.Season);
+                            DataController.SeriesController.GetSeasonById(movie.Season);
                         movie.SeasonEntity = season;
                     }
 
@@ -131,14 +131,14 @@ namespace TaymadeEntities.Models
                     if (movie.SeasonEntity.TVEpisodes == null)
                     {
                         movie.SeasonEntity.TVEpisodes =
-                            DataController.MovieController.GetTVEpisodesBySeasonID(movie.Season.Value);
+                            DataController.SeriesController.GetTVEpisodesBySeasonID(movie.Season.Value);
                     }
 
 
                     if (movie.SeriesEntity == null)
                     {
                         // get series entity for this movie
-                        Series series = DataController.MovieController.GetSeriesById(movie.Series);
+                        Series series = DataController.SeriesController.GetSeriesById(movie.Series.Value);
                         movie.SeriesEntity = series;
                     }
 
@@ -198,7 +198,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         internal void Delete()
         {
-            DataController.MovieController.DeleteTVEpisode(this);
+            DataController.SeriesController.DeleteTVEpisode(this);
         }
 
         /// <summary>
@@ -206,7 +206,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void Insert()
         {
-            DataController.MovieController.AddTVEpisode(this);
+            DataController.SeriesController.AddTVEpisode(this);
         }
 
         /// <summary>
@@ -232,7 +232,7 @@ namespace TaymadeEntities.Models
             }
 
 
-            DataController.MovieController.UpdateTVEpisode(this);
+            DataController.SeriesController.UpdateTVEpisode(this);
         }
 
         #endregion

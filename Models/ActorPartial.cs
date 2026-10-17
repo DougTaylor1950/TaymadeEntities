@@ -158,6 +158,10 @@ namespace TaymadeEntities.Models
             set => this.RaiseAndSetIfChanged(ref imageBMP, value);
         }
 
+        [NotMapped]
+
+        private bool moviesLoaded = false;
+
         /// <summary>
         /// Gets or sets the Movies.
         /// </summary>
@@ -166,21 +170,14 @@ namespace TaymadeEntities.Models
         {
             get
             {
-                // need to get an updated list of Casts
-                Casts = DataController.CastController.GetActorCasts(this.Id).ToList();
-                //Casts = DataController.SandboxEntities.Casts.Where(a => a.ActorId == this.Id).ToList(); 
-
-                if (movies == null && Casts != null)
+                // only if we haven't already loaded the movies
+                if (movies == null || (movies.Count == 0 && !moviesLoaded))
                 {
-                    movies = [];
-                    foreach (var item in Casts)
-                    {
-                        Movies? movie = DataController.SandboxEntities.Movies.Find(item.MovieID);
-                        if (movie != null)
-                            movies.Add(movie);
-                    }
+                    movies = DataController.MovieController.GetMoviesByActor(this.Id);
+                    moviesLoaded = true;
+                    this.RaisePropertyChanged(nameof(Movies));
                 }
-                this.RaisePropertyChanged(nameof(Movies));
+                
                 return movies;
             }
 
@@ -305,7 +302,7 @@ namespace TaymadeEntities.Models
         /// The SetDetailsFromPerson.
         /// </summary>
         /// <param name="person">The person<see cref="Person"/>.</param>
-        public async void SetDetailsFromPerson(Person person)
+        public async void SetDetailsFromPerson(Person? person)
         {
             if (person != null)
             {
@@ -401,9 +398,9 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void Insert()
         {
-            //string temp = SortName;
-            DataController.SandboxEntities.Add(this);
-            DataController.SandboxEntities.SaveChanges();
+            using var _context = new DBContext.SandboxEntities();
+            _context.Actors.Add(this);
+            _context.SaveChanges();
         }
 
 
@@ -419,23 +416,16 @@ namespace TaymadeEntities.Models
             if (Dirty)
                 try
                 {
-                    var local = DataController.SandboxEntities.Set<Actor>().Local.FirstOrDefault(entry => entry.Id.Equals(Id));
-
-                    // check if local is not null
-                    if (local != null)
+                    using var _context = new DBContext.SandboxEntities();
+                    Actor? actor = _context.Actors.Find(this.Id);
+                    if (actor == null)
                     {
-                        // detach
-                        DataController.SandboxEntities.Entry(local).State = EntityState.Detached;
+                        _context.Actors.Add(this);
                     }
-                    // set Modified flag in your entry
-                    DataController.SandboxEntities.Entry(this).State = EntityState.Modified;
+                    else
+                        CloneToTempActor(actor);
+                    _context.SaveChanges();
 
-                    // save
-                    DataController.SandboxEntities.SaveChanges();
-
-                    LogMessage("Saved " + ChangedFields);
-
-                    Dirty = false;
                     ChangedFields = string.Empty;
 
                 }
@@ -444,6 +434,25 @@ namespace TaymadeEntities.Models
                     string msg = "error Saving Actor : " + Id.ToString() + " : " + Name;
                     Support.Logger.Error(ex, msg);
                 }
+        }
+
+        private void CloneToTempActor(Actor actor)
+        {
+            actor.Name = this.Name;
+            actor.Info = this.Info;
+            actor.ImagePath = this.imagePath;
+            actor.DOB = this.DOB;
+            actor.FilmGroup = this.filmGroup;
+            actor.DeathDay = this.DeathDay;
+            actor.TMDBID = this.TMDBID;
+            actor.IMDB = this.IMDB;
+            actor.Aliases = this.Aliases;
+            actor.PlaceOfBirth = this.PlaceOfBirth;
+            actor.Adult = this.Adult;
+            actor.Gender = this.Gender;
+            actor.wIKIPageID = this.wIKIPageID;
+            actor.SortName = this.SortName;
+            actor.Thumb = this.Thumb;
         }
 
         public async Task<bool> SaveAsync()

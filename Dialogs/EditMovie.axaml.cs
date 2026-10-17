@@ -19,6 +19,7 @@ using TaymadeControls;
 using TaymadeControls.Buttons;
 using static TaymadeEntities.Support.FFMpegSupport;
 using Colors = Avalonia.Media.Colors;
+using ReactiveUI;
 
 namespace TaymadeEntities.Dialogs;
 
@@ -44,6 +45,8 @@ public partial class EditMovie : Window, IDisposable
 
         SizeChanged += EditMovie_SizeChanged;
 
+        Opened += EditMovie_Opened;
+
         this.WindowState = WindowState.Maximized;
         this.BookmarksTab.Width = this.Width - 4;
 
@@ -57,6 +60,18 @@ public partial class EditMovie : Window, IDisposable
         };
     }
 
+    private void EditMovie_Opened(object? sender, EventArgs e)
+    {
+        if (this.DataContext is MovieEditViewModel viewModel
+            )
+        {
+            viewModel.RaisePropertyChanged(nameof(viewModel.CurrentSeries));
+
+            this.SeriesCombo1.SelectedItem = viewModel.CurrentSeries;
+            this.SeriesCombo2.SelectedItem = viewModel.CurrentSeries;
+        }
+    }
+
     public EditMovie(MovieEditViewModel viewModel)
     {
         InitializeComponent();
@@ -66,7 +81,7 @@ public partial class EditMovie : Window, IDisposable
         DataContextChanged += EditMovie_DataContextChanged;
 
         SizeChanged += EditMovie_SizeChanged;
-
+        Opened += EditMovie_Opened;
         this.WindowState = WindowState.Maximized;
         this.BookmarksTab.Width = this.Width - 4;
 
@@ -325,15 +340,22 @@ public partial class EditMovie : Window, IDisposable
                     Director? director = ViewModel.DirectorList.Where(x => x.Name.ToLower() == newName.ToLower()).FirstOrDefault();
                     if (director == null)
                     {
-                        director = new Director()
+                        director = DataController.DirectorController.GetOrCreateDirector(newName);
+                        //DataController.SandboxEntities.SaveChanges();
+                        if (director != null)
                         {
-                            Name = newName
-                        };
+                            ViewModel.DirectorList.Add(director);
+                            ViewModel.CurrentMovie.Director = director;
+                            ViewModel.CurrentMovie.DirectorID = director.Id;
+                            ViewModel.CurrentMovie.DirectorsName = director.Name;
+                        }
 
-                        DataController.SandboxEntities.Directors.Add(director);
-                        DataController.SandboxEntities.SaveChanges();
+                        List<Director>? tempList = DataController.DirectorController.GetDirectorList();
+                        if (tempList != null)
+                        {
+                            ViewModel.DirectorList = new ObservableCollection<Director>(tempList);
+                        }
 
-                        ViewModel.DirectorList.Add(director);
                     }
                 }
             }
@@ -746,6 +768,7 @@ public partial class EditMovie : Window, IDisposable
         //{
         //    ViewModel.CurrentMovie?.Save();
         //}
+        System.Threading.Thread.Sleep(1000);
         Avalonia.Threading.Dispatcher.UIThread.Invoke(() =>
         {
             this.Close(true);
@@ -971,136 +994,93 @@ public partial class EditMovie : Window, IDisposable
 
     private async void SearchTMDB_Click(object? sender, RoutedEventArgs e)
     {
-        if (sender != null && sender is Button)
+        if (DataContext is MovieEditViewModel viewModel)
         {
-            Button? button = sender as Button;
-
-            if (button != null && button.DataContext is MovieEditViewModel)
+            if (viewModel != null && viewModel.CurrentActor != null)
             {
-                MovieEditViewModel viewModel = button.DataContext as MovieEditViewModel;
-                if (viewModel != null && viewModel.CurrentActor != null)
+               using  ActorSearchModel? actorSearchModel = new ActorSearchModel(viewModel.CurrentActor);
+               using  Dialogs.TMDBActorSearchDialog? searchDialog = new Dialogs.TMDBActorSearchDialog(actorSearchModel);
+
+                bool result = await searchDialog.ShowDialog<bool>(this);
+                if (result)
                 {
-                    ActorSearchModel? actorSearchModel = new ActorSearchModel(viewModel.CurrentActor);
-                    Dialogs.TMDBActorSearchDialog? searchDialog = new Dialogs.TMDBActorSearchDialog(actorSearchModel);
+                    string? tmidb = actorSearchModel.GetTMIDB();
 
-                    bool result = await searchDialog.ShowDialog<bool>(this);
-                    if (result)
+                    if (!string.IsNullOrEmpty(tmidb))  // not  cancelled or none selected
                     {
-                        string? tmidb = actorSearchModel.GetTMIDB();
+                        // need to set the tmdbid
 
-                        if (!string.IsNullOrEmpty(tmidb))  // not  cancelled or none selected
-                        {
-                            // need to set the tmdbid
-
-                            viewModel.CurrentActor.TMDBID = int.Parse(tmidb);
-                            //viewModel.CurrentActor.SetDetailsFromPerson(found);
-                            //viewModel.CurrentActor.Save();
-                        }
-                        else if (actorSearchModel.CurrentActor != null)
-                        {
-                            viewModel.CurrentActor.TMDBID = actorSearchModel.CurrentActor.TMDBID;
-                        }
-                        //viewModel.CurrentActor.Save();
-                        //actorSearchModel?.Dispose();
-                        //actorSearchModel = null;
-                        //searchDialog?.Dispose();
-                        //searchDialog = null;
-                        //found = null;
-
+                        viewModel.CurrentActor.TMDBID = int.Parse(tmidb);
+                        viewModel.CurrentActor.SetDetailsFromPerson(actorSearchModel.FoundPerson);
+                        viewModel.CurrentActor.Save();
                     }
-                    searchDialog = null;
-                    //actorSearchModel?.Dispose();
-                    //actorSearchModel = null;
+                    else if (actorSearchModel.CurrentActor != null)
+                    {
+                        viewModel.CurrentActor.TMDBID = actorSearchModel.CurrentActor.TMDBID;
+                    }
+                    viewModel.CurrentActor.Save();
                 }
             }
+
         }
     }
 
     private void GetActor_Click(object? sender, RoutedEventArgs e)
     {
-        if (sender != null && sender is Button)
+        if (DataContext is MovieEditViewModel viewModel)
         {
-            Button? button = sender as Button;
-
-            if (button != null && button.DataContext is MovieEditViewModel)
+            if (viewModel != null && viewModel.CurrentActor != null)
             {
-                MovieEditViewModel viewModel = button.DataContext as MovieEditViewModel;
-                if (viewModel != null && viewModel.CurrentActor != null)
-                {
-                    viewModel.CurrentActor.GetDetailsFromTMDB();
-                }
+                viewModel.CurrentActor.GetDetailsFromTMDB();
             }
         }
     }
 
     private async void NewMember_Click(object? sender, RoutedEventArgs e)
     {
-        if (sender != null && sender is Button)
+
+        if (DataContext is MovieEditViewModel viewModel)
         {
-            Button? button = sender as Button;
-
-            if (button != null && button.DataContext is MovieEditViewModel)
+            // create a new cast entity can get the movie Id from the viewModel.CurrentMovie.
+            // need to search for an actor
+            if (viewModel != null && viewModel.CurrentMovie != null)
             {
-
-                MovieEditViewModel viewModel = button.DataContext as MovieEditViewModel;
-
-                // create a new cast entity can get the movie Id from the viewModel.CurrentMovie.
-                // need to search for an actor
-                if (viewModel != null && viewModel.CurrentMovie != null)
+                Cast tempCastMember = new Cast();
+                tempCastMember.MovieID = viewModel.CurrentMovie.Id;
+                using ActorSearchModel? actorSearchModel = new ActorSearchModel();
+                actorSearchModel.CurrentActor = new Actor()
                 {
-                    Cast tempCastMember = new Cast();
-                    tempCastMember.MovieID = viewModel.CurrentMovie.Id;
-                    ActorSearchModel? actorSearchModel = new ActorSearchModel();
-                    actorSearchModel.CurrentActor = new Actor()
+                    Name = "<enter>"
+                };
+                using Dialogs.TMDBActorSearchDialog? searchDialog = new Dialogs.TMDBActorSearchDialog(actorSearchModel);
+
+                bool result = await searchDialog.ShowDialog<bool>(this);
+                //searchDialog = null;
+
+                if (result)
+                {
+                    Person? found = actorSearchModel.FoundPerson;
+
+                    if (found != null)  // not  cancelled or none selected
                     {
-                        Name = "<enter>"
-                    };
-                    Dialogs.TMDBActorSearchDialog? searchDialog = new Dialogs.TMDBActorSearchDialog(actorSearchModel);
+                        Actor? actor = DataController.ActorList
+                            .Where(x => x.Name.ToLower() == found.Name.ToLower())
+                            .FirstOrDefault();
 
-                    bool result = await searchDialog.ShowDialog<bool>(this);
-                    searchDialog = null;
-
-                    if (result)
-                    {
-                        Person? found = actorSearchModel.FoundPerson;
-
-                        if (found != null)  // not  cancelled or none selected
+                        if (actor != null) // we already know about this actor
                         {
-                            Actor? actor = DataController.ActorList
-                                .Where(x => x.Name.ToLower() == found.Name.ToLower())
-                                .FirstOrDefault();
+                            Cast? castmember =
+                                actor.Casts
+                                    .Where(x => x.MovieID == viewModel.CurrentMovie.Id)
+                                    .FirstOrDefault() as Cast;
 
-                            if (actor != null) // we already know about this actor
+                            if (castmember == null)
                             {
-                                Cast? castmember =
-                                    actor.Casts
-                                        .Where(x => x.MovieID == viewModel.CurrentMovie.Id)
-                                        .FirstOrDefault() as Cast;
-
-                                if (castmember == null)
-                                {
-                                    actor.SetDetailsFromPerson(found);
-
-                                    tempCastMember.ActorId = actor.Id;
-                                    //tempCastMember.Actor = actor;
-
-                                    tempCastMember.MovieID = viewModel.CurrentMovie.Id;
-                                    tempCastMember.Insert();
-                                    tempCastMember.Actor = actor;
-                                    tempCastMember.Movies = viewModel.CurrentMovie;
-                                    viewModel.CurrentMovie.Casts.Add(tempCastMember);
-                                }
-                            }
-                            else
-                            {
-                                actor = new Actor();
-                                actor.Name = found.Name;
-                                if (actor.Id == 0) actor.Insert();
-
                                 actor.SetDetailsFromPerson(found);
-                                //tempCastMember.Actor = actor;
-                                DataController.ActorList.Add(actor);
+
                                 tempCastMember.ActorId = actor.Id;
+                                //tempCastMember.Actor = actor;
+
                                 tempCastMember.MovieID = viewModel.CurrentMovie.Id;
                                 tempCastMember.Insert();
                                 tempCastMember.Actor = actor;
@@ -1108,18 +1088,30 @@ public partial class EditMovie : Window, IDisposable
                                 viewModel.CurrentMovie.Casts.Add(tempCastMember);
                             }
                         }
+                        else
+                        {
+                            actor = new Actor();
+                            actor.Name = found.Name;
+                            if (actor.Id == 0) actor.Insert();
 
-
-                        actorSearchModel.Dispose();
-                        actorSearchModel = null;
+                            actor.SetDetailsFromPerson(found);
+                            //tempCastMember.Actor = actor;
+                            DataController.ActorList.Add(actor);
+                            tempCastMember.ActorId = actor.Id;
+                            tempCastMember.MovieID = viewModel.CurrentMovie.Id;
+                            tempCastMember.Insert();
+                            tempCastMember.Actor = actor;
+                            tempCastMember.Movies = viewModel.CurrentMovie;
+                            viewModel.CurrentMovie.Casts.Add(tempCastMember);
+                            viewModel.RaisePropertyChanged(nameof(viewModel.CurrentMovie.Casts));
+                            viewModel.CurrentCastMember = tempCastMember;
+                        }
                     }
-
+                    //actorSearchModel.Dispose();
+                    //actorSearchModel = null;
                 }
             }
-
         }
-
-
     }
 
     private void Button_Click(object? sender, RoutedEventArgs e)
@@ -1173,7 +1165,7 @@ public partial class EditMovie : Window, IDisposable
                 AddBookmarks.Dispose();
                 AddPoster.Dispose();
                 EpisodeList.Clear();
-                SeriesList.Clear();
+                //SeriesList.Clear();
                 ViewModel?.Dispose();
             }
 

@@ -71,12 +71,19 @@ namespace TaymadeEntities.ViewModels
 
         #region Properties
 
+        public int? ActorId { get; set; }
+
         public string? ActorName { get; set; }
+
+        public string? PersonId { get; internal set; }
 
         public int? TMDBID { get; internal set; }
 
         private ObservableCollection<Person>? foundPeople;
         private bool disposedValue;
+        private Actor? selectedActor;
+        private Person? foundPerson;
+        private string? findText;
 
         public ObservableCollection<Person>? FoundPeople
         {
@@ -87,7 +94,11 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets or sets the ActorList.
         /// </summary>
-        public ObservableCollection<Actor>? ActorList { get => actorList; set => actorList = value; }
+        public ObservableCollection<Actor>? ActorList
+        {
+            get => actorList;
+            set => this.RaiseAndSetIfChanged(ref actorList, value); 
+        }
 
         /// <summary>
         /// Gets the AddActor.
@@ -99,7 +110,11 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets or sets the CurrentActor.
         /// </summary>
-        public Actor? CurrentActor { get => currentActor; set => this.RaiseAndSetIfChanged(ref currentActor, value); }
+        public Actor? CurrentActor 
+        { 
+            get => currentActor;
+            set => this.RaiseAndSetIfChanged(ref currentActor, value); 
+        }
 
         /// <summary>
         /// Gets the EndFindActor.
@@ -114,9 +129,25 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets or sets the FoundPerson.
         /// </summary>
-        public Person? FoundPerson { get; set; }
-        public Actor? SelectedActor { get; internal set; }
-        public string? FindText { get; internal set; }
+        public Person? FoundPerson 
+        {
+            get => foundPerson; 
+            set => this.RaiseAndSetIfChanged(ref foundPerson,value); 
+        }
+        public Actor? SelectedActor
+        {
+            get => selectedActor;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref selectedActor, value);
+                this.CurrentActor = value;
+            }
+        }
+        public string? FindText 
+        {
+            get => findText; 
+            internal set => this.RaiseAndSetIfChanged(ref  findText, value);
+        }
 
         #endregion
 
@@ -132,22 +163,23 @@ namespace TaymadeEntities.ViewModels
             if (!string.IsNullOrEmpty(findText))
             {
 
-                //if (ActorList != null) oldActorList = ActorList.ToList();
-                //List<Actor> tempList = DataController.SandboxEntities.Actors.AsNoTracking().Where(a => a.Name.ToLower().Contains(findText.ToLower())).ToList();
-                //ActorList = new ObservableCollection<Actor>(tempList);
-                //findText = string.Empty;
+                if (ActorList != null) oldActorList = ActorList.ToList();
+                List<Actor> tempList = DataController.ActorController.GetActorsByName(findText);
+                    //DataController.SandboxEntities.Actors.AsNoTracking().Where(a => a.Name.ToLower().Contains(findText.ToLower())).ToList();
+                ActorList = new ObservableCollection<Actor>(tempList);
+                findText = string.Empty;
 
                 //if (caller != null && caller is Views.MainWindow)
                 //{
                 //    MainWindow main = caller as MainWindow;
-                   
-                //        DataGrid dataGrid = main.ACListControl.dgActors;
 
-                //        if (dataGrid != null)
-                //        {
-                //            dataGrid.ItemsSource = ActorList;
-                //        }
-                   
+                //    DataGrid dataGrid = main.ACListControl.dgActors;
+
+                //    if (dataGrid != null)
+                //    {
+                //        dataGrid.ItemsSource = ActorList;
+                //    }
+
 
                 //}
             }
@@ -200,6 +232,16 @@ namespace TaymadeEntities.ViewModels
                 //    dataGrid.ItemsSource = oldActorList;
                 //}
                 //}
+        }
+
+        public string? GetTMIDB()
+        {
+            string? returnValue = null;
+            if (FoundPerson != null)
+                returnValue = FoundPerson.PersonId;
+
+            return returnValue;
+
         }
 
         /// <summary>
@@ -270,17 +312,6 @@ namespace TaymadeEntities.ViewModels
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
-
-        public string? GetTMIDB()
-        {
-            string? returnValue = null;
-            if (FoundPerson != null)
-                returnValue = FoundPerson.PersonId;
-
-            return returnValue;
-
-        }
-
 
 
         #endregion

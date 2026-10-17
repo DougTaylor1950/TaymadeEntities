@@ -219,7 +219,10 @@
 							<TextBlock Text="Primary" Classes="h2" Grid.Column="0" Grid.Row="6" />
 							<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.PrimaryFilmGroup, Mode=TwoWay}"  Grid.Column="1" Grid.Row="6" />
 							<TextBlock Text="Director" Grid.Column="5" Grid.Row="6" Classes="h2" />
-							<ComboBox  Classes="c1" ItemsSource="{Binding DirectorList}" Grid.Column="6" Grid.Row="6" SelectedItem="{Binding CurrentMovie.Director}" />
+							<ComboBox  Classes="c1" 
+									   ItemsSource="{Binding DirectorList}"
+									   Grid.Column="6" Grid.Row="6" 
+									   SelectedItem="{Binding CurrentMovie.Director}" />
 							<TextBox Height="30" Classes="c1" Text="{Binding CurrentMovie.DirectorsName}"  Grid.Column="7" Grid.Row="6" />
 							<tcb:ImagedButton  Grid.Column="8"
 											   Grid.Row="6"
@@ -240,7 +243,7 @@
 							<TextBlock Text="Has Chapters" Classes="h2" Grid.Column="0" Grid.Row="7" />
 							<CheckBox Height="30" Classes="c1" IsChecked="{Binding CurrentMovie.HasChapters, Mode=TwoWay}"  Grid.Column="1" Grid.Row="7" />
 							<TextBlock Text="Series" Classes="h2" Grid.Column="0" Grid.Row="9" />
-							<ComboBox  Classes="c1"
+							<ComboBox  Classes="c1" Name="SeriesCombo1"
 									   ItemsSource="{Binding SeriesList}"
 									   SelectedItem="{Binding CurrentSeries}"
 									   Grid.Column="1"
@@ -521,7 +524,7 @@
 										   Grid.Row="0"/>
 
 								<ComboBox Classes="c1"
-										  Name ="SeriesList"
+										  Name ="SeriesCombo2"
 										  Grid.Column="1"
 										  Grid.Row="0"
 										  VerticalAlignment="Center"

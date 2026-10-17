@@ -159,12 +159,12 @@ namespace TaymadeEntities.Dialogs
 
                         // refresh all items.
 
-                        vm.CurrentEpisode = DataController.MovieController.GetTVEpisodeById(episode.Id);
-                        vm.CurrentSeason = DataController.MovieController.GetSeasonById(season.Id);
-                        if (vm.CurrentSeason == null) vm.CurrentSeason = DataController.MovieController.GetSeasonById(season.Id);
+                        vm.CurrentEpisode = DataController.SeriesController.GetTVEpisodeById(episode.Id);
+                        vm.CurrentSeason = DataController.SeriesController.GetSeasonById(season.Id);
+                        if (vm.CurrentSeason == null) vm.CurrentSeason = DataController.SeriesController.GetSeasonById(season.Id);
                         if (vm.CurrentSeason == null) return;
-                        vm.CurrentSeason.TVEpisodes = DataController.MovieController.GetTVEpisodesBySeasonID(season.Id);
-                        vm.CurrentSeries.Seasons = DataController.MovieController.GetSeasonsBySeriesID(vm.CurrentSeries.Id);
+                        vm.CurrentSeason.TVEpisodes = DataController.SeriesController.GetTVEpisodesBySeasonID(season.Id);
+                        vm.CurrentSeries.Seasons = DataController.SeriesController.GetSeasonsBySeriesID(vm.CurrentSeries.Id);
                         vm.RaisePropertyChanged(nameof(vm.CurrentEpisode));
                         vm.RaisePropertyChanged(nameof(vm.CurrentSeason.TVEpisodes));
                         vm.RaisePropertyChanged(nameof(vm.CurrentSeason));
@@ -432,7 +432,7 @@ namespace TaymadeEntities.Dialogs
                     vm.CurrentSeason.TVEpisodes.Remove(vm.CurrentEpisode);
                     vm.CurrentEpisode = null;
                     vm.CurrentSeason.TVEpisodes.Clear();
-                    vm.CurrentSeason.TVEpisodes = DataController.MovieController.GetTVEpisodesBySeasonID(vm.CurrentSeason.Id);
+                    vm.CurrentSeason.TVEpisodes = DataController.SeriesController.GetTVEpisodesBySeasonID(vm.CurrentSeason.Id);
                 }
             }
         }

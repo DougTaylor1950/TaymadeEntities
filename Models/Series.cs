@@ -86,20 +86,9 @@ namespace TaymadeEntities.Models
                 this.seasons = new ObservableCollection<Season>();
             }
 
-            Series series = DataController.SandboxEntities.Series.Find(seriesId);
+            Series series = DataController.SeriesController.GetSeriesById(seriesId);
 
-            if (series != null)
-            {
-                Id = series.Id;
-                Name = series.Name;
-                this.Intro = series.Intro;
-                this.TMID = series.TMID;
-                this.Overview = series.Overview;
-                this.Outro = series.Outro;
-                this.Path = series.Path;
-                Seasons = new ObservableCollection<Season>(DataController.SandboxEntities.Seasons.Where(se => se.Series == Id).OrderBy(s => s.SeasonNo).ToList());
-                // Seasons = setemp;
-            }
+            CreateFromSeries(series);
         }
 
         #endregion

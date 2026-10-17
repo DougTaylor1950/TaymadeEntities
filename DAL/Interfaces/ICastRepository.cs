@@ -11,6 +11,8 @@ namespace TaymadeEntities.DAL.Interfaces
         void DeleteCast(int id);
 
         IEnumerable<Cast> GetMovieCasts(int movieId);
+
+        Task<IEnumerable<Cast>> GetMovieCastsAsync(int movieId);
         IEnumerable<Cast> GetActorCasts(int actorId);
         Cast GetCastById(int id);
         Cast GetCastByRelationships(int movieId, int actorId);

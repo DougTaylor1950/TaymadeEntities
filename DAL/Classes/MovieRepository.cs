@@ -1,15 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using Microsoft.EntityFrameworkCore;
+using NLog.LayoutRenderers;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using TaymadeEntities.DAL.Interfaces;
+using TaymadeEntities.DBContext;
 using TaymadeEntities.Models;
 
 namespace TaymadeEntities.DAL.Classes
 {
     public class MovieRepository : IMovieRepository, IDisposable
     {
-
         #region Private Fields
 
         private readonly DBContext.SandboxEntities _context;
@@ -51,10 +53,6 @@ namespace TaymadeEntities.DAL.Classes
             return _context.CreateMovie(filmName, year, path, filmGroup);
         }
 
-        public EntityState? GetTVEpisodeEntityState(TVEpisode episode)
-        {
-            return _context.Entry(episode).State;
-        }
         public MovieGenre? CreateMovieGenre(int movieId, string? genreCompKey, string? subGenreCompKey)
         {
             return _context.CreateMovieGenre(movieId, genreCompKey, subGenreCompKey);
@@ -70,6 +68,8 @@ namespace TaymadeEntities.DAL.Classes
             _context.FrameSet.Remove(frameSet);
             return Save();
         }
+        
+        
 
         public bool DeleteMovie(int id)
         {
@@ -112,7 +112,7 @@ namespace TaymadeEntities.DAL.Classes
             return _context.FrameSetHeader.FirstOrDefault(f => f.MovieImageId == movieImageId);
         }
 
-        public IEnumerable<FrameSet>? GetFrameSetsByHeaderId(int frameSetHeaderId)
+        public List<FrameSet>? GetFrameSetsByHeaderId(int frameSetHeaderId)
         {
             return _context.FrameSet.
                 Where(f => f.FrameSetHeaderId == frameSetHeaderId).
@@ -132,16 +132,16 @@ namespace TaymadeEntities.DAL.Classes
             return _context.MovieImage.Where(i => i.FolderType == v).ToList();
         }
 
-        public IEnumerable<MovieImage>? GetMovieImagesById(int id)
+        public List<MovieImage>? GetMovieImagesById(int id)
         {
             return _context.MovieImage.Where(i => i.ParentId == id).OrderBy(x => x.Name).ToList();
         }
 
-        public IEnumerable<Movies>? GetMoviesByActor(int id)
+        public List<Movies>? GetMoviesByActor(int id)
         {
             List<Movies> tempList = new List<Movies>();
 
-            IEnumerable<Cast> actorCasts = _context.Casts.Where(c => c.ActorId == id).ToList();
+            List<Cast> actorCasts = _context.Casts.Where(c => c.ActorId == id).ToList();
 
             List<int?> actorMovieIds = actorCasts.Select(c => c.MovieID).ToList();
 
@@ -158,20 +158,20 @@ namespace TaymadeEntities.DAL.Classes
             return tempList;
         }
 
-        public IEnumerable<Movies>? GetMoviesbyBookmarkName(string bookmarkText)
+        public List<Movies>? GetMoviesbyBookmarkName(string bookmarkText)
         {
             List<Movies>? tempList = _context.GetMoviesbyBookmarkName(bookmarkText);
             return tempList;
         }
 
-        public IEnumerable<Movies>? GetMoviesByDirector(int id)
+        public List<Movies>? GetMoviesByDirector(int id)
         {
             return _context.Movies.Where(d => d.DirectorID == id)
-                
+
                 .ToList();
         }
 
-        public IEnumerable<Movies>? GetMoviesByGenre(string? genre, string? subGenre = "")
+        public List<Movies>? GetMoviesByGenre(string? genre, string? subGenre = "")
         {
             List<Movies>? returnValue = null;
 
@@ -187,29 +187,51 @@ namespace TaymadeEntities.DAL.Classes
             return returnValue;
         }
 
+        public async Task<List<Movies>>? GetMoviesByGenreAsync(string? genre, string? subGenre = "")
+        {
+            await using (var context = new SandboxEntities())
+            {
+                List<Movies>? returnValue = null;
+
+                if (string.IsNullOrEmpty(genre)) return returnValue;
+
+                if (!string.IsNullOrEmpty(subGenre))
+                {
+                    returnValue = await _context.Movies.FromSql($"Execute dbo.GetMoviesBySubGenre {subGenre}").ToListAsync();
+                }
+                else
+                    returnValue = await _context.Movies.FromSql($"Execute dbo.GetMoviesByGenre {genre}").ToListAsync();
+
+                return returnValue;
+            }
+        }
+
         public Movies? GetMoviesById(int id)
         {
+            using DBContext.SandboxEntities _context = new DBContext.SandboxEntities();
             return _context.Movies.Find(id)
                                 ;
         }
 
-        public IEnumerable<Movies>? GetMoviesByInfo(string stub)
+        public List<Movies>? GetMoviesByInfo(string stub)
         {
             return _context.GetMoviesbyInfo(stub)
                                 ;
         }
 
-        public IEnumerable<Movies>?  GetMoviesBySeason(int id)
+        public List<Movies>? GetMoviesBySeason(int id)
         {
-            IEnumerable<Movies>? tempList = _context.Movies.Where(m => m.Season == id)
+            using DBContext.SandboxEntities _context = new DBContext.SandboxEntities();
+            List<Movies>? tempList = _context.Movies.Where(m => m.Season == id)
                 .Include(x => x.Director)
                 .Include(x => x.MovieGenres)
                 .Include(x => x.Bookmarks)
-                .Include(x => x.Casts);
-            
+                .Include(x => x.Casts).ToList();
+
             return tempList;
         }
-        public IEnumerable<Movies>? GetMoviesByTitle(string title)
+
+        public List<Movies>? GetMoviesByTitle(string title)
         {
             return _context.GetMoviesbyTitle(title);
         }
@@ -220,35 +242,6 @@ namespace TaymadeEntities.DAL.Classes
             return tempList;
         }
 
-        public List<TVEpisode>? GetTVEpisodesBySeasonID(int id)
-        {
-            return _context.TVEpisodes.Where(t => t.SeasonID == id).OrderBy(t => t.EpisodeNumber).ToList();
-        }
-
-        public List<Season>? GetSeasonsBySeriesID(int id)
-        {
-            return _context.Seasons.Where(s => s.Id == id).OrderBy(s => s.SeasonNo).ToList();
-        }
-
-        public Season? GetSeasonById(int? season)
-        {
-            return _context.Seasons.Find(season);
-        }
-        public TVEpisode? GetTVEpisodeById(int? episode)
-        {
-            return _context.TVEpisodes.Find(episode);
-        }
-
-        public Series? GetSeriesById(int? id)
-        {
-            if (id == null) return null;
-            return _context.Series.Find(id);
-        }
-
-        public List<Series> GetSeriesList()
-        {
-            return _context.Series.OrderBy(s => s.Name).ToList();
-        }
         public bool InsertFrameSetHeader(FrameSetHeader frameSetHeader)
         {
             _context.FrameSetHeader.Add(frameSetHeader);
@@ -259,9 +252,7 @@ namespace TaymadeEntities.DAL.Classes
         {
             try
             {
-                
                 return _context.SaveChanges() > 0;
-
             }
             catch (Exception ex)
             {
@@ -269,7 +260,6 @@ namespace TaymadeEntities.DAL.Classes
                 return false;
                 //throw;
             }
-            
         }
 
         public bool Save(Movies movie)
@@ -315,55 +305,11 @@ namespace TaymadeEntities.DAL.Classes
             return _context.SaveChanges() > 0;
         }
 
-        public bool UpdateSeason(Season season)
-        {
-            _context.Seasons.Update(season);
-            return Save();
-        }
-        public bool UpdateSeries(Series series)
-        {
-            try
-            {
-                _context.Series.Update(series);
-            }
-            catch (Exception)
-            {
-
-                
-            }
-            
-            return Save();
-        }
-        public bool UpdateTVEpisode(TVEpisode tVEpisode)
-        {
-            _context.Entry(tVEpisode).State = EntityState.Modified;
-            return Save();
-        }
-
         public async Task<bool> UpdateMovieAsync(Movies movie)
         {
-           // _context.Movies.Update(movie);
+            // _context.Movies.Update(movie);
             return await _context.SaveChangesAsync() > 0;
         }
-
-       
-
-        public bool DeleteSeason(Season season)
-        {
-            _context.Seasons.Remove(season);
-            return Save();
-        }
-
-        public Season? AddSeason(Season season)
-        {
-            _context.Seasons.Add(season);
-            if (Save())
-                return season;
-            else
-                return null;
-        }
-
-        
 
         #endregion Public Methods
 
@@ -382,29 +328,6 @@ namespace TaymadeEntities.DAL.Classes
                 // TODO: set large fields to null
                 disposedValue = true;
             }
-        }
-
-        public TVEpisode? AddTVEpisode(TVEpisode tVEpisode)
-        {
-            if (tVEpisode == null)
-                return null;
-            if (tVEpisode.Id > 2)
-            {
-                UpdateTVEpisode(tVEpisode);
-                return null;
-            }
-            _context.TVEpisodes.Add(tVEpisode);
-            _context.Entry(tVEpisode).State = EntityState.Added;
-            if (Save())
-                return tVEpisode;
-            else
-                return null;
-        }
-
-        public bool DeleteTVEpisode(TVEpisode tVEpisode)
-        {
-            _context.TVEpisodes.Remove(tVEpisode);
-            return Save();
         }
 
         #endregion Protected Methods

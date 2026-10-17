@@ -319,8 +319,21 @@ namespace TaymadeEntities.Models
         [NotMapped]
         public virtual Director? Director 
         {
-            get => director; 
-            set => this.RaiseAndSetIfChanged(ref director, value); 
+            get => director;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref director, value);
+                if (value != null)
+                {
+                    if (value.Id != DirectorID)
+                    {
+                        DirectorID = value.Id;
+                        
+                        //this.RaisePropertyChanged(nameof(DirectorID));
+                    }
+                    DirectorsName = value.Name;
+                }
+            }
         }
 
         /// <summary>
@@ -415,7 +428,7 @@ namespace TaymadeEntities.Models
             {
                 if (episodeEntity == null && (Episode != null && Episode > 0))
                 {
-                    episodeEntity = DataController.MovieController.GetTVEpisodeById(Episode);
+                    episodeEntity = DataController.SeriesController.GetTVEpisodeById(Episode);
                     this.RaisePropertyChanged(nameof(EpisodeEntity));
                     this.RaisePropertyChanged(nameof(EpisodeNumber));
                 }
@@ -490,8 +503,13 @@ namespace TaymadeEntities.Models
         /// Gets or sets the HasEpisodes.
         /// </summary>
         public bool? HasEpisodes
-        { 
-            get => hasEpisodes; 
+        {
+            get
+            {
+                if (Episode != null) hasEpisodes = true;
+                return hasEpisodes;
+            }
+
             set => this.RaiseAndSetIfChanged(ref hasEpisodes, value);
         }
 
@@ -798,7 +816,7 @@ namespace TaymadeEntities.Models
                 {
                     if (Season != null)
                     {
-                        if (SeasonEntity == null) SeasonEntity = DataController.MovieController.GetSeasonById(Season);
+                        if (SeasonEntity == null) SeasonEntity = DataController.SeriesController.GetSeasonById(Season);
                         if (SeasonEntity != null) seasonNo = SeasonEntity.SeasonNo?.ToString();
                         else seasonNo = "-";
                     }
@@ -827,7 +845,7 @@ namespace TaymadeEntities.Models
                 {
                     if (SeriesEntity == null)
                     {
-                        SeriesEntity = DataController.MovieController.GetSeriesById(value.Value);
+                        SeriesEntity = DataController.SeriesController.GetSeriesById(value.Value);
                     }
 
                     if (SeriesEntity != null && (SeriesEntity.Seasons == null || SeriesEntity.Seasons.Count == 0))
@@ -922,7 +940,7 @@ namespace TaymadeEntities.Models
 
         private void GetEpisodeEntity()
         {
-            EpisodeEntity = DataController.MovieController.GetTVEpisodeById(Episode);
+            EpisodeEntity = DataController.SeriesController.GetTVEpisodeById(Episode);
             this.RaisePropertyChanged("EpisodeEntity");
         }
 

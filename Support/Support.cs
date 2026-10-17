@@ -1727,6 +1727,24 @@ namespace TaymadeEntities.Support
         /// </summary>
         /// <param name="filename">The filename<see cref="string"/>.</param>
         /// <returns>The <see cref="string"/>.</returns>
+
+
+        public static List<MappedDrives>? DriveList
+        {
+            get
+            {
+                if (driveList == null)
+                {
+                    string machineName = GetComputerName();
+                    driveList = DataController.MaintenaceController.GetDrivesByComputerName(machineName);
+
+                }
+                return driveList;
+            }
+
+            set => driveList = value;
+        }
+
         public static string FixImagePath(string filename)
         {
             string tPath = string.Empty;
@@ -1737,12 +1755,9 @@ namespace TaymadeEntities.Support
                 //find OS if WinNT short circuit operation
                 string os = GetOS();
 
-                string machineName = GetComputerName();
-                List<MappedDrives> mappedDrives = DataController.MaintenaceController.GetDrivesByComputerName(machineName);
-
                 // List <MappedDrives> mappedDrives = DataController.SandboxEntities.MappedDrives.Where(s => s.Computer == machineName && s.LocationType == "PATH").ToList();
-
-                MappedDrives? mapped = mappedDrives.Where(d => filename.ToLower().Contains(d.SourceDrive)).FirstOrDefault();
+                if (DriveList == null) return filename; 
+                MappedDrives? mapped = DriveList.Where(d => filename.ToLower().Contains(d.SourceDrive)).FirstOrDefault();
 
                 // m oving to mapped files
                 if (mapped != null && mapped.SourceDrive != null && mapped.DestinationDrive != null)
@@ -1880,10 +1895,10 @@ namespace TaymadeEntities.Support
                 string machineName = GetComputerName();
 
                 // add mapped drive support
-                List<MappedDrives> mappedDrives = DataController.MaintenaceController.GetDrivesByComputerName(machineName);
+                //List<MappedDrives> mappedDrives = DataController.MaintenaceController.GetDrivesByComputerName(machineName);
                 //List <MappedDrives> mappedDrives = DataController.SandboxEntities.MappedDrives.Where(s => s.Computer == machineName && s.Reversible == true && s.LocationType == "PATH").ToList();
 
-                MappedDrives? mapped = mappedDrives.Where(d => filename.ToLower().Contains(d.DestinationDrive)).FirstOrDefault();
+                MappedDrives? mapped = DriveList.Where(d => filename.ToLower().Contains(d.DestinationDrive)).FirstOrDefault();
 
                 // m oving to mapped files
                 if (mapped != null && mapped.SourceDrive != null && mapped.DestinationDrive != null)
@@ -2391,6 +2406,7 @@ namespace TaymadeEntities.Support
         private static object absMaxWidth;
         private FrameSetHeader? frameSetHeader;
         private FFMpegSupport? fFMpegSupport;
+        private static List<MappedDrives>? driveList;
 
         public Support()
         {

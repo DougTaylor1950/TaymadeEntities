@@ -9,9 +9,9 @@ namespace TaymadeEntities.DAL.Interfaces
     public interface IDirectorRepository : IDisposable
     {
         #region Public Methods
-        void Delete(int id);
+        
 
-        IEnumerable<Director>? GetDirectors();
+        List<Director>? GetDirectors();
 
         Director? GetById(int id);
         Director? GetByName(string directorName);
@@ -22,10 +22,17 @@ namespace TaymadeEntities.DAL.Interfaces
         Director? GetOrCreate(string directorName);
         bool Update(Director director);
 
-        Task<bool> UpdateAsync(Director director);
-        void Add(Director director);
+        
+        
         bool Save(Director director);
-        Task<bool> SaveAsync();
+        
+        bool DeleteDirector(Director director);
+        bool AddDirector(Director director);
+        Director? GetDirectorById(int id);
+        bool UpdateDirector(Director director);
+        
+        Task<bool> UpdateDirectorAsync(Director director);
+        List<Director>? GetDirectorsByName(string findDirectorText);
 
         #endregion Public Methods
     }

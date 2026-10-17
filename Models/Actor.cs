@@ -157,6 +157,8 @@ namespace TaymadeEntities.Models
             }
         }
 
+        
+
         #endregion
 
         #region Properties
@@ -164,6 +166,20 @@ namespace TaymadeEntities.Models
         [NotMapped]
 
         public string? DeathDayString { get; set; }
+
+        public string? BirthdayString { 
+            get
+            {
+                if (DOB != null && DOB.Value.Year > 1901 )
+                {
+                    string returnValue = DOB.Value.ToString("dd-MMM-yyyy");
+                    TimeSpan ts = DateTime.Today.Subtract(DOB.Value);
+                    returnValue += " age: " + (ts.TotalDays / 365.25).ToString("00");
+                    return returnValue;
+                }
+                return "";
+            }
+        }
 
         [NotMapped]
         public bool? MergeItem { get => mergeItem; set => this.RaiseAndSetIfChanged(ref mergeItem, value); }

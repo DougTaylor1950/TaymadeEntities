@@ -21,7 +21,7 @@ namespace TaymadeEntities.Controllers
 
         public BookmarkController()
         {
-            this.bookmarkRepository = new BookmarkRepository(new DBContext.SandboxEntities());
+            this.bookmarkRepository = new BookmarkRepository();
         }
 
         public BookmarkController(IBookmarkRepository Repository)
@@ -45,11 +45,11 @@ namespace TaymadeEntities.Controllers
             GC.SuppressFinalize(this);
         }
 
-        public List<Bookmark> GetBookmarksByMovieId(int id)
+        public List<Bookmark>? GetBookmarksByMovieId(int id)
         {
-            List<Bookmark> tempList = bookmarkRepository.GetBookmarksByMovieId(id).OrderBy(b=> b.Time).
-                ToList() 
-                ?? new List<Bookmark>();
+            List<Bookmark> tempList = bookmarkRepository.GetBookmarksByMovieId(id);
+            
+               
 
             return tempList;
         }
@@ -59,21 +59,21 @@ namespace TaymadeEntities.Controllers
             return bookmarkRepository.GetById(id);
         }
 
-        public bool Save()
-        {
-            return bookmarkRepository.Save();
-        }
+        //public bool Save()
+        //{
+        //    return bookmarkRepository.Save();
+        //}
 
-        public bool Save(Models.Bookmark bookmark)
-        {
-            return bookmarkRepository.Save(bookmark);
-        }
+        //public bool Save(Models.Bookmark bookmark)
+        //{
+        //    return bookmarkRepository.Save(bookmark);
+        //}
 
-        public bool Update(Models.Bookmark bookmark)
-        {
-            bookmarkRepository.Update(bookmark);
-            return true;
-        }
+        //public bool Update(Models.Bookmark bookmark)
+        //{
+        //    bookmarkRepository.Update(bookmark);
+        //    return true;
+        //}
 
         #endregion Public Methods
 
@@ -90,10 +90,10 @@ namespace TaymadeEntities.Controllers
             bookmarkRepository.Add(bookmark);
         }
 
-        internal Task<bool> UpdateAsync(Bookmark bookmark)
-        {
-            return bookmarkRepository.UpdateAsync(bookmark);
-        }
+        //internal Task<bool> UpdateAsync(Bookmark bookmark)
+        //{
+        //    return bookmarkRepository.UpdateAsync(bookmark);
+        //}
 
         #endregion Internal Methods
 

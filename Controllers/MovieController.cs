@@ -67,10 +67,10 @@ namespace TaymadeEntities.Controllers
             return movieRepository.CreateMovieGenre(movieId, genreCompKey, subGenreCompKey);
         }
 
-        public Series? CreateSeries(string newSeriesName)
-        {
-            return movieRepository.CreateSeries(newSeriesName);
-        }
+        //public Series? CreateSeries(string newSeriesName)
+        //{
+        //    return movieRepository.CreateSeries(newSeriesName);
+        //}
 
         /// <summary>
         /// </summary>
@@ -201,6 +201,19 @@ namespace TaymadeEntities.Controllers
                     movie.Loaded = true;
                 }
             return tempList;
+        }
+
+        public async Task<List<Movies>>? GetMoviesByGenreAsync(string? genre,
+            string? subGenre = "")
+
+        {
+            IEnumerable<Movies>? tempList = await movieRepository.GetMoviesByGenreAsync(genre, subGenre);
+            //if (tempList != null)
+                //foreach (Movies movie in tempList.ToList())
+                //{
+                //    movie.Loaded = true;
+                //}
+            return tempList?.ToList();
         }
 
         /// <summary>
@@ -363,10 +376,10 @@ namespace TaymadeEntities.Controllers
         /// <remarks>
         ///   <created> 02/10/2026 02/10/2026 </created>
         /// </remarks>
-        public bool UpdateSeries(Series series)
-        {
-            return movieRepository.UpdateSeries(series);
-        }
+        //public bool UpdateSeries(Series series)
+        //{
+        //    return movieRepository.UpdateSeries(series);
+        //}
 
         #endregion Public Methods
 
@@ -416,10 +429,10 @@ namespace TaymadeEntities.Controllers
             return movieRepository.GetMovieImagesById(id).ToList();
         }
 
-        public List<Series> GetSeriesList()
-        {
-            return movieRepository.GetSeriesList();
-        }
+        //public List<Series> GetSeriesList()
+        //{
+        //    return movieRepository.GetSeriesList();
+        //}
 
         public bool SaveMovieImage(MovieImage movieImage)
         {
@@ -449,63 +462,17 @@ namespace TaymadeEntities.Controllers
             }
         }
 
-        public bool DeleteSeason(Season season)
-        {
-            return movieRepository.DeleteSeason(season);
-        }
+        
 
-        public Season? AddSeason(Season season)
-        {
-            return movieRepository.AddSeason(season);
-        }
+        
 
-        public bool UpdateSeason(Season season)
-        {
-            return movieRepository.UpdateSeason(season);
-        }
+        
 
-        public bool UpdateTVEpisode(TVEpisode tVEpisode)
-        {
-            return movieRepository.UpdateTVEpisode(tVEpisode);
-        }
+        
 
-        public TVEpisode? AddTVEpisode(TVEpisode tVEpisode)
-        {
-            return movieRepository.AddTVEpisode(tVEpisode);
+        
 
-        }
-
-        public bool DeleteTVEpisode(TVEpisode tVEpisode)
-        {
-            return movieRepository.DeleteTVEpisode(tVEpisode);
-        }
-
-        public ObservableCollection<TVEpisode>? GetTVEpisodesBySeasonID(int id)
-        {
-            List<TVEpisode>? temp = movieRepository.GetTVEpisodesBySeasonID(id)?.ToList();
-            return new ObservableCollection<TVEpisode>(temp ?? new List<TVEpisode>());
-        }
-
-        public Series? GetSeriesById(int? id)
-        {
-            return movieRepository.GetSeriesById(id);
-        }
-
-        public ObservableCollection<Season>? GetSeasonsBySeriesID(int id)
-        {
-            List<Season>? temp = movieRepository.GetSeasonsBySeriesID(id)?.ToList();
-            return new ObservableCollection<Season>(temp ?? new List<Season>());
-        }
-
-        public Season? GetSeasonById(int? season)
-        {
-            return movieRepository.GetSeasonById(season);
-        }
-
-        public TVEpisode? GetTVEpisodeById(int? episode)
-        {
-            return movieRepository.GetTVEpisodeById(episode);
-        }
+        
 
         public List<Movies>? GetMoviesBySeason(int id)
         {
@@ -518,11 +485,11 @@ namespace TaymadeEntities.Controllers
             return tempList;
         }
 
-        public EntityState? GetTVEpisodeEntityState(TVEpisode episode)
-        {
-            return movieRepository.GetTVEpisodeEntityState(episode);
-        }
+        
 
+       
+
+        
         #endregion Protected Methods
     }
 }

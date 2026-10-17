@@ -101,6 +101,15 @@ namespace TaymadeEntities.DAL
             return _context.Casts.Where(c => c.MovieID == movieId).ToList();
         }
 
+        public async Task<IEnumerable<Cast>>? GetMovieCastsAsync(int movieId)
+        {
+            IEnumerable<Cast>? templist = null;
+            using DBContext.SandboxEntities _context = new DBContext.SandboxEntities();
+             templist = await _context.Casts.Where(c => c.MovieID == movieId).ToListAsync();
+
+            return templist;
+        }
+
         public async Task<List<Cast>> GetCastsByMovieIdAsync(int id)
         {
             return await _context.Casts.Where(c => c.MovieID == id).ToListAsync();

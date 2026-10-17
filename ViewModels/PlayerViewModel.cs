@@ -176,7 +176,7 @@ namespace TaymadeEntities.ViewModels
                 }
 
                 // sort by name 
-                UsedBookmarks = new ObservableCollection<string>(UsedBookmarks.OrderBy(x => x));    
+                UsedBookmarks = new ObservableCollection<string>(UsedBookmarks.OrderBy(x => x));
             }
         }
 
@@ -980,7 +980,7 @@ namespace TaymadeEntities.ViewModels
                 if (AutoCompleteBox != null && !string.IsNullOrEmpty(AutoCompleteBox.Text))
                 {
                     // as spaces get consumed a space can be entered as a "." so replace with a space
-                    bookmarkName = AutoCompleteBox.Text.Replace("."," ");
+                    bookmarkName = AutoCompleteBox.Text.Replace(".", " ");
                 }
 
                 AddMark(bookmarkName);
@@ -1242,10 +1242,14 @@ namespace TaymadeEntities.ViewModels
             this.RaisePropertyChanged(nameof(ProgressX));
 
             // get movie current time msecs
-
-            TimeSpan elapsedTime = TimeSpan.FromMilliseconds(movieLengtthMsecs);
-
-            Percent = elapsedTime.ToString(@"hh\:mm\:ss") + " - " + (percent).ToString("0.00") + "%";
+            try
+            {
+                TimeSpan elapsedTime = TimeSpan.FromMilliseconds(movieLengtthMsecs);
+                Percent = elapsedTime.ToString(@"hh\:mm\:ss") + " - " + (percent).ToString("0.00") + "%";
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private void SetPosition(float position)

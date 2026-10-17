@@ -1820,12 +1820,13 @@ namespace TaymadeEntities.Support
 
         #region Properties
 
-        public JObject jObject 
-        { get
+        public JObject jObject
+        {
+            get
             {
                 return jObject1;
             }
-            set => jObject1 = value; 
+            set => jObject1 = value;
         }
 
         /// <summary>
@@ -1857,7 +1858,7 @@ namespace TaymadeEntities.Support
             set => castMembers = value;
         }
 
-        
+
 
 
 
@@ -2286,6 +2287,24 @@ namespace TaymadeEntities.Support
 
         [JsonProperty("also_known_as")]
         public string[]? AlsoKnownAs { get; set; }
+
+        public string? Aliases
+        {
+            get
+            {
+                if (AlsoKnownAs != null && AlsoKnownAs.Length > 0)
+                {
+                    string returnValue = "";
+                    foreach (var item in AlsoKnownAs)
+                    {
+                        if (returnValue.Length > 0) returnValue += ",";
+                        returnValue += item;
+                    }
+                    return returnValue;
+                }
+                else return "";
+            }
+        }
 
         /// <summary>
         /// Gets or sets the adult

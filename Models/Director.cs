@@ -159,16 +159,23 @@ namespace TaymadeEntities.Models
             Support.GenerateInfoAndLogMessage(action, "Director", Id, Name);
         }
 
-        internal void Delete()
+        public bool Delete()
         {
-            DataController.SandboxEntities.Directors.Remove(this);
-            DataController.SandboxEntities.SaveChanges();
+            return DataController.DirectorController.DeleteDirector(this);
+            
         }
 
-        internal async void SaveAsync()
+        public bool InsertDirector()
         {
-           await DataController.DirectorController.SaveAsync();
+            return DataController.DirectorController.AddDirector(this);
         }
+
+        public async void SaveAsync()
+        {
+           await DataController.DirectorController.UpdateDirectorAsync(this);
+        }
+
+       
 
         #endregion
     }

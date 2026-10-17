@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reactive;
 using TaymadeEntities.ViewModels;
 using System;
+using TaymadeControls.Buttons;
 
 namespace TaymadeEntities.Dialogs
 {
@@ -39,9 +40,9 @@ namespace TaymadeEntities.Dialogs
             DataContext = amodel;
             ViewModel = amodel;
 
-            TextBox searchFor = this.Find<TextBox>("SearchFor");
+            TextBox? searchFor = this.Find<TextBox>("SearchFor");
 
-            Button searchTMDP = this.Find<Button>("TMDBSearch");
+            ImagedButton? searchTMDP = this.TMDBSearch;
 
             if (searchFor != null && amodel.CurrentActor != null)
             {
@@ -80,12 +81,12 @@ namespace TaymadeEntities.Dialogs
 
         private async void SearchDatabase()
         {
-            TextBox searchFor = this.Find<TextBox>("SearchFor");
+            TextBox? searchFor = this.Find<TextBox>("SearchFor");
             if (searchFor != null)
             {
                 DataGrid? dataGridA;
 
-                string searchText = searchFor.Text;
+                string? searchText = searchFor.Text;
 
                 if (!string.IsNullOrEmpty(searchText))
                 {
@@ -101,35 +102,34 @@ namespace TaymadeEntities.Dialogs
                         );
 
 
-                    peopleList.Clear();
+                    //peopleList.Clear();
 
-                    DataGrid dataGrid = this.Find<DataGrid>("dgFoundMovies");
-                    dataGrid.SelectionChanged += MovieSelected;
-                    dataGrid.ItemsSource = ViewModel.FoundPeople;
+                    //DataGrid dataGrid = this.Find<DataGrid>("dgFoundMovies");
+                    //dataGrid.SelectionChanged += MovieSelected;
+                    //dataGrid.ItemsSource = ViewModel.FoundPeople;
 
-                    dataGridA = this.Find<DataGrid>("dgFoundActors");
+                    //dataGridA = this.Find<DataGrid>("dgFoundActors");
 
-                    if (dataGridA != null)
-                    {
-                        dataGridA.SelectionChanged += ActorSelected;
-                        dataGridA.ItemsSource = ViewModel.ActorList;
-                    }
-
-
-
-                    else
-                    {
-                        dataGridA = this.Find<DataGrid>("dgFoundActors");
+                    //if (dataGridA != null)
+                    //{
+                    //    dataGridA.SelectionChanged += ActorSelected;
+                    //    dataGridA.ItemsSource = ViewModel.ActorList;
+                    //}
 
 
-                        if (dataGridA != null)
-                        {
-                            dataGridA.SelectionChanged += ActorSelected;
-                            dataGridA.ItemsSource = ViewModel.ActorList;
-                        }
+                    //else
+                    //{
+                    //    //dataGridA = this.Find<DataGrid>("dgFoundActors");
 
 
-                    }
+                    //    //if (dataGridA != null)
+                    //    //{
+                    //    //    dataGridA.SelectionChanged += ActorSelected;
+                    //    //    dataGridA.ItemsSource = ViewModel.ActorList;
+                    //    //}
+
+
+                    //}
                 }
 
 
@@ -176,12 +176,18 @@ namespace TaymadeEntities.Dialogs
 
         private void OkButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            this.Close(true);
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                this.Close(true);
+            });
         }
 
         private void CancelButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
-            this.Close(false);
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                this.Close(false);
+            });
         }
 
         protected virtual void Dispose(bool disposing)
@@ -190,7 +196,8 @@ namespace TaymadeEntities.Dialogs
             {
                 if (disposing)
                 {
-                    foreach (var item in actorList)
+                   if (actorList != null)
+                        foreach (var item in actorList)
                     {
                         item.Dispose();
                     }

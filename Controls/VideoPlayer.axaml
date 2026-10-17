@@ -7,7 +7,7 @@
 			 xmlns:views="using:TaymadeEntities.Views"
 			 xmlns:controls="using:TaymadeEntities.Controls"
 			 xmlns:tcb="using:TaymadeControls.Buttons"
-			 mc:Ignorable="d" d:DesignWidth="1400" d:DesignHeight="1050"
+			 mc:Ignorable="d" d:DesignWidth="1900" d:DesignHeight="1050"
 			 x:Class="TaymadeEntities.Controls.VideoPlayer"
 			 DataContextChanged="OnDataContextChanged"
 			 x:DataType="viewModels:PlayerViewModel"
@@ -310,11 +310,18 @@
 				<Grid
 				ColumnDefinitions="Auto"
 				RowDefinitions="Auto,20,20,20,20">
-					<Image Source="{Binding CurrentBookmark.ImageBMP}"
-						   Name="Poster"
-						   Width="{Binding PaneWidth}"
-						   Height="{Binding ScreenHeight}"
-						   Grid.Row="0" Grid.Column="0"   />
+					<Border  Width="{Binding PaneWidth}"
+							 Height="{Binding ScreenHeight}" 
+							 BorderBrush="Black"
+							 BorderThickness="2"
+							 CornerRadius="5">
+						<Image Source="{Binding CurrentBookmark.ImageBMP}"
+							   Name="Poster"
+							   Stretch="UniformToFill"
+							   MaxWidth="{Binding PaneWidth}"
+							   MaxHeight="{Binding ScreenHeight}"
+							   Grid.Row="0" Grid.Column="0"   />
+					</Border>
 					<Label Grid.Row="1" Content="Bookmark name" HorizontalAlignment="Center"/>
 					<TextBlock Text="{Binding CurrentBookmark.Name}" Grid.Row="2"  Grid.Column="0" HorizontalAlignment="Center"  />
 					<Label Grid.Row="3" Content="Bookmark time" HorizontalAlignment="Center"/>

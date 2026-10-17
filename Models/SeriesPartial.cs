@@ -1,5 +1,6 @@
 ﻿using Avalonia.Controls;
 using System;
+using TaymadeEntities.DBContext;
 
 namespace TaymadeEntities.Models
 {
@@ -29,7 +30,7 @@ namespace TaymadeEntities.Models
 
         public void Update()
         {
-            DataController.MovieController.UpdateSeries(this);
+            this.Save();
         }
 
 
@@ -44,7 +45,7 @@ namespace TaymadeEntities.Models
         /// <remarks>
         ///   <created> 05/10/2026 05/10/2026 </created>
         /// </remarks>
-        public async static Task<Series> AddSeriesToMovie(int id, Window? window= null)
+        public async static Task<Series> AddSeriesToMovie(int id, Window? window = null)
         {
             Series newSeries = null;
             using TaymadeEntities.ViewModels.EntryDialogModel entryDialogModel =
@@ -55,9 +56,9 @@ namespace TaymadeEntities.Models
             {
                 Movies? movie = _context.Movies.Find(id);
                 entryDialog.Title = "Set Series Value";
-                entryDialogModel.ItemList = DataController.MovieController.GetSeriesList();
+                entryDialogModel.ItemList = DataController.SeriesController.GetSeriesList();
 
-                if (window == null)  window = Support.Support.GetMainWindow() as Window;
+                if (window == null) window = Support.Support.GetMainWindow() as Window;
 
                 DialogResultButton result = await entryDialog.ShowDialog<DialogResultButton>(window);
                 if (result != null && result.Result == DialogResultButton.ResultType.Ok)
@@ -85,7 +86,19 @@ namespace TaymadeEntities.Models
         {
             try
             {
-                DataController.MovieController.UpdateSeries(this);
+                using SandboxEntities _context = new SandboxEntities();
+                if (Id == 0)
+                {
+                    _context.Series.Add(this);
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    Series? tempSeries = _context.Series.Find(this.Id);
+                    if (tempSeries == null) return;
+                    MoveToTemp(tempSeries);
+                    _context.SaveChanges();
+                }
                 // DataController.SandboxEntities.SaveChanges();
 
             }
@@ -96,6 +109,30 @@ namespace TaymadeEntities.Models
             }
         }
 
-        #endregion Internal Methods
+        private void MoveToTemp(Series series)
+        {
+            series.Intro = this.Intro;
+            series.Name = this.Name;
+            series.Outro = this.Outro;
+            series.Path = this.Path;
+            series.TMID = this.TMID;
+            series.Overview = this.Overview;
+        }
+
+        public void CreateFromSeries(Series? series)
+        {
+            if (series == null) return;
+            this.Id = series.Id;
+            this.Intro = series.Intro;
+            this.Name = series.Name;
+            this.Outro = series.Outro;
+            this.Path = series.Path;
+            this.TMID = series.TMID;
+            this.Overview = series.Overview;
+        }
+
     }
+
+        #endregion Internal Methods
 }
+

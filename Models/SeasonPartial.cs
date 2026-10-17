@@ -32,7 +32,15 @@ namespace TaymadeEntities.Models
         /// </summary>
         internal void Delete()
         {
-            DataController.MovieController.DeleteSeason(this);
+            using DBContext.SandboxEntities _context = new DBContext.SandboxEntities();
+            {
+                Season? tempSeason = _context.Seasons.Find(this.Id);
+                if (tempSeason != null)
+                {
+                    _context.Seasons.Remove(this);
+                    _context.SaveChanges();
+                }
+            }
         }
 
         /// <summary>
@@ -40,7 +48,7 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void Insert()
         {
-            DataController.MovieController.AddSeason(this);
+            Save();
         }
 
         /// <summary>
@@ -48,7 +56,46 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void Save()
         {
-            DataController.MovieController.SaveContext();
+            using DBContext.SandboxEntities _context = new DBContext.SandboxEntities();
+            {
+                Season? tempSeason = _context.Seasons.Find(this.Id);
+                if (tempSeason != null)
+                {
+                    MoveToTempSeason(tempSeason);
+                }
+                else
+                {
+                    _context.Seasons.Add(this);
+                }
+                _context.SaveChanges();
+            }
+        }
+
+        public void CreateFromSeason(Season? season)
+        {
+            if (season == null) return;
+            this.Id = season.Id;
+            this.Year = season.Year;
+            this.Series = season.Series;
+            this.SeasonNo = season.SeasonNo;
+            this.Path = season.Path;
+            this.TMDBID = season.TMDBID;
+            this.ShowId = season.ShowId;
+            this.Name = season.Name;
+            this.Description = season.Description;
+        }
+
+        private void MoveToTempSeason(Season tempSeason)
+        {
+            tempSeason.Year = this.Year;
+            tempSeason.Series = this.Series;
+            tempSeason.SeasonNo = this.SeasonNo;
+            tempSeason.Path = this.Path;
+            tempSeason.TMDBID = this.TMDBID;
+            tempSeason.ShowId = this.ShowId;
+            tempSeason.Name = this.Name;
+            tempSeason.Description = this.Description;
+
         }
 
         #endregion

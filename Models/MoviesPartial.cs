@@ -127,6 +127,17 @@ namespace TaymadeEntities.Models
         private ObservableCollection<ProductionCompany> productionCompanies;
         private Season? seasonEntity1;
 
+        public Movies(int id)
+        {
+            this.Id = id;
+            Movies? temp = DataController.MovieController.GetMoviesById(id);
+            if (temp != null)
+            {
+                this.UpdateFrom(temp);
+                LoadChildren();
+            }
+        }
+
         /// <summary>
         /// Gets or sets the BackColour.
         /// </summary>
@@ -352,7 +363,7 @@ namespace TaymadeEntities.Models
                 if (value != null)
                 {
                     value.TVEpisodes = new ObservableCollection<TVEpisode>(
-                        DataController.MovieController.GetTVEpisodesBySeasonID(value.Id).ToList() ?? new List<TVEpisode>());
+                        DataController.SeriesController.GetTVEpisodesBySeasonID(value.Id).ToList() ?? new List<TVEpisode>());
                 }
             }
         }
@@ -380,7 +391,7 @@ namespace TaymadeEntities.Models
                     Series = value.Id;
                     if (value.Seasons == null || value.Seasons.Count == 0)
                     {
-                        value.Seasons = DataController.MovieController.GetSeasonsBySeriesID(value.Id);
+                        value.Seasons = DataController.SeriesController.GetSeasonsBySeriesID(value.Id);
                     }
 
                     if (SeasonEntity == null && Season > 0)
@@ -832,7 +843,11 @@ namespace TaymadeEntities.Models
         /// </summary>
         public void SetPercentUnmarked()
         {
+            if (IsLoaded) return;
             double pbm = 0;
+            if (Bookmarks == null || Bookmarks.Count == 0)
+                Bookmarks = new ObservableCollection<Bookmark>(
+                    DataController.BookmarkController.GetBookmarksByMovieId(this.Id));
             TimeSpan time = TimeFromLastBookMarkToEnd();
             if (time > TimeSpan.MinValue)
             {
@@ -855,7 +870,7 @@ namespace TaymadeEntities.Models
             if (DurationSeconds != null)
             {
                 filmDuration = TimeSpan.FromSeconds(DurationSeconds.Value);
-                Bookmark? last = Bookmarks.LastOrDefault();
+                Bookmark? last = Bookmarks?.LastOrDefault();
                 imagesCount = Bookmarks.Count;
                 if (last != null && last.Time != null)
                 {
@@ -940,6 +955,7 @@ namespace TaymadeEntities.Models
         /// </remarks>
         public void LoadChildren()
         {
+            if (IsLoaded) return;
             try
             {
                 if (Casts == null || Casts.Count < 1)
@@ -951,13 +967,34 @@ namespace TaymadeEntities.Models
                         DataController.BookmarkController.GetBookmarksByMovieId(this.Id));
                 //DataController.SandboxEntities.Bookmarks.Where(b => b.MovieID == this.Id).OrderBy(b => b.Id).ToList());
                 if (Director == null)
+                {
                     Director = DataController.SandboxEntities.Directors.Where(d => d.Movies.Contains(this)).FirstOrDefault();
-
+                    if (Director != null)
+                    {
+                        if (DirectorID == null || DirectorID == 14) DirectorID = Director.Id;
+                        DirectorsName = Director.Name;
+                    }
+                }
                 // set bookmark count
-                if (Bookmarks != null) ImagesCount = Bookmarks.Count;
-                if (Series != null && Series != 2) DataController.MovieController.GetSeriesById(Series.Value);
-                if (Season != null) DataController.MovieController.GetSeasonById(Season);
-                if (Episode != null) DataController.MovieController.GetTVEpisodeById(Episode);
+                if (Bookmarks != null && ImagesCount != Bookmarks.Count) ImagesCount = Bookmarks.Count;
+                if (Series != null && Series != 2 && SeriesEntity == null)
+                    SeriesEntity = DataController.SeriesController.GetSeriesById(Series.Value);
+                if (SeriesEntity != null)
+                {
+
+                }
+                if (Season != null && SeasonEntity == null)
+                    SeasonEntity = DataController.SeriesController.GetSeasonById(Season);
+                if (SeasonEntity != null)
+                {
+                    this.seasonNo = SeasonEntity.SeasonNo?.ToString(); ;
+                }
+                if (Episode != null && EpisodeEntity == null)
+                    EpisodeEntity = DataController.SeriesController.GetTVEpisodeById(Episode);
+                if (EpisodeEntity != null)
+                {
+                    this.EpisodeNumber = EpisodeEntity.EpisodeNumber;
+                }
             }
             catch (Exception)
             {
@@ -1023,7 +1060,7 @@ namespace TaymadeEntities.Models
 
                             //_context.Movies.Update(movie);
                             success = await _context.SaveChangesAsync() > 0;
-                            movie = _context.Movies.Find(this.Id);
+                            // movie = _context.Movies.Find(this.Id);
                         }
                         else
                         {
@@ -1063,6 +1100,14 @@ namespace TaymadeEntities.Models
             return success;
         }
 
+        public void RefreshAllProperties()
+        {
+            this.RaisePropertyChanged("");
+            this.RaisePropertyChanged(nameof(Series));
+            this.RaisePropertyChanged(nameof(HasChapters));
+            this.RaisePropertyChanged(nameof(DirectorsName));
+        }
+
         public bool Save()
         {
             bool success = false;
@@ -1088,7 +1133,7 @@ namespace TaymadeEntities.Models
                     success = DataController.MovieController.Add(this);
                 }
 
-                if (SeriesEntity != null && (Series == null || Series != SeriesEntity.Id))
+                if (SeriesEntity != null && (Series == null || Series == 0 || Series != SeriesEntity.Id))
                 {
                     Series = SeriesEntity.Id;
                 }
@@ -1128,7 +1173,7 @@ namespace TaymadeEntities.Models
             catch (Exception ex)
             {
                 string msg = "error Saving movie : " + Id.ToString() + " : " + MovieName;
-                Support.Logger.Error(ex, msg);
+                //Support.Logger.Error(ex, msg);
 
                 MVMLogs logs = new MVMLogs(ex, "database", "Error");
 
@@ -1146,17 +1191,51 @@ namespace TaymadeEntities.Models
             return success;
         }
 
-        private void CloneCurrentPropertyValues(Movies? movie)
+        public void UpdateFrom(Movies? movie)
         {
+            if (movie == null) return;
+            this.Info = movie.Info;
+            this.DirectorID = movie.DirectorID;
+            this.DurationSeconds = movie.DurationSeconds;
+            this.Episode = movie.Episode;
+            this.HasEpisodes = (movie.episode != null);
+            this.FilmGroup = movie.FilmGroup;
+            this.HasChapters = movie.HasChapters;
+            //this.HasEpisodes = movie.HasEpisodes;
+            this.ImagePath = movie.ImagePath;
+            this.ImagesCount = movie.imagesCount;
+            this.Json = movie.Json;
+            this.link = movie.link;
+            this.ModifiedOn = DateTime.Now;
+            this.MovieDuration = movie.MovieDuration;
+            this.MovieName = movie.MovieName;
+            this.MoviePath = movie.MoviePath;
+            this.PlexKey = movie.PlexKey;
+            this.PrimaryFilmGroup = movie.PrimaryFilmGroup;
+            this.Season = movie.Season;
+            this.Series = movie.Series;
+            this.TMDBID = movie.TMDBID;
+            this.WIKIPageID = movie.WIKIPageID;
+            this.Year = movie.Year;
+        }
+
+        public void CloneCurrentPropertyValues(Movies? movie)
+        {
+            if (Director != null && Director.Id != 14 && Director.Id != DirectorID)
+                DirectorID = Director.Id;
             movie.Info = this.Info;
-            movie.DirectorID = this.DirectorID;
+            if (this.DirectorID != 14 && movie.DirectorID != this.DirectorID)
+                movie.DirectorID = this.DirectorID;
             movie.DurationSeconds = this.DurationSeconds;
-            movie.Episode = this.Episode;
+            if (this.Episode > 0) movie.Episode = this.Episode;
+            movie.HasEpisodes = (this.episode != null);
             movie.FilmGroup = this.FilmGroup;
-            movie.HasChapters = this.HasChapters;
-            movie.HasEpisodes = this.HasEpisodes;
+            if (this.HasChapters.HasValue && this.HasChapters.Value)
+                movie.HasChapters = this.HasChapters;
+            //movie.HasEpisodes = this.HasEpisodes;
             movie.ImagePath = this.ImagePath;
-            movie.ImagesCount = this.imagesCount;
+            if (movie.ImagesCount != this.ImagesCount)
+                movie.imagesCount = this.imagesCount;
             movie.Json = this.Json;
             movie.link = this.link;
             movie.ModifiedOn = DateTime.Now;
@@ -1165,8 +1244,8 @@ namespace TaymadeEntities.Models
             movie.MoviePath = this.MoviePath;
             movie.PlexKey = this.PlexKey;
             movie.PrimaryFilmGroup = this.PrimaryFilmGroup;
-            movie.Season = this.Season;
-            movie.Series = this.Series;
+            if (this.Season > 0) movie.Season = this.Season;
+            if (this.Series > 0) movie.Series = this.Series;
             movie.TMDBID = this.TMDBID;
             movie.WIKIPageID = this.WIKIPageID;
             movie.Year = this.Year;
@@ -1180,6 +1259,51 @@ namespace TaymadeEntities.Models
             //using var ctx = DataController.SandboxEntities;
             //Casts = new ObservableCollection<Cast>(
             //        ctx.Casts.Where(c => c.MovieID == this.Id).OrderBy(c => c.ActorId).ToList());
+        }
+
+        public async Task<bool> LoadChildrenAsync()
+        {
+            bool success = false;
+            if (IsLoaded) return true;
+            try
+            {
+                using DBContext.SandboxEntities _context = new DBContext.SandboxEntities();
+                {
+                    if (Casts == null || Casts.Count < 1)
+                    {
+                        List<Cast>? tempCastList = await _context.Casts.Where(c => c.MovieID == Id).ToListAsync();
+                        if (tempCastList != null) Casts = new ObservableCollection<Cast>(tempCastList);
+                    }
+                    if (Bookmarks == null || Bookmarks.Count == 0)
+                    {
+                        List<Bookmark>? tempBookmarkList = await _context.Bookmarks.Where(b => b.MovieID == this.Id).OrderBy(b => b.Id).ToListAsync();
+                        if (tempBookmarkList != null)
+                            Bookmarks = new ObservableCollection<Bookmark>(tempBookmarkList);
+                    }
+                    //DataController.SandboxEntities.Bookmarks.Where(b => b.MovieID == this.Id).OrderBy(b => b.Id).ToList());
+                    if (Director == null && this.DirectorID == null)
+                    {
+                        Director = await _context.Directors.Where(d => d.Movies.Contains(this)).FirstOrDefaultAsync();
+                    }
+
+                    // set bookmark count
+                    if (Bookmarks != null) ImagesCount = Bookmarks.Count;
+                    if (Series != null && Series != 2 && SeriesEntity == null)
+                        SeriesEntity = DataController.SeriesController.GetSeriesById(Series.Value);
+                    if (Season != null && SeasonEntity == null)
+                        SeasonEntity = DataController.SeriesController.GetSeasonById(Season);
+                    if (Episode != null && EpisodeEntity == null)
+                        EpisodeEntity = DataController.SeriesController.GetTVEpisodeById(Episode);
+                    success = true;
+                    isLoaded = true;
+                }
+            }
+            catch (Exception)
+            {
+            }
+
+
+            return success;
         }
 
         #endregion Methods

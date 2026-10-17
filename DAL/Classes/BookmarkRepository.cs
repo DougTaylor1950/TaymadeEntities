@@ -14,12 +14,12 @@ namespace TaymadeEntities.DAL.Classes
     {
         private bool disposedValue;
 
-        private readonly DBContext.SandboxEntities _context;
+        //private readonly DBContext.SandboxEntities _context;
 
-        public BookmarkRepository(SandboxEntities context)
-        {
-            _context = context;
-        }
+        //public BookmarkRepository(SandboxEntities context)
+        //{
+        //    _context = context;
+        //}
 
         protected virtual void Dispose(bool disposing)
         {
@@ -50,62 +50,80 @@ namespace TaymadeEntities.DAL.Classes
             GC.SuppressFinalize(this);
         }
 
-        
-
-        public bool Save()
-        {
-            bool success = _context.SaveChanges() > 0;
-            return success;
-        }
 
 
-        
+        //public bool Save()
+        //{
+        //    using DBContext.SandboxEntities _context = new DBContext.SandboxEntities();
+        //    bool success = _context.SaveChanges() > 0;
+        //    return success;
+        //}
+
+
+
 
         public bool Save(Bookmark bookmark)
         {
-            _context.Bookmarks.Update(bookmark);
-            return Save();
+            using DBContext.SandboxEntities _context = new DBContext.SandboxEntities();
+            {
+                _context.Bookmarks.Update(bookmark);
+                return _context.SaveChanges() > 0;
+            }
         }
 
         public void Delete(int id)
-        {   Bookmark? bookmark = _context.Bookmarks.Find(id);
-            if (bookmark != null)
-            _context.Bookmarks.Remove(bookmark);
-            _context.SaveChanges();
+        {
+            using DBContext.SandboxEntities _context = new DBContext.SandboxEntities();
+            {
+                Bookmark? bookmark = _context.Bookmarks.Find(id);
+                if (bookmark != null)
+                    _context.Bookmarks.Remove(bookmark);
+                _context.SaveChanges();
+            }
         }
 
         public Bookmark? GetById(int id)
         {
-            return _context.Bookmarks.Find(id);
+            using DBContext.SandboxEntities _context = new DBContext.SandboxEntities();
+            {
+                return _context.Bookmarks.Find(id);
+            }
         }
 
         public void Insert(Bookmark bookmark)
         {
-            _context.Bookmarks.Add(bookmark);
-            _context.SaveChanges(); 
+            using DBContext.SandboxEntities _context = new DBContext.SandboxEntities();
+            {
+                _context.Bookmarks.Add(bookmark);
+                _context.SaveChanges();
+            }
         }
 
-        public void Update(Bookmark bookmark)
-        {
-            //_context.Bookmarks.Update(bookmark);
-            _context.SaveChanges();
-        }
+        //public void Update(Bookmark bookmark)
+        //{
+        //    //_context.Bookmarks.Update(bookmark);
+
+        //    _context.SaveChanges();
+        //}
 
         public void Add(Bookmark bookmark)
         {
-            _context.Bookmarks.Add(bookmark);
-            _context.SaveChanges();
+            using DBContext.SandboxEntities _context = new DBContext.SandboxEntities();
+            {
+                _context.Bookmarks.Add(bookmark);
+                _context.SaveChanges();
+            }
         }
 
-        public IEnumerable<Bookmark> GetBookmarksByMovieId(int id)
+        public List<Bookmark> GetBookmarksByMovieId(int id)
         {
-            return _context.Bookmarks.Where(b => b.MovieID == id).OrderBy(b => b.Id);
+            using DBContext.SandboxEntities _context = new DBContext.SandboxEntities();
+            {
+                return 
+                    _context.Bookmarks.Where(b => b.MovieID == id).OrderBy(b => b.Time).ToList();
+            }
         }
 
-        public async Task<bool> UpdateAsync(Bookmark bookmark)
-        {
-             //_context.Bookmarks.Update(bookmark);
-            return await _context.SaveChangesAsync() >= 0;
-        }
+       
     }
 }
