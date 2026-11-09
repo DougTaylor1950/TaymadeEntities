@@ -1,0 +1,140 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:TaymadeEntities.ViewModels"
+             xmlns:c="using:TaymadeEntities.Controls"
+             xmlns:tc="using:TaymadeControls"
+             xmlns:tcb="using:TaymadeControls.Buttons"
+             xmlns:mo="using:TaymadeEntities.Models"
+             mc:Ignorable="d" d:DesignWidth="1900" d:DesignHeight="450"
+             x:DataType="vm:MovieViewModelBase"
+             x:Class="TaymadeEntities.Controls.MovieSerialControl">
+
+    <StackPanel Orientation="Horizontal">
+        <Border BorderBrush="Gray"
+                BorderThickness="2"
+                CornerRadius="5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width=" 120"/>
+                    <ColumnDefinition Width=" 120"/>
+                    <ColumnDefinition Width=" 120"/>
+                    <ColumnDefinition Width=" 100"/>
+                    <ColumnDefinition Width=" 100"/>
+                    <ColumnDefinition Width=" 100"/>
+                    <ColumnDefinition Width=" 150"/>
+                    <ColumnDefinition Width=" 150"/>
+                    <ColumnDefinition Width=" 150"/>
+                    <ColumnDefinition Width=" 150"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="Series"
+                           Margin="5,5,5,5"
+                           VerticalAlignment="Center"
+                           Classes="h2" Grid.Column="0" Grid.Row="0" />
+                <ComboBox  Classes="c1" Name="SeriesCombo1"
+                           ItemsSource="{Binding SeriesList}"
+                           Margin="5,5,5,5"
+                           VerticalAlignment="Center"
+                           SelectedItem="{Binding CurrentMovie.SeriesEntity}"
+                           Grid.Column="1"
+                           Grid.Row="0" />
+
+                <TextBox  Classes="c1"
+                          Height="30"
+                          Margin="5,5,5,5"
+                          VerticalAlignment="Center"
+                          Text="{Binding CurrentMovie.SeriesEntity?.Name}"
+                          Grid.Column="2" />
+
+                <TextBlock  Classes="h2"
+                            Margin="5,5,5,5"
+                            VerticalAlignment="Center"
+                            Text="Series Overview"
+                            Grid.Column="0"
+                            Grid.Row="1"/>
+                <TextBox  Classes="c1"
+                          Height="30"  Text="{Binding CurrentSeries.Overview, Mode=TwoWay}" Grid.Column="1"
+                          Grid.Row="1"
+                          Grid.ColumnSpan="6"
+                          Margin="5,5,5,5"
+                          VerticalAlignment="Center"
+                          TextWrapping="Wrap" />
+                <TextBlock Text="Season"
+                           Classes="h2"
+                           Margin="5,5,5,5"
+                           VerticalAlignment="Center"
+                           Grid.Column="0"
+                           Grid.Row="2"/>
+                <ComboBox Classes="c1"
+                          Name="SeasonList"
+                          Margin="5,5,5,5"
+                          VerticalAlignment="Center"
+                          ItemsSource="{Binding CurrentMovie.SeriesEntity.Seasons}"
+                          SelectedItem="{Binding CurrentMovie.SeasonEntity}"
+                          Grid.Column="1"
+                          Grid.Row="2" />
+                <TextBlock  Classes="h2"
+                            Text="Name"
+                            Margin="5,5,5,5"
+                            VerticalAlignment="Center"
+                            Grid.Column="2"
+                            Grid.Row="2"/>
+                <TextBox   Classes="c1" Height="30"
+                           Margin="5,5,5,5"
+                           VerticalAlignment="Center"
+                           Text="{Binding CurrentMovie.SeasonEntity?.Name}"
+                           Grid.Column="3"
+                           Grid.Row="2"
+                           Width="100" />
+                <TextBlock  Classes="h2"  Text="Year"
+                            Margin="5,5,5,5"
+                            VerticalAlignment="Center"
+                            Grid.Column="4"
+                            Grid.Row="2"/>
+
+                <TextBox   Classes="c1" Height="30"
+                           Margin="5,5,5,5"
+                           VerticalAlignment="Center"
+                           Text="{Binding CurrentSeason.Year}"
+                           Grid.Column="5" Grid.Row="2"   />
+                <TextBlock  Classes="h2"  Text="Season No"
+                            Margin="5,5,5,5"
+                            VerticalAlignment="Center"
+                            Grid.Column="6" Grid.Row="2"/>
+                <TextBox   Classes="c1" Height="30"
+                           Margin="5,5,5,5"
+                           VerticalAlignment="Center"
+                           Text="{Binding CurrentSeason.SeasonNo}"
+                           Grid.Column="7" Grid.Row="2"  Width="150" />
+
+                <tcb:ImagedButton Grid.Row="2" Grid.Column="8"
+                                  Margin="5,5,5,5"
+                                  VerticalAlignment="Center"
+                                  Command="{Binding AddSeasonCommand}"
+                                  ImageSource="avares://TaymadeControls/Assets/add_icon.png"
+                                  LabelText="Add Season"
+                                  HotKeyText=""
+                                  TextFontSize="12"
+                                  HotKeyFontSize="9"
+                                  />
+                <tcb:ImagedButton Grid.Row="2"
+                                  Grid.Column="9"
+                                  Margin="5,5,5,5"
+                                  VerticalAlignment="Center"
+                                  Click="SaveSeason_Click"
+                                  ToolTip.Tip="Save the Season's details"
+                                  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+                                  LabelText="Save Season"
+                                  />
+            </Grid>
+        </Border>
+    </StackPanel>
+
+</UserControl>

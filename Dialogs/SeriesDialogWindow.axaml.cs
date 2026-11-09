@@ -18,7 +18,7 @@ namespace TaymadeEntities.Dialogs
     /// <summary>
     /// Defines the <see cref="SeriesDialogWindow" />.
     /// </summary>
-    public partial class SeriesDialogWindow : Window,IDisposable
+    public partial class SeriesDialogWindow : Window, IDisposable
     {
         private bool disposedValue;
         #region Constructors
@@ -103,6 +103,14 @@ namespace TaymadeEntities.Dialogs
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+
+        private void SaveSeries_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+        {
+            if (this.DataContext != null && this.DataContext is SeriesViewModel viewModel)
+            {
+                if (viewModel.CurrentSeries != null) viewModel.CurrentSeries.Save();
+            }
         }
 
         #endregion

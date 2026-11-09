@@ -534,15 +534,15 @@ namespace TaymadeEntities.Models
         /// <summary>
         /// Gets the SeriesList.
         /// </summary>
-        public static List<Series> SeriesList
+        public static ObservableCollection<Series> SeriesList
         {
             get
             {
                 if (seriesEntries == null || seriesEntries.Count == 0)
                 {
-                    seriesEntries = SandboxEntities.Series.OrderBy(s => s.Name).ToList();
+                    seriesEntries = SeriesController.GetSeriesList();
                 }
-                return seriesEntries;
+                return new ObservableCollection<Series>(seriesEntries);
             }
         }
 

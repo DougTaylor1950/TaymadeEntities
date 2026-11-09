@@ -843,7 +843,7 @@ namespace TaymadeEntities.Support
                         };
 
                     OnProgress(movieProgressEventargs);
-                    
+
                 }
                 temp?.Dispose();
             }
@@ -907,7 +907,7 @@ namespace TaymadeEntities.Support
                 }
                 // create the resized image
                 reSizedImage = Support.ResizeImage(image, newWidth, newHeight);
-                
+
                 // if we want to add text it needs to be on the resized image
 
 
@@ -966,7 +966,7 @@ namespace TaymadeEntities.Support
                 //};
 
                 //OnProgress(progressChangedEventArgs);
-                
+
                 System.Threading.Thread.Sleep(50);
                 //await Task.Delay(50);
                 solidBrush?.Dispose();
@@ -984,9 +984,9 @@ namespace TaymadeEntities.Support
             int indx = 1;
             int cnt = 1;
 
-            
 
-                foreach (ImageItem item in images)
+
+            foreach (ImageItem item in images)
             {
                 if (progressChangedEventArgs != null)
                 {
@@ -1301,13 +1301,13 @@ namespace TaymadeEntities.Support
 
                     string filmName = System.IO.Path.GetFileNameWithoutExtension(movieFilename).Replace("&", "and").Replace(",", " ");
                     newMovie = DataController.MovieController.CreateMovie(filmName, 0, movieFilename, phrase.Id);
-                    // newMovie = DataController.SandboxEntities.CreateMovie(filmName);
+
                     if (newMovie == null)
                     {
                         throw new Exception("Failed to create movie entity");
                     }
                     int Id = newMovie.Id;
-                    newMovie = DataController.MovieController.GetMoviesById(Id);
+                    newMovie.Refresh(); // refesh should cleanly reload the entity
 
                     progressArgs.Info = "Movie entity created " + movieFilename;
                     OnProgress(progressArgs);
@@ -1370,13 +1370,11 @@ namespace TaymadeEntities.Support
 
                                     //await newMovie.GetDuration(movieFilename);
 
-                                    //if (newMovie.DurationSeconds != null)
-                                    //    VideoSupport.CreateXSPF(newMovie.DurationSeconds.Value, newName, XSPFilename);
-
                                     //we need to create a temporary new name
                                     string tempNewName = Support.FixImagePath(newName);
                                     MoveFiles(newMovie, filename, fixedNewName, tempNewName);
-                                    //      await newMovie.GetDuration();
+
+                                    await newMovie.GetDuration();
                                     if (newMovie.DurationSeconds == 0)
                                     {
                                         newMovie.DurationSeconds = 30;
@@ -1386,15 +1384,8 @@ namespace TaymadeEntities.Support
                                     if (newTMIDB != null)
                                     {
                                         newMovie.TMDBID = newTMIDB;
-
-                                        //iMovie iMovie = await TmdbSupport.GetMovieData(newTMIDB.Value);
-                                        //if (iMovie != null)
-                                        //{
-                                        //    DialogModelBase.GetCastData(newMovie, iMovie);
-                                        //    newMovie.Info = iMovie.Overview;
-
-                                        //    //newMovie.Save();
-                                        //}
+                                        newMovie.Save();
+                                       
                                     }
 
                                     success = newMovie.Save();
@@ -1502,9 +1493,11 @@ namespace TaymadeEntities.Support
             newMovie.HasChapters = false;
             newMovie.HasEpisodes = false;
             newMovie.Save();
+            newMovie.Refresh();
             MovieGenre movieGenre = DataController.MovieController.CreateMovieGenre(newMovie.Id, phrase?.COMPKEY, subPhrase?.COMPKEY);
             newMovie.MovieGenres.Add(movieGenre);
             SetSeriesDetails(newMovie, movieGenre);
+            newMovie.Refresh();
         }
 
         private static void SetSeriesDetails(Movies newMovie, MovieGenre? movieGenre)
@@ -1756,7 +1749,7 @@ namespace TaymadeEntities.Support
                 string os = GetOS();
 
                 // List <MappedDrives> mappedDrives = DataController.SandboxEntities.MappedDrives.Where(s => s.Computer == machineName && s.LocationType == "PATH").ToList();
-                if (DriveList == null) return filename; 
+                if (DriveList == null) return filename;
                 MappedDrives? mapped = DriveList.Where(d => filename.ToLower().Contains(d.SourceDrive)).FirstOrDefault();
 
                 // m oving to mapped files
@@ -2028,7 +2021,7 @@ namespace TaymadeEntities.Support
 
         public static Bitmap? ConvertAvaloniaBMPToSystem(Avalonia.Media.Imaging.Bitmap sourceBMP)
         {
-            
+
             Bitmap destImage = null;
             if (sourceBMP == null) return destImage;
             using (MemoryStream imageStream = new MemoryStream())

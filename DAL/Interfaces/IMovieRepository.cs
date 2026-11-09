@@ -52,12 +52,15 @@ namespace TaymadeEntities.DAL.Interfaces
 
         List<Movies>? GetMoviesbyBookmarkName(string bookmarkText);
 
+        Task<int> GetTotalMoviesInGenre(string genre);
+
         List<Movies>? GetMoviesByDirector(int id);
 
         List<Movies>? GetMoviesByGenre(string? genre,
-            string? subGenre = "");
+            string? subGenre = "", int pagenumber = 0, int pageSize = 50);
 
-        Task<List<Movies>>? GetMoviesByGenreAsync(string? genre, string? subGenre = "");
+        Task<List<Movies>>? GetMoviesByGenreAsync(string? genre, string? subGenre = ""
+            , int lastMovieId = 0, int pageNumber = 1, int pageSize = 50);
 
         Movies? GetMoviesById(int id);
 

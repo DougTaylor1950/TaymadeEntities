@@ -1,0 +1,454 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TaymadeEntities.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:tcb="using:TaymadeControls.Buttons"
+             xmlns:mo="using:TaymadeEntities.Models"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="1600"
+             d:DesignHeight="1000"
+             x:Class="TaymadeEntities.Controls.MovieListControl"
+             x:DataType="vm:MovieViewModel"
+             >
+
+    <Design.DataContext>
+        <vm:MovieViewModel/>
+    </Design.DataContext>
+
+
+
+
+    <StackPanel Orientation="Vertical">
+        <!-- <Border BorderBrush="Black"
+                BorderThickness="2"
+                CornerRadius="10">
+
+            <StackPanel Orientation="Horizontal" Height="60" IsVisible="False">
+                <tcb:ToolbarPanel Name="MoviesToolbar" IsVisible="False"
+                                  >
+                   
+                    <tcb:ImagedButton
+
+                    Name = "Series"
+
+                    
+                    ImageSource = "avares://TaymadeControls/Assets/Series_Icon.png"
+                    LabelText = "Series"
+                    />
+
+                    <tcb:ImagedButton
+
+                    Name = "Edit"
+                    IsVisible = "{Binding EditVisible}"
+                    ImageSource = "avares://TaymadeControls/Assets/edit_icon.png"
+                    LabelText = "Edit"
+                    HotKey = "Ctrl+E"
+                    />
+
+
+                    <tcb:ImagedButton
+
+                    Name = "Refresh"
+
+                    ImageSource = "avares://TaymadeControls/Assets/Refresh.png"
+                    LabelText = "Refresh"
+                    HotKey = "F5"
+                    />
+
+                    <tcb:ImagedButton Margin="5,5,5,5"
+                                      HotKey="Ctrl+E"
+                                      ImageSource="avares://TaymadeControls/Assets/edit_icon.png"
+                                     
+                                      LabelText = "Edit"
+                                      />
+
+                    <tcb:ImagedButton
+                    Margin ="5, 5, 5, 5"
+                    HotKey = "Alt+F"
+                    ImageSource = "avares://TaymadeControls/Assets/Filter.png"
+                    LabelText = "Filter"
+
+                    />
+
+
+                    <TextBlock
+
+                    Text = "Sort By:"
+                    VerticalAlignment ="Center"
+                    Margin ="5, 5, 5, 5"
+                    />
+
+                    <ComboBox
+
+                    Margin ="5, 5, 5, 5"
+                    />
+                    <ComboBox Margin="5,5,5,5"
+                              
+                              />
+
+                     
+                    <tcb:ImagedButton
+                   
+                    Margin ="5, 5, 5, 5"
+                    LabelText = "Search"
+                    HotKey = "Ctrl+F"
+                    ImageSource = "avares://TaymadeControls/Assets/search_icon.png"
+                    />
+                    <tcb:ImagedButton
+                    IsVisible="False"
+                    Margin ="5,5,5,5"
+                    ImageSource = "avares://TaymadeControls/Assets/Filter.png"
+                    LabelText = "Filter View"
+                    />
+
+                    <tcb:ImagedButton
+
+                    Margin ="5,5,5,5"
+                    IsVisible="False"
+                    LabelText = "Join List"
+                    ImageSource = "avares://TaymadeControls/Assets/merge.png"
+                    />
+
+                    <tcb:ImagedButton
+                    IsVisible="False"
+                    Margin ="5,5,5,5"
+                    LabelText = "Missing Genres"
+                    ImageSource = "avares://TaymadeControls/Assets/missing_icon.png"
+                    />
+
+                    <tcb:ImagedButton
+                    IsVisible="False"
+                    Margin ="5,5,5,5"
+                    LabelText = "Errors"
+                    ImageSource = "avares://TaymadeControls/Assets/warning.png"
+                    />
+
+                    <tcb:ImagedButton
+                    IsVisible="False"
+                    LabelText = "Show Temp"
+                    Margin ="5,5,5,5"
+                    ImageSource = "avares://TaymadeControls/Assets/MovieReel.png"
+                    Width = "100"
+                    />
+
+                    <tcb:ImagedButton
+
+                    LabelText = "Move Temp"
+                    Margin ="5,5,5,5"
+                    ImageSource = "avares://TaymadeControls/Assets/move.png"
+                    Width = "100"
+                    />
+
+                    <tcb:ImagedButton
+
+                    LabelText = "Delete Temp"
+                    Margin ="5,5,5,5"
+                    ImageSource = "avares://TaymadeControls/Assets/delete_icon.png"
+                    Width = "100"
+                    />
+
+                </tcb:ToolbarPanel>
+
+                <Button Content="Show Film Temp" Margin="5" 
+                        
+                        />
+                <Button Content="Move Film Temp" 
+                        Margin="5" 
+                        
+                        
+                        />
+                <Button Content="Delete Temp" 
+                        Margin="5" 
+                        />
+
+            </StackPanel>
+
+        </Border> -->
+
+        <StackPanel Name="MovieControlsPanel"
+                    Orientation="Vertical"
+                    Margin="5,5,5,5" >
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Left" >
+
+                <StackPanel Orientation="Vertical" Height="500">
+                  <!--  <StackPanel Orientation="Horizontal" Height="60" >
+                        <Border BorderBrush="Black"
+                                BorderThickness="2"
+                                CornerRadius="10"
+
+                                >
+                            <StackPanel Orientation="Horizontal"
+                                        Height="60"
+                                        VerticalAlignment="Center"
+                                        >
+                                <tcb:ToolbarPanel Name="MovieListToolbar"
+                                                  Height="70"
+                                                  Margin="5,5,5,5"
+                                                  >
+                                    <ComboBox ItemsSource="{Binding Phrases}"
+                                              SelectedItem="{Binding CurrentPhrase}"
+                                              Margin="5,5,5,5"
+                                              Classes="c1"
+                                              VerticalAlignment="Center"
+                                              >
+                                        <ComboBox.ContextMenu>
+                                            <ContextMenu>
+                                                <MenuItem Header = "Reload List"
+                                                          Name = "ReloadGroups"
+                                                   
+                                                          />
+                                                <MenuItem  Header = "Move To Selected Row"
+                                                           Name = "MoveToSelected"
+                                                           
+                                                           />
+                                            </ContextMenu>
+                                        </ComboBox.ContextMenu>
+                                    </ComboBox>
+
+                                    <ComboBox   Name = "SubGroups"
+                                                Classes="c1"
+                                                ItemsSource="{Binding SubPhrases}"
+                                                SelectedItem="{Binding CurrentSubPhrase}"
+                                                Margin="5,5,5,5"
+                                                VerticalAlignment="Center"
+                                                >
+                                    </ComboBox >
+
+                                    <ComboBox Name="SeriesCombo"
+                                              IsVisible="False"
+                                              VerticalAlignment="Center" />
+                                    <ComboBox Name="SeasonCombo"
+                                              IsVisible="False"
+                                              VerticalAlignment="Center" />
+                                    <tcb:ImagedButton Click="Play"
+                                      Margin="5"
+                                      ImageSource="avares://TaymadeControls/Assets/MovieReel.png"
+                                      LabelText="Play Current"
+                                      HotKey="Alt+P"
+                                      />    
+                                    <tcb:ImagedButton Margin="5,5,5,5"
+                                                     
+                                                      LabelText = "Search"
+                                                      HotKey="Ctrl+F"
+                                                      ImageSource="avares://TaymadeControls/Assets/search_icon.png"
+
+                                                      />
+                                    <tcb:ImagedButtonNoText Name="EndFind"
+
+                                                            Margin="5,5,5,5"
+                                                            ImageSource="avares://TaymadeControls/Assets/Cross2.png"
+                                                            
+                                                            />
+
+                                    <tcb:ImagedButton Name="CreateMovieButton"
+                                                      
+
+                                                      LabelText = "Create Movie"
+                                                      ImageSource = "avares://TaymadeControls/Assets/add_icon.png"
+                                                      Margin="5,5,5,5"
+                                                      />
+                                    <Label Content="Current Movie"
+                                           Margin="5,5,5,5"
+                                           VerticalAlignment="Center" />
+
+                                    <TextBox Name="CurrentMovieTextBox"
+                                             Width="350"
+                                             Margin="5,5,5,5"
+                                             Text=""
+                                             />
+
+
+
+                                    <TextBlock Text="Count"
+                                               Margin="5,5,5,5"
+                                               VerticalAlignment="Center"
+                                               Width="50"/>
+                                    <TextBox Text=""
+                                             Margin="5,5,5,5"
+                                             VerticalAlignment="Center"
+                                             Width="50"  />
+                                    <TextBlock Text="Row"
+                                               Margin="5,5,5,5"
+                                               VerticalAlignment="Center"
+                                               Width="50"/>
+                                  
+                                    <TextBox Text="{Binding RowNumber}"
+                                             Width="50"
+                                             Margin="5,5,5,5"
+                                             VerticalAlignment="Center"
+                                             Name="RowNumber" />
+                                            
+                                </tcb:ToolbarPanel>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel> -->
+                    <StackPanel Orientation="Vertical" >
+                        <Grid ShowGridLines="False">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="40"/>
+                                <RowDefinition Height="30"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="40"/>
+                                <ColumnDefinition Width="200"/>
+                                <ColumnDefinition Width="350"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="140"/>
+                                <ColumnDefinition Width="140"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="100"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            <!--
+                            <TextBox Classes="c1" Text="{Binding  SortOrders[0], Mode=OneWay}" Grid.Row="0"  Grid.Column="0"   />
+                            <TextBox Classes="c1" Text="{Binding  SortOrders[1], Mode=OneWay}" Grid.Row="0"  Grid.Column="1"   />
+                            <TextBox Classes="c1" Text="{Binding  SortOrders[2], Mode=OneWay}" Grid.Row="0"  Grid.Column="2"   />
+                            <TextBox Classes="c1" Text="{Binding  SortOrders[3], Mode=OneWay}" Grid.Row="0"  Grid.Column="3"   />
+                            <TextBox Classes="c1" Text="{Binding  SortOrders[4], Mode=OneWay}" Grid.Row="0"  Grid.Column="4"   />
+                            <TextBox Classes="c1" Text="{Binding  SortOrders[5], Mode=OneWay}" Grid.Row="0"  Grid.Column="5"   />
+                            <TextBox Classes="c1" Text="{Binding  SortOrders[6], Mode=OneWay}" Grid.Row="0"  Grid.Column="6"   />
+                            <TextBox Classes="c1" Text="{Binding  SortOrders[7], Mode=OneWay}" Grid.Row="0"  Grid.Column="7"   />
+                            <TextBox Classes="c1" Text="{Binding  SortOrders[8], Mode=OneWay}" Grid.Row="0"  Grid.Column="8"   />
+                            <TextBox Classes="c1" Text="{Binding  SortOrders[9], Mode=OneWay}" Grid.Row="0"  Grid.Column="10"   />
+                            
+                            <tcb:ImagedButton  Grid.Column="11"
+                                               Grid.Row="0"
+                                               
+                                               LabelText="Sort"
+                                               ImageSource="avares://TaymadeControls/Assets/sort.png"
+                                               />
+
+
+
+                            <tcb:ImagedButton Grid.Column="12"
+                                              Grid.Row="0"
+                                             
+                                              HotKey="Escape"
+                                              LabelText="Clear"
+                                              HotKeyText="Esc"
+                                              ImageSource="avares://TaymadeControls/Assets/cleaning.png"
+                                              />
+
+                            <TextBox Classes="C2" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="9" 
+                                     Text="{Binding ProcessOutput}"/>
+                            <ProgressBar Value="{Binding ProgressPercent}" ShowProgressText="True" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="10"  Minimum="0" Maximum="100" />
+                            
+
+                            <tcb:ImagedButton Margin="10,0,0,0"
+                                              Grid.Column="11"
+                                              Grid.Row="1"
+                                              Name="LastMovie"
+                                              HotKey="Ctrl+L"
+                                              LabelText="Last Movie"
+                                              HotKeyText="Ctrl+L"
+                                              ImageSource="avares://TaymadeControls/Assets/Last.png"
+                                              />
+                                              -->
+                        </Grid>
+                        <DataGrid Name="dgMovies" 
+                                  IsVisible="True"
+                                  AutoGenerateColumns="False"
+                                  VerticalScrollBarVisibility="Visible"
+                                  HorizontalScrollBarVisibility="Visible"
+                                  Height="250"
+                                  RowHeight="25"
+                                  VerticalAlignment="Center"
+                                  CanUserResizeColumns="True"
+                                  ItemsSource="{Binding MovieList}"
+                                  SelectedItem="{Binding CurrentMovie}"
+                                  
+                                  >
+                            <!--	<DataGrid.KeyBindings>
+                            <KeyBinding Gesture="PageDown" Command="{Binding PageDownCommand}" CommandParameter="{Binding BoundGrid}" />
+                            <KeyBinding Gesture="PageUp" Command="{Binding PageUpCommand}" />
+                            <KeyBinding Gesture="Home" Command="{Binding PageHomeCommand}" />
+                            <KeyBinding Gesture="End" Command="{Binding PageEndCommand}" />
+                            </DataGrid.KeyBindings> -->
+                            <DataGrid.Styles>
+                                <!--<Style Selector=":is(DataGridRow)">
+                                <Setter Property="Background" Value="{Binding BackColour}"/>
+                                </Style> -->
+
+                            </DataGrid.Styles>
+
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Id" Binding="{Binding Id}" />
+
+                                <DataGridTextColumn Header="Name" 
+                                                    Binding="{Binding MovieName}"
+                                                    Width="200"  
+                                                    SortMemberPath="MovieName" />
+                                    
+                          
+                                <DataGridTextColumn Header="Information" 
+                                                    Width="350"  Binding="{Binding Info}">
+                                    
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="#Bookmarks" Binding="{Binding ImagesCount}" />
+                                <DataGridTextColumn Header="%Unmarked" Binding="{Binding PercentUnBookmarked}" />
+                                <DataGridTextColumn Header="Duration" Binding="{Binding MovieDuration, Mode=OneWay}" />
+                                <DataGridTextColumn Header="Added" Binding="{Binding Added, Mode=OneWay}" />
+                                <DataGridTextColumn Header="Modified" Binding="{Binding ModifiedOn, Mode=OneWay}" />
+                                <DataGridCheckBoxColumn Header="Has Chapter" Binding="{Binding HasChapters, Mode=OneWay}" />
+                                <DataGridCheckBoxColumn Header="Has Episode" Binding="{Binding HasEpisodes, Mode=OneWay}" />
+                                <DataGridCheckBoxColumn Header="Selected" Binding="{Binding IsSelected, Mode=OneWay}" />
+                                <DataGridTextColumn Header="Rating" Binding="{Binding MovieExtension.Rating, Mode=OneWay}" />
+                                <DataGridTextColumn Header="Year" Binding="{Binding Year, Mode=OneWay}" />
+                                <DataGridTextColumn Header="Episode No" Binding="{Binding EpisodeNumber, Mode=OneWay}" />
+                                
+                                
+                            </DataGrid.Columns>
+
+                            <DataGrid.ContextMenu>
+                                <ContextMenu  Name="MovieMenu">
+                                    <MenuItem Header="Delete Movie"  />
+                                    <MenuItem Header="Delete Movie Entity"  />
+                                    <MenuItem Header="Conversion">
+                                        <MenuItem Header="To MTS" />
+                                        <MenuItem Header="-  Move MTS"  />
+                                        <MenuItem Header="To MP4"  />
+                                        <MenuItem Header="-  Move MP4" />
+                                        <MenuItem Header="Trim Movie"  />
+
+                                    </MenuItem>
+                                    <MenuItem Header="Add NFO File"  />
+                                    <MenuItem Header="Play">
+                                        <MenuItem Header="Play VLC"  HotKey="Ctrl+P" />
+                                        <MenuItem Header="Play From Last" 
+                                                  
+                                                  HotKey="Ctrl+L"/>
+                                    </MenuItem>
+                                    <MenuItem Header="Edit"  />
+                                    <MenuItem Header="Details" />
+                                    <MenuItem Header="Join">
+                                        <MenuItem Header="Clear List" 
+                                                  />
+                                        <MenuItem Header="Join List" 
+                                                  
+                                                  Name="JoinMovies"/>
+                                    </MenuItem>
+                                    <MenuItem Header="Cast Shared Movies"
+                                              
+                                              />
+                                    <MenuItem	Header="Search" 
+                                                 
+                                                 HotKey="Ctrl+F" />
+                                </ContextMenu>
+                            </DataGrid.ContextMenu>
+                        </DataGrid>
+
+
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+
+        </StackPanel>
+    
+    </StackPanel>
+
+</UserControl>

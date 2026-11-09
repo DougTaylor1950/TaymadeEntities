@@ -306,11 +306,11 @@ namespace TaymadeEntities.Models
             {
                 if (disposing)
                 {
-                    if (Actor != null)
-                    {
-                        Actor.Dispose();
-                        Actor = null;
-                    }
+                    //if (Actor != null)
+                    //{
+                    //    //Actor.Dispose();
+                    //    Actor = null;
+                    //}
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer

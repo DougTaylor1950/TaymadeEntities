@@ -38,7 +38,7 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Defines the currentSeason.
         /// </summary>
-        private Support.Season? currentSeason;
+        private Season? currentSeason;
 
         /// <summary>
         /// Defines the episodeList.
@@ -68,7 +68,8 @@ namespace TaymadeEntities.ViewModels
         private bool showVisible = false;
         private string? seriesName = "<new>";
         private ObservableCollection<Series>? newSeriesList;
-        private Series? currentNewSeries;
+        private Series? currentSeries;
+        private TVEpisode? currentEpisode1;
 
         #endregion
 
@@ -92,6 +93,24 @@ namespace TaymadeEntities.ViewModels
             SetupCommands();
         }
 
+        public SeriesViewModel(Movies? currentMovie) 
+        {
+            CurrentSeries = currentMovie.SeriesEntity;
+            CurrentSeason = currentMovie?.SeasonEntity;
+            CurrentEpisode = currentMovie?.EpisodeEntity;
+            CurrentMovie = currentMovie;
+
+            SetupCommands();
+        }
+
+        public SeriesViewModel(Series? series, Season? season, TVEpisode? episode): base()
+        {
+            CurrentSeries = series;
+            CurrentSeason = season;
+            CurrentEpisode = episode;
+            SetupCommands();
+        }
+
         #endregion
         #region Properties
 
@@ -107,10 +126,16 @@ namespace TaymadeEntities.ViewModels
 
         public new ReactiveCommand<Unit, Unit> CreateSeason { get; set; }
 
-        public Series? CurrentNewSeries
+        public new Series? CurrentSeries
         {
-            get => currentNewSeries;
-            set => this.RaiseAndSetIfChanged(ref currentNewSeries, value);
+            get => currentSeries;
+            set => this.RaiseAndSetIfChanged(ref currentSeries, value);
+        }
+
+        public new Season? CurrentSeason
+        {
+            get => currentSeason;
+            set => this.RaiseAndSetIfChanged(ref currentSeason,value);
         }
 
         public ReactiveCommand<Unit, Unit> SaveEpisode { get; set; }
@@ -152,7 +177,11 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets or sets the EpisodeEntity.
         /// </summary>
-        public new TVEpisode? CurrentEpisode { get; internal set; }
+        public new TVEpisode? CurrentEpisode 
+        {
+            get => currentEpisode1;
+            set => this.RaiseAndSetIfChanged(ref currentEpisode1, value); 
+        }
 
         /// <summary>
         /// Gets or sets the EpisodeList.

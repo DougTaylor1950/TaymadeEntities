@@ -16,6 +16,25 @@ public partial class PhraseDialog : Window
         ViewModel = this.DataContext as PhraseViewModel;
 
         this.DataContextChanged += PhraseDialog_DataContextChanged;
+        //this.OKCancelPanel?.OkButton?.Click += OkButton_Click;
+        //this.OKCancelPanel?.CancelButton?.Click += CancelButton_Click;
+            
+    }
+
+    private void CancelButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            this.Close(false);
+        });
+    }
+
+    private void OkButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            this.Close(true);
+        });
     }
 
     public PhraseViewModel? ViewModel { get; internal set; }

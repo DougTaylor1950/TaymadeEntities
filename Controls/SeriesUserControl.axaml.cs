@@ -11,6 +11,8 @@ namespace TaymadeEntities.Controls
     using Avalonia.Controls;
     using Avalonia.Data;
     using Avalonia.Markup.Xaml;
+    using ReactiveUI;
+    using TaymadeEntities.Models;
     using TaymadeEntities.ViewModels;
     //using TaymadeControls;
 
@@ -19,7 +21,7 @@ namespace TaymadeEntities.Controls
     /// </summary>
     public partial class SeriesUserControl : UserControl
     {
-        private MovieEditViewModel? movieViewModelBase;
+        private MovieViewModelBase? movieViewModelBase;
         //private MovieViewModel? movieViewModel;
         #region Constructors
 
@@ -43,13 +45,13 @@ namespace TaymadeEntities.Controls
         {
             if (this.DataContext != null)
             {
-                if (this.DataContext is MovieEditViewModel)
+                if (this.DataContext is MovieViewModelBase)
                 {
-                    movieViewModelBase = this.DataContext as MovieEditViewModel;
+                    movieViewModelBase = this.DataContext as MovieViewModelBase;
 
                     if (movieViewModelBase != null)
                     {
-                        this.SeriesHeaderPanel.Title = movieViewModelBase.CurrentMovie?.MovieName;
+                        this.SeriesHeaderPanel.BindTitle("SeriesHeaderInfo");
                     }
                 }
 
@@ -69,6 +71,34 @@ namespace TaymadeEntities.Controls
         private void SeriesUserControl_Initialized(object? sender, System.EventArgs e)
         {
             this.SetDataContext();
+        }
+
+        private void SeriesList_LayoutUpdated(object? sender, System.EventArgs e)
+        {
+        }
+
+        private void SeasonList_LayoutUpdated(object? sender, System.EventArgs e)
+        {
+            if (this.DataContext != null && DataContext is MovieViewModelBase viewModel)
+            {
+
+            }
+        }
+
+        private void EpisodeList_LayoutUpdated(object? sender, System.EventArgs e)
+        {
+            if (this.DataContext != null && DataContext is MovieViewModelBase viewModel)
+            {
+                //if (sender is ComboBox comboBox && 
+                //    viewModel.CurrentMovie.SeasonEntity.TVEpisodes != null)
+                //{
+                //    TVEpisode? episode = viewModel.CurrentMovie.SeasonEntity.TVEpisodes.
+                //        Where(e => e.Id == viewModel.CurrentMovie?.Episode).FirstOrDefault();
+                    
+                //    //    comboBox.SelectedItem = episode;
+                    
+                //}
+            }
         }
 
         #endregion

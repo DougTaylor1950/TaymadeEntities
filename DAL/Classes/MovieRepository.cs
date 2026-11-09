@@ -68,8 +68,8 @@ namespace TaymadeEntities.DAL.Classes
             _context.FrameSet.Remove(frameSet);
             return Save();
         }
-        
-        
+
+
 
         public bool DeleteMovie(int id)
         {
@@ -171,7 +171,8 @@ namespace TaymadeEntities.DAL.Classes
                 .ToList();
         }
 
-        public List<Movies>? GetMoviesByGenre(string? genre, string? subGenre = "")
+        public List<Movies>? GetMoviesByGenre(string? genre, string? subGenre = ""
+            , int pageNumber = 1, int pageSize = 50)
         {
             List<Movies>? returnValue = null;
 
@@ -179,7 +180,11 @@ namespace TaymadeEntities.DAL.Classes
 
             if (!string.IsNullOrEmpty(subGenre))
             {
-                returnValue = _context.Movies.FromSql($"Execute dbo.GetMoviesBySubGenre {subGenre}").ToList();
+                returnValue = _context.Movies.FromSql($"Execute dbo.GetMoviesBySubGenre {subGenre}")
+                    .AsNoTracking()
+                    .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+                    .ToList();
             }
             else
                 returnValue = _context.Movies.FromSql($"Execute dbo.GetMoviesByGenre {genre}").ToList();
@@ -187,8 +192,32 @@ namespace TaymadeEntities.DAL.Classes
             return returnValue;
         }
 
-        public async Task<List<Movies>>? GetMoviesByGenreAsync(string? genre, string? subGenre = "")
+
+        public async Task<int> GetTotalMoviesInGenre(string genre)
         {
+            var query = _context.Movies
+            .Where(m => _context.MovieGenre
+            .Any(mg => mg.MovieId == m.Id && mg.Genre == genre));
+
+            int totalCount = await query.CountAsync();
+
+            return totalCount;
+
+        }
+
+        public async Task<List<Movies>>? GetMoviesByGenreAsync(string? genre,
+            string? subGenre = ""
+            , int lastMovieId = 0
+            , int pageNumber = 1, int pageSize = 50)
+        {
+
+        //    var query = _context.Movies
+        //.Where(m => _context.MovieGenre
+        //    .Any(mg => mg.MovieId == m.Id && mg.Genre == genre));
+
+        //    int totalCount = await query.CountAsync();
+
+
             await using (var context = new SandboxEntities())
             {
                 List<Movies>? returnValue = null;
@@ -197,14 +226,35 @@ namespace TaymadeEntities.DAL.Classes
 
                 if (!string.IsNullOrEmpty(subGenre))
                 {
-                    returnValue = await _context.Movies.FromSql($"Execute dbo.GetMoviesBySubGenre {subGenre}").ToListAsync();
+                    returnValue = await _context.Movies
+                        .Where(m => m.Id > lastMovieId)
+                        .Where(m => _context.MovieGenre
+                        .Any(mg => mg.MovieId == m.Id && mg.Genre == genre && mg.SubGenre == subGenre))
+                        .OrderBy(m => m.Id)
+                        .Take(pageSize)
+                        .AsNoTracking().ToListAsync();
+                    //returnValue = await _context.Movies.FromSql($"Execute dbo.GetMoviesBySubGenre {subGenre}")
+                    //    .AsNoTracking()
+                    //    .Skip((pageNumber - 1) * pageSize)
+                    //    .Take(pageSize)
+                    //    .ToListAsync();
                 }
                 else
-                    returnValue = await _context.Movies.FromSql($"Execute dbo.GetMoviesByGenre {genre}").ToListAsync();
+                    returnValue = await _context.Movies
+    .Where(m => m.Id > lastMovieId)
+    .Where(m => _context.MovieGenre
+        .Any(mg => mg.MovieId == m.Id && mg.Genre == genre))
+    .OrderBy(m => m.Id)
+    .Take(pageSize)
+    .AsNoTracking()
+    .ToListAsync();
 
                 return returnValue;
             }
         }
+
+        
+
 
         public Movies? GetMoviesById(int id)
         {

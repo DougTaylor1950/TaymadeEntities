@@ -1,13 +1,19 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using TaymadeEntities.ViewModels;
+using Avalonia.Platform.Storage;
+using DocumentFormat.OpenXml.Bibliography;
+using Microsoft.IdentityModel.Tokens;
+using OpenXmlPowerTools;
+using ReactiveUI;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using TaymadeEntities.Models;
+using TaymadeEntities.Support;
 using TaymadeEntities.ViewModels;
-using Avalonia.Interactivity;
+using TaymadeEntities.ViewModels;
 
 namespace TaymadeEntities.Dialogs;
 
@@ -33,6 +39,8 @@ public partial class Maintenance : Window, IDisposable
         DataContext = viewModel;
         MaintenaceViewModel = viewModel;
     }
+
+
 
     private void StoryMaintenance_DataContextChanged(object? sender, EventArgs e)
     {
@@ -183,5 +191,55 @@ public partial class Maintenance : Window, IDisposable
 
     private void EditStory(object? sender, RoutedEventArgs e)
     {
+    }
+
+    
+
+    private void PlayMovie_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext != null && DataContext is MaintenanceViewModel viewModel)
+        {
+            if (viewModel.CurrentMissing != null && !string.IsNullOrEmpty(viewModel.CurrentMissing.FilePath))
+            {
+                using PlayerViewModel playerViewModel = new PlayerViewModel(viewModel.CurrentMissing.FilePath, true);
+
+                playerViewModel.FullScreen = true;
+                playerViewModel.AutoPlay = true;
+
+                Window? main = Support.Support.GetWindow();
+                using PlayerDialog playerDialog = new PlayerDialog(playerViewModel);
+
+                playerDialog.ShowDialog(main);
+            }
+
+        }
+    }
+
+    private void DeleteMovie_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext != null && DataContext is MaintenanceViewModel viewModel)
+        {
+            if (viewModel.CurrentMissing != null && !string.IsNullOrEmpty(viewModel.CurrentMissing.FilePath))
+            {
+                File.Delete(viewModel.CurrentMissing.FilePath);
+                viewModel.MissingMovies.Remove(viewModel.CurrentMissing);
+            }
+        }
+    }
+
+    private async void CreateMovie_Click(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext != null && DataContext is MaintenanceViewModel viewModel)
+        {
+            if (viewModel.CurrentMissing != null && !string.IsNullOrEmpty(viewModel.CurrentMissing.FilePath))
+            {
+                bool success = await viewModel.CreateActualMovieFromPath(viewModel.CurrentMissing.FilePath, viewModel.SelectedPhrase, null);
+                if (success)
+                {
+                    viewModel.MissingMovies.Remove(viewModel.CurrentMissing);
+                }
+                
+            }
+        }
     }
 }

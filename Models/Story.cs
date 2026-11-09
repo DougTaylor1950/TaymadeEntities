@@ -9,7 +9,7 @@
 namespace TaymadeEntities.Models
 {
     using Support.Word;
-   
+
     using DocumentFormat.OpenXml;
     using DocumentFormat.OpenXml.Packaging;
     using DocumentFormat.OpenXml.Wordprocessing;
@@ -351,10 +351,10 @@ namespace TaymadeEntities.Models
 
                 if (authorItem != null && authorItem.Id != 1)
                 {
-                    StoryAuthor? storyAuthor = DataController.SandboxEntities.StoryAuthor.FirstOrDefault(x => x.StoryId == this.Id && x.AuthorId == authorItem.Id);
+                    StoryAuthor? storyAuthor = DataController.StoryController.GetAuthorById(authorItem.Id);
                     if (storyAuthor == null)
                     {
-                        storyAuthor = DataController.SandboxEntities.InsertStoryAuthor(this.Id, authorItem.Id);
+                        storyAuthor = DataController.StoryController.AddStoryAuthor(this.Id, authorItem.Id);
                         if (storyAuthor != null)
                         {
                             storyAuthor.Save();
@@ -379,7 +379,11 @@ namespace TaymadeEntities.Models
             {
                 if (authors == null)
                 {
-                    authors = new ObservableCollection<StoryAuthor>(DataController.SandboxEntities.StoryAuthor.Where(x => x.StoryId == this.Id));
+                    List<StoryAuthor>? authorList = DataController.StoryController.GetStoryAuthorsByStoryId(this.Id);
+                    if (authorList != null)
+                        authors = new ObservableCollection<StoryAuthor>(authorList);
+                    else
+                        Authors = new ObservableCollection<StoryAuthor>();
                 }
 
                 return authors;
@@ -571,7 +575,7 @@ namespace TaymadeEntities.Models
 
                     if (present == null)
                     {
-                        StoryAuthor? newAuthor = DataController.SandboxEntities.InsertStoryAuthor(this.Id, value.Value);
+                        StoryAuthor? newAuthor = DataController.StoryController.AddStoryAuthor(this.Id, value.Value);
                         if (newAuthor != null)
                         {
                             newAuthor.Save();
@@ -797,7 +801,7 @@ namespace TaymadeEntities.Models
                 if (storyDictionary == null && Id > 0)
                 {
                     storyDictionary = DataController.StoryController.GetStoryDictionaryByStoryId(Id);
-                    if (storyDictionary == null )
+                    if (storyDictionary == null)
                     {
                         storyDictionary = new StoryDictionary()
                         {
@@ -885,7 +889,6 @@ namespace TaymadeEntities.Models
                 if (wordHeadingList == null || wordHeadingList.Count == 0)
                 {
                     wordHeadingList = DataController.StoryController.GetWordHeadingsList(this.Id);
-                    //DataController.SandboxEntities.WordHeadings.Where(x => x.StoryId == this.Id).ToList();
                 }
 
                 return wordHeadingList;
@@ -971,9 +974,6 @@ namespace TaymadeEntities.Models
                 newStory.SeriesId = 1;
 
                 newStory.Insert();
-
-                //DataController.SandboxEntities.Story.Add(newStory);
-                //DataController.SandboxEntities.SaveChanges();
                 newStory.Dirty = false;
             }
             catch (Exception ex)
@@ -1024,7 +1024,7 @@ namespace TaymadeEntities.Models
             if (newStory.Id == 0)
             {
                 newStory.Insert();
-                
+
             }
             newStory.StoryDictionary = new StoryDictionary()
             {
@@ -1504,8 +1504,7 @@ namespace TaymadeEntities.Models
                 Creation = info.CreationTime;
             }
 
-            //if (DataController.SandboxEntities.Entry(this).State == EntityState.Unchanged)
-            //{
+
             LastModified = DateTime.Now;
             if (Id == 0) DataController.StoryController.AddStory(this);
             DataController.StoryController.Update(this);
@@ -1536,10 +1535,11 @@ namespace TaymadeEntities.Models
             }
 
             LastModified = DateTime.Now;
-            success = await DataController.StoryController.UpdateAsync(this);
 
             try
             {
+                success = await DataController.StoryController.UpdateAsync(this);
+
             }
             catch (Exception e)
             {
@@ -1975,6 +1975,56 @@ namespace TaymadeEntities.Models
         private void Story_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             Dirty = true;
+        }
+
+        internal void MoveFromStory(Story story)
+        {
+            // transfer from the update story to this story
+            if (story != null)
+            {
+                this.Id = story.Id;
+                // need to check title length max 250 characters
+                if (!string.IsNullOrEmpty(story.Title) && story.Title.Length > 250)
+                {
+                    this.Title = story.Title.Substring(0, 250);
+                }
+                else
+                {
+                    this.Title = story.Title;
+                }
+                // need to check author is less than 50 characters
+                if (!string.IsNullOrEmpty(story.Author) && story.Author.Length > 50)
+                {
+                    this.Author = story.Author.Substring(0, 50);
+                }
+                else
+                {
+                    this.Author = story.Author;
+                }
+                this.Creation = story.Creation;
+                this.LastModified = story.LastModified;
+                this.Path = story.Path;
+                //this.FixedPath = story.FixedPath;
+                this.Codes = story.Codes;
+                this.Age = story.Age;
+                this.LowestAge = story.LowestAge;
+                this.Lines = story.Lines;
+                this.Pages = story.Pages;
+                this.Characters = story.Characters;
+                this.Score = story.Score;
+                this.Json = story.Json;
+                this.Added = story.Added;
+                this.Translation = story.Translation;
+                this.OriginalLanguage = story.OriginalLanguage;
+                this.Published = story.Published;
+                this.IDAuthor = story.IDAuthor;
+                this.SeriesId = story.SeriesId;
+                this.Percent = story.Percent;
+
+
+
+
+            }
         }
 
         #endregion Private Methods

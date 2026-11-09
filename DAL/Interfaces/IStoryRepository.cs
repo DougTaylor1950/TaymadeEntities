@@ -51,7 +51,7 @@ namespace TaymadeEntities.DAL.Interfaces
         bool SaveStoryTransInfo(StoryTransInfo item);
 
         bool SaveWordHeading(WordHeadings item);
-        bool Update(int storyId);
+        bool Update(Story story);
 
         bool UpdateStoryDictionary(StoryDictionary? storyDictionary);
         bool AddAuthor(Author author);
@@ -63,6 +63,9 @@ namespace TaymadeEntities.DAL.Interfaces
         bool UpdateStorySeries(StorySeries storySeries);
         IEnumerable<StorySeries> GetStorySeriesList();
         IEnumerable<Story>? GetStoriesByAuthorId(int id);
+        StoryAuthor? GetAuthorById(int id);
+        StoryAuthor? AddStoryAuthor(int id1, int id2);
+        List<StoryAuthor>? GetStoryAuthorsByStoryId(int id);
         #endregion Public Methods
     }
 }

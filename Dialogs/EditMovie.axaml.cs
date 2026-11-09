@@ -207,7 +207,7 @@ public partial class EditMovie : Window, IDisposable
     private void CancelButton_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
 
-        Avalonia.Threading.Dispatcher.UIThread.Invoke(() =>
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
         {
             this.Close(false);
         }
@@ -998,8 +998,8 @@ public partial class EditMovie : Window, IDisposable
         {
             if (viewModel != null && viewModel.CurrentActor != null)
             {
-               using  ActorSearchModel? actorSearchModel = new ActorSearchModel(viewModel.CurrentActor);
-               using  Dialogs.TMDBActorSearchDialog? searchDialog = new Dialogs.TMDBActorSearchDialog(actorSearchModel);
+                using ActorSearchModel? actorSearchModel = new ActorSearchModel(viewModel.CurrentActor);
+                using Dialogs.TMDBActorSearchDialog? searchDialog = new Dialogs.TMDBActorSearchDialog(actorSearchModel);
 
                 bool result = await searchDialog.ShowDialog<bool>(this);
                 if (result)
@@ -1109,6 +1109,28 @@ public partial class EditMovie : Window, IDisposable
                     }
                     //actorSearchModel.Dispose();
                     //actorSearchModel = null;
+
+                    else if (actorSearchModel.SelectedActor != null) // we already know about this actor
+                    {
+                        Cast? castmember =
+                            actorSearchModel.CurrentActor.Casts
+                                .Where(x => x.MovieID == viewModel.CurrentMovie.Id)
+                                .FirstOrDefault() as Cast;
+
+                        if (castmember == null)
+                        {
+                            //actorSearchModel.CurrentActor.SetDetailsFromPerson(found);
+
+                            tempCastMember.ActorId = actorSearchModel.CurrentActor.Id;
+                            //tempCastMember.Actor = actor;
+
+                            tempCastMember.MovieID = viewModel.CurrentMovie.Id;
+                            tempCastMember.Insert();
+                            tempCastMember.Actor = actorSearchModel.CurrentActor;
+                            tempCastMember.Movies = viewModel.CurrentMovie;
+                            viewModel.CurrentMovie.Casts.Add(tempCastMember);
+                        }
+                    }
                 }
             }
         }

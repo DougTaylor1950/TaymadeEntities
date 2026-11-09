@@ -6,25 +6,28 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using System.Xml;
+using ReactiveUI;
+using Avalonia.Media;
+using Color = Avalonia.Media.Color;
 
 namespace TaymadeEntities.Support
 {
     /// <summary>
     /// Defines the <see cref="PhraseInfo" />
     /// </summary>
-    public class PhraseInfo
+    public class PhraseInfo : ReactiveObject
     {
         #region Fields
 
         /// <summary>
         /// Defines the BackColour
         /// </summary>
-        public string backColour = System.Drawing.ColorTranslator.ToHtml(Color.White);
+        public string backColour = Colors.White.ToString();
 
         /// <summary>
         /// Defines the ForeColour
         /// </summary>
-        public string foreColour = System.Drawing.ColorTranslator.ToHtml(Color.Black);
+        public string foreColour = Colors.Black.ToString();
 
         public string ForeColour { get; set; }
 
@@ -33,17 +36,18 @@ namespace TaymadeEntities.Support
         /// <summary>
         /// Defines the mybackcolour
         /// </summary>
-        private System.Drawing.Color mybackcolour = Color.White;
+        private Avalonia.Media.Color mybackcolour = Colors.White;
 
         /// <summary>
         /// Defines the myforecolor
         /// </summary>
-        private System.Drawing.Color myforecolor = Color.Black;
+        private Avalonia.Media.Color myforecolor = Colors.Black;
 
         /// <summary>
         /// Defines the mySeries
         /// </summary>
         private int mySeries;
+        private string path;
 
         #endregion
 
@@ -65,7 +69,7 @@ namespace TaymadeEntities.Support
             Deserialize(xml);
         }
 
-        public string Path { get; set; }
+        public string Path { get => path; set => this.RaiseAndSetIfChanged(ref path, value); }
 
         #endregion
 
@@ -75,17 +79,27 @@ namespace TaymadeEntities.Support
         /// Gets or sets the backColour
         /// </summary>
         [XmlIgnore]
-        public System.Drawing.Color BackColor
+        public Avalonia.Media.Color BackColor
         {
             get
             {
-                mybackcolour = System.Drawing.ColorTranslator.FromHtml(BackColour);
+                if (!string.IsNullOrWhiteSpace(BackColour))
+                {
+                    Color temp = Colors.White;
+
+                    if (Color.TryParse(BackColour, out temp))
+                    {
+                        mybackcolour = temp;
+                    }
+                }
+
                 return mybackcolour;
             }
             set
             {
-                mybackcolour = value;
-                backColour = System.Drawing.ColorTranslator.ToHtml(value);
+                this.RaiseAndSetIfChanged(ref mybackcolour, value);
+                BackColour = value.ToString();
+
             }
         }
 
@@ -93,17 +107,25 @@ namespace TaymadeEntities.Support
         /// Gets or sets the foreColour
         /// </summary>
         [XmlIgnore]
-        public System.Drawing.Color ForeColor
+        public Color ForeColor
         {
             get
             {
-                myforecolor = System.Drawing.ColorTranslator.FromHtml(ForeColour);
+                if (!string.IsNullOrWhiteSpace(ForeColour))
+                {
+                    Color temp = Colors.White;
+
+                    if (Color.TryParse(ForeColour, out temp))
+                    {
+                        myforecolor = temp;
+                    }
+                }
                 return myforecolor;
             }
             set
             {
                 myforecolor = value;
-                ForeColour = System.Drawing.ColorTranslator.ToHtml(value);
+                ForeColour = value.ToString();
             }
         }
 
@@ -126,7 +148,7 @@ namespace TaymadeEntities.Support
         /// <param name="xml">The <see cref="string"/></param>
         public void Deserialize(string xml)
         {
-            if ( !string.IsNullOrEmpty(xml) )
+            if (!string.IsNullOrEmpty(xml))
             {
                 // Create an instance of the XmlSerializer specifying type and namespace.
                 XmlSerializer serializer = new
@@ -144,11 +166,11 @@ namespace TaymadeEntities.Support
                 fs.Close();
 
                 BackColor = i.BackColor;
-                
-                BackColour = System.Drawing.ColorTranslator.ToHtml(BackColor);
+
+                BackColour = BackColor.ToString();
                 ForeColor = i.ForeColor;
                 ForeColour = i.ForeColour;
-                foreColour = System.Drawing.ColorTranslator.ToHtml(ForeColor);
+                foreColour = ForeColor.ToString();
                 Series = i.Series;
                 Path = i.Path;
             }

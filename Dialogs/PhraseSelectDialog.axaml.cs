@@ -8,8 +8,10 @@ using System.Linq;
 
 namespace TaymadeEntities.Dialogs
 {
-    public partial class PhraseSelectDialog : Window
+    public partial class PhraseSelectDialog : Window , IDisposable
     {
+        private PhraseViewModel phraseViewModel;
+        private bool disposedValue;
         #region Public Constructors
 
         public PhraseSelectDialog()
@@ -17,6 +19,11 @@ namespace TaymadeEntities.Dialogs
             InitializeComponent();
 
             ViewModels.PhraseViewModel phraseViewModel = new ViewModels.PhraseViewModel();
+            SetUpDialogue(phraseViewModel);
+        }
+
+        private void SetUpDialogue(PhraseViewModel phraseViewModel)
+        {
             DataContext = phraseViewModel;
             this.Closed += PhraseSelectDialog_Closed;
 
@@ -32,6 +39,12 @@ namespace TaymadeEntities.Dialogs
             {
                 subPhrases.SelectionChanged += OnSubSelectionChanged;
             }
+        }
+
+        public PhraseSelectDialog(PhraseViewModel phraseViewModel)
+        {
+            this.phraseViewModel = phraseViewModel;
+            SetUpDialogue(phraseViewModel);
         }
 
         #endregion Public Constructors
@@ -112,6 +125,35 @@ namespace TaymadeEntities.Dialogs
         {
             this.DataContext = null;
             
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~PhraseSelectDialog()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         #endregion Private Methods

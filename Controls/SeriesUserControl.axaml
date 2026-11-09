@@ -19,7 +19,8 @@
 
 	<Border CornerRadius="6" BorderBrush="Gray" Background="LightGray" BorderThickness="2" DockPanel.Dock="Top">
 		<DockPanel	LastChildFill="True" >
-			<tc:HeaderControl2 Name="SeriesHeaderPanel" DockPanel.Dock="Top" />
+			<tc:HeaderControl2 Name="SeriesHeaderPanel" Title="{Binding SeriesHeaderInfo}" DockPanel.Dock="Top"
+							   />
 			<Grid ShowGridLines="False">
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="100"/>
@@ -56,9 +57,10 @@
 			  Name ="SeriesList"  
 			  Grid.Column="1" 
 			  Grid.Row="0" 
+			  LayoutUpdated="SeriesList_LayoutUpdated"
 			  VerticalAlignment="Center"
 			  ItemsSource="{Binding SeriesList}" 
-			  SelectedItem="{Binding CurrentMovie.SeriesEntity}"
+			  SelectedItem="{Binding CurrentMovie.SeriesEntity, Mode=TwoWay}"
 			  />
 				<TextBlock  Classes="h2"  Text="Series Name"  Grid.Column="4" Grid.Row="0"/>
 				<TextBox  Classes="c1" Height="30"  Text="{Binding CurrentMovie.SeriesEntity.Name}" Grid.Column="4" />
@@ -70,7 +72,13 @@
 				<!--
 				<TextBox Height="30"  Text="{Binding SeasonEntity.SeasonNo}" Grid.Column="1" Grid.Row="2" />-->
 
-				<ComboBox Classes="c1" Name="SeasonList"  ItemsSource="{Binding CurrentMovie.SeriesEntity.Seasons}" SelectedItem="{Binding CurrentMovie.SeasonEntity}" Grid.Column="1" Grid.Row="2" />
+				<ComboBox Classes="c1" Name="SeasonList" 
+						  ItemsSource="{Binding CurrentMovie.SeriesEntity.Seasons}" 
+						  SelectedItem="{Binding CurrentMovie.SeasonEntity, Mode=TwoWay}" 
+						  SelectedValue="{Binding CurrentMovie.Season}"
+						  SelectedValueBinding="{Binding Id}"
+						  LayoutUpdated="SeasonList_LayoutUpdated"
+						  Grid.Column="1" Grid.Row="2" />
 				<TextBlock  Classes="h2"  Text="Name"  Grid.Column="3" Grid.Row="2"/>
 				<TextBox   Classes="c1" Height="30"   Text="{Binding CurrentMovie.SeasonEntity.Name}" Grid.Column="5" Grid.Row="2"  Width="100" />
 				<TextBlock  Classes="h2"  Text="Year"  Grid.Column="6" Grid.Row="2"/>
@@ -115,7 +123,14 @@
 				<!--
 				<TextBox Height="30"  Text="{Binding Episode.EpisodeNumber}"  Grid.Column="1" Grid.Row="3" />
 				-->
-				<ComboBox Classes="c1" Name="EpisodeList"  ItemsSource="{Binding CurrentMovie.SeasonEntity.TVEpisodes}" SelectedItem="{Binding CurrentMovie.EpisodeEntity }" Grid.Column="1" Grid.Row="3" />
+				<ComboBox Classes="c1" Name="EpisodeList" 
+						  ItemsSource="{Binding CurrentMovie.SeasonEntity.TVEpisodes}"
+						  
+						  SelectedItem="{Binding CurrentMovie.EpisodeEntity, Mode=TwoWay }" 
+						  SelectedValue="{Binding CurrentMovie.Episode}"
+						  SelectedValueBinding="{Binding Id}"
+						  LayoutUpdated="EpisodeList_LayoutUpdated"
+						  Grid.Column="1" Grid.Row="3" />
 
 				<TextBlock  Classes="h2"  Text="Name" Grid.Column="6" Grid.Row="3"/>
 				<TextBox Classes="c1" Height="30"  Text="{Binding CurrentMovie.EpisodeEntity.Name}" Grid.Column="7" Grid.Row="3" Width="200" />

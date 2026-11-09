@@ -30,6 +30,8 @@ namespace TaymadeEntities.Controllers
         /// </summary>
         private IMovieRepository movieRepository;
 
+        public bool InUse { get; private set; }
+
 
 
         #endregion Private Fields
@@ -204,15 +206,29 @@ namespace TaymadeEntities.Controllers
         }
 
         public async Task<List<Movies>>? GetMoviesByGenreAsync(string? genre,
-            string? subGenre = "")
+            string? subGenre = "",
+            int lastMovieId = 0,
+            int pageNumber = 1, 
+            int pageSize = 50)
 
         {
-            IEnumerable<Movies>? tempList = await movieRepository.GetMoviesByGenreAsync(genre, subGenre);
+            if (InUse)
+            {
+                while (InUse)
+                {
+                    System.Threading.Thread.Sleep(1000);
+                }
+            }
+            InUse = true;
+            IEnumerable<Movies>? tempList = await movieRepository.GetMoviesByGenreAsync(genre, subGenre, lastMovieId, pageNumber, pageSize);
+            InUse = false;
+
             //if (tempList != null)
-                //foreach (Movies movie in tempList.ToList())
-                //{
-                //    movie.Loaded = true;
-                //}
+            //foreach (Movies movie in tempList.ToList())
+            //{
+            //    movie.Loaded = true;
+            //}
+            InUse = false;
             return tempList?.ToList();
         }
 

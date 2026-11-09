@@ -53,9 +53,13 @@ namespace TaymadeEntities.Models
         public TVEpisode(Models.Season season)
         {
             this.Season = season;
-            this.SeasonID = season.Id;
-            this.SeasonNumber = season.SeasonNo;
-            this.ShowID = season.ShowId;
+            if (season != null)
+            {
+                this.SeasonID = season.Id;
+                this.SeasonNumber = season.SeasonNo;
+
+                this.ShowID = season.ShowId;
+            }
         }
 
         #endregion

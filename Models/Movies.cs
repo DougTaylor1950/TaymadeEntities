@@ -426,12 +426,12 @@ namespace TaymadeEntities.Models
         {
             get
             {
-                if (episodeEntity == null && (Episode != null && Episode > 0))
-                {
-                    episodeEntity = DataController.SeriesController.GetTVEpisodeById(Episode);
-                    this.RaisePropertyChanged(nameof(EpisodeEntity));
-                    this.RaisePropertyChanged(nameof(EpisodeNumber));
-                }
+                //if (episodeEntity == null && (Episode != null && Episode > 0))
+                //{
+                //    episodeEntity = DataController.SeriesController.GetTVEpisodeById(Episode);
+                //    //this.RaisePropertyChanged(nameof(EpisodeEntity));
+                //    //this.RaisePropertyChanged(nameof(EpisodeNumber));
+                //}
 
                 return episodeEntity;
             }
@@ -926,7 +926,7 @@ namespace TaymadeEntities.Models
             {
                 if (disposing)
                 {
-                    imageBMP?.Dispose();
+                    //imageBMP?.Dispose();
                     // TODO: dispose managed state (managed objects)
                 }
                 

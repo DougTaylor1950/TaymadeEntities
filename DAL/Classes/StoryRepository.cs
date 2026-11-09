@@ -16,8 +16,9 @@ namespace TaymadeEntities.DAL.Classes
     {
         #region Private Fields
 
-        private readonly DBContext.SandboxEntities _context;
+        // private DBContext.SandboxEntities _context;
         private bool disposedValue;
+        private SandboxEntities _context;
 
         #endregion Private Fields
 
@@ -25,7 +26,7 @@ namespace TaymadeEntities.DAL.Classes
 
         public StoryRepository(SandboxEntities context)
         {
-            _context = context;
+            // _context = context;
         }
 
         #endregion Public Constructors
@@ -35,28 +36,39 @@ namespace TaymadeEntities.DAL.Classes
         public bool Add(Story Story)
         {
             Story.StorySeries = null;
-            _context.Story.Add(Story);
-            return Save();
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                _context.Story.Add(Story);
+
+                return _context.SaveChanges() > 0;
+            }
         }
 
         public bool AddAuthor(Author author)
         {
-            Author? temp = _context.Author.Find(author.Id);
-            if (temp == null)
+            using (var _context = new DBContext.SandboxEntities())
             {
-                _context.Author.Add(author);
-                return Save();
+                Author? temp = _context.Author.Find(author.Id);
+                if (temp == null)
+                {
+                    _context.Author.Add(author);
+
+                    return _context.SaveChanges() > 0;
+                }
+                else return false;
             }
-            else return false;
         }
 
         public bool? AddStoryCast(StoryCast storyCast)
         {
-            StoryCast? temp =
-            _context.CreateStoryCast(storyCast.StoryId,
-                storyCast.CastId, storyCast.Codes, storyCast.Character, storyCast.Age);
+            StoryCast? temp = null;
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                temp = _context.CreateStoryCast(storyCast.StoryId,
+                    storyCast.CastId, storyCast.Codes, storyCast.Character, storyCast.Age);
+            }
             int result = _context.SaveChanges();
-            if (temp.Id > 0) storyCast.Id = temp.Id;
+            if (temp != null && temp.Id > 0) storyCast.Id = temp.Id;
             return (result > 0);
         }
 
@@ -67,14 +79,19 @@ namespace TaymadeEntities.DAL.Classes
             {
                 // see if the story is present in the repository 
                 Story? story = this.GetById(dictionary.StoryId);
-                _context.StoryDictionary.Add(dictionary);
-                // cannot save changes as the story may not have been added
-                if (story != null)
+                using (var _context = new DBContext.SandboxEntities())
                 {
-                    int result = _context.SaveChanges();
-                    success = result > 0;
-                } else 
-                success = true;
+                    _context.StoryDictionary.Add(dictionary);
+
+                    // cannot save changes as the story may not have been added
+                    if (story != null)
+                    {
+                        int result = _context.SaveChanges();
+                        success = result > 0;
+                    }
+                    else
+                        success = true;
+                }
             }
 
             return success;
@@ -82,56 +99,115 @@ namespace TaymadeEntities.DAL.Classes
 
         public bool UpdateStorySeries(StorySeries storySeries)
         {
-            _context.StorySeries.Update(storySeries);
-            return Save();
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                _context.StorySeries.Update(storySeries);
+            }
+            return _context.SaveChanges() > 0;
         }
 
         public IEnumerable<StorySeries> GetStorySeriesList()
         {
-            return _context.StorySeries.ToList().OrderBy(s => s.Name);
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                return _context.StorySeries.ToList().OrderBy(s => s.Name);
+            }
+        }
+
+        public StoryAuthor? AddStoryAuthor(int id1, int id2)
+        {
+            StoryAuthor? storyAuthor = null;
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                storyAuthor = _context.InsertStoryAuthor(id1, id2);
+            }
+            return storyAuthor;
+        }
+
+        public List<StoryAuthor>? GetStoryAuthorsByStoryId(int id)
+        {
+            List<StoryAuthor>? storyAuthors = null;
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                storyAuthors = _context.StoryAuthor.Where(sa => sa.StoryId == id).ToList();
+            }
+            return storyAuthors;
+        }
+
+        public StoryAuthor? GetAuthorById(int id)
+        {
+            StoryAuthor? storyAuthor = null;
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                storyAuthor = _context.StoryAuthor.Find(id);
+            }
+            return storyAuthor;
         }
 
         public IEnumerable<Story>? GetStoriesByAuthorId(int id)
         {
-            return _context.Story.Where(s => s.IDAuthor == id).OrderBy(s => s.Title).ToList();
+            List<Story>? tempList = null;
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                tempList = _context.Story.Where(s => s.IDAuthor == id).OrderBy(s => s.Title).ToList();
+            }
+            return tempList;
         }
-
         public bool AddStoryTransInfo(StoryTransInfo storyTransInfo)
         {
-            _context.StoryTransInfo.Add(storyTransInfo);
-            return Save();
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                _context.StoryTransInfo.Add(storyTransInfo);
+            }
+            return _context.SaveChanges() > 0;
         }
         public bool AddWordHeading(WordHeadings item)
         {
-            _context.WordHeadings.Add(item);
-            return Save();
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                _context.WordHeadings.Add(item);
+
+                return _context.SaveChanges() > 0;
+            }
         }
 
         public StoryCast? CreateStoryCast(int StoryId, int CastId, string Codes, string Character, string Age)
         {
-            return _context.CreateStoryCast(StoryId, CastId, Codes, Character, Age);
+            StoryCast? storyCast = null;
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                storyCast = _context.CreateStoryCast(StoryId, CastId, Codes, Character, Age);
+            }
+            return storyCast;
         }
 
         public void Delete(int id)
         {
-            Story StoryToDelete = _context.Story.Find(id);
-            if (StoryToDelete != null)
+            using (var _context = new DBContext.SandboxEntities())
             {
-                // stored procedure used to delete items where story is the foriegn key.
-                _context.DeleteStory(id);
-                Save();
+                using Story? StoryToDelete = _context.Story.Find(id);
+                if (StoryToDelete != null)
+                {
+                    // stored procedure used to delete items where story is the foriegn key.
+                    _context.DeleteStory(id);
+                    _context.SaveChanges();
+                }
             }
         }
 
         public bool DeleteStoryCast(int castId)
         {
-            StoryCast? temp = _context.StoryCast.Find(castId);
-            if (temp != null)
+            using (var _context = new DBContext.SandboxEntities())
             {
-                _context.StoryCast.Remove(temp);
-                return Save();
+                StoryCast? temp = _context.StoryCast.Find(castId);
+                if (temp != null)
+                {
+                    _context.StoryCast.Remove(temp);
+                    return _context.SaveChanges() > 0;
+                }
+
+                return false;
             }
-            return false;
         }
 
         public void Dispose()
@@ -150,130 +226,178 @@ namespace TaymadeEntities.DAL.Classes
 
         public IEnumerable<Author> GetAuthors()
         {
-            return _context.Author.OrderBy(a => a.Name).ToList();
+            List<Author> list = new List<Author>();
+            using (var _context = new DBContext.SandboxEntities())
+                list = _context.Author.OrderBy(a => a.Name).ToList();
+            return list;
         }
         public Story? GetById(int id)
         {
-            return _context.Story.Find(id);
+            Story? story = null;
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                story = _context.Story.Find(id);
+            }
+            return story;
         }
 
         public Story? GetOrCreate(string StoryName)
         {
-            Story Story = _context.Story.FirstOrDefault(a => a.Path == StoryName);
-            if (Story == null)
+            Story? story = null;
+            using (var _context = new DBContext.SandboxEntities())
             {
-                Story = new Story { Path = StoryName };
-                Insert(Story);
+                story = _context.Story.FirstOrDefault(a => a.Path == StoryName);
+                if (story == null)
+                {
+                    story = new Story { Path = StoryName };
+                    Insert(story);
+                }
+                return story;
             }
-            return Story;
         }
 
         public IEnumerable<Story> GetStories()
         {
-            return _context.Story.Include(s => s.WordHeadingList)
-            .Include(s => s.StorySeries)
-            .OrderByDescending(s => s.Id).ToList();
+            List<Story> list = null;
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                list = _context.Story.Include(s => s.WordHeadingList)
+                .Include(s => s.StorySeries)
+                .OrderByDescending(s => s.Id).ToList();
+            }
+            return list;
         }
 
         public StoryCast? GetStoryCastById(int castId)
         {
-            return _context.StoryCast.Where(s => s.Pk == castId).ToList().FirstOrDefault();
+            StoryCast? storyCast = null;
+            using (var _context = new DBContext.SandboxEntities())
+                storyCast = _context.StoryCast.Where(s => s.Pk == castId).ToList().FirstOrDefault();
+            return storyCast;
         }
 
         public IEnumerable<StoryCast>? GetStoryCastList(int storyId)
         {
-            return _context.StoryCast.Where(s => s.StoryId == storyId).OrderBy(s => s.CastId);
+            List<StoryCast> list = new List<StoryCast>();
+            using (var _context = new DBContext.SandboxEntities())
+                list = _context.StoryCast.Where(s => s.StoryId == storyId).OrderBy(s => s.CastId).ToList();
+            return list;
         }
 
         public StoryDictionary? GetStoryDictionaryByStoryId(int storyId)
         {
-            return _context.StoryDictionary.Where(s => s.StoryId == storyId).FirstOrDefault();
+            StoryDictionary? storyDictionary = null;
+            using (var _context = new DBContext.SandboxEntities())
+                storyDictionary = _context.StoryDictionary.Where(s => s.StoryId == storyId).FirstOrDefault();
+            return storyDictionary;
         }
 
         public StoryDictionary? GetStoryDictionary(int id)
         {
-            return _context.StoryDictionary.Where(s => s.Id == id).FirstOrDefault();
+            StoryDictionary? storyDictionary = null;
+            using (var _context = new DBContext.SandboxEntities())
+                storyDictionary = _context.StoryDictionary.Where(s => s.Id == id).FirstOrDefault();
+            return storyDictionary;
         }
-        
+
 
         public StoryProperties? GetStoryProperties()
         {
-            return _context.StoryProperties.ToList().FirstOrDefault();
+            StoryProperties? storyProperties = null;
+            using (var _context = new DBContext.SandboxEntities())
+                storyProperties = _context.StoryProperties.ToList().FirstOrDefault();
+            return storyProperties;
         }
 
         public StoryTransInfo? GetStoryTransInfo()
         {
-            return _context.StoryTransInfo.FirstOrDefault();
+            StoryTransInfo? storyTransInfo = null;
+            using (var _context = new DBContext.SandboxEntities())
+                storyTransInfo = _context.StoryTransInfo.FirstOrDefault();
+            return storyTransInfo;
         }
 
         public IEnumerable<WordHeadings> GetWordHeadingsByStoryId(int storyId)
         {
-            return _context.WordHeadings.Where(w => w.StoryId == storyId);
+            List<WordHeadings>? list = null;
+            using (var _context = new DBContext.SandboxEntities())
+                list = _context.WordHeadings.Where(w => w.StoryId == storyId).ToList();
+            return list;
         }
 
         public void Insert(Story story)
         {
-            _context.Story.Add(story);
+            using (var _context = new DBContext.SandboxEntities())
+                _context.Story.Add(story);
             if (story.SeriesId == 0) story.SeriesId = 1;
-            Save();
+            _context.SaveChanges();
         }
 
         public Task<bool> InsertStoryAsync(Story story)
         {
-            _context.Story.Add(story);
+            using (var _context = new DBContext.SandboxEntities())
+                _context.Story.Add(story);
             if (story.SeriesId == 0) story.SeriesId = 1;
             return SaveAsync();
         }
 
-        public bool Save()
-        {
-            try
-            {
-                bool success = _context.SaveChanges() > 0;
-                return success;
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                foreach (var entry in ex.Entries)
-                {
-                    Debug.Write(entry.Entity.GetType().Name + " : ");
-                    Debug.WriteLine(entry.State);
-                }
+        //public bool Save()
+        //{
+        //    try
+        //    {
+        //        using bool success = _context.SaveChanges() > 0;
+        //        return success;
+        //    }
+        //    catch (DbUpdateConcurrencyException ex)
+        //    {
+        //        foreach (var entry in ex.Entries)
+        //        {
+        //            Debug.Write(entry.Entity.GetType().Name + " : ");
+        //            Debug.WriteLine(entry.State);
+        //        }
 
-                //foreach (var e in _context.ChangeTracker.Entries())
-                //{
-                //    Debug.WriteLine($"{e.Entity.GetType().Name}  {e.State}");
+        //        //foreach (var e in _context.ChangeTracker.Entries())
+        //        //{
+        //        //    Debug.WriteLine($"{e.Entity.GetType().Name}  {e.State}");
 
-                //    foreach (var p in e.Properties)
-                //    {
-                //        if (p.IsModified && e.Entity.GetType().Name == "StoryDictionary")
-                //            Debug.WriteLine($"    {p.Metadata.Name}");
-                //    }
-                //}
-                return false; 
-               // throw;
-            }
-            catch (Exception ex)
-            {
-                string error = ex.ToString();
-                return false;
-            }
-        }
+        //        //    foreach (var p in e.Properties)
+        //        //    {
+        //        //        if (p.IsModified && e.Entity.GetType().Name == "StoryDictionary")
+        //        //            Debug.WriteLine($"    {p.Metadata.Name}");
+        //        //    }
+        //        //}
+        //        return false; 
+        //       // throw;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        string error = ex.ToString();
+        //        return false;
+        //    }
+        //}
 
         public bool Save(Story story)
         {
             if (story.SeriesId == 0) story.SeriesId = 1;
-            _context.Story.Update(story);
-            return Save();
+            using (var _context = new DBContext.SandboxEntities())
+                _context.Story.Update(story);
+            return _context.SaveChanges() > 0;
+
         }
 
         public bool SaveStoryProperties(StoryProperties item)
         {
             //bool success = false;
-            _context.StoryProperties.Update(item);
-            return Save();
-                       
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                _context.StoryProperties.Update(item);
+                return _context.SaveChanges() > 0;
+            }
+
+
         }
+
+
 
         public bool SaveStoryTransInfo(StoryTransInfo? item)
         {
@@ -281,53 +405,86 @@ namespace TaymadeEntities.DAL.Classes
             if (item != null)
             {
                 //item = _context.StoryTransInfo.Find(item.Id);
-                _context.StoryTransInfo.Update(item);
-                //if (item.CurrentStoryId > 0)
-                //{
-                //    Story? story = _context.Story.Find(item.CurrentStoryId);
-                //    if (story != null)
-                //    {
-                //        _context.Story.Update(story);
-                //        _context.SaveChanges();
-                //    }
-                //}
-                int result = _context.SaveChanges();
-                success = (result > 0);
+                using (var _context = new DBContext.SandboxEntities())
+                {
+                    _context.StoryTransInfo.Update(item);
+
+
+
+                    int result = _context.SaveChanges();
+
+                    success = (result > 0);
+                }
+
             }
             return success;
         }
 
         public bool SaveWordHeading(WordHeadings item)
         {
-            _context.WordHeadings.Update(item);
-            int result = _context.SaveChanges();
-            return (result > 0);
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                _context.WordHeadings.Update(item);
+
+                int result = _context.SaveChanges();
+
+                return (result > 0);
+            }
         }
 
-        public bool Update(int storyId)
+        public bool Update(Story story)
         {
-            Story? temp = _context.Story.Find(storyId);
-            if (temp != null)
+            using (var _context = new DBContext.SandboxEntities())
             {
-                _context.Story.Update(temp);
+                Story? temp = _context.Story.Find(story.Id);
+                if (temp == null)
+                {
+                    _context.Story.Add(story);
+                }
+                else
+                {
+                    temp.MoveFromStory(story);
+                }
+
+                return _context.SaveChanges() > 0;
             }
-            return Save();
         }
 
         public async Task<bool> UpdateAsync(Story story)
         {
-            _context.Story.Update(story);
-            return await SaveAsync();
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                Story? temp = _context.Story.Find(story.Id);
+                if (temp == null)
+                {
+                    _context.Story.Add(story);
+                }
+                else
+                {
+                    temp.MoveFromStory(story);
+                }
+
+                return await _context.SaveChangesAsync() > 0;
+            }
         }
+
+        
+
+        
 
         public bool UpdateStoryDictionary(StoryDictionary? storyDictionary)
         {
             bool success = false;
             if (storyDictionary != null)
             {
-                _context.StoryDictionary.Update(storyDictionary);
-                int result = _context.SaveChanges();
-                success = result > 0;
+                using (var _context = new DBContext.SandboxEntities())
+                {
+                    _context.StoryDictionary.Update(storyDictionary);
+
+                    int result = _context.SaveChanges();
+
+                    success = result > 0;
+                }
             }
 
             return success;
@@ -366,6 +523,22 @@ namespace TaymadeEntities.DAL.Classes
             catch (Exception ex)
             {
                 return false;
+            }
+        }
+
+        bool IStoryRepository.Save()
+        {
+            using (var _context = new DBContext.SandboxEntities())
+            {
+                try
+                {
+                    bool success = _context.SaveChanges() > 0;
+                    return success;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
             }
         }
 

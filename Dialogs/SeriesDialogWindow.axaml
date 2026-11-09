@@ -28,6 +28,53 @@
 
 		<Panel Margin="40">
 			<StackPanel Orientation="Vertical">
+				<Grid ShowGridLines="False" MinHeight="100" Height="150">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="100"/>
+						<ColumnDefinition Width="70"/>
+						<ColumnDefinition Width="1"/>
+						<ColumnDefinition Width="100"/>
+						<ColumnDefinition Width="20"/>
+						<ColumnDefinition Width="100"/>
+
+						<ColumnDefinition Width="100"/>
+						<ColumnDefinition Width="100"/>
+						<ColumnDefinition Width="100"/>
+
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="50"/>
+						<RowDefinition Height="40"/>
+						<RowDefinition Height="40"/>
+						
+					</Grid.RowDefinitions>
+					<TextBlock  Classes="h2"  Text="Series Name"  Grid.Column="0" Grid.Row="0"/>
+					<TextBox  Classes="c1" Height="30"  Text="{Binding CurrentSeries.Name}" Grid.Column="1" Grid.ColumnSpan="3" />
+					<TextBlock  Classes="h2"  Text="Series Id"  Grid.Column="5" Grid.Row="0"/>
+					<tcb:ImagedButton Grid.Column="7" 
+									  Grid.ColumnSpan="2"
+									  LabelText="Save Series"
+									  Click="SaveSeries_Click"
+									  ImageSource="avares://TaymadeControls/Assets/save_icon.png"
+									  />
+					
+					<TextBox  Classes="c1" Height="30"  Text="{Binding CurrentSeries.Id}" Grid.Column="6"  />
+					<TextBlock  Classes="h2"  Text="Overview" Grid.Row="1"  />
+					<TextBox  Classes="c1" 
+							  Height="30" 
+							  Text="{Binding CurrentSeries.Overview}"
+							  Grid.Row="1"
+							  Grid.Column="1" Grid.ColumnSpan="8"
+							  />
+					<TextBlock  Classes="h2"  Text="Path" Grid.Row="2"  />
+					<TextBox  Classes="c1" 
+							  Height="30" 
+							  Text="{Binding CurrentSeries.Path}"
+							  Grid.Row="2"
+							  Grid.Column="1" Grid.ColumnSpan="8"
+							  />
+
+					</Grid>
 				<Grid ShowGridLines="False" MinHeight="200" Height="250">
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="100"/>
@@ -44,36 +91,49 @@
 					</Grid.ColumnDefinitions>
 					<Grid.RowDefinitions>
 						<RowDefinition Height="50"/>
-						<RowDefinition Height="35"/>
 						<RowDefinition Height="40"/>
 						<RowDefinition Height="40"/>
 						<RowDefinition Height="40"/>
-						<RowDefinition Height="60"/>
+						<RowDefinition Height="40"/>
+						
 					</Grid.RowDefinitions>
 
-					<TextBlock  Classes="h2"  Text="Series Name"  Grid.Column="0" Grid.Row="0"/>
-					<TextBox  Classes="c1" Height="30"  Text="{Binding CurrentSeries.Name}" Grid.Column="1" Grid.ColumnSpan="3" />
-					<TextBlock  Classes="h2"  Text="Series Id"  Grid.Column="5" Grid.Row="0"/>
-					<TextBox  Classes="c1" Height="30"  Text="{Binding CurrentSeries.Id}" Grid.Column="6"  />
+					
+					<TextBlock  Classes="h1"  Text="Season"  Grid.Column="0" Grid.Row="0"/>
+					<ComboBox Grid.Column="1" 
+							  Grid.Row="0"
+							  Grid.ColumnSpan="3"
+							  ItemsSource="{Binding CurrentSeries.Seasons}"
+							  SelectedItem="{Binding CurrentSeason, Mode= TwoWay}"
+							  />
+					<TextBlock  Classes="h2"  Text="Name"  Grid.Column="0" Grid.Row="1"/>
+					<TextBox  Classes="c1" Height="30"  Grid.Row="1" Text="{Binding CurrentSeason.Name}" Grid.Column="1" Grid.ColumnSpan="3" />
 
+					<TextBlock  Classes="h2"  Text="Show Id"  Grid.Column="5" Grid.Row="1"/>
+					<TextBox  Classes="c1" Height="30"  Grid.Row="1" Text="{Binding CurrentSeason.ShowId}" Grid.Column="6"
+							  Grid.ColumnSpan="3" />
+					<TextBlock  Classes="h2"  Text="Season No"  Grid.Column="0" Grid.Row="2"/>
+					<TextBox  Classes="c1" Height="30"  Grid.Row="2" Text="{Binding CurrentSeason.SeasonNo}" Grid.Column="1" Grid.ColumnSpan="3" />
+					
+					<TextBlock  Classes="h2"  Text="Path"  Grid.Column="5" Grid.Row="2"/>
+					<TextBox  Classes="c1" Height="30"  Grid.Row="2" Text="{Binding CurrentSeason.Path}" Grid.Column="6" Grid.ColumnSpan="3" />
 
-					<TextBlock  Classes="h1"  Text="Season"  Grid.Column="0" Grid.Row="1"/>
-					<TextBlock  Classes="h2"  Text="Name"  Grid.Column="0" Grid.Row="2"/>
-					<TextBox  Classes="c1" Height="30"  Grid.Row="2" Text="{Binding NewSeason.Name}" Grid.Column="1" Grid.ColumnSpan="3" />
-					<TextBlock  Classes="h2"  Text="Season No"  Grid.Column="0" Grid.Row="3"/>
-					<TextBox  Classes="c1" Height="30"  Grid.Row="3" Text="{Binding NewSeason.SeasonNo}" Grid.Column="1" Grid.ColumnSpan="3" />
-					<TextBlock  Classes="h2"  Text="Description"  Grid.Column="0" Grid.Row="4"/>
-					<TextBox  Classes="c1" Height="30"  Grid.Row="4" Text="{Binding NewSeason.Description}" Grid.Column="1" Grid.ColumnSpan="3" />
-					<TextBlock  Classes="h2"  Text="Show Id"  Grid.Column="5" Grid.Row="2"/>
-					<TextBox  Classes="c1" Height="30"  Grid.Row="2" Text="{Binding NewSeason.ShowId}" Grid.Column="6" Grid.ColumnSpan="3" />
-					<TextBlock  Classes="h2"  Text="Path"  Grid.Column="5" Grid.Row="3"/>
-					<TextBox  Classes="c1" Height="30"  Grid.Row="3" Text="{Binding NewSeason.Path}" Grid.Column="6" Grid.ColumnSpan="3" />
-					<TextBlock  Classes="h2"  Text="Year"  Grid.Column="5" Grid.Row="4"/>
-					<TextBox  Classes="c1" Height="30"  Text="{Binding NewSeason.Year}" Grid.Column="6" Grid.Row="4"  />
-					<TextBlock  Classes="h2"  Text="TMDB Id"  Grid.Column="7" Grid.Row="4"/>
-					<TextBox  Classes="c1" Height="30"  Text="{Binding NewSeason.TMDBID}" Grid.Column="8" Grid.Row="4"  />
+					<TextBlock  Classes="h2"  Text="Description"  Grid.Column="0" Grid.Row="3"/>
+					<TextBox  Classes="c1" Height="30"  
+							  Grid.Row="3" Text="{Binding CurrentSeason.Description}" 
+							  Grid.Column="1" Grid.ColumnSpan="3" />
+					<TextBlock  Classes="h2"  Text="Year"  Grid.Column="5" Grid.Row="3"/>
+					<TextBox  Classes="c1" Height="30"  
+							  Text="{Binding CurrentSeason.Year}" 
+							  Grid.Column="6" 
+							  Grid.Row="3"  />
+					<TextBlock  Classes="h2"  Text="TMDB Id"  Grid.Column="7" Grid.Row="3"/>
+					<TextBox  Classes="c1" Height="30"  
+							  Text="{Binding CurrentSeason.TMDBID}" Grid.Column="8" 
+							  Grid.Row="3"  />
 
 				</Grid>
+
 				<StackPanel Orientation="Vertical" Height="20" Background="Beige"
 							/>
 				<Grid ShowGridLines="False" MinHeight="250" Height="300">
@@ -100,25 +160,25 @@
 					</Grid.RowDefinitions>
 
 					<TextBlock  Classes="h1"  Text="Episode"  Grid.Column="0" Grid.Row="0" />
-					<TextBlock  Classes="h2" Text="{Binding Episode.Id}" Grid.Column="1"/>
+					<TextBlock  Classes="h2" Text="{Binding CurrentEpisode.Id}" Grid.Column="1"/>
 					<TextBlock  Classes="h2"  Text="Episode No"  Grid.Column="0" Grid.Row="2" />
-					<TextBox  Classes="c1" Height="30"  Grid.Row="2" Text="{Binding Episode.EpisodeNumber}"  Grid.Column="1" Grid.ColumnSpan="3" />
+					<TextBox  Classes="c1" Height="30"  Grid.Row="2" Text="{Binding CurrentEpisode.EpisodeNumber}"  Grid.Column="1" Grid.ColumnSpan="3" />
 					<TextBlock  Classes="h2"  Text="Show Id"  Grid.Column="5" Grid.Row="2"/>
-					<TextBox  Classes="c1" Height="30"  Grid.Row="2" Text="{Binding Episode.ShowID}"  Grid.Column="6"  />
+					<TextBox  Classes="c1" Height="30"  Grid.Row="2" Text="{Binding CurrentEpisode.ShowID}"  Grid.Column="6"  />
 					<TextBlock  Classes="h2"  Text="Movie Id"  Grid.Column="0" Grid.Row="4" />
 					<TextBox  Classes="c1" Height="30"  Grid.Row="4"
-							  Text="{Binding Episode.MovieId}"  Grid.Column="1"  />
+							  Text="{Binding CurrentEpisode.MovieId}"  Grid.Column="1"  />
 
 
 					<TextBlock  Classes="h2"  Text="Name"  Grid.Column="0" Grid.Row="1" />
-					<TextBox  Classes="c1" Height="30"  Grid.Row="1" Text="{Binding Episode.Name}"  Grid.Column="1" Grid.ColumnSpan="3" />
+					<TextBox  Classes="c1" Height="30"  Grid.Row="1" Text="{Binding CurrentEpisode.Name}"  Grid.Column="1" Grid.ColumnSpan="3" />
 					<TextBlock  Classes="h2"  Text="Overview"  Grid.Column="5" Grid.Row="1" />
-					<TextBox  Classes="c1" Height="30"  Grid.Row="1" Text="{Binding Episode.Overview}"  Grid.Column="6" Grid.ColumnSpan="3" />
+					<TextBox  Classes="c1" Height="30"  Grid.Row="1" Text="{Binding CurrentEpisode.Overview}"  Grid.Column="6" Grid.ColumnSpan="3" />
 
 					<TextBlock  Classes="h2"  Text="Airtime"  Grid.Column="0" Grid.Row="3"/>
-					<DatePicker SelectedDate="{Binding	Episode.AirDate}" Grid.Row="3" Grid.Column="1"    Grid.ColumnSpan="2"/>
+					<DatePicker SelectedDate="{Binding	CurrentEpisode.AirDate}" Grid.Row="3" Grid.Column="1"    Grid.ColumnSpan="2"/>
 					<TextBlock  Classes="h2"  Text="Runtime"  Grid.Column="5" Grid.Row="4" />
-					<TextBox  Classes="c1" Height="30"  Grid.Row="4" Text="{Binding Episode.Runtime}"  Grid.Column="6" Grid.ColumnSpan="3" />
+					<TextBox  Classes="c1" Height="30"  Grid.Row="4" Text="{Binding CurrentEpisode.Runtime}"  Grid.Column="6" Grid.ColumnSpan="3" />
 
 
 					<tcb:ImagedButton LabelText="Initialise"

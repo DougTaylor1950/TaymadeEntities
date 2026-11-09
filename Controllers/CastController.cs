@@ -45,6 +45,8 @@ namespace TaymadeEntities.Controllers
             this.castRepository = castRepository;
         }
 
+        public bool InUse { get; private set; }
+
         #endregion Public Constructors
 
         #region Public Methods
@@ -130,9 +132,19 @@ namespace TaymadeEntities.Controllers
         /// <remarks>
         ///   <created> 04/06/2026 04/06/2026 </created>
         /// </remarks>
-        public IEnumerable<Models.Cast> GetCastsByMovieId(int movieId)
+        public List<Models.Cast>? GetCastsByMovieId(int movieId)
         {
-            return castRepository.GetMovieCasts(movieId);
+            if (InUse)
+            {
+                while (InUse)
+                {
+                    System.Threading.Thread.Sleep(1000);
+                }
+            }
+            InUse = true;
+            List<Models.Cast>? tempList = castRepository.GetMovieCasts(movieId).ToList();
+            InUse = false;
+            return tempList;
         }
 
         /// <summary>

@@ -50,8 +50,8 @@ namespace TaymadeEntities.ViewModels
         /// The subphrase entries
         /// </summary>
         private ObservableCollection<Models.PhraseEntry>? subphraseEntries;
-        private Models.PhraseEntry currentPhrase;
-        private Models.PhraseEntry currentSubPhrase;
+        private Models.PhraseEntry? currentPhrase;
+        private Models.PhraseEntry? currentSubPhrase;
 
         #endregion Private Fields
 
@@ -240,12 +240,12 @@ namespace TaymadeEntities.ViewModels
             get => subphraseEntries;
             set => this.RaiseAndSetIfChanged(ref subphraseEntries, value);
         }
-        public Models.PhraseEntry CurrentPhrase 
+        public Models.PhraseEntry? CurrentPhrase 
         { 
             get => currentPhrase; 
             set => this.RaiseAndSetIfChanged(ref currentPhrase, value); 
         }
-        public Models.PhraseEntry CurrentSubPhrase 
+        public Models.PhraseEntry? CurrentSubPhrase 
         { 
             get => currentSubPhrase; 
             set => this.RaiseAndSetIfChanged(ref currentSubPhrase, value); 

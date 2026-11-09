@@ -21,8 +21,15 @@
 		<DockPanel	LastChildFill="True" >
 			<StackPanel Orientation="Vertical" DockPanel.Dock="Top" Height="500">
 				<StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-					<ComboBox  Name="Phrases" ItemsSource="{Binding PhraseEntries}" SelectedItem="{Binding CurrentPhrase}" />
-					<ComboBox  Name="SubPhrases" ItemsSource="{Binding SubPhraseEntries}" SelectedItem="{Binding CurrentSubPhrase}" />
+					<ComboBox  Name="Phrases" 
+							   Margin="10,10,10,10"
+							   ItemsSource="{Binding PhraseEntries}" 
+							   SelectedItem="{Binding CurrentPhrase}"
+							   />
+					<ComboBox  Name="SubPhrases" 
+							   Margin="10,10,10,10"
+							   ItemsSource="{Binding SubPhraseEntries}" 
+							   SelectedItem="{Binding CurrentSubPhrase}" />
 				</StackPanel>
 			</StackPanel>
 			<StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center" Height="50">

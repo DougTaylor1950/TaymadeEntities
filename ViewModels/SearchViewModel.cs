@@ -68,7 +68,7 @@ namespace TaymadeEntities.ViewModels
             set => this.RaiseAndSetIfChanged(ref  movieId, value); 
         }
 
-        public List<Series> SeriesList
+        public ObservableCollection<Series> SeriesList
         { get => DataController.SeriesList; }
 
         public Series? CurrentSeries 

@@ -401,7 +401,7 @@ namespace TaymadeEntities.Models
             {
                 if (disposing)
                 {
-                    imageBMP?.Dispose();
+                    //imageBMP?.Dispose();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer

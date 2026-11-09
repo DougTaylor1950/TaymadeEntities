@@ -194,7 +194,7 @@ namespace TaymadeEntities.Models
         {
             get
             {
-                if (!string.IsNullOrEmpty(FixImagePath()))
+                if (imageBMP == null && !string.IsNullOrEmpty(FixImagePath()))
                 {
                     string fileName = FixImagePath();
                     if (System.IO.File.Exists(fileName) && imageBMP == null)
@@ -202,13 +202,13 @@ namespace TaymadeEntities.Models
                         imageBMP = Support.GetBMP(fileName);
 
                         //     imageBMP = new Avalonia.Media.Imaging.Bitmap(memory);
-                        //this.RaiseAndSetIfChanged(ref imageBMP, imageBMP);
+                        this.RaisePropertyChanged(nameof(ImageBMP));
                         //}
                     }
                 }
                 return imageBMP;
             }
-            set => imageBMP = value; //this.RaiseAndSetIfChanged(ref imageBMP, value);
+            set => this.RaiseAndSetIfChanged(ref imageBMP, value);
         }
 
         /// <summary>
@@ -887,17 +887,7 @@ namespace TaymadeEntities.Models
 
         public async Task<bool> DeleteMovieAsync(int id)
         {
-            await using var context = new SandboxEntities();
-
-            var movie = new Movies
-            {
-                Id = id
-            };
-
-            context.Movies.Attach(movie);
-            context.Movies.Remove(movie);
-
-            return await context.SaveChangesAsync() > 0;
+            return DataController.MovieController.DeleteMovie(id);
         }
 
         /// <summary>
@@ -1304,6 +1294,16 @@ namespace TaymadeEntities.Models
 
 
             return success;
+        }
+
+        public void Refresh()
+        {
+            Movies? temp = DataController.MovieController.GetMoviesById(Id);
+            if (temp != null)
+            {
+                this.UpdateFrom(temp);
+                LoadChildren();
+            }
         }
 
         #endregion Methods

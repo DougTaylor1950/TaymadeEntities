@@ -151,7 +151,10 @@ namespace TaymadeEntities.Dialogs
             {
                 Result = DialogResultButton.ResultType.Cancel
             };
-            this.Close(result);
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                this.Close(result);
+            });
         }
 
         protected virtual void Dispose(bool disposing)

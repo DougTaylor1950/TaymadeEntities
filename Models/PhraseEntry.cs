@@ -97,7 +97,7 @@ namespace TaymadeEntities.Models
                 }
                 return phraseInfo;
             }
-            set => phraseInfo = value;
+            set => this.RaiseAndSetIfChanged(ref phraseInfo, value);
         }
 
         /// <summary>

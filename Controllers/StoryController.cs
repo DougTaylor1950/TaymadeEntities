@@ -94,7 +94,7 @@ namespace TaymadeEntities.Controllers
         }
         public bool Update(Models.Story story)
         {
-            return storyRepository.Update(story.Id);
+            return storyRepository.Update(story);
         }
 
         #endregion Public Methods
@@ -214,6 +214,21 @@ namespace TaymadeEntities.Controllers
         internal List<Story>? GetStoriesByAuthorId(int id)
         {
             return storyRepository.GetStoriesByAuthorId(id)?.ToList();
+        }
+
+        public StoryAuthor? GetAuthorById(int id)
+        {
+            return storyRepository.GetAuthorById(id);
+        }
+
+        internal StoryAuthor? AddStoryAuthor(int id1, int id2)
+        {
+            return storyRepository.AddStoryAuthor(id1, id2);
+        }
+
+        public List<StoryAuthor>? GetStoryAuthorsByStoryId( int Id)
+        {
+            return storyRepository.GetStoryAuthorsByStoryId(Id);
         }
 
         #endregion Protected Methods

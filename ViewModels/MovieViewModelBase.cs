@@ -6,11 +6,7 @@ using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Svg.Skia;
-using TaymadeEntities.Controls;
-using TaymadeEntities.Dialogs;
-using TaymadeEntities.Models;
-using TaymadeEntities.Support;
-using TaymadeEntities.Views;
+using Avalonia.Threading;
 using BitMiracle.LibTiff.Classic;
 using CliWrap;
 using CliWrap.EventStream;
@@ -35,20 +31,24 @@ using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using TaymadeControls;
+using TaymadeEntities.Controls;
+using TaymadeEntities.DBContext;
+using TaymadeEntities.Dialogs;
+using TaymadeEntities.Models;
+using TaymadeEntities.Support;
+using TaymadeEntities.Views;
 using Bookmark = TaymadeEntities.Models.Bookmark;
 using FFMpegSupport = TaymadeEntities.Support.FFMpegSupport;
 using PhraseEntry = TaymadeEntities.Models.PhraseEntry;
+using Season = TaymadeEntities.Models.Season;
+using Series = TaymadeEntities.Models.Series;
 using Task = System.Threading.Tasks.Task;
 using Window = Avalonia.Controls.Window;
-using Series = TaymadeEntities.Models.Series;
-using Season = TaymadeEntities.Models.Season;
 
 namespace TaymadeEntities.ViewModels
 {
-
     public class MovieViewModelBase : DialogModelBase
     {
-
 
         #region Public Fields
 
@@ -81,6 +81,8 @@ namespace TaymadeEntities.ViewModels
 
         #region Private Fields
 
+        private string? actorHeaderInfo;
+
         /// <summary>
         /// Defines the actorList.
         /// </summary>
@@ -98,7 +100,6 @@ namespace TaymadeEntities.ViewModels
         private string? autoCompleteToken;
 
         private BackgroundMovieGetter? backgroundMovieGetter = new BackgroundMovieGetter();
-
         /// <summary>
         /// Defines the bookmark.
         /// </summary>
@@ -109,6 +110,8 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         private bool byMovie = true;
 
+        private Actor? currentActor;
+        private Movies? currentActorMovie;
         /// <summary>
         /// Defines the currentCastMember.
         /// </summary>
@@ -119,24 +122,24 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         private EpisodeDetails? currentEpisode;
 
+        private MovieGenre currentGenre;
         /// <summary>
         /// Defines the currentMissingMovie.
         /// </summary>
         private MissingFile? currentMissingMovie;
 
+        private MovieGenre currentMovieGenre;
         /// <summary>
         /// Defines the currentPhrase.
         /// </summary>
         private PhraseEntry? currentPhrase;
 
         private Models.Season? currentSeason;
-
         private Models.Series? currentSeries;
-
         /// <summary>
         /// Defines the currentMovie.
         /// </summary>
-       //private Movies? currentMovie;
+        //private Movies? currentMovie;
         /// <summary>
         /// Defines the currentSubPhrase.
         /// </summary>
@@ -147,6 +150,7 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         private bool detailVisible = true;
 
+        private string? directorHeaderInfo;
         /// <summary>
         /// Defines the directors.
         /// </summary>
@@ -167,6 +171,8 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         private ObservableCollection<TVEpisode>? episodeList;
 
+        private ObservableCollection<Actor>? filteredActors;
+        private ObservableCollection<Director>? filteredDirectors;
         /// <summary>
         /// Defines the filterList.
         /// </summary>
@@ -177,39 +183,38 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         private string? findBookmarkText;
 
+        private string? findText;
+        private List<string> genderList;
         /// <summary>
         /// Defines the hasEpisode.
         /// </summary>
         private bool hasEpisode = true;
 
+        private bool? hasMovie;
         /// <summary>
         /// Defines the hasTemp.
         /// </summary>
         private bool hasTemp;
 
+        private string? headerInfo;
         private bool initialise;
         private bool isConverted;
-
         private string? missingInfo;
-
         /// <summary>
         /// Defines the movieList.
         /// </summary>
         private ObservableCollection<Movies>? movieList;
 
         private int movieProgress = 0;
-
         private bool mP4Converted;
         private bool mTSConverted;
         private PhraseEntry? newPhrase;
-
         /// <summary>
         /// Defines the newSeason.
         /// </summary>
         private Models.Season? newSeason;
 
         private Window? oldCaller = null;
-
         /// <summary>
         /// Defines the movieDetailControl.
         /// </summary>
@@ -220,7 +225,6 @@ namespace TaymadeEntities.ViewModels
         private ObservableCollection<Movies>? oldmovieList;
 
         private PhraseEntry? oldPhrase = null;
-
         //private Movies oldCurrentMovie = null;
         private PhraseEntry? oldSubPhrase = null;
 
@@ -254,6 +258,9 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         private Models.DialogResultButton? resultTask;
 
+        private int? rowNumber;
+        private int screenHeight;
+
         /// <summary>
         /// The screen width
         /// </summary>
@@ -280,6 +287,8 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         private Models.Series? seriesEntity;
 
+        private ObservableCollection<Series>? seriesList;
+
         /// <summary>
         /// Defines the showVisible.
         /// </summary>
@@ -299,13 +308,9 @@ namespace TaymadeEntities.ViewModels
         private ObservableCollection<PhraseEntry>? subPhrases;
 
         private string? textToken;
+
         private int volume = 0;
-        private MovieGenre currentGenre;
-        private string? findText;
-        private bool? hasMovie;
-        private MovieGenre currentMovieGenre;
-        private int screenHeight;
-        private ObservableCollection<Series>? seriesList;
+        private string? seriesHeaderInfo;
 
         #endregion Private Fields
 
@@ -362,9 +367,6 @@ namespace TaymadeEntities.ViewModels
             ShowDialog = new Interaction<MovieViewModelBase, SeriesViewModel?>();
 
             CreateSeasonCommand = ReactiveCommand.Create(DoCreateSeason);
-                  
-
-            
 
             this.MpegSupport = new FFMpegSupport();
             this.MpegSupport.CliWrapCompleted += this.MpegSupport_CliWrapCompleted;
@@ -372,55 +374,10 @@ namespace TaymadeEntities.ViewModels
             this.MpegSupport.CliWrapError += this.MpegSupport_CliWrapErrored;
         }
 
-        private void DoCreateSeason()
-        {
-            if (CurrentSeries != null)
-            {
-                Models.Season newSeason = new Models.Season()
-                {
-                    Series = CurrentSeries.Id,
-                    SeasonNo = 1
-                };
-                CurrentSeries.Seasons.Add(newSeason);
-                newSeason.Save();
-                SeasonsList = CurrentSeries.Seasons;
-            }
-        }
-
-        private void DoRemoveGenre()
-        {
-            if (CurrentGenre != null)
-            {
-                if (CurrentMovie != null)
-                {
-                    CurrentGenre.Delete();
-                    CurrentMovie.MovieGenres.Remove(CurrentGenre);
-                    CurrentMovie.Save();
-                    CurrentMovie.MovieGenres = new ObservableCollection<MovieGenre>(CurrentMovie.MovieGenres);
-                }
-            }
-        }
-
-        private void DoMoveToSelectedRow()
-        {
-            MoveToSelectedRow(null);
-        }
-
-        private void MoveToSelectedRow(object value)
-        {
-            //throw new NotImplementedException();
-        }
-
         #endregion Public Constructors
-
-        // Fix for CS1503: Argument 1: cannot convert from 'int' to 'TaymadeEntities.Models.MovieIntResult'
-        // Update the LINQ queries in SearchForMovie to compare Movie IDs correctly
 
         #region Public Properties
 
-        public Window? mainWindow { get; set; }
-
-        public bool MainWindowInitialised { get; set; } = false;
         public static SvgImage SpectrumImage
         {
             get
@@ -433,13 +390,19 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        public ReactiveCommand<Unit, Unit>? _MoveToSelectedRow { get; }
+
         /// <summary>
         /// Defines the phraseEntries.
         /// </summary>
         // private List<PhraseEntry> phraseEntries;
         public ReactiveCommand<Unit, Unit>? _ReloadGroups { get; }
 
-        public ReactiveCommand<Unit, Unit>? _MoveToSelectedRow { get; }
+        public string? ActorHeaderInfo
+        {
+            get => actorHeaderInfo;
+            set => this.RaiseAndSetIfChanged(ref actorHeaderInfo, value);
+        }
 
         /// <summary>
         /// Gets or sets the ActorList.
@@ -516,6 +479,28 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         public ReactiveCommand<Unit, Unit>? CreateSeasonCommand { get; }
 
+        public Actor? CurrentActor
+        {
+            get => currentActor;
+            set
+            {
+                //currentActor?.Dispose();
+                this.RaiseAndSetIfChanged(ref currentActor, value);
+                if (value != null)
+                {
+                    string adult = "";
+                    if (value.Adult.HasValue && value.Adult.Value) adult = "Adult Actor";
+                    ActorHeaderInfo = $"{value.Name} " + adult; ;
+                }
+            }
+        }
+
+        public Movies? CurrentActorMovie
+        {
+            get => currentActorMovie;
+            set => this.RaiseAndSetIfChanged(ref currentActorMovie, value);
+        }
+
         /// <summary>
         /// Gets or sets the CurrentBookmark.
         /// </summary>
@@ -534,18 +519,43 @@ namespace TaymadeEntities.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref currentCastMember, value);
+                if (value != null)
+                    this.CurrentActor = value.Actor;
             }
         }
 
         /// <summary>
         /// Gets or sets the CurrentDirector.
         /// </summary>
-        public Director? CurrentDirector { get => currentDirector; set => this.RaiseAndSetIfChanged(ref currentDirector, value); }
+        public Director? CurrentDirector { get => currentDirector;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref currentDirector, value);
+
+                if (value != null)
+                {
+                    MoveToSelectedDirectorRow();
+                    DirectorHeaderInfo = value.Name;
+                    //if (value.Id != CurrentMovie.DirectorID)
+                    //{
+                    //    CurrentMovie.DirectorID = value.Id;
+                    //}
+
+                    if ((value.Movies == null || value.Movies.Count == 0)
+                        && value.Id != 14 && value != null)
+                    {
+                        value.Movies = DataController.MovieController.GetMoviesByDirector(value.Id);
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets the CurrentEpisode.
         /// </summary>
         public TaymadeEntities.Support.EpisodeDetails? CurrentEpisode { get => currentEpisode; set => this.RaiseAndSetIfChanged(ref currentEpisode, value); }
+
+        public MovieGenre CurrentGenre { get => currentGenre; set => this.RaiseAndSetIfChanged(ref currentGenre, value); }
 
         /// <summary>
         /// Gets or sets the CurrentMissingMovie.
@@ -555,8 +565,6 @@ namespace TaymadeEntities.ViewModels
             get => currentMissingMovie;
             set => this.RaiseAndSetIfChanged(ref currentMissingMovie, value);
         }
-
-        public MovieGenre CurrentGenre { get => currentGenre; set => this.RaiseAndSetIfChanged(ref currentGenre, value); }
 
         /// <summary>
         /// Gets or sets the CurrentMovie.
@@ -632,8 +640,6 @@ namespace TaymadeEntities.ViewModels
                             }
                         }
 
-
-
                         this.RaisePropertyChanged(nameof(IsMP4));
 
                         if (mainWindow == null) mainWindow = Support.Support.GetMainWindow();
@@ -654,7 +660,6 @@ namespace TaymadeEntities.ViewModels
                     IsMP4 = false;
                 }
             }
-
 
             //}
         }
@@ -688,21 +693,6 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        // PSEUDOCODE:
-        // - When CurrentSeason is set:
-        //   - update backing field via RaiseAndSetIfChanged
-        //   - if value not null:
-        //       - query Movies matching season id and (if CurrentSeries present) matching series id
-        //       - construct an ObservableCollection<Movies> from the result
-        //         (do NOT call .ToList() on the ObservableCollection itself)
-        //   - if value is null:
-        //       - set SeasonMovies to an empty ObservableCollection to avoid null references
-        //
-        // FIX SUMMARY:
-        // The original code called .ToList() after constructing the ObservableCollection,
-        // which returned a List<Movies> and caused assignment of List to ObservableCollection (CS0029).
-        // Fix by building a list first (or passing IEnumerable) and then creating the ObservableCollection.
-
         public Models.Season? CurrentSeason
         {
             get => currentSeason;
@@ -734,6 +724,20 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        // PSEUDOCODE:
+        // - When CurrentSeason is set:
+        //   - update backing field via RaiseAndSetIfChanged
+        //   - if value not null:
+        //       - query Movies matching season id and (if CurrentSeries present) matching series id
+        //       - construct an ObservableCollection<Movies> from the result
+        //         (do NOT call .ToList() on the ObservableCollection itself)
+        //   - if value is null:
+        //       - set SeasonMovies to an empty ObservableCollection to avoid null references
+        //
+        // FIX SUMMARY:
+        // The original code called .ToList() after constructing the ObservableCollection,
+        // which returned a List<Movies> and caused assignment of List to ObservableCollection (CS0029).
+        // Fix by building a list first (or passing IEnumerable) and then creating the ObservableCollection.
         public Movies? CurrentSeasonMovie { get; set; }
 
         public Models.Series? CurrentSeries
@@ -762,6 +766,8 @@ namespace TaymadeEntities.ViewModels
                         List<Models.Movies> tempList = DataController.SandboxEntities.Movies
                             .Where(s => s.Series == value.Id).OrderBy(s => s.Season).ToList();
                         SeriesMovieList = new ObservableCollection<Movies>(tempList);
+
+                        SeriesHeaderInfo = value.Name;
                     }
                 }
             }
@@ -810,6 +816,12 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         public bool DetailVisible { get => detailVisible; set => this.RaiseAndSetIfChanged(ref detailVisible, value); }
 
+        public string? DirectorHeaderInfo
+        {
+            get => directorHeaderInfo;
+            set => this.RaiseAndSetIfChanged(ref directorHeaderInfo, value);
+        }
+
         /// <summary>
         /// Gets or sets the Directors.
         /// </summary>
@@ -853,6 +865,32 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         public ObservableCollection<Models.TVEpisode> EpisodeList { get => this.episodeList; set => this.RaiseAndSetIfChanged(ref this.episodeList, value); }
 
+        public ObservableCollection<Actor>? FilteredActors
+        {
+            get
+            {
+                if (filteredActors == null)
+                    filteredActors = new ObservableCollection<Actor>(ActorList);
+                return filteredActors;
+            }
+
+            set => this.RaiseAndSetIfChanged(ref filteredActors, value);
+        }
+
+        public ObservableCollection<TaymadeEntities.Models.Director>? FilteredDirectors
+        {
+            get
+            {
+                if (filteredDirectors == null)
+                {
+                    filteredDirectors = DirectorList;
+                }
+                return filteredDirectors;
+            }
+
+            set => this.RaiseAndSetIfChanged(ref filteredDirectors, value);
+        }
+
         /// <summary>
         /// Gets or sets the FilterList.
         /// </summary>
@@ -863,12 +901,20 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         public string FindBookmarkText { get => findBookmarkText; set => this.RaiseAndSetIfChanged(ref findBookmarkText, value); }
 
+        public string? FindText { get => findText; private set => this.RaiseAndSetIfChanged(ref findText, value); }
+
         public bool FirstMovieSelected { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the FoundMissingMovies.
         /// </summary>
         public MissingFileCollection FoundMissingMovies { get => foundMissingMovies; set => this.RaiseAndSetIfChanged(ref foundMissingMovies, value); }
+
+        public List<string> GenderList
+        {
+            get => genderList;
+            set => genderList = value;
+        }
 
         public ReactiveCommand<Unit, Unit> getMissingGenres { get; }
 
@@ -879,18 +925,24 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         public bool HasEpisode { get => this.hasEpisode; set => this.RaiseAndSetIfChanged(ref this.hasEpisode, value); }
 
+        public bool? HasMovie { get => hasMovie; internal set => this.RaiseAndSetIfChanged(ref hasMovie, value); }
+
         /// <summary>
         /// Gets or sets a value indicating whether HasTemp.
         /// </summary>
         public bool HasTemp { get => hasTemp; set => this.RaiseAndSetIfChanged(ref hasTemp, value); }
 
-        //public TabItemHeader ImageSetsHeader
-        //{
-        //    get
-        //    {
-        //        return TaymadeControls.Builders.TabHeaders.imageSetsHeader;
-        //    }
-        //}
+        public string? HeaderInfo
+        {
+            get => headerInfo;
+            set => this.RaiseAndSetIfChanged(ref headerInfo, value);
+        }
+
+        public string? SeriesHeaderInfo
+        {
+            get => seriesHeaderInfo;
+            set => this.RaiseAndSetIfChanged(ref seriesHeaderInfo, value);
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="MovieViewModelBase"/> is initialise.
@@ -901,6 +953,13 @@ namespace TaymadeEntities.ViewModels
         /// <autogeneratedoc />
         public bool Initialise { get => this.initialise; set => this.initialise = value; }
 
+        //public TabItemHeader ImageSetsHeader
+        //{
+        //    get
+        //    {
+        //        return TaymadeControls.Builders.TabHeaders.imageSetsHeader;
+        //    }
+        //}
         /// <summary>
         /// Gets or sets a value indicating whether this instance is converted.
         /// </summary>
@@ -909,7 +968,6 @@ namespace TaymadeEntities.ViewModels
         /// </value>
         /// <autogeneratedoc />
         public bool IsConverted { get => isConverted; set => this.RaiseAndSetIfChanged(ref isConverted, value); }
-
 
         public bool IsMP4
         {
@@ -926,6 +984,8 @@ namespace TaymadeEntities.ViewModels
 
         public ReactiveCommand<Unit, Unit> joinList { get; }
 
+        public int? LastMovieID { get; set; }
+
         public TabItemHeader MaintenanceHeader
         {
             get
@@ -933,6 +993,12 @@ namespace TaymadeEntities.ViewModels
                 return TaymadeControls.Builders.TabHeaders.maintenanceHeader;
             }
         }
+
+        public Window? mainWindow { get; set; }
+
+        // Fix for CS1503: Argument 1: cannot convert from 'int' to 'TaymadeEntities.Models.MovieIntResult'
+        // Update the LINQ queries in SearchForMovie to compare Movie IDs correctly
+        public bool MainWindowInitialised { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the missing information.
@@ -1048,11 +1114,6 @@ namespace TaymadeEntities.ViewModels
             set => this.RaiseAndSetIfChanged(ref movieList, value);
         }
 
-        public ObservableCollection<string>? SortOrders
-        {
-            get => sortOrders;
-            set => this.RaiseAndSetIfChanged(ref sortOrders, value);
-        }
         public TabItemHeader? MovieListHeader
         {
             get
@@ -1210,6 +1271,8 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         public ReactiveCommand<Unit, Unit>? ReloadBookmarks { get; set; }
 
+        public object RemoveGenre { get; private set; }
+
         /// <summary>
         /// Gets the RefreshMovies.
         /// </summary>
@@ -1224,7 +1287,16 @@ namespace TaymadeEntities.ViewModels
         /// </summary>
         public Models.DialogResultButton ResultTask { get => resultTask; set => resultTask = value; }
 
+        public int? RowNumber
+        {
+            get => rowNumber;
+            private set => this.RaiseAndSetIfChanged(ref rowNumber, value);
+        }
         public ReactiveCommand<Unit, Unit> SaveBookmark { get; set; }
+
+        public int ScreenHeight { get => screenHeight; set => this.RaiseAndSetIfChanged(ref screenHeight, value); }
+
+        public int ScreenWidth { get => screenWidth; set => this.RaiseAndSetIfChanged(ref screenWidth, value); }
 
         /// <summary>
         /// Gets or sets the width of the screen.
@@ -1233,13 +1305,7 @@ namespace TaymadeEntities.ViewModels
         /// The width of the screen.
         /// </value>
         /// <autogeneratedoc />
-        /// 
-
-        public int ScreenWidth { get => screenWidth; set => this.RaiseAndSetIfChanged(ref screenWidth, value); }
-
-        public int ScreenHeight { get => screenHeight; set => this.RaiseAndSetIfChanged(ref screenHeight, value); }
-
-
+        ///
         /// <summary>
         /// Gets or sets the screen width list.
         /// </summary>
@@ -1267,12 +1333,19 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets or sets the SeriesList.
         /// </summary>
-        public ObservableCollection<Models.Series>? SeriesList 
-        { 
-            get => seriesList; 
-            set => this.RaiseAndSetIfChanged(ref seriesList,value); 
+        public ObservableCollection<Models.Series>? SeriesList
+        {
+            get
+            {
+                if (seriesList == null)
+                {
+                    seriesList = DataController.SeriesList;
+                }
+                return seriesList;
+            }
+
+            set => this.RaiseAndSetIfChanged(ref seriesList, value);
         }
-        public object RemoveGenre { get; private set; }
 
         /// <summary>
         /// Gets the EndFindMovie.
@@ -1320,13 +1393,11 @@ namespace TaymadeEntities.ViewModels
                     .Split(',')
                     .ToList();
 
-        /// <summary>
-        /// Gets or sets the MovieDetailControl.
-        /// </summary>
-        //public MovieDetailControl? MovieDetailControl { get => movieDetailControl; set => this.RaiseAndSetIfChanged(ref movieDetailControl, value); }
-        /// <summary>
-        /// Gets or sets the SortOrders.
-        /// </summary>
+        public ObservableCollection<string>? SortOrders
+        {
+            get => sortOrders;
+            set => this.RaiseAndSetIfChanged(ref sortOrders, value);
+        }
 
         public TabItemHeader StoriesHeader
         {
@@ -1336,6 +1407,13 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        /// <summary>
+        /// Gets or sets the MovieDetailControl.
+        /// </summary>
+        //public MovieDetailControl? MovieDetailControl { get => movieDetailControl; set => this.RaiseAndSetIfChanged(ref movieDetailControl, value); }
+        /// <summary>
+        /// Gets or sets the SortOrders.
+        /// </summary>
         public Movies SubGridSelected { get => subGridSelected; set => this.RaiseAndSetIfChanged(ref subGridSelected, value); }
 
         /// <summary>
@@ -1373,15 +1451,35 @@ namespace TaymadeEntities.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref volume, value);
-
             }
         }
-        public string? FindText { get => findText; private set => this.RaiseAndSetIfChanged(ref findText, value); }
-        public bool? HasMovie { get => hasMovie; internal set => this.RaiseAndSetIfChanged(ref hasMovie, value); }
 
         #endregion Public Properties
 
         #region Public Methods
+
+        public PagedResult<Movies> GetMovies(int pageNumber, int pageSize)
+        {
+            using var context = new SandboxEntities();
+
+            var query = context.Movies.AsNoTracking();
+
+            int totalRecords = query.Count();
+
+            var items = query
+                .OrderBy(m => m.Id)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagedResult<Movies>
+            {
+                Items = items,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalRecords = totalRecords
+            };
+        }
 
         /// <summary>
         /// The GetWindow.
@@ -1399,74 +1497,6 @@ namespace TaymadeEntities.ViewModels
             }
             return null;
         }
-
-        /// <summary>
-        /// The AddActualBookmark.
-        /// </summary>
-        /// <param name="main">The main<see cref="MainWindow?"/>.</param>
-        /// <param name="vm">The vm<see cref="MainWindowViewModel?"/>.</param>
-        /// <param name="bookmark">The bookmark<see cref="Bookmark"/>.</param>
-        /// <returns>The <see cref="Task"/>.</returns>
-        //public async System.Threading.Tasks.Task AddActualBookmark(
-        //    MainWindow? main,
-        //    MainWindowViewModel? vm,
-        //    Models.Bookmark? bookmark
-        //)
-        //{
-        //    Models.Bookmark? newbookmark = DataController.SandboxEntities.CreateBookmark(
-        //        bookmark.MovieID,
-        //        bookmark.Time.Value,
-        //        bookmark.Name
-        //    );
-
-        //    string imagePath = bookmark.ImagePath;
-
-        //    if (newbookmark != null)
-        //    {
-        //        newbookmark.ImagePath = imagePath;
-        //        bookmark = newbookmark;
-        //    }
-        //    //DataController.SandboxEntities.Bookmarks.Add(bookmark);
-
-        //    //DataController.SandboxEntities.;
-
-        //    CurrentMovie.Bookmarks.Add(bookmark);
-
-        //    CurrentMovie.ModifiedOn = DateTime.Now;
-        //    CurrentMovie.ImagesCount = CurrentMovie.Bookmarks.Count;
-        //    CurrentMovie.SetPercentUnmarked();
-        //    CurrentMovie.Save();
-
-        //    CurrentBookmark = bookmark;
-        //    CurrentBookmark = bookmark;
-        //    // if (CurrentMovieModel != null) CurrentMovieModel.Bookmarks.Add(bookmark);
-
-        //    UserControl movieBookmarks = main.MovieBookmarks;
-        //    if (movieBookmarks != null)
-        //    {
-        //        DataGrid dgb = main.MovieBookmarks.dgBooks;
-        //        if (dgb != null)
-        //        {
-        //            dgb.ItemsSource = new ObservableCollection<Models.Bookmark>(CurrentMovie.Bookmarks);
-        //            dgb.SelectedItem = CurrentBookmark;
-        //        }
-        //    }
-
-        //    UserControl bookmarkUserControl = main.BookmarkDetails;
-
-        //    if (bookmarkUserControl != null)
-        //    {
-        //        bookmarkUserControl.DataContext = this;
-        //    }
-
-        //    if (string.IsNullOrEmpty(imagePath))
-        //    {
-        //        await EditTheBookmark();
-        //    }
-        //    else newbookmark.Save();
-
-        //    DoReloadBookmarks();
-        //}
 
         //        // if (viewModel != null) viewModel.CurrentMovieModel = value;
         //        this.RaiseAndSetIfChanged(ref this.movie, value);
@@ -1520,6 +1550,8 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        //    DoReloadBookmarks();
+        //}
         //    set
         //    {
         //        if (value != null)
@@ -1559,6 +1591,11 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        //    if (string.IsNullOrEmpty(imagePath))
+        //    {
+        //        await EditTheBookmark();
+        //    }
+        //    else newbookmark.Save();
         /// <summary>
         /// Gets or sets the Movie.
         /// </summary>
@@ -1591,7 +1628,6 @@ namespace TaymadeEntities.ViewModels
                     {
                         CurrentMovie.EpisodeEntity.SeasonID = newSeason.Id;
                         CurrentMovie.EpisodeEntity.SeasonNumber = 1;
-
                     }
                 }
 
@@ -1602,7 +1638,6 @@ namespace TaymadeEntities.ViewModels
                 //CurrentEpisode = CurrentMovie.Episode;
 
                 CurrentMovie.SeriesEntity?.Seasons = DataController.SeriesController.GetSeasonsBySeriesID(CurrentMovie.Series.Value);
-
 
                 //HasEpisode = false;
                 //SeriesDialogWindow seriesDialogWindow = new SeriesDialogWindow();
@@ -1637,6 +1672,10 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        //    if (bookmarkUserControl != null)
+        //    {
+        //        bookmarkUserControl.DataContext = this;
+        //    }
         /// <summary>
         /// Gets or sets the MovieList.
         /// </summary>
@@ -1688,6 +1727,7 @@ namespace TaymadeEntities.ViewModels
             Caller = oldCaller;
         }
 
+        //    UserControl bookmarkUserControl = main.BookmarkDetails;
         //public Cast CurrentCastMember { get => this.currentCastMember; set => this.RaiseAndSetIfChanged(ref this.currentCastMember, value); }
         /// <summary>
         /// The DoClearList.
@@ -1700,6 +1740,73 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        /// <summary>
+        /// The DoToMP4.
+        /// </summary>
+        public async void ConvertToMP4()
+        {
+            Window? mainWindow = Support.Support.GetMainWindow();
+
+            MP4Converted = false;
+            if (mainWindow != null)
+            {
+                if (CurrentMovie != null)
+                {
+                    {
+                        FFMpegSupport mpegSupport = new FFMpegSupport();
+                        //mpegSupport.ConversionComplete += MP4Complete;
+                        mpegSupport.CliWrapProgress += MpegSupport_CliWrapProgress;
+                        mpegSupport.CliWrapCompleted += MpegSupport_CliWrapCompleted;
+                        if (CurrentMovie.DurationSeconds != null) mpegSupport.TotalDuration = CurrentMovie.DurationSeconds.Value;
+                        mpegSupport.MovieName = CurrentMovie.MovieName;
+                        // set action
+                        mpegSupport.action = "CONVERT";
+                        bool success = await mpegSupport.ConvertToMP4(CurrentMovie.MoviePath, CurrentMovie.Id);
+
+                        MP4Converted = success;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// The DoToMTS.
+        /// </summary>
+        public async void ConvertToMTS()
+        {
+            MTSConverted = false;
+            Window? mainWindow = Support.Support.GetMainWindow();
+
+            if (mainWindow != null)
+            {
+                MainWindowViewModel? mvm = mainWindow.DataContext as MainWindowViewModel;
+                if (mvm != null && CurrentMovie != null)
+                {
+                    {
+                        FFMpegSupport mpegSupport = new FFMpegSupport();
+                        //mpegSupport.ConversionComplete += MTSComplete;
+                        mpegSupport.CliWrapProgress += MpegSupport_CliWrapProgress;
+                        mpegSupport.CliWrapCompleted += MpegSupport_CliWrapCompleted;
+                        if (CurrentMovie.DurationSeconds != null) mpegSupport.TotalDuration = CurrentMovie.DurationSeconds.Value;
+                        mpegSupport.MovieName = CurrentMovie.MovieName;
+
+                        bool success = await mpegSupport.ConvertToMTS(CurrentMovie);
+                        MTSConverted = success;
+                    }
+                }
+            }
+        }
+
+        //    UserControl movieBookmarks = main.MovieBookmarks;
+        //    if (movieBookmarks != null)
+        //    {
+        //        DataGrid dgb = main.MovieBookmarks.dgBooks;
+        //        if (dgb != null)
+        //        {
+        //            dgb.ItemsSource = new ObservableCollection<Models.Bookmark>(CurrentMovie.Bookmarks);
+        //            dgb.SelectedItem = CurrentBookmark;
+        //        }
+        //    }
         //public Bookmark CurrentBookmark
         //{
         //    get => this.currentBookmark;
@@ -1727,6 +1834,9 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        //    CurrentBookmark = bookmark;
+        //    CurrentBookmark = bookmark;
+        //    // if (CurrentMovieModel != null) CurrentMovieModel.Bookmarks.Add(bookmark);
         public async Task<bool> CreateActualMovieFromPath(string filePath, PhraseEntry? phrase, PhraseEntry? subPhrase)
         {
             string directory = Path.GetDirectoryName(filePath);
@@ -1738,10 +1848,14 @@ namespace TaymadeEntities.ViewModels
             support.ProgressInformation += Support_ProgressInformation;
 
             bool success = await support.CreateMovie(filePath, phrase, subPhrase);
-
+            
             return success;
         }
 
+        //    CurrentMovie.ModifiedOn = DateTime.Now;
+        //    CurrentMovie.ImagesCount = CurrentMovie.Bookmarks.Count;
+        //    CurrentMovie.SetPercentUnmarked();
+        //    CurrentMovie.Save();
         public async void CutText(string param)
         {
             if (mainWindow == null) mainWindow = Support.Support.GetMainWindow();
@@ -1767,6 +1881,7 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        //    CurrentMovie.Bookmarks.Add(bookmark);
         /// <summary>
         /// The DoDeleteMovie.
         /// </summary>
@@ -1836,6 +1951,7 @@ namespace TaymadeEntities.ViewModels
             // }
         }
 
+        //    //DataController.SandboxEntities.;
         /// <summary>
         /// The DoDeleteMovieEntity.
         /// </summary>
@@ -1854,6 +1970,12 @@ namespace TaymadeEntities.ViewModels
             //}
         }
 
+        //    if (newbookmark != null)
+        //    {
+        //        newbookmark.ImagePath = imagePath;
+        //        bookmark = newbookmark;
+        //    }
+        //    //DataController.SandboxEntities.Bookmarks.Add(bookmark);
         public void DeletePhrase()
         {
             if (CurrentPhrase != null)
@@ -1865,6 +1987,7 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        //    string imagePath = bookmark.ImagePath;
         public void DeleteSeasonCommand()
         {
             if (CurrentSeason != null)
@@ -1873,6 +1996,24 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        /// <summary>
+        /// The AddActualBookmark.
+        /// </summary>
+        /// <param name="main">The main<see cref="MainWindow?"/>.</param>
+        /// <param name="vm">The vm<see cref="MainWindowViewModel?"/>.</param>
+        /// <param name="bookmark">The bookmark<see cref="Bookmark"/>.</param>
+        /// <returns>The <see cref="Task"/>.</returns>
+        //public async System.Threading.Tasks.Task AddActualBookmark(
+        //    MainWindow? main,
+        //    MainWindowViewModel? vm,
+        //    Models.Bookmark? bookmark
+        //)
+        //{
+        //    Models.Bookmark? newbookmark = DataController.SandboxEntities.CreateBookmark(
+        //        bookmark.MovieID,
+        //        bookmark.Time.Value,
+        //        bookmark.Name
+        //    );
         /// <summary>
         /// Deletes the sub phrase.
         /// </summary>
@@ -1884,6 +2025,113 @@ namespace TaymadeEntities.ViewModels
                 CurrentSubPhrase.Delete();
                 if (CurrentPhrase != null)
                     SubPhrases = new ObservableCollection<PhraseEntry>(DataController.GetSubPhraseEntries(CurrentPhrase));
+            }
+        }
+
+        public async void DoAddActor()
+        {
+            this.CurrentActor = new Actor()
+            {
+                Name = "<new>"
+            };
+        }
+
+        public async void DoAddCastMember()
+        {
+            // create a new cast entity can get the movie Id from the viewModel.CurrentMovie.
+            // need to search for an actor
+            //Views.MainWindow? mainWindow = Support.Support.GetMainWindow() as Views.MainWindow;
+            if (CurrentMovie != null )
+            {
+                bool result = false;
+                Cast tempCastMember = new Cast();
+                tempCastMember.MovieID = CurrentMovie.Id;
+                Actor? foundActor = null;
+                int? actorId = null;
+                int? tmdbid = null;
+                Person? foundPerson = null;
+                string? personId = null;
+
+                using ActorSearchModel? actorSearchModel = new ActorSearchModel();
+                {
+                    actorSearchModel.ActorName = "<Enter Actor Name>";
+
+                    using TaymadeEntities.Dialogs.TMDBActorSearchDialog? searchDialog = new
+                         TaymadeEntities.Dialogs.TMDBActorSearchDialog(actorSearchModel);
+                    {
+                        Window? mainWindow = Support.Support.GetWindow();
+                        result = await searchDialog.ShowDialog<bool>(mainWindow);
+
+                        if (result)
+                        {
+                            if (actorSearchModel != null)
+                            {
+                                if (actorSearchModel.FoundPerson != null)
+                                {
+                                    Person? found = actorSearchModel.FoundPerson;
+                                    // see if we already have an actor with this name
+                                    List<Actor>? actors = DataController.ActorController.GetActorsByName(actorSearchModel.FoundPerson.Name);
+                                    //DataController.SandboxEntities.Actors.Where(a => a.Name.ToLower() == actorSearchModel.FoundPerson.Name.ToLower()).ToList();
+                                    if (actors != null && actors.Count == 1)
+                                    {
+                                        foundActor = actors[0];
+                                        actorId = foundActor.Id;
+                                    }
+                                    else if (actors != null && actors.Count > 1)
+                                    {
+                                        foreach (var actor in actors)
+                                        {
+                                            if (actor.Name.ToLower() == found.Name.ToLower())
+                                            {
+                                                foundActor = actor;
+                                                actorId = foundActor.Id;
+                                                return;
+                                            }
+                                        }
+                                        foundActor = new Actor()
+                                        {
+                                            Name = found.Name
+                                        };
+                                        foundActor.Insert();
+                                        actorId = foundActor.Id;
+                                    }
+                                    else if (actors == null || actors.Count == 0)
+                                    {
+                                        foundActor = new Actor()
+                                        {
+                                            Name = found.Name
+                                        };
+                                        foundActor.Insert();
+                                        actorId = foundActor.Id;
+                                    }
+                                    if (foundActor != null && found != null)
+                                    {
+                                        foundActor.SetDetailsFromPerson(found);
+                                        await foundActor.SaveAsync();
+                                    }
+                                }
+                                //actorId = actorSearchModel.ActorId;
+                                //tmdbid = actorSearchModel.TMDBID;
+                                //personId = actorSearchModel.PersonId;
+                            }
+                            if (actorSearchModel.SelectedActor != null && actorSearchModel.FoundPerson == null)
+                            {
+                                actorId = actorSearchModel.SelectedActor.Id;
+                            }
+                        }
+                    }
+                }  // end using actor search model and dialog
+
+                if (result)
+                {
+                    if (CurrentMovie != null && actorId != null)
+                    {
+                        tempCastMember = DataController.CastController.GetOrCreateCast(
+                            CurrentMovie.Id, actorId.Value);
+                        //CurrentCastMember = tempCastMember;
+                    }
+                    CurrentMovie?.ReloadCasts();
+                }
             }
         }
 
@@ -1971,6 +2219,17 @@ namespace TaymadeEntities.ViewModels
         }
 
         /// <summary>
+        /// The DoClearSort.
+        /// </summary>
+        public void DoClearSort()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                SortOrders?[i] = "";
+            }
+        }
+
+        /// <summary>
         /// The DoDeleteCastMember.
         /// </summary>
         public void DoDeleteCastMember()
@@ -2036,12 +2295,122 @@ namespace TaymadeEntities.ViewModels
             //}
         }
 
+        public async void DoGetActor()
+        {
+            if (CurrentActor != null)
+                CurrentActor.GetDetailsFromTMDB();
+        }
+
+        public async void DoGetActorImage()
+        {
+            if (CurrentActor != null)
+            {
+                if (!string.IsNullOrEmpty(CurrentActor.Thumb))
+                {
+                    Avalonia.Media.Imaging.Bitmap? temp = await TmdbSupport.GetImageFromProfileAsync(CurrentActor.Thumb);
+
+                    if (temp != null && CurrentActor.Id > 0)
+                    {
+                        CurrentActor.ImagePath = @"k:\TD1\MovieImages\ActorImages\id-" + CurrentActor.Id.ToString().Trim() + ".jpg";
+
+                        if (!System.IO.File.Exists(Support.Support.FixImagePath(CurrentActor.ImagePath)))
+                        {
+                            temp.Save(Support.Support.FixImagePath(CurrentActor.ImagePath));
+                        }
+                        CurrentActor.ImageBMP = temp;
+                        //temp?.Dispose();
+                    }
+                }
+                else if (!string.IsNullOrEmpty(CurrentActor.ImagePath))
+                {
+                    string checkPath = Support.Support.FixImagePath(CurrentActor.ImagePath);
+                    if (!System.IO.File.Exists(checkPath))
+                    {
+                        CurrentActor.ImagePath = checkPath;
+                        if (CurrentActor.ImageBMP == null)
+                        {
+                            CurrentActor.SetImageBMP();
+                        }
+                        bool success = await CurrentActor.SaveAsync();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="moviePath">The movie path.</param>
+        /// <param name="bookmark">The bookmark.</param>
+        /// <param name="recording">if set to <c>true</c> [recording].</param>
+        /// <param name="recordName">Name of the record.</param>
+        /// <author>
+        /// Doug Taylor - Taymade Software Services
+        /// </author>
+        /// <remarks>
+        ///   <created> 10/09/2026 10/09/2026 </created>
+        /// </remarks>
+        public async void DoPlay(Movies movie,
+            Bookmark? bookmark = null,
+            bool recording = false,
+            string recordName = "",
+            bool fullScreen = true,
+            bool autoplay = true)
+        {
+            using PlayerViewModel playerViewModel = new PlayerViewModel(movie, true);
+
+            playerViewModel.FullScreen = fullScreen;
+            playerViewModel.AutoPlay = autoplay;
+
+            using PlayerDialog playerDialog = new PlayerDialog(playerViewModel);
+            playerViewModel.Caller = playerDialog;
+            playerViewModel.PlayFromBookmark = (bookmark != null);
+            playerViewModel.FullScreen = false;
+            playerViewModel.Bookmark = bookmark;
+            playerViewModel.CurrentBookmark = bookmark;
+            playerViewModel.Recording = recording;
+            playerViewModel.RecordName = recordName;
+            Avalonia.Controls.Window? main = Support.Support.GetWindow();
+            await playerDialog.ShowDialog(main);
+        }
+
         public void DoPlayMovieFile()
         {
             if (CurrentMovie != null)
             {
                 TaymadeEntities.Support.Support.PlayMovie(CurrentMovie.MoviePath, null);
             }
+        }
+
+        public void DoPlayMovieFile(string path)
+        {
+            if (!string.IsNullOrEmpty(path))
+            {
+                TaymadeEntities.Support.Support.PlayMovie(path, null);
+            }
+        }
+
+        public async void DoSaveActor()
+        {
+            if (CurrentActor != null)
+            {
+                bool success = await CurrentActor.SaveAsync();
+            }
+        }
+
+        public void DoSaveBookmark()
+        {
+            if (CurrentBookmark != null)
+                CurrentBookmark.Save();
+        }
+
+        public async System.Threading.Tasks.Task DoSaveMovie()
+        {
+            if (CurrentMovie != null)
+            {
+                bool success = await CurrentMovie.SaveAsync();
+                //bool success = DataController.MovieController.Save(CurrentMovie);
+            }
+            this.RaisePropertyChanged(nameof(CurrentMovie));
         }
 
         /// <summary>
@@ -2099,7 +2468,6 @@ namespace TaymadeEntities.ViewModels
                 {
                     using Dialogs.TMDBSearchDialog searchDialog = new TMDBSearchDialog(viewModel);
                     {
-
                         Window? main = Support.Support.GetWindow() as Window;
 
                         if (main != null)
@@ -2112,32 +2480,35 @@ namespace TaymadeEntities.ViewModels
                 if (movieBase != null) GetTMDBDetails(movieBase);
 
                 //bool success = await CurrentMovie.SaveAsync();
-
             }
         }
 
-        public void GetTMDBDetails(MovieBase movieBase)
+        public async void DoSearchTMDBActor()
         {
-            if (movieBase != null)
+            Views.MainWindow? mainWindow = Support.Support.GetMainWindow() as Views.MainWindow;
+            if (CurrentActor != null)
             {
-                CurrentMovie.TMDBID = movieBase.ID;
-                if (!string.IsNullOrEmpty(movieBase.Overview))
-                    CurrentMovie.Info = movieBase.Overview;
-                if (!string.IsNullOrEmpty(movieBase.Year))
+                using ActorSearchModel? actorSearchModel = new ActorSearchModel(CurrentActor);
+                using TMDBActorSearchDialog? searchDialog = new TMDBActorSearchDialog(actorSearchModel);
+
+                bool result = await searchDialog.ShowDialog<bool>(mainWindow);
+                if (result)
                 {
-                    DateTime temp = DateTime.MinValue;
-                    if (DateTime.TryParse(movieBase.Year, out temp))
+                    string? tmidb = actorSearchModel.GetTMIDB();
+
+                    if (!string.IsNullOrEmpty(tmidb))  // not  cancelled or none selected
                     {
-                        CurrentMovie.Year = temp.Year;
+                        // need to set the tmdbid
+
+                        CurrentActor.TMDBID = int.Parse(tmidb);
+                        CurrentActor.SetDetailsFromPerson(actorSearchModel.FoundPerson);
+                        CurrentActor.Save();
+                    }
+                    else if (actorSearchModel.TMDBID != null)
+                    {
+                        CurrentActor.TMDBID = actorSearchModel.TMDBID;
                     }
                 }
-                // need to do year
-            }
-
-            if (CurrentMovie.TMDBID != null && CurrentMovie.TMDBID > 0)
-            {
-                GetFromTMDB(CurrentMovie, CurrentMovie.TMDBID.Value, true);
-                //bool success = CurrentMovie.Save();
             }
         }
 
@@ -2210,7 +2581,6 @@ namespace TaymadeEntities.ViewModels
                     CurrentMovie.SeasonEntity.TVEpisodes = new ObservableCollection<TVEpisode>(CurrentMovie.SeasonEntity.TVEpisodes.DistinctBy(x => x.Id).OrderBy(x => x.EpisodeNumber).ToList());
                     this.RaisePropertyChanged(nameof(CurrentMovie));
                 }
-
             }
         }
 
@@ -2218,35 +2588,48 @@ namespace TaymadeEntities.ViewModels
         {
             if (mainWindow == null) mainWindow = Support.Support.GetMainWindow();
 
-            if (CurrentSeason != null)
+            if (CurrentMovie != null)
             {
-                NewSeason = CurrentSeason;
-                //SeasonEntity = CurrentMovie.SeasonEntity;
-                //SeriesEntity = CurrentMovie.SeriesEntity;
-                //HasEpisode = CurrentMovie.HasEpisodes.Value;
-                //Episode = CurrentMovie.EpisodeEntity;
-                SeriesDialogWindow seriesDialogWindow = new SeriesDialogWindow();
-
-                SeriesViewModel seriesViewModel = new SeriesViewModel(seriesDialogWindow);
-
-                if (this.Caller == null) this.Caller = mainWindow;
-
-                oldCaller = this.Caller;
-                Caller = seriesDialogWindow;
-
-                seriesDialogWindow.DataContext = this;
-
-                await seriesDialogWindow.ShowDialog(oldCaller);
-                if (
-                       resultButton != null
-                       && resultButton.Result == Models.DialogResultButton.ResultType.Ok
-                   )
+                // check values populated 
+                if (CurrentMovie.Season != null && CurrentMovie.SeasonEntity == null)
                 {
-                    CurrentSeason.Save();
+                    CurrentMovie.SeasonEntity = DataController.SeriesController.GetSeasonById(CurrentMovie.Season.Value);
+                }
+
+                using SeriesViewModel seriesViewModel = new SeriesViewModel(CurrentMovie);
+
+                using SeriesDialogWindow seriesDialogWindow = new SeriesDialogWindow(seriesViewModel);
+
+                
+
+                bool ok =  await seriesDialogWindow.ShowDialog<bool>(mainWindow);
+                if (
+                       ok
+                   )
+                { 
+                    if (seriesViewModel != null)
+                    {
+                        if (seriesViewModel.CurrentSeason != null)
+                        {
+                            seriesViewModel.CurrentSeason.Save();
+                            if (CurrentMovie != null)
+                            {
+                                CurrentMovie.Season = seriesViewModel.CurrentSeason.Id;
+                                //CurrentMovie.SeasonNo = seriesViewModel.CurrentSeason.SeasonNo;
+                                CurrentMovie.SeasonEntity = seriesViewModel.CurrentSeason;
+                                await CurrentMovie.SaveAsync();
+                                CurrentMovie.Refresh();
+                                this.RaisePropertyChanged(nameof(CurrentMovie));
+                                this.RaisePropertyChanged(nameof(CurrentMovie.SeasonEntity));
+                                this.RaisePropertyChanged(nameof(CurrentMovie.EpisodeEntity));
+                            }
+                        }
+                    }
+                    
                     this.RaisePropertyChanged(nameof(CurrentMovie));
                 }
             }
-            Caller = oldCaller;
+           
         }
 
         /// <summary>
@@ -2258,8 +2641,6 @@ namespace TaymadeEntities.ViewModels
             MainWindow? main = Support.Support.GetWindow() as MainWindow;
             if (main != null)
             {
-
-
                 if (this != null && this.CurrentBookmark != null)
                 {
                     BookmarkViewModel viewModel = new BookmarkViewModel();
@@ -2332,32 +2713,6 @@ namespace TaymadeEntities.ViewModels
         }
 
         /// <summary>
-        /// Finds the and move to current movie.
-        /// </summary>
-        /// <autogeneratedoc />
-        //public void FindAndMoveToCurrentMovie()
-        //{
-        //    DataGrid? dgMovies = Support.Support.GetDgMovies();
-        //    if (dgMovies != null)
-        //    {
-        //        dgMovies.ItemsSource = MovieList;
-        //    }
-
-        //    if (CurrentMovie != null)
-        //    {
-        //        Movies movies = MovieList.Where(x => x.Id == CurrentMovie.Id).FirstOrDefault();
-        //        if (movies != null)
-        //        {
-        //            int pos = MovieList.IndexOf(movies);
-
-        //            CurrentMovie = movies;
-
-        //            if (pos >= 0) MoveToSelectedRow(pos);
-        //        }
-        //    }
-        //}
-
-        /// <summary>
         /// Finds from movie information.
         /// </summary>
         /// <autogeneratedoc />
@@ -2375,6 +2730,10 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        //            if (pos >= 0) MoveToSelectedRow(pos);
+        //        }
+        //    }
+        //}
         /// <summary>
         /// Finds the movie.
         /// </summary>
@@ -2384,6 +2743,7 @@ namespace TaymadeEntities.ViewModels
             FindMovie(true);
         }
 
+        //            CurrentMovie = movies;
         /// <summary>
         /// The DoFindMovies.
         /// </summary>
@@ -2416,6 +2776,12 @@ namespace TaymadeEntities.ViewModels
                 MovieList = OldMovieList;
         }
 
+        //    if (CurrentMovie != null)
+        //    {
+        //        Movies movies = MovieList.Where(x => x.Id == CurrentMovie.Id).FirstOrDefault();
+        //        if (movies != null)
+        //        {
+        //            int pos = MovieList.IndexOf(movies);
         /// <summary>
         /// Finds the with bookmark.
         /// </summary>
@@ -2434,6 +2800,17 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        /// <summary>
+        /// Finds the and move to current movie.
+        /// </summary>
+        /// <autogeneratedoc />
+        //public void FindAndMoveToCurrentMovie()
+        //{
+        //    DataGrid? dgMovies = Support.Support.GetDgMovies();
+        //    if (dgMovies != null)
+        //    {
+        //        dgMovies.ItemsSource = MovieList;
+        //    }
         /// <summary>
         /// Finds the with bookmark no dialog.
         /// </summary>
@@ -2582,6 +2959,34 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        public int LastMovieId { get; set; } = 0;
+
+        public int PageSize { get; set; } = 50;
+
+        public int PageNumber { get; set; } = 1;
+
+       
+
+
+        public async void NextTranche()
+        {
+            PageNumber += 1;
+            var tempList = await DataController.MovieController.GetMoviesByGenreAsync(CurrentPhrase.COMPKEY, ""
+                        , LastMovieId, PageNumber, PageSize);
+            if (tempList != null)
+            {
+                foreach (var item in tempList)
+                {
+                    MovieList.Add(item);
+                }
+            }
+        }
+
+        public async void PrevTranche()
+        {
+
+        }
+
         /// <summary>
         /// </summary>
         /// <author>
@@ -2590,16 +2995,27 @@ namespace TaymadeEntities.ViewModels
         /// <remarks>
         ///   <created> 30/01/2026 30/01/2026 </created>
         /// </remarks>
-        public void GetMovieList()
+        public async void GetMovieList()
         {
             if (CurrentPhrase != null)
             {
+                LastMovieId = 0;
+                PageNumber = 1;
+                PageSize = 50;
                 SeriesVisible = (CurrentPhrase.Id == "SER");
                 if (CurrentSubPhrase == null)
                 {
-                    backgroundMovieGetter.Phrase = CurrentPhrase;
-                    backgroundMovieGetter.SubPhrase = CurrentSubPhrase;
-                    if (!backgroundMovieGetter.busy) backgroundMovieGetter.Run();
+                  var tempList = await DataController.MovieController.GetMoviesByGenreAsync(CurrentPhrase.COMPKEY, ""
+                        , LastMovieId, PageNumber, PageSize);
+                    if (tempList != null)
+                    {
+                        MovieList = new ObservableCollection<Movies>(tempList);
+                    }
+
+                    LastMovieId = MovieList.Last().Id;
+                    //backgroundMovieGetter.Phrase = CurrentPhrase;
+                    //backgroundMovieGetter.SubPhrase = CurrentSubPhrase;
+                    //if (!backgroundMovieGetter.busy) backgroundMovieGetter.Run();
                 }
                 else
                 {
@@ -2660,6 +3076,31 @@ namespace TaymadeEntities.ViewModels
         public async void GetSearchDirector()
         {
             Director director = await GetDirectorAsync();
+        }
+
+        public void GetTMDBDetails(MovieBase movieBase)
+        {
+            if (movieBase != null)
+            {
+                CurrentMovie.TMDBID = movieBase.ID;
+                if (!string.IsNullOrEmpty(movieBase.Overview))
+                    CurrentMovie.Info = movieBase.Overview;
+                if (!string.IsNullOrEmpty(movieBase.Year))
+                {
+                    DateTime temp = DateTime.MinValue;
+                    if (DateTime.TryParse(movieBase.Year, out temp))
+                    {
+                        CurrentMovie.Year = temp.Year;
+                    }
+                }
+                // need to do year
+            }
+
+            if (CurrentMovie.TMDBID != null && CurrentMovie.TMDBID > 0)
+            {
+                GetFromTMDB(CurrentMovie, CurrentMovie.TMDBID.Value, true);
+                //bool success = CurrentMovie.Save();
+            }
         }
 
         /// <summary>
@@ -2758,21 +3199,6 @@ namespace TaymadeEntities.ViewModels
             SetupMpeg();
         }
 
-        //public void LastMovie()
-        //{
-        //    // get last id from MovieProperties
-        //    int? lastId = DataController.MovieProperties.LastMoveID;
-
-        //    // set CurrentMovie to movie with lastId
-        //    if (lastId != null)
-        //    {
-        //        CurrentMovie = MovieList.Where(x => x.Id == lastId).FirstOrDefault();
-        //        DataGrid? dgMovies = Support.Support.GetDgMovies();
-
-        //        dgMovies.ScrollIntoView(CurrentMovie, dgMovies.Columns[1]);
-        //    }
-        //}
-
         public async void MissingImages()
         {
             if (CurrentMovie != null)
@@ -2801,6 +3227,9 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        //        dgMovies.ScrollIntoView(CurrentMovie, dgMovies.Columns[1]);
+        //    }
+        //}
         public async void MoveMP4()
         {
             if (mainWindow == null) mainWindow = Support.Support.GetMainWindow();
@@ -2843,6 +3272,11 @@ namespace TaymadeEntities.ViewModels
             MP4Converted = false;
         }
 
+        //    // set CurrentMovie to movie with lastId
+        //    if (lastId != null)
+        //    {
+        //        CurrentMovie = MovieList.Where(x => x.Id == lastId).FirstOrDefault();
+        //        DataGrid? dgMovies = Support.Support.GetDgMovies();
         public async void MoveMTS()
         {
             if (mainWindow == null) mainWindow = Support.Support.GetMainWindow();
@@ -2885,6 +3319,10 @@ namespace TaymadeEntities.ViewModels
             MTSConverted = false;
         }
 
+        //public void LastMovie()
+        //{
+        //    // get last id from MovieProperties
+        //    int? lastId = DataController.MovieProperties.LastMoveID;
         /// <summary>
         /// Moves to current.
         /// </summary>
@@ -2932,31 +3370,20 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        /// <summary>
-        /// Moves to selected row.
-        /// </summary>
-        /// <param name="pos">The position.</param>
-        /// <autogeneratedoc />
-        //public void MoveToSelectedRow(int? pos = null)
-        //{
-        //    //DataGrid? temp = BoundGrid;
-        //    DataGrid? dgMovies = Support.Support.GetDgMovies();
-        //    if (dgMovies != null)
-        //    {
-        //        //dgMovies.ItemsSource = MovieList;
-        //        ObservableCollection<Movies>? movies = dgMovies.ItemsSource as ObservableCollection<Movies>;
+        internal void MoveToSelectedDirectorRow()
+        {
+            // check if MainWindow exists then issue a scroll into view command on dgMovies
+            //Window? mainWindow = Support.GetMainWindow() as Views.MainWindow;
 
-        //        //Movies tempm = movies.Where(x => x.Id == CurrentMovie.Id).FirstOrDefault();
-        //        //CurrentMovie = movies.Where(x => x.Id == CurrentMovie.Id).FirstOrDefault();
-        //        if (CurrentMovie != null && movies != null && movies.Contains(CurrentMovie))
-        //        {
-        //            dgMovies.SelectedItem = CurrentMovie;
+            //if (mainWindow != null && mainWindow.DirectorGrid != null)
+            //{
+            //    Dispatcher.UIThread.Post(() =>
+            //    {
+            //        mainWindow.DirectorGrid.ScrollIntoView(CurrentDirector, null);
+            //    });
 
-        //            dgMovies.ScrollIntoView(CurrentMovie, null);
-
-        //        }
-        //    }
-        //}
+            //}
+        }
 
         public async void OtherMovies()
         {
@@ -2991,6 +3418,9 @@ namespace TaymadeEntities.ViewModels
             //}
         }
 
+        //        }
+        //    }
+        //}
         /// <summary>
         /// Does the page down command.
         /// </summary>
@@ -3014,6 +3444,7 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        //            dgMovies.ScrollIntoView(CurrentMovie, null);
         /// <summary>
         /// Pages the end command.
         /// </summary>
@@ -3023,6 +3454,11 @@ namespace TaymadeEntities.ViewModels
             MoveToLast();
         }
 
+        //        //Movies tempm = movies.Where(x => x.Id == CurrentMovie.Id).FirstOrDefault();
+        //        //CurrentMovie = movies.Where(x => x.Id == CurrentMovie.Id).FirstOrDefault();
+        //        if (CurrentMovie != null && movies != null && movies.Contains(CurrentMovie))
+        //        {
+        //            dgMovies.SelectedItem = CurrentMovie;
         /// <summary>
         /// Pages the home command.
         /// </summary>
@@ -3032,6 +3468,19 @@ namespace TaymadeEntities.ViewModels
             MoveToFirst();
         }
 
+        /// <summary>
+        /// Moves to selected row.
+        /// </summary>
+        /// <param name="pos">The position.</param>
+        /// <autogeneratedoc />
+        //public void MoveToSelectedRow(int? pos = null)
+        //{
+        //    //DataGrid? temp = BoundGrid;
+        //    DataGrid? dgMovies = Support.Support.GetDgMovies();
+        //    if (dgMovies != null)
+        //    {
+        //        //dgMovies.ItemsSource = MovieList;
+        //        ObservableCollection<Movies>? movies = dgMovies.ItemsSource as ObservableCollection<Movies>;
         /// <summary>
         /// Pages up command.
         /// </summary>
@@ -3069,43 +3518,6 @@ namespace TaymadeEntities.ViewModels
                     FindBookmarkText = pastedText;
                 }
             }
-        }
-
-
-        /// <summary>
-        /// </summary>
-        /// <param name="moviePath">The movie path.</param>
-        /// <param name="bookmark">The bookmark.</param>
-        /// <param name="recording">if set to <c>true</c> [recording].</param>
-        /// <param name="recordName">Name of the record.</param>
-        /// <author>
-        /// Doug Taylor - Taymade Software Services
-        /// </author>
-        /// <remarks>
-        ///   <created> 10/09/2026 10/09/2026 </created>
-        /// </remarks>
-        public async void DoPlay(Movies movie,
-            Bookmark? bookmark = null,
-            bool recording = false,
-            string recordName = "",
-            bool fullScreen = true,
-            bool autoplay = true)
-        {
-            using PlayerViewModel playerViewModel = new PlayerViewModel(movie, true);
-
-            playerViewModel.FullScreen = fullScreen;
-            playerViewModel.AutoPlay = autoplay;
-
-            using PlayerDialog playerDialog = new PlayerDialog(playerViewModel);
-            playerViewModel.Caller = playerDialog;
-            playerViewModel.PlayFromBookmark = (bookmark != null);
-            playerViewModel.FullScreen = false;
-            playerViewModel.Bookmark = bookmark;
-            playerViewModel.CurrentBookmark = bookmark;
-            playerViewModel.Recording = recording;
-            playerViewModel.RecordName = recordName;
-            Avalonia.Controls.Window? main = Support.Support.GetWindow();
-            await playerDialog.ShowDialog(main);
         }
 
         public void PlayCurrentMovie()
@@ -3222,6 +3634,12 @@ namespace TaymadeEntities.ViewModels
             if (CurrentMovie != null && CurrentMovie.Nfo != null) CurrentMovie.Nfo.Save();
         }
 
+        public async void SaveDirector()
+        {
+            if (CurrentDirector != null)
+                CurrentDirector.SaveAsync();
+        }
+
         /// <summary>
         /// Defines the movie.
         /// </summary>
@@ -3279,6 +3697,29 @@ namespace TaymadeEntities.ViewModels
                     //        GetTMDBDetailsLocal(viewModel);
                     //}
                     //this.Caller = oldCaller;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Setups the sort orders.
+        /// </summary>
+        /// <autogeneratedoc />
+        public void SetupSortOrders()
+        {
+            string sorts = DataController.MovieProperties.SortColumns;
+
+            if (!string.IsNullOrEmpty(sorts) && (SortOrders == null || SortOrders.Count == 0))
+            {
+                SortOrders = new ObservableCollection<string>(sorts.Split(',').ToList());
+            }
+            else if (SortOrders == null || SortOrders.Count == 0)
+            {
+                SortOrders = new ObservableCollection<string>();
+
+                for (int i = 0; i < 10; i++)
+                {
+                    SortOrders.Add("");
                 }
             }
         }
@@ -3348,18 +3789,6 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        //public void ToBookmarks()
-        //{
-        //    // set currenttab to bookmark tab on mainWindow
-        //    if (mainWindow == null) mainWindow = Support.Support.GetMainWindow();
-        //    if (mainWindow != null)
-        //    {
-        //        mainWindow.tabControl.SelectedItem = mainWindow.Bookmarks;
-        //    }
-        //}
-
-
-
         /// <summary>
         /// The DoToMP4.
         /// </summary>
@@ -3389,6 +3818,15 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        //public void ToBookmarks()
+        //{
+        //    // set currenttab to bookmark tab on mainWindow
+        //    if (mainWindow == null) mainWindow = Support.Support.GetMainWindow();
+        //    if (mainWindow != null)
+        //    {
+        //        mainWindow.tabControl.SelectedItem = mainWindow.Bookmarks;
+        //    }
+        //}
         /// <summary>
         /// The DoToMTS.
         /// </summary>
@@ -3416,7 +3854,6 @@ namespace TaymadeEntities.ViewModels
                 }
             }
         }
-
 
         /// <summary>
         /// The DoTrimMovieAsync.
@@ -3963,7 +4400,6 @@ namespace TaymadeEntities.ViewModels
                     this.CurrentMovie.HasChapters = false;
                     this.CurrentMovie.Save();
                     this.Progress = "Removing Chapters Completed";
-
                 }
             }
             if (e.TaskName == "SetChapters")
@@ -3982,11 +4418,6 @@ namespace TaymadeEntities.ViewModels
             }
             ProgressPercent = 0;
             MovieProgress = 0;
-        }
-
-        private void ScrollMissingIntoView()
-        {
-            // throw new NotImplementedException();
         }
 
         /// <summary>
@@ -4205,21 +4636,6 @@ namespace TaymadeEntities.ViewModels
         }
 
         /// <summary>
-        /// Scrolls the missing into view.
-        /// </summary>
-        /// <autogeneratedoc />
-        //internal void ScrollMissingIntoView()
-        //{
-        //    if (mainWindow == null) mainWindow = Support.Support.GetMainWindow();
-
-        //    DataGrid? missingFiles = mainWindow.MissingFiles;
-        //    if (missingFiles != null)
-        //    {
-        //        missingFiles.ScrollIntoView(CurrentMissingMovie, null);
-        //    }
-        //}
-
-        /// <summary>
         /// The SetupMpeg.
         /// </summary>
         internal async void SetupMpeg()
@@ -4263,7 +4679,6 @@ namespace TaymadeEntities.ViewModels
                     }
                     //int time = await Support.VideoSupport.GetDurationSeconds(item, null);
 
-
                     string line = ("file '" + item.Replace("\\", "/") + "'");
                     streamWriter.WriteLine(line);
                 }
@@ -4281,29 +4696,12 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        /// <summary>
-        /// Setups the sort orders.
-        /// </summary>
-        /// <autogeneratedoc />
-        internal void SetupSortOrders()
-        {
-            string sorts = DataController.MovieProperties.SortColumns;
-
-            if (!string.IsNullOrEmpty(sorts) && (SortOrders == null || SortOrders.Count == 0))
-            {
-                SortOrders = new ObservableCollection<string>(sorts.Split(',').ToList());
-            }
-            else if (SortOrders == null || SortOrders.Count == 0)
-            {
-                SortOrders = new ObservableCollection<string>();
-
-                for (int i = 0; i < 10; i++)
-                {
-                    SortOrders.Add("");
-                }
-            }
-        }
-
+        //    DataGrid? missingFiles = mainWindow.MissingFiles;
+        //    if (missingFiles != null)
+        //    {
+        //        missingFiles.ScrollIntoView(CurrentMissingMovie, null);
+        //    }
+        //}
         /// <summary>
         /// Handles the ActionCompleted event of the Support control.
         /// </summary>
@@ -4327,6 +4725,13 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        /// <summary>
+        /// Scrolls the missing into view.
+        /// </summary>
+        /// <autogeneratedoc />
+        //internal void ScrollMissingIntoView()
+        //{
+        //    if (mainWindow == null) mainWindow = Support.Support.GetMainWindow();
         internal void Support_ProgressInformation(object sender, MovieProgressEventargs e)
         {
             MissingInfo = e.Info;
@@ -4349,31 +4754,6 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        //private static void SetHeaderText(string progress, PhraseEntry? currentPhrase)
-        //{
-        //    MainWindow? mainWindow = Support.Support.GetMainWindow();
-
-        //    if (mainWindow != null)
-        //    {
-        //        // look for MainWindowHeaderControl in mainWindow
-        //        TaymadeControls.HeaderControl2? headerControl = mainWindow.MainWindowHeaderControl;
-
-        //        // check not null
-        //        if (headerControl != null)
-        //        {
-        //            if (!string.IsNullOrEmpty(progress))
-        //            {
-        //                if (currentPhrase == null)
-        //                    headerControl.Title = "Movies Loading ... " + progress;
-        //                else
-        //                    headerControl.Title = "Movies Loading ... " + currentPhrase.Description + " " + progress;
-        //            }
-        //            else
-        //                headerControl.Title = "Movies";
-        //        }
-        //    }
-        //}
-
         private void BackgroundMovieGetter_DataGetCompleted(object sender, DataGetCompletedEventArgs e)
         {
             if (e != null)
@@ -4395,17 +4775,27 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        //        // check not null
+        //        if (headerControl != null)
+        //        {
+        //            if (!string.IsNullOrEmpty(progress))
+        //            {
+        //                if (currentPhrase == null)
+        //                    headerControl.Title = "Movies Loading ... " + progress;
+        //                else
+        //                    headerControl.Title = "Movies Loading ... " + currentPhrase.Description + " " + progress;
+        //            }
+        //            else
+        //                headerControl.Title = "Movies";
+        //        }
+        //    }
+        //}
         private void BackgroundMovieGetter_DataGetProgress(object sender, DataGetProgressEventArgs e)
         {
             // display information in movieListheader
 
             // check not null
             SetHeaderText(e.Progress, CurrentPhrase);
-        }
-
-        private void SetHeaderText(string? progress, PhraseEntry? currentPhrase)
-        {
-            //throw new NotImplementedException();
         }
 
         /// <summary>
@@ -4615,6 +5005,21 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        private void DoCreateSeason()
+        {
+            if (CurrentSeries != null)
+            {
+                Models.Season newSeason = new Models.Season()
+                {
+                    Series = CurrentSeries.Id,
+                    SeasonNo = 1
+                };
+                CurrentSeries.Seasons.Add(newSeason);
+                newSeason.Save();
+                SeasonsList = CurrentSeries.Seasons;
+            }
+        }
+
         /// <summary>
         /// The DoDeleteBookmark.
         /// </summary>
@@ -4623,7 +5028,6 @@ namespace TaymadeEntities.ViewModels
             MainWindow? main = GetWindow() as MainWindow;
             if (main != null)
             {
-
                 if (CurrentBookmark != null && CurrentMovie != null)
                 {
                     if (!string.IsNullOrEmpty(CurrentBookmark.ImagePath))
@@ -4687,6 +5091,11 @@ namespace TaymadeEntities.ViewModels
             return returnString;  // provider.GetTextAsync();
         }
 
+        private void DoMoveToSelectedRow()
+        {
+            MoveToSelectedRow(null);
+        }
+
         /// <summary>
         /// The DoPlayBookmark.
         /// </summary>
@@ -4704,12 +5113,19 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        public void DoSaveBookmark()
+        private void DoRemoveGenre()
         {
-            if (CurrentBookmark != null)
-                CurrentBookmark.Save();
+            if (CurrentGenre != null)
+            {
+                if (CurrentMovie != null)
+                {
+                    CurrentGenre.Delete();
+                    CurrentMovie.MovieGenres.Remove(CurrentGenre);
+                    CurrentMovie.Save();
+                    CurrentMovie.MovieGenres = new ObservableCollection<MovieGenre>(CurrentMovie.MovieGenres);
+                }
+            }
         }
-
         /// <summary>
         /// The DoRepeatLast.
         /// </summary>
@@ -5038,6 +5454,10 @@ namespace TaymadeEntities.ViewModels
             GetFromTMDB(CurrentMovie, viewModel.FoundMovie.ID);
         }
 
+        private void MoveToSelectedRow(object value)
+        {
+            //throw new NotImplementedException();
+        }
         //                // save movie
         //                this.Movie.Save();
         //            }
@@ -5062,7 +5482,7 @@ namespace TaymadeEntities.ViewModels
                 {
                     if (movie.Series != null && movie.Series != 2)
                     {
-                        if (this.CurrentSeries.Id != movie.Series) this.CurrentSeries = Models.DataController.SeriesList.Find(s => s.Id == movie.Series);
+                        if (this.CurrentSeries.Id != movie.Series) this.CurrentSeries = Models.DataController.SeriesList.Where(s => s.Id == movie.Series).FirstOrDefault();
                     }
 
                     if (movie.Season != null && this.CurrentSeries!.Seasons != null)
@@ -5096,6 +5516,14 @@ namespace TaymadeEntities.ViewModels
                 }
             }
         }
+
+        private void ScrollMissingIntoView()
+        {
+            // throw new NotImplementedException();
+        }
+        //private static void SetHeaderText(string progress, PhraseEntry? currentPhrase)
+        //{
+        //    MainWindow? mainWindow = Support.Support.GetMainWindow();
 
         private async void SearchForMovie()
         {
@@ -5191,6 +5619,15 @@ namespace TaymadeEntities.ViewModels
             //}
         }
 
+        //    if (mainWindow != null)
+        //    {
+        //        // look for MainWindowHeaderControl in mainWindow
+        //        TaymadeControls.HeaderControl2? headerControl = mainWindow.MainWindowHeaderControl;
+        private void SetHeaderText(string? progress, PhraseEntry? currentPhrase)
+        {
+            //throw new NotImplementedException();
+        }
+
         #endregion Private Methods
 
         /// <summary>
@@ -5238,6 +5675,5 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// The DoChapters.
         /// </summary>
-
     }
 }

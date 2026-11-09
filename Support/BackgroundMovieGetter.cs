@@ -96,6 +96,12 @@ namespace TaymadeEntities.Support
             }
         }
 
+        public int LastMovieId { get; set; }
+
+        public int PageSize { get; set; } = 50;
+
+        public int PageNumber { get; set; } = 1;
+
         public Models.PhraseEntry? Phrase
         {
             get => id;
@@ -247,7 +253,8 @@ namespace TaymadeEntities.Support
             {
                 if (SubPhrase == null)
                 {
-                    List<Models.Movies>? tempList = await DataController.MovieController.GetMoviesByGenreAsync(Phrase.COMPKEY);
+                    List<Models.Movies>? tempList = 
+                        await DataController.MovieController.GetMoviesByGenreAsync(Phrase.COMPKEY,"",LastMovieId,PageNumber,PageSize);
                     MovieList = MovieCollection.GetAndSortObservableCollection(tempList);
 
                 }
