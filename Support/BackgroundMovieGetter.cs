@@ -253,15 +253,15 @@ namespace TaymadeEntities.Support
             {
                 if (SubPhrase == null)
                 {
-                    List<Models.Movies>? tempList = 
-                        await DataController.MovieController.GetMoviesByGenreAsync(Phrase.COMPKEY,"",LastMovieId,PageNumber,PageSize);
-                    MovieList = MovieCollection.GetAndSortObservableCollection(tempList);
+                    var tempList = 
+                        await DataController.MovieController.GetMoviesByGenrePagedAsync(Phrase.COMPKEY,"",LastMovieId,PageNumber,PageSize);
+                    MovieList = MovieCollection.GetAndSortObservableCollection(tempList.Items);
 
                 }
                 else
                 {
-                    List<Models.Movies>? tempList = await DataController.MovieController.GetMoviesByGenreAsync(Phrase.COMPKEY, SubPhrase.COMPKEY);
-                    MovieList = MovieCollection.GetAndSortObservableCollection(tempList);
+                    var tempList = await DataController.MovieController.GetMoviesByGenrePagedAsync(Phrase.COMPKEY, SubPhrase.COMPKEY);
+                    MovieList = MovieCollection.GetAndSortObservableCollection(tempList.Items);
                 }
             }
 

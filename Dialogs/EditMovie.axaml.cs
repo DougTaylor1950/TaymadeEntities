@@ -159,47 +159,51 @@ public partial class EditMovie : Window, IDisposable
 
         Window? main = TaymadeEntities.Support.Support.GetMainWindow() as Window;
 
-        if (button != null && main != null)
+        if (button != null && main != null && 
+            ViewModel != null && ViewModel?.CurrentMovie != null)
+            ViewModel.GeneratePhrase();
+    }
+
+    private void GeneratePhrase()
+    {
+        if (ViewModel != null && ViewModel?.CurrentMovie != null)
         {
-            if (ViewModel != null && ViewModel?.CurrentMovie != null)
+            //ComboBox cbPhrase = this.FindControl<ComboBox>("cbGroup");
+
+            if (ViewModel?.NewPhrase != null)
             {
-                //ComboBox cbPhrase = this.FindControl<ComboBox>("cbGroup");
-
-                if (ViewModel?.NewPhrase != null)
+                string? group = ViewModel?.CurrentMovie.FilmGroup;
+                PhraseEntry? id = ViewModel?.NewPhrase;
+                if (ViewModel?.NewSubPhrase != null)
                 {
-                    string? group = ViewModel?.CurrentMovie.FilmGroup;
-                    PhraseEntry? id = ViewModel?.NewPhrase;
-                    if (ViewModel?.NewSubPhrase != null)
-                    {
-                        id = ViewModel?.NewSubPhrase;
-                    }
-
-                    if (id != null && group != null)
-                    {
-                        if (string.IsNullOrEmpty(group) && !group.Contains(id.Id))
-                            group += id.Id;
-                        else if (!group.Contains(id.Id))
-                            group += "," + id.Id;
-                        ViewModel?.CurrentMovie.FilmGroup = group;
-
-                        if (string.IsNullOrEmpty(ViewModel?.CurrentMovie.PrimaryFilmGroup)) ViewModel.CurrentMovie.PrimaryFilmGroup = id.Id;
-                    }
-
-                    // generate MovieGenre
-                    MovieGenre movieGenre = new MovieGenre()
-                    {
-                        MovieId = ViewModel.CurrentMovie.Id,
-                        Genre = ViewModel?.NewPhrase?.COMPKEY
-                    };
-                    if (ViewModel?.NewSubPhrase != null)
-                    {
-                        movieGenre.SubGenre = ViewModel.NewSubPhrase.COMPKEY;
-                        //   movieGenre.SubGenreEntity = model.NewSubPhrase;
-                    }
-                    movieGenre.Insert();
-                    ViewModel?.CurrentGenre = movieGenre;
-                    ViewModel?.CurrentMovie?.MovieGenres?.Add(movieGenre);
+                    id = ViewModel?.NewSubPhrase;
                 }
+
+                if (id != null && group != null)
+                {
+                    if (string.IsNullOrEmpty(group) && !group.Contains(id.Id))
+                        group += id.Id;
+                    else if (!group.Contains(id.Id))
+                        group += "," + id.Id;
+                    ViewModel?.CurrentMovie.FilmGroup = group;
+
+                    if (string.IsNullOrEmpty(ViewModel?.CurrentMovie.PrimaryFilmGroup)) ViewModel.CurrentMovie.PrimaryFilmGroup = id.Id;
+                }
+
+                // generate MovieGenre
+                MovieGenre movieGenre = new MovieGenre()
+                {
+                    MovieId = ViewModel.CurrentMovie.Id,
+                    Genre = ViewModel?.NewPhrase?.COMPKEY
+                };
+                if (ViewModel?.NewSubPhrase != null)
+                {
+                    movieGenre.SubGenre = ViewModel.NewSubPhrase.COMPKEY;
+                    //   movieGenre.SubGenreEntity = model.NewSubPhrase;
+                }
+                movieGenre.Insert();
+                ViewModel?.CurrentGenre = movieGenre;
+                ViewModel?.CurrentMovie?.MovieGenres?.Add(movieGenre);
             }
         }
     }

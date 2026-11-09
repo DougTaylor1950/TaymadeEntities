@@ -205,6 +205,25 @@ namespace TaymadeEntities.DAL.Classes
 
         }
 
+        public async Task<int> GetMovieCountByGenreAsync(string? genre, string? subGenre = "")
+        {
+            if (string.IsNullOrEmpty(genre)) return 0;
+            int totalCount = 0;
+            if (!string.IsNullOrEmpty(subGenre))
+            {
+                totalCount = await _context.Movies
+                    .Where(m => _context.MovieGenre
+                    .Any(mg => mg.MovieId == m.Id && mg.Genre == genre && mg.SubGenre == subGenre))
+                    .CountAsync();
+            }
+            else
+                totalCount = await _context.Movies
+                    .Where(m => _context.MovieGenre
+                        .Any(mg => mg.MovieId == m.Id && mg.Genre == genre))
+                    .CountAsync();
+            return totalCount;
+        }
+
         public async Task<List<Movies>>? GetMoviesByGenreAsync(string? genre,
             string? subGenre = ""
             , int lastMovieId = 0

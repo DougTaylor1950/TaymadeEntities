@@ -205,11 +205,12 @@ namespace TaymadeEntities.Controllers
             return tempList;
         }
 
-        public async Task<List<Movies>>? GetMoviesByGenreAsync(string? genre,
+        public async Task <PagedResult<Movies>>? GetMoviesByGenrePagedAsync(string? genre,
             string? subGenre = "",
             int lastMovieId = 0,
             int pageNumber = 1, 
-            int pageSize = 50)
+            int pageSize = 50,
+            int totalCount = 0)
 
         {
             if (InUse)
@@ -229,7 +230,22 @@ namespace TaymadeEntities.Controllers
             //    movie.Loaded = true;
             //}
             InUse = false;
-            return tempList?.ToList();
+            PagedResult<Movies> pagedResult = new PagedResult<Movies>
+            {
+                Items = tempList?.ToList() ?? new List<Movies>(),
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalRecords = totalCount
+            };
+            return pagedResult;
+        }
+
+        public async Task<int> GetMovieCountByGenreAsync(string? genre, string? subGenre = "")
+        {
+            InUse = true;
+            int count = await movieRepository.GetMovieCountByGenreAsync(genre, subGenre);
+            InUse = false;
+            return count;
         }
 
         /// <summary>

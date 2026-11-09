@@ -90,7 +90,8 @@ namespace TaymadeEntities.DAL.Interfaces
         Task<bool> UpdateMovieAsync(Movies movie);
 
         List<Movies>? GetMoviesBySeason(int id);
-        
+        Task<int> GetMovieCountByGenreAsync(string? genre, string? subGenre);
+
 
         #endregion Public Methods
 

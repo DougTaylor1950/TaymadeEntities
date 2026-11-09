@@ -14,6 +14,7 @@ using DocumentFormat.OpenXml.Drawing.Spreadsheet;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using Microsoft.Office.Interop.Word;
 using MsBox.Avalonia;
 using MsBox.Avalonia.Enums;
@@ -311,6 +312,8 @@ namespace TaymadeEntities.ViewModels
 
         private int volume = 0;
         private string? seriesHeaderInfo;
+        private int movieCount;
+        private string? groupInfo;
 
         #endregion Private Fields
 
@@ -527,7 +530,9 @@ namespace TaymadeEntities.ViewModels
         /// <summary>
         /// Gets or sets the CurrentDirector.
         /// </summary>
-        public Director? CurrentDirector { get => currentDirector;
+        public Director? CurrentDirector
+        {
+            get => currentDirector;
             set
             {
                 this.RaiseAndSetIfChanged(ref currentDirector, value);
@@ -1848,7 +1853,7 @@ namespace TaymadeEntities.ViewModels
             support.ProgressInformation += Support_ProgressInformation;
 
             bool success = await support.CreateMovie(filePath, phrase, subPhrase);
-            
+
             return success;
         }
 
@@ -2041,7 +2046,7 @@ namespace TaymadeEntities.ViewModels
             // create a new cast entity can get the movie Id from the viewModel.CurrentMovie.
             // need to search for an actor
             //Views.MainWindow? mainWindow = Support.Support.GetMainWindow() as Views.MainWindow;
-            if (CurrentMovie != null )
+            if (CurrentMovie != null)
             {
                 bool result = false;
                 Cast tempCastMember = new Cast();
@@ -2600,13 +2605,13 @@ namespace TaymadeEntities.ViewModels
 
                 using SeriesDialogWindow seriesDialogWindow = new SeriesDialogWindow(seriesViewModel);
 
-                
 
-                bool ok =  await seriesDialogWindow.ShowDialog<bool>(mainWindow);
+
+                bool ok = await seriesDialogWindow.ShowDialog<bool>(mainWindow);
                 if (
                        ok
                    )
-                { 
+                {
                     if (seriesViewModel != null)
                     {
                         if (seriesViewModel.CurrentSeason != null)
@@ -2625,11 +2630,11 @@ namespace TaymadeEntities.ViewModels
                             }
                         }
                     }
-                    
+
                     this.RaisePropertyChanged(nameof(CurrentMovie));
                 }
             }
-           
+
         }
 
         /// <summary>
@@ -2959,31 +2964,110 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
+        public string? GroupInfo
+        {
+            get => groupInfo;
+            set => this.RaiseAndSetIfChanged(ref groupInfo, value);
+        }
+
+        public int MovieCount
+        {
+            get => movieCount;
+            private set => this.RaiseAndSetIfChanged(ref movieCount, value);
+        }
         public int LastMovieId { get; set; } = 0;
 
         public int PageSize { get; set; } = 50;
 
         public int PageNumber { get; set; } = 1;
 
-       
+
 
 
         public async void NextTranche()
         {
+            await GetNextTranche();
+        }
+
+        private async Task<int> GetNextTranche()
+        {
             PageNumber += 1;
-            var tempList = await DataController.MovieController.GetMoviesByGenreAsync(CurrentPhrase.COMPKEY, ""
-                        , LastMovieId, PageNumber, PageSize);
-            if (tempList != null)
+            int left = MovieCount - (MovieList.Count);
+            if (MovieList != null && MovieList.Count < MovieCount)
             {
-                foreach (var item in tempList)
+                LastMovieId = MovieList.Max(m => m.Id);
+                var tempList = await DataController.MovieController.GetMoviesByGenrePagedAsync(CurrentPhrase.COMPKEY, ""
+                            , LastMovieId, PageNumber, PageSize, MovieCount);
+                if (tempList != null)
                 {
-                    MovieList.Add(item);
+                    foreach (var item in tempList.Items)
+                    {
+                        item.LoadChildren();
+                        MovieList.Add(item);
+                    }
+                    GroupInfo = MovieCount.ToString() + ": pages " + tempList.TotalPages.ToString()
+                                + " page " + tempList.PageNumber.ToString();
+                }
+
+                left  = MovieCount - (MovieList.Count);
+            }
+
+            return left;
+        }
+
+        public void GeneratePhrase()
+        {
+            if (CurrentMovie != null)
+            {
+                //ComboBox cbPhrase = this.FindControl<ComboBox>("cbGroup");
+
+                if (NewPhrase != null)
+                {
+                    string? group = CurrentMovie.FilmGroup;
+                    PhraseEntry? id = NewPhrase;
+                    if (NewSubPhrase != null)
+                    {
+                        id = NewSubPhrase;
+                    }
+
+                    if (id != null && group != null)
+                    {
+                        if (string.IsNullOrEmpty(group) && !group.Contains(id.Id))
+                            group += id.Id;
+                        else if (!group.Contains(id.Id))
+                            group += "," + id.Id;
+                        CurrentMovie.FilmGroup = group;
+
+                        if (string.IsNullOrEmpty(CurrentMovie.PrimaryFilmGroup)) 
+                            CurrentMovie.PrimaryFilmGroup = id.Id;
+                    }
+
+                    // generate MovieGenre
+                    MovieGenre movieGenre = new MovieGenre()
+                    {
+                        MovieId = CurrentMovie.Id,
+                        Genre = NewPhrase?.COMPKEY
+                    };
+                    if (NewSubPhrase != null)
+                    {
+                        movieGenre.SubGenre = NewSubPhrase.COMPKEY;
+                        //   movieGenre.SubGenreEntity = model.NewSubPhrase;
+                    }
+                    movieGenre.Insert();
+                    CurrentGenre = movieGenre;
+                    CurrentMovie?.MovieGenres?.Add(movieGenre);
                 }
             }
         }
 
         public async void PrevTranche()
         {
+            while (MovieCount - MovieList?.Count  >0)
+            {
+                int togo = await GetNextTranche();
+
+                System.Threading.Thread.Sleep(5000);
+            }
 
         }
 
@@ -2997,33 +3081,40 @@ namespace TaymadeEntities.ViewModels
         /// </remarks>
         public async void GetMovieList()
         {
-            if (CurrentPhrase != null)
+            if (CurrentPhrase != null && !DataController.MovieController.InUse)
             {
+                string? subPhraseCompKey = null;
+                if (CurrentSubPhrase != null) subPhraseCompKey = CurrentSubPhrase.COMPKEY;
+                MovieCount = await DataController.MovieController.GetMovieCountByGenreAsync(CurrentPhrase.COMPKEY, subPhraseCompKey);
+                GroupInfo = MovieCount.ToString();
+
                 LastMovieId = 0;
                 PageNumber = 1;
-                PageSize = 50;
+                PageSize = 100;
                 SeriesVisible = (CurrentPhrase.Id == "SER");
-                if (CurrentSubPhrase == null)
+                if (CurrentSubPhrase == null && !DataController.MovieController.InUse)
                 {
-                  var tempList = await DataController.MovieController.GetMoviesByGenreAsync(CurrentPhrase.COMPKEY, ""
-                        , LastMovieId, PageNumber, PageSize);
+                    var tempList = await DataController.MovieController.GetMoviesByGenrePagedAsync(CurrentPhrase.COMPKEY, ""
+                          , LastMovieId, PageNumber, PageSize, MovieCount);
                     if (tempList != null)
                     {
-                        MovieList = new ObservableCollection<Movies>(tempList);
+                        foreach (var item in tempList.Items)
+                        {
+                            item.LoadChildren();
+                        }
+                        MovieList = new ObservableCollection<Movies>(tempList.Items);
+                        GroupInfo = MovieCount.ToString() + ": pages " + tempList.TotalPages.ToString()
+                            + " page " + tempList.PageNumber.ToString();
                     }
+
+
 
                     LastMovieId = MovieList.Last().Id;
                     //backgroundMovieGetter.Phrase = CurrentPhrase;
                     //backgroundMovieGetter.SubPhrase = CurrentSubPhrase;
                     //if (!backgroundMovieGetter.busy) backgroundMovieGetter.Run();
                 }
-                else
-                {
-                    backgroundMovieGetter.Phrase = CurrentPhrase;
-                    backgroundMovieGetter.SubPhrase = CurrentSubPhrase;
-                    if (!backgroundMovieGetter.busy) backgroundMovieGetter.Run();
-                }
-                // MovieList = Support.GetMovieList(this.CurrentPhrase.Id);
+
             }
             else
             {
@@ -3143,6 +3234,8 @@ namespace TaymadeEntities.ViewModels
                 }
                 else
                 {
+
+
                     GetMovieList();
                     //MovieList = new ObservableCollection<Movies>(DataController.SandboxEntities.GetMoviesByGenre(CurrentPhrase.COMPKEY));
                 }

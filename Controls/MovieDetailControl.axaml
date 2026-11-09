@@ -140,7 +140,7 @@
 				<ComboBox Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="3" Name="cbGroup"  ItemsSource="{Binding Phrases}" SelectedItem="{Binding NewPhrase}"/>
 				<ComboBox Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3" Name="cbSubGroup"  ItemsSource="{Binding SubPhrases}" SelectedItem="{Binding NewSubPhrase}"/>
 				<tcb:ImagedButton
-				
+				Command="{Binding GeneratePhrase}"
 				Grid.Row="6" Grid.Column="3"
 				LabelText="Add"
 				ImageSource="avares://TaymadeControls/Assets/add_icon.png"

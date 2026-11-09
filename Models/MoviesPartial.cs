@@ -955,6 +955,7 @@ namespace TaymadeEntities.Models
                 if (Bookmarks == null || Bookmarks.Count == 0)
                     Bookmarks = new ObservableCollection<Bookmark>(
                         DataController.BookmarkController.GetBookmarksByMovieId(this.Id));
+                SetPercentUnmarked();
                 //DataController.SandboxEntities.Bookmarks.Where(b => b.MovieID == this.Id).OrderBy(b => b.Id).ToList());
                 if (Director == null)
                 {
@@ -985,6 +986,7 @@ namespace TaymadeEntities.Models
                 {
                     this.EpisodeNumber = EpisodeEntity.EpisodeNumber;
                 }
+                loaded = true;
             }
             catch (Exception)
             {
