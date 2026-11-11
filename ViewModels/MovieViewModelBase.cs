@@ -50,6 +50,7 @@ namespace TaymadeEntities.ViewModels
 {
     public class MovieViewModelBase : DialogModelBase
     {
+        private const int pageSizeDefault = 50;
 
         #region Public Fields
 
@@ -314,6 +315,8 @@ namespace TaymadeEntities.ViewModels
         private string? seriesHeaderInfo;
         private int movieCount;
         private string? groupInfo;
+        private List<PagedResult<Movies>> pagedResults;
+        private int pageNumber = 1;
 
         #endregion Private Fields
 
@@ -2970,6 +2973,13 @@ namespace TaymadeEntities.ViewModels
             set => this.RaiseAndSetIfChanged(ref groupInfo, value);
         }
 
+        public List<PagedResult<Movies>> PagedResults
+        {
+            get => pagedResults;
+            set => this.RaiseAndSetIfChanged(ref pagedResults, value);
+        }
+
+
         public int MovieCount
         {
             get => movieCount;
@@ -2979,19 +2989,34 @@ namespace TaymadeEntities.ViewModels
 
         public int PageSize { get; set; } = 50;
 
-        public int PageNumber { get; set; } = 1;
-
+        public int PageNumber
+        {
+            get => pageNumber;
+            set => this.RaiseAndSetIfChanged(ref pageNumber, value);
+        }
 
 
 
         public async void NextTranche()
         {
-            await GetNextTranche();
+            PageNumber += 1;
+            PagedResult<Movies>? result = PagedResults.Where(p => p.PageNumber == PageNumber).FirstOrDefault();
+
+            if (result != null)
+            {
+                MovieList = new ObservableCollection<Movies>(result.Items);
+                GroupInfo = MovieCount.ToString() + ": pages " + result.TotalPages.ToString()
+                                + " page " + result.PageNumber.ToString();
+            }
+            else
+            {
+                await GetNextTranche();
+            }
         }
 
         private async Task<int> GetNextTranche()
         {
-            PageNumber += 1;
+            // PageNumber += 1;
             int left = MovieCount - (MovieList.Count);
             if (MovieList != null && MovieList.Count < MovieCount)
             {
@@ -3003,13 +3028,16 @@ namespace TaymadeEntities.ViewModels
                     foreach (var item in tempList.Items)
                     {
                         item.LoadChildren();
-                        MovieList.Add(item);
+                        //MovieList.Add(item);
                     }
+
+                    MovieList = new ObservableCollection<Movies>(tempList.Items);
                     GroupInfo = MovieCount.ToString() + ": pages " + tempList.TotalPages.ToString()
                                 + " page " + tempList.PageNumber.ToString();
+                    PagedResults.Add(tempList);
                 }
 
-                left  = MovieCount - (MovieList.Count);
+                left = MovieCount - (MovieList.Count);
             }
 
             return left;
@@ -3038,7 +3066,7 @@ namespace TaymadeEntities.ViewModels
                             group += "," + id.Id;
                         CurrentMovie.FilmGroup = group;
 
-                        if (string.IsNullOrEmpty(CurrentMovie.PrimaryFilmGroup)) 
+                        if (string.IsNullOrEmpty(CurrentMovie.PrimaryFilmGroup))
                             CurrentMovie.PrimaryFilmGroup = id.Id;
                     }
 
@@ -3062,12 +3090,25 @@ namespace TaymadeEntities.ViewModels
 
         public async void PrevTranche()
         {
-            while (MovieCount - MovieList?.Count  >0)
-            {
-                int togo = await GetNextTranche();
+            if (PageNumber == 1) return;
+            PageNumber -= 1;
 
-                System.Threading.Thread.Sleep(5000);
+
+            PagedResult<Movies>? result = PagedResults.Where(p => p.PageNumber == PageNumber).FirstOrDefault();
+
+            if (result != null)
+            {
+                MovieList = new ObservableCollection<Movies>(result.Items);
+                GroupInfo = MovieCount.ToString() + ": pages " + result.TotalPages.ToString()
+                                + " page " + result.PageNumber.ToString();
             }
+
+            //while (MovieCount - MovieList?.Count  >0)
+            //{
+            //    int togo = await GetNextTranche();
+
+            //    System.Threading.Thread.Sleep(5000);
+            //}
 
         }
 
@@ -3090,10 +3131,13 @@ namespace TaymadeEntities.ViewModels
 
                 LastMovieId = 0;
                 PageNumber = 1;
-                PageSize = 100;
+                PageSize = pageSizeDefault;
                 SeriesVisible = (CurrentPhrase.Id == "SER");
                 if (CurrentSubPhrase == null && !DataController.MovieController.InUse)
                 {
+                    // set up paged results to hold these data
+                    PagedResults = new List<PagedResult<Movies>>();
+
                     var tempList = await DataController.MovieController.GetMoviesByGenrePagedAsync(CurrentPhrase.COMPKEY, ""
                           , LastMovieId, PageNumber, PageSize, MovieCount);
                     if (tempList != null)
@@ -3105,6 +3149,8 @@ namespace TaymadeEntities.ViewModels
                         MovieList = new ObservableCollection<Movies>(tempList.Items);
                         GroupInfo = MovieCount.ToString() + ": pages " + tempList.TotalPages.ToString()
                             + " page " + tempList.PageNumber.ToString();
+
+                        PagedResults.Add(tempList);
                     }
 
 

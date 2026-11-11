@@ -252,11 +252,6 @@ namespace TaymadeEntities.DAL.Classes
                         .OrderBy(m => m.Id)
                         .Take(pageSize)
                         .AsNoTracking().ToListAsync();
-                    //returnValue = await _context.Movies.FromSql($"Execute dbo.GetMoviesBySubGenre {subGenre}")
-                    //    .AsNoTracking()
-                    //    .Skip((pageNumber - 1) * pageSize)
-                    //    .Take(pageSize)
-                    //    .ToListAsync();
                 }
                 else
                     returnValue = await _context.Movies
