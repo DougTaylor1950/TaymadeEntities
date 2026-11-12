@@ -9,12 +9,14 @@ using NAudio.Wave;
 using NAudio.WaveFormRenderer;
 using ReactiveUI;
 using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using TaymadeEntities.Models;
+using TaymadeEntities.Support;
 using TaymadeEntities.Views;
+using Media = LibVLCSharp.Shared.Media;
 
 namespace TaymadeEntities.ViewModels
 {
@@ -53,6 +55,7 @@ namespace TaymadeEntities.ViewModels
         private double progressBar = 1.0;
         private int progressInt;
         private int screenHeight = 750;
+
         /// <summary>
         /// The screen width
         /// </summary>
@@ -175,16 +178,29 @@ namespace TaymadeEntities.ViewModels
                     }
                 }
 
-                // sort by name 
+                // sort by name
                 UsedBookmarks = new ObservableCollection<string>(UsedBookmarks.OrderBy(x => x));
             }
         }
 
         #endregion Public Constructors
 
+        #region Public Delegates
+
+        public delegate void NewBookmarkEventHandler(object sender, BookmarkEventArgs e);
+
+        #endregion Public Delegates
+
+        #region Public Events
+
+        public event NewBookmarkEventHandler NewBookmarkCreated;
+
+        #endregion Public Events
+
         #region Public Properties
 
         public AutoCompleteBox? AutoCompleteBox { get; set; }
+
         public List<string>? AutoCompleteList
         {
             get
@@ -198,7 +214,9 @@ namespace TaymadeEntities.ViewModels
         }
 
         public bool AutoPlay { get; set; }
+
         public Bookmark? Bookmark { get; set; }
+
         public Album? CurrentAlbum
         {
             get => currentAlbum;
@@ -223,7 +241,9 @@ namespace TaymadeEntities.ViewModels
         }
 
         public int FrameHeight { get; set; } = 480;
+
         public int FrameWidth { get; set; } = 640;
+
         public bool FullScreen
         {
             get => fullScreen;
@@ -279,11 +299,17 @@ namespace TaymadeEntities.ViewModels
         }
 
         public float LastPosition { get; private set; }
+
         public Media? media { get; set; } = null;
+
         public MediaPlayer? MediaPlayer { get; internal set; }
+
         public MediaPlayer? MediaPlayerFull { get; internal set; }
+
         public MediaPlayer? MediaPlayerMusic { get; internal set; }
+
         public MediaPlayer? MediaPlayerPlus { get; internal set; }
+
         public double MovementValue
         {
             get => movementValue;
@@ -291,7 +317,9 @@ namespace TaymadeEntities.ViewModels
         }
 
         public new int MusicPlayerHeight { get => playerHeight; set => this.RaiseAndSetIfChanged(ref playerHeight, value); }
+
         public int MusicPlayerWidth { get => playerWidth; set => this.RaiseAndSetIfChanged(ref playerWidth, value); }
+
         public int PaneWidth
         {
             get => paneWidth;
@@ -308,8 +336,11 @@ namespace TaymadeEntities.ViewModels
         }
 
         public bool playerInitialised { get; private set; }
+
         public bool PlayFromBookmark { get; set; } = false;
+
         public bool PlayFromLastBookmark { get; private set; }
+
         //public Movies? Movies { get; internal set; }
         public new double Progress
         {
@@ -328,14 +359,19 @@ namespace TaymadeEntities.ViewModels
         }
 
         public double ProgressX => Progress * 18;
+
         public bool Recording { get; set; } = false;
+
         public string RecordName { get; set; }
+
         //    public Thickness ProgressMargin =>
         //new Thickness(Progress *18,0, 0, 0 );
         public new int ScreenHeight { get => screenHeight; set => this.RaiseAndSetIfChanged(ref screenHeight, value); }
 
         public List<int>? ScreenSizelist { get; private set; }
+
         public new int ScreenWidth { get => screenWidth; set => this.RaiseAndSetIfChanged(ref screenWidth, value); }
+
         public string? SelectedBookmark
         {
             get => selectedBookmark;
@@ -343,7 +379,9 @@ namespace TaymadeEntities.ViewModels
         }
 
         public List<float>? SpeedList { get; private set; }
+
         public bool Stopped { get; private set; }
+
         public DataGrid? TrackGrid { get; set; }
 
         public ObservableCollection<string>? UsedBookmarks
@@ -633,6 +671,7 @@ namespace TaymadeEntities.ViewModels
         {
             MoveBy(-5.0);
         }
+
         //public PlayerControl? Player { get; internal set; }
         public void MoveByValue()
         {
@@ -967,6 +1006,16 @@ namespace TaymadeEntities.ViewModels
 
         #endregion Internal Methods
 
+        #region Protected Methods
+
+        protected virtual void OnNewBookmarkCreated(BookmarkEventArgs e)
+        {
+            NewBookmarkEventHandler handler = NewBookmarkCreated;
+            handler?.Invoke(this, e);
+        }
+
+        #endregion Protected Methods
+
         #region Private Methods
 
         private void AddBookmark()
@@ -1090,8 +1139,12 @@ namespace TaymadeEntities.ViewModels
                 CurrentBookmark = Bookmark;
                 GetAvaloniaBMP(Bookmark);
                 Console.Out.WriteLine("New Bookmark=" + Bookmark.Id.ToString());
+                // raise a new bookmark Event
+                BookmarkEventArgs args = new BookmarkEventArgs(Bookmark);
+                this.OnNewBookmarkCreated(args);
             }
         }
+
         private void InitialseViewModel()
         {
             if (initialised) return;
@@ -1129,6 +1182,7 @@ namespace TaymadeEntities.ViewModels
                 NextAlbumTrack();
             }
         }
+
         private void NextAlbumTrack()
         {
             if (CurrentAlbum == null && CurrentTrack.Album == null) return;
@@ -1271,5 +1325,6 @@ namespace TaymadeEntities.ViewModels
         }
 
         #endregion Private Methods
+
     }
 }

@@ -545,7 +545,7 @@ namespace TaymadeEntities.DBContext
             {
                 var id = new SqlParameter("@MovieId", Id);
                 int result = this.Database.ExecuteSqlRaw(" exec DeleteMovie @MovieId", id);
-                success = result == 1;
+                success = result >=1;
             }
             return success;
         }

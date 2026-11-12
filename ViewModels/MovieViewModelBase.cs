@@ -1487,6 +1487,7 @@ namespace TaymadeEntities.ViewModels
                 PageSize = pageSize,
                 TotalRecords = totalRecords
             };
+           
         }
 
         /// <summary>
@@ -2493,8 +2494,8 @@ namespace TaymadeEntities.ViewModels
 
         public async void DoSearchTMDBActor()
         {
-            Views.MainWindow? mainWindow = Support.Support.GetMainWindow() as Views.MainWindow;
-            if (CurrentActor != null)
+            Window? mainWindow = Support.Support.GetWindow();
+            if (CurrentActor != null && mainWindow != null)
             {
                 using ActorSearchModel? actorSearchModel = new ActorSearchModel(CurrentActor);
                 using TMDBActorSearchDialog? searchDialog = new TMDBActorSearchDialog(actorSearchModel);
@@ -3016,29 +3017,32 @@ namespace TaymadeEntities.ViewModels
 
         private async Task<int> GetNextTranche()
         {
-            // PageNumber += 1;
+            //PageNumber += 1;
+            GetPage();
             int left = MovieCount - (MovieList.Count);
-            if (MovieList != null && MovieList.Count < MovieCount)
-            {
-                LastMovieId = MovieList.Max(m => m.Id);
-                var tempList = await DataController.MovieController.GetMoviesByGenrePagedAsync(CurrentPhrase.COMPKEY, ""
-                            , LastMovieId, PageNumber, PageSize, MovieCount);
-                if (tempList != null)
-                {
-                    foreach (var item in tempList.Items)
-                    {
-                        item.LoadChildren();
-                        //MovieList.Add(item);
-                    }
+            //if (MovieList != null && MovieList.Count < MovieCount)
+            //{
+            //    if (MovieList.Count > 0)
+            //        LastMovieId = MovieList.Max(m => m.Id);
+            //    else LastMovieId = 1;
+            //    var tempList = await DataController.MovieController.GetMoviesByGenrePagedAsync(CurrentPhrase.COMPKEY, ""
+            //                , LastMovieId, PageNumber, PageSize, MovieCount);
+            //    if (tempList != null)
+            //    {
+            //        foreach (var item in tempList.Items)
+            //        {
+            //            item.LoadChildren();
+            //            //MovieList.Add(item);
+            //        }
 
-                    MovieList = new ObservableCollection<Movies>(tempList.Items);
-                    GroupInfo = MovieCount.ToString() + ": pages " + tempList.TotalPages.ToString()
-                                + " page " + tempList.PageNumber.ToString();
-                    PagedResults.Add(tempList);
-                }
+            //        MovieList = new ObservableCollection<Movies>(tempList.Items);
+            //        GroupInfo = MovieCount.ToString() + ": pages " + tempList.TotalPages.ToString()
+            //                    + " page " + tempList.PageNumber.ToString();
+            //        PagedResults.Add(tempList);
+            //    }
 
                 left = MovieCount - (MovieList.Count);
-            }
+            
 
             return left;
         }
@@ -3088,13 +3092,17 @@ namespace TaymadeEntities.ViewModels
             }
         }
 
-        public async void PrevTranche()
+        public async void GetPage()
         {
-            if (PageNumber == 1) return;
-            PageNumber -= 1;
+            // check that pageNumber is above 1 and <= maxpages
+            if (PageNumber == 0) return;
 
+            PagedResult<Movies>? result = PagedResults.FirstOrDefault();
 
-            PagedResult<Movies>? result = PagedResults.Where(p => p.PageNumber == PageNumber).FirstOrDefault();
+            if (result != null && PageNumber > result.TotalPages) return;
+
+            // check if we have this page already
+            result = PagedResults.Where(p => p.PageNumber == PageNumber).FirstOrDefault();
 
             if (result != null)
             {
@@ -3102,6 +3110,58 @@ namespace TaymadeEntities.ViewModels
                 GroupInfo = MovieCount.ToString() + ": pages " + result.TotalPages.ToString()
                                 + " page " + result.PageNumber.ToString();
             }
+            else // we get the actual page
+            {
+                Window? window = Support.Support.GetWindow();
+                if (window != null)
+                {
+                    window.Cursor = new Cursor(StandardCursorType.Wait);
+                }
+                LastMovieId = 1;  // set to one as we are going to use the offeset to get the correct page.
+                var tempList = await DataController.MovieController.GetMoviesByGenrePagedAsync(CurrentPhrase.COMPKEY, ""
+                          , LastMovieId, PageNumber, PageSize, MovieCount);
+                if (tempList != null)
+                {
+                    foreach (var item in tempList.Items)
+                    {
+                        item.LoadChildren();
+                    }
+                    MovieList = new ObservableCollection<Movies>(tempList.Items);
+                    GroupInfo = MovieCount.ToString() + ": pages " + tempList.TotalPages.ToString()
+                        + " page " + tempList.PageNumber.ToString();
+
+                    PagedResults.Add(tempList);
+                }
+
+                if (window != null)
+                {
+                    window.Cursor = Cursor.Default;
+                }
+            }
+
+        }
+
+        public async void PrevTranche()
+        {
+            if (PageNumber == 1) return;
+            PageNumber -= 1;
+
+
+            //PagedResult<Movies>? result = PagedResults.Where(p => p.PageNumber == PageNumber).FirstOrDefault();
+
+            //if (result != null)
+            //{
+            //    if (result.Items.Count > 0)
+            //    {
+            //        MovieList = new ObservableCollection<Movies>(result.Items);
+            //        GroupInfo = MovieCount.ToString() + ": pages " + result.TotalPages.ToString()
+            //                        + " page " + result.PageNumber.ToString();
+            //    }
+            //    else GetPage();
+            //}
+
+            //else
+            GetPage();
 
             //while (MovieCount - MovieList?.Count  >0)
             //{
@@ -3122,6 +3182,7 @@ namespace TaymadeEntities.ViewModels
         /// </remarks>
         public async void GetMovieList()
         {
+            // run to getthe first tranche on genre changed
             if (CurrentPhrase != null && !DataController.MovieController.InUse)
             {
                 string? subPhraseCompKey = null;
@@ -5510,8 +5571,8 @@ namespace TaymadeEntities.ViewModels
                     }
                 }
 
-                //if (getCast)
-                //    GetCastData(movie, iMovie);
+                if (getCast)
+                    Support.Support.GetCastData(movie, iMovie);
             }
         }
 

@@ -283,7 +283,7 @@ namespace TaymadeEntities.ViewModels
         public async void GetCast(MovieBase? foundMovie, Movies movie)
         {
             iMovie iMovie = await TmdbSupport.GetMovieData(foundMovie.ID);
-            //GetCastData(movie, iMovie);
+            Support.GetCastData(movie, iMovie);
         }
 
         /// <summary>

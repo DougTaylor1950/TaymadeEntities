@@ -77,7 +77,7 @@ namespace TaymadeEntities.DAL.Classes
             bool success = false;
             if (movie != null)
             {
-                _context.Entry(movie).State = EntityState.Detached;
+                //_context.Entry(movie).State = EntityState.Detached;
                 success = _context.DeleteMovie(id);
             }
 
@@ -236,6 +236,8 @@ namespace TaymadeEntities.DAL.Classes
 
         //    int totalCount = await query.CountAsync();
 
+            int offset = (pageNumber - 1) * pageSize;
+            if (offset < 0) offset = 0;
 
             await using (var context = new SandboxEntities())
             {
@@ -250,6 +252,7 @@ namespace TaymadeEntities.DAL.Classes
                         .Where(m => _context.MovieGenre
                         .Any(mg => mg.MovieId == m.Id && mg.Genre == genre && mg.SubGenre == subGenre))
                         .OrderBy(m => m.Id)
+                        .Skip(offset)
                         .Take(pageSize)
                         .AsNoTracking().ToListAsync();
                 }
@@ -259,6 +262,7 @@ namespace TaymadeEntities.DAL.Classes
     .Where(m => _context.MovieGenre
         .Any(mg => mg.MovieId == m.Id && mg.Genre == genre))
     .OrderBy(m => m.Id)
+    .Skip(offset)
     .Take(pageSize)
     .AsNoTracking()
     .ToListAsync();
