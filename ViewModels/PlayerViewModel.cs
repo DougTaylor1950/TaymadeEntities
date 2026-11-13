@@ -189,11 +189,14 @@ namespace TaymadeEntities.ViewModels
 
         public delegate void NewBookmarkEventHandler(object sender, BookmarkEventArgs e);
 
+        public delegate void CompletedEventHandler(object sender, ViewingCompletedEventArgs e);
+
         #endregion Public Delegates
 
         #region Public Events
 
         public event NewBookmarkEventHandler NewBookmarkCreated;
+        public event CompletedEventHandler ViewingCompleted;
 
         #endregion Public Events
 
@@ -1014,6 +1017,12 @@ namespace TaymadeEntities.ViewModels
             handler?.Invoke(this, e);
         }
 
+        protected virtual void OnViewingCompleted(ViewingCompletedEventArgs e)
+        {
+            CompletedEventHandler handler = ViewingCompleted;
+            handler?.Invoke(this, e);
+        }
+
         #endregion Protected Methods
 
         #region Private Methods
@@ -1322,6 +1331,12 @@ namespace TaymadeEntities.ViewModels
         private void TimerTick(object sender, EventArgs e)
         {
             SetPercent();
+        }
+
+        internal void Finished()
+        {
+            ViewingCompletedEventArgs args = new ViewingCompletedEventArgs();
+            this.OnViewingCompleted(args);
         }
 
         #endregion Private Methods

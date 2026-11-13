@@ -19,4 +19,19 @@ namespace TaymadeEntities
         public Bookmark Bookmark { get; set; }
 
     }
+
+    public class ViewingCompletedEventArgs : System.EventArgs
+    {
+        public ViewingCompletedEventArgs()
+        {
+        }
+
+        public ViewingCompletedEventArgs(Bookmark bookmark)
+        {
+            Bookmark = bookmark;
+        }
+
+        public Bookmark? Bookmark { get; set; }
+
+    }
 }

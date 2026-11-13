@@ -38,7 +38,21 @@ public partial class PlayerDialog : Avalonia.Controls.Window, IDisposable
 
     private void PlayerDialog_Closed(object? sender, EventArgs e)
     {
+        if (DataContext is PlayerViewModel vm)
+        {
+            if (vm.MediaPlayer != null)
+            {
+                vm.Finished();
+                vm.MediaPlayer.Stop();
+                vm.MediaPlayer?.Media?.Dispose();
+                // detach the native window handle
+                vm.MediaPlayer.Hwnd = IntPtr.Zero;
+                vm.MediaPlayer.Dispose();
+            }
+        }
         IsClosed = true;
+
+       
     }
 
     public PlayerDialog(PlayerViewModel viewModel)
