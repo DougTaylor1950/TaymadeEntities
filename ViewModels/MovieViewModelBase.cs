@@ -316,7 +316,8 @@ namespace TaymadeEntities.ViewModels
         private int movieCount;
         private string? groupInfo;
         private List<PagedResult<Movies>> pagedResults;
-        private int pageNumber = 1;
+        private int? pageNumber = 1;
+        private int totalPages = 0;
 
         #endregion Private Fields
 
@@ -2990,7 +2991,13 @@ namespace TaymadeEntities.ViewModels
 
         public int PageSize { get; set; } = 50;
 
-        public int PageNumber
+        public int TotalPages
+        {
+            get => totalPages;
+            set => this.RaiseAndSetIfChanged(ref totalPages, value);
+        }
+
+        public int? PageNumber
         {
             get => pageNumber;
             set => this.RaiseAndSetIfChanged(ref pageNumber, value);
@@ -3109,6 +3116,7 @@ namespace TaymadeEntities.ViewModels
                 MovieList = new ObservableCollection<Movies>(result.Items);
                 GroupInfo = MovieCount.ToString() + ": pages " + result.TotalPages.ToString()
                                 + " page " + result.PageNumber.ToString();
+                TotalPages = result.TotalPages;
             }
             else // we get the actual page
             {
@@ -3119,7 +3127,7 @@ namespace TaymadeEntities.ViewModels
                 }
                 LastMovieId = 1;  // set to one as we are going to use the offeset to get the correct page.
                 var tempList = await DataController.MovieController.GetMoviesByGenrePagedAsync(CurrentPhrase.COMPKEY, ""
-                          , LastMovieId, PageNumber, PageSize, MovieCount);
+                          , LastMovieId, PageNumber.Value, PageSize, MovieCount);
                 if (tempList != null)
                 {
                     foreach (var item in tempList.Items)
@@ -3192,6 +3200,7 @@ namespace TaymadeEntities.ViewModels
 
                 LastMovieId = 0;
                 PageNumber = 1;
+                TotalPages = 1;
                 PageSize = pageSizeDefault;
                 SeriesVisible = (CurrentPhrase.Id == "SER");
                 if (CurrentSubPhrase == null && !DataController.MovieController.InUse)
@@ -3200,7 +3209,7 @@ namespace TaymadeEntities.ViewModels
                     PagedResults = new List<PagedResult<Movies>>();
 
                     var tempList = await DataController.MovieController.GetMoviesByGenrePagedAsync(CurrentPhrase.COMPKEY, ""
-                          , LastMovieId, PageNumber, PageSize, MovieCount);
+                          , LastMovieId, PageNumber.Value, PageSize, MovieCount);
                     if (tempList != null)
                     {
                         foreach (var item in tempList.Items)
@@ -3210,7 +3219,7 @@ namespace TaymadeEntities.ViewModels
                         MovieList = new ObservableCollection<Movies>(tempList.Items);
                         GroupInfo = MovieCount.ToString() + ": pages " + tempList.TotalPages.ToString()
                             + " page " + tempList.PageNumber.ToString();
-
+                        TotalPages = tempList.TotalPages;
                         PagedResults.Add(tempList);
                     }
 
