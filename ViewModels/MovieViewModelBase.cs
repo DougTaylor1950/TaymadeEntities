@@ -318,6 +318,7 @@ namespace TaymadeEntities.ViewModels
         private List<PagedResult<Movies>> pagedResults;
         private int? pageNumber = 1;
         private int totalPages = 0;
+        private int? skipCount;
 
         #endregion Private Fields
 
@@ -2997,6 +2998,12 @@ namespace TaymadeEntities.ViewModels
             set => this.RaiseAndSetIfChanged(ref totalPages, value);
         }
 
+        public int? SkipCount
+        {
+            get => skipCount;
+            set => this.RaiseAndSetIfChanged(ref skipCount, value);
+        }
+
         public int? PageNumber
         {
             get => pageNumber;
@@ -3097,6 +3104,18 @@ namespace TaymadeEntities.ViewModels
                     CurrentMovie?.MovieGenres?.Add(movieGenre);
                 }
             }
+        }
+
+        public async void SkipForwardPages()
+        {
+            PageNumber += SkipCount ?? 1;
+            GetPage();
+        }
+
+        public async void SkipBackwardPages()
+        {
+            PageNumber -= SkipCount ?? 1;
+            GetPage();
         }
 
         public async void GetPage()
@@ -3220,6 +3239,7 @@ namespace TaymadeEntities.ViewModels
                         GroupInfo = MovieCount.ToString() + ": pages " + tempList.TotalPages.ToString()
                             + " page " + tempList.PageNumber.ToString();
                         TotalPages = tempList.TotalPages;
+                        SkipCount = TotalPages / 5;
                         PagedResults.Add(tempList);
                     }
 
