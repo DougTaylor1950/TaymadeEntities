@@ -39,7 +39,9 @@ using TaymadeEntities.Models;
 using TaymadeEntities.Support;
 using TaymadeEntities.Views;
 using Bookmark = TaymadeEntities.Models.Bookmark;
+using Director = TaymadeEntities.Models.Director;
 using FFMpegSupport = TaymadeEntities.Support.FFMpegSupport;
+using Person = TaymadeEntities.Support.Person;
 using PhraseEntry = TaymadeEntities.Models.PhraseEntry;
 using Season = TaymadeEntities.Models.Season;
 using Series = TaymadeEntities.Models.Series;
@@ -317,6 +319,8 @@ namespace TaymadeEntities.ViewModels
         private string? groupInfo;
         private List<PagedResult<Movies>> pagedResults;
         private int? pageNumber = 1;
+
+        private int? page = 1;
         private int totalPages = 0;
         private int? skipCount;
 
@@ -1489,7 +1493,7 @@ namespace TaymadeEntities.ViewModels
                 PageSize = pageSize,
                 TotalRecords = totalRecords
             };
-           
+
         }
 
         /// <summary>
@@ -3004,11 +3008,22 @@ namespace TaymadeEntities.ViewModels
             set => this.RaiseAndSetIfChanged(ref skipCount, value);
         }
 
+        public int? Page
+        {
+            get => page;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref page, value);
+                PageNumber = value;
+            }
+        }
+
         public int? PageNumber
         {
             get => pageNumber;
             set => this.RaiseAndSetIfChanged(ref pageNumber, value);
         }
+        public DataGrid DgMovies { get;  set; }
 
 
 
@@ -3055,8 +3070,8 @@ namespace TaymadeEntities.ViewModels
             //        PagedResults.Add(tempList);
             //    }
 
-                left = MovieCount - (MovieList.Count);
-            
+            left = MovieCount - (MovieList.Count);
+
 
             return left;
         }
@@ -3164,6 +3179,15 @@ namespace TaymadeEntities.ViewModels
                 {
                     window.Cursor = Cursor.Default;
                 }
+
+                DoSortMovies();
+                if (DgMovies != null)
+                {
+                    DgMovies.LayoutUpdated += (s, e) =>
+                    {
+                        MoveToMovieIfInList(DgMovies);
+                    };
+                }
             }
 
         }
@@ -3246,9 +3270,7 @@ namespace TaymadeEntities.ViewModels
 
 
                     LastMovieId = MovieList.Last().Id;
-                    //backgroundMovieGetter.Phrase = CurrentPhrase;
-                    //backgroundMovieGetter.SubPhrase = CurrentSubPhrase;
-                    //if (!backgroundMovieGetter.busy) backgroundMovieGetter.Run();
+
                 }
 
             }
@@ -3264,24 +3286,48 @@ namespace TaymadeEntities.ViewModels
             //    DataController.MovieList.ToList()
             //);
 
-            if (
-                DataController.MovieProperties.LastMoveID != null
-                && DataController.MovieProperties.LastMoveID > 0
-            )
+            bool flowControl = MoveToMovieIfInList();
+            if (!flowControl)
             {
-                if (MovieList != null)
-                {
-                    CurrentMovie = MovieList.Where(x => x.Id ==
-                        DataController.MovieProperties.LastMoveID).FirstOrDefault();
+                return;
+            }
+        }
 
-                    if (CurrentMovie != null)
+        public bool MoveToMovieIfInList(DataGrid dg = null)
+        {
+            if (DgMovies != null)
+            {
+                DgMovies.LayoutUpdated -= (s, e) =>
+                {
+                    MoveToMovieIfInList(DgMovies);
+                };
+            }
+            if (
+                            DataController.MovieProperties.LastMoveID == null
+                            || !(DataController.MovieProperties.LastMoveID > 0)
+                        )
+            {
+                return false;
+            }
+            if (MovieList != null)
+            {
+                CurrentMovie = MovieList.Where(x => x.Id ==
+                    DataController.MovieProperties.LastMoveID).FirstOrDefault();
+
+                if (CurrentMovie != null && dg != null)
+                {
+                    MoviePath = CurrentMovie.MoviePath;
+                    //int pos = MovieList.IndexOf(CurrentMovie);
+                    dg.ScrollIntoView(CurrentMovie, null);
+                    Avalonia.Threading.Dispatcher.UIThread.Post(() =>
                     {
-                        MoviePath = CurrentMovie.MoviePath;
-                        int pos = MovieList.IndexOf(CurrentMovie);
-                        if (pos >= 0) MoveToSelectedRow(pos);
-                    }
+                        dg.ScrollIntoView(CurrentMovie, null);
+                    });
+                    
                 }
             }
+
+            return true;
         }
 
         public void GetMovieList(bool forceReload)

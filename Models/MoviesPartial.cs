@@ -1308,6 +1308,24 @@ namespace TaymadeEntities.Models
             }
         }
 
+        public int CompareToByChapters(Movies movie)
+
+        {
+            int retVal = this.HasChapters.Value.CompareTo(movie.HasChapters.Value);
+
+            if (retVal != 0)
+                return retVal;
+            else
+            {
+
+                retVal = this.PercentUnBookmarked.CompareTo(movie.PercentUnBookmarked);
+
+            }
+
+
+            return retVal;
+        }
+
         #endregion Methods
     }
 }
